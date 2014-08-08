@@ -41,3 +41,34 @@ The plugin provides the following tasks:
    for use at runtime *or* when packaging a `.war` file.
  * `cachegems` - (semi-internal) Caches `.gem` files into `.gemcache/` for easy extraction
  * `jrubyWar`
+
+
+### Using the Ruby interpreter
+
+The primary motivation for this plugin is to replace the use of both
+[Bundler](http://bundler.io/) and [Warbler](https://github.com/jruby/warbler)
+for JRuby projects.
+
+There are still plenty of cases, such as for local development, when you might
+not want to create a full `.war` file to run some tests. In order to use the
+same gems and `.jar` based dependencies, add the following to the entry point
+for your application:
+
+```ruby
+# Hack our GEM_HOME to make sure that the `rubygems` support can find our
+# unpacked gems in ./vendor/
+vendored_gems = File.expand_path(File.dirname(__FILE__) + '/vendor')
+if File.exists?(vendored_gems)
+  ENV['GEM_HOME'] = vendored_gems
+end
+
+jar_cache = File.expand_path(File.dirname(__FILE__) + '/.jarcache/')
+if File.exists?(jar_cache)
+  # Under JRuby `require`ing a `.jar` file will result in it being added to the
+  # classpath for easy importing
+  Dir["#{jar_cache}/*.jar"].each { |j| require j }
+end
+```
+
+**Note:** in the example above, the `.rb` file is assuming it's in the top
+level of the source tree, i.e. where `build.gradle` is located
