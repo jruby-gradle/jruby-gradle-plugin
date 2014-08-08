@@ -3,6 +3,7 @@ package com.lookout.gradle.jruby
 import org.gradle.api.Plugin
 import org.gradle.api.Project
 import org.gradle.api.tasks.Copy
+import org.gradle.api.tasks.bundling.War
 
 import org.gradle.api.file.FileTree
 
@@ -15,16 +16,22 @@ class JRubyPlugin implements Plugin<Project> {
             }
         }
 
-        project.task('cachegems', type: Copy) {
+        // In order for jrubyWar to work we'll need to pull in the warbler
+        // bootstrap code from this artifact
+        project.dependencies {
+            compile group: 'com.lookout', name: 'warbler-bootstrap', version: '1.+'
+        }
+
+        project.task('jrubyCacheGems', type: Copy) {
             description 'Copy gems from the runtime dependencies into .gemcache/'
             from project.configurations.runtime
             into '.gemcache'
             include '**/*.gem'
         }
 
-        project.task('preparegems') {
+        project.task('jrubyPrepareGems') {
             description 'Prepare the gems from the runtime dependencies, extracts into vendor/'
-            dependsOn project.tasks.cachegems
+            dependsOn project.tasks.jrubyCacheGems
 
             doLast {
                 project.fileTree(dir: '.gemcache/',
@@ -32,6 +39,33 @@ class JRubyPlugin implements Plugin<Project> {
                     extractGem(project, f)
                 }
             }
+        }
+
+        project.task('jrubyCacheJars', type: Copy) {
+            description 'Cache .jar-based dependencies into .jarcache/'
+            from project.configurations.runtime
+            into ".jarcache"
+            include '**/*.jar'
+        }
+
+        project.task('jrubyPrepare') {
+            description 'Pre-cache and prepare all dependencies (jars and gems)'
+            dependsOn project.tasks.jrubyCacheJars, project.tasks.jrubyPrepareGems
+        }
+
+        project.task('jrubyWar', type: War) {
+            dependsOn project.tasks.jrubyPrepare
+
+            from "$project.buildDir/classes/main"
+            // Bring our vendored gems into the created war file
+            webInf {
+                from 'vendor'
+                into 'gems'
+            }
+
+            // By adding the WarMain class as the main-class we can have a
+            // runnable war
+            manifest { attributes 'Main-Class' : 'WarMain' }
         }
     }
 

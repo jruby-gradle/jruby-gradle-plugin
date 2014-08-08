@@ -37,9 +37,10 @@ dependencies {
 
 The plugin provides the following tasks:
 
- * `preparegems` - Extracts content of Ruby gems in `.gemcache/` into `vendor/`
-   for use at runtime *or* when packaging a `.war` file.
- * `cachegems` - (semi-internal) Caches `.gem` files into `.gemcache/` for easy extraction
+ * `jrubyPrepare` - Extracts content of Ruby gems in `.gemcache/` into `vendor/`
+   for use at runtime *or* when packaging a `.war` file. Also copies the
+   content of Java-based dependencies into `.jarcache/` for interpreted use
+   (see below)
  * `jrubyWar`
 
 

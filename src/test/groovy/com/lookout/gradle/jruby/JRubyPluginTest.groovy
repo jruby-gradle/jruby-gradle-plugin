@@ -2,6 +2,7 @@ package com.lookout.gradle.jruby
 
 import org.gradle.api.*
 import org.gradle.api.tasks.*
+import org.gradle.api.tasks.bundling.War
 
 import org.gradle.testfixtures.ProjectBuilder
 
@@ -14,11 +15,16 @@ class JRubyPluginTest {
     @Test
     public void jrubyPluginAddsGemTasks() {
         Project project = ProjectBuilder.builder().build()
-        project.configurations { runtime }
+        ['runtime', 'compile'].each { project.configurations.create(it) }
         project.apply plugin: 'jruby'
 
-        assertTrue(project.tasks.cachegems instanceof AbstractCopyTask)
-        assertTrue(project.tasks.preparegems instanceof Task)
+        assertTrue(project.tasks.jrubyCacheGems instanceof AbstractCopyTask)
+        assertTrue(project.tasks.jrubyCacheJars instanceof AbstractCopyTask)
+
+        assertTrue(project.tasks.jrubyPrepareGems instanceof Task)
+        assertTrue(project.tasks.jrubyPrepare instanceof Task)
+
+        assertTrue(project.tasks.jrubyWar instanceof War)
     }
 
     @Test
