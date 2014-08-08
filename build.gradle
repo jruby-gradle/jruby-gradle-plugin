@@ -1,8 +1,25 @@
 apply plugin: 'groovy'
+apply plugin: 'maven'
+
+group = 'com.lookout'
+version = '1.0.0-SNAPSHOT'
+
+repositories {
+    mavenCentral()
+    mavenLocal()
+}
 
 dependencies {
     compile gradleApi()
     compile localGroovy()
+
+    testCompile 'junit:junit:4.+'
+}
+
+test {
+    testLogging {
+        exceptionFormat "full"
+    }
 }
 
 // vim: ft=groovy
