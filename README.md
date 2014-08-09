@@ -1,7 +1,10 @@
 # JRuby Gradle plugin
 
 The purpose of plugin is to encapsulate useful [Gradle](http://www.gradle.org/)
-functionality for JRuby projects.
+functionality for JRuby projects. Use of this plugin replaces the need for both
+[Bundler](http://bundler.io/) and [Warbler](https://github.com/jruby/warbler)
+in JRuby projects.
+
 
 The Ruby gem dependency code for this project relies on the [Rubygems Maven
 proxy](http://rubygems-proxy.torquebox.org/) provided by the
@@ -45,10 +48,6 @@ The plugin provides the following tasks:
 
 
 ### Using the Ruby interpreter
-
-The primary motivation for this plugin is to replace the use of both
-[Bundler](http://bundler.io/) and [Warbler](https://github.com/jruby/warbler)
-for JRuby projects.
 
 There are still plenty of cases, such as for local development, when you might
 not want to create a full `.war` file to run some tests. In order to use the
