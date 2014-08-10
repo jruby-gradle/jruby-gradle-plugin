@@ -1,6 +1,6 @@
 # JRuby Gradle plugin
 
-[![Download](https://api.bintray.com/packages/rtyler/jruby/jruby-gradle-plugin/images/download.png)](https://bintray.com/rtyler/jruby/jruby-gradle-plugin/_latestVersion)
+[![Download](https://api.bintray.com/packages/rtyler/jruby/jruby-gradle-plugin/images/download.png)](https://bintray.com/rtyler/jruby/jruby-gradle-plugin/\_latestVersion)
 
 The purpose of plugin is to encapsulate useful [Gradle](http://www.gradle.org/)
 functionality for JRuby projects. Use of this plugin replaces the need for both
@@ -43,10 +43,14 @@ Create a `build.gradle` file in the root of `fancy-webapp/` with the following:
 apply plugin: 'jruby'
 
 buildscript {
-    repositories { mavenCentral() }
+    repositories {
+        maven {
+            url 'http://dl.bintray.com/rtyler/jruby'
+        }
+    }
 
     dependencies {
-      classpath group: 'com.lookout', name: 'jruby-gradle-plugin', version: '1.0.7-SNAPSHOT'
+      classpath group: 'com.lookout', name: 'jruby-gradle-plugin', version: '1.0.+'
     }
 }
 ```
