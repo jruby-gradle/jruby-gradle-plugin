@@ -31,6 +31,7 @@ class JRubyPlugin implements Plugin<Project> {
         }
 
         project.task('jrubyCacheGems', type: Copy) {
+            group 'JRuby'
             description 'Copy gems from the runtime dependencies into .gemcache/'
             from project.configurations.runtime
             into '.gemcache'
@@ -38,6 +39,7 @@ class JRubyPlugin implements Plugin<Project> {
         }
 
         project.task('jrubyPrepareGems') {
+            group 'JRuby'
             description 'Prepare the gems from the runtime dependencies, extracts into vendor/'
             dependsOn project.tasks.jrubyCacheGems
 
@@ -50,6 +52,7 @@ class JRubyPlugin implements Plugin<Project> {
         }
 
         project.task('jrubyCacheJars', type: Copy) {
+            group 'JRuby'
             description 'Cache .jar-based dependencies into .jarcache/'
             from project.configurations.runtime
             into ".jarcache"
@@ -57,11 +60,14 @@ class JRubyPlugin implements Plugin<Project> {
         }
 
         project.task('jrubyPrepare') {
+            group 'JRuby'
             description 'Pre-cache and prepare all dependencies (jars and gems)'
             dependsOn project.tasks.jrubyCacheJars, project.tasks.jrubyPrepareGems
         }
 
         project.task('jrubyWar', type: War) {
+            group 'JRuby'
+            description 'Create a executable JRuby-based web archive'
             dependsOn project.tasks.jrubyPrepare
 
             from "$project.buildDir/classes/main"
@@ -71,6 +77,8 @@ class JRubyPlugin implements Plugin<Project> {
                 into 'gems'
             }
 
+            // Bring the jrubyWar configuration's dependencies into
+            // WEB-INF/libs
             classpath project.configurations.jrubyWar
 
             // note that zipTree call is wrapped in closure so that configuration

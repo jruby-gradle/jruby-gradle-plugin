@@ -44,7 +44,8 @@ The plugin provides the following tasks:
    for use at runtime *or* when packaging a `.war` file. Also copies the
    content of Java-based dependencies into `.jarcache/` for interpreted use
    (see below)
- * `jrubyWar`
+ * `jrubyWar` - Creates a runnable web archive file in `build/libs` for your
+   project.
 
 
 ### Using the Ruby interpreter
