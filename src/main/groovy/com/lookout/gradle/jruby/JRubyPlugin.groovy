@@ -14,6 +14,10 @@ class JRubyPlugin implements Plugin<Project> {
                 // More details here: <http://rubygems-proxy.torquebox.org/>
                 url "http://rubygems-proxy.torquebox.org/releases"
             }
+
+            maven {
+                url 'http://dl.bintray.com/rtyler/jruby'
+            }
         }
 
         // Set up a special configuration group for our embedding jars
