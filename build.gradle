@@ -1,8 +1,18 @@
 apply plugin: 'groovy'
 apply plugin: 'maven'
 
+buildscript {
+    repositories {
+        jcenter()
+    }
+    dependencies {
+        classpath 'com.jfrog.bintray.gradle:gradle-bintray-plugin:0.5'
+    }
+}
+apply plugin: 'com.jfrog.bintray'
+
 group = 'com.lookout'
-version = '1.0.7-SNAPSHOT'
+version = '1.0.10'
 
 repositories {
     mavenCentral()
@@ -22,4 +32,16 @@ test {
     }
 }
 
-// vim: ft=groovy
+bintray {
+    user = project.bintrayUser
+    key = project.bintrayKey
+    publish = true
+    dryRun = false
+    configurations = ['archives']
+
+    pkg {
+        repo = 'jruby'
+        name = 'jruby-gradle-plugin'
+    }
+}
+bintrayUpload.dependsOn assemble
