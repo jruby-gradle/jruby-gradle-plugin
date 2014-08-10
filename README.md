@@ -1,5 +1,7 @@
 # JRuby Gradle plugin
 
+[![Download](https://api.bintray.com/packages/rtyler/jruby/jruby-gradle-plugin/images/download.png)](https://bintray.com/rtyler/jruby/jruby-gradle-plugin/_latestVersion)
+
 The purpose of plugin is to encapsulate useful [Gradle](http://www.gradle.org/)
 functionality for JRuby projects. Use of this plugin replaces the need for both
 [Bundler](http://bundler.io/) and [Warbler](https://github.com/jruby/warbler)
