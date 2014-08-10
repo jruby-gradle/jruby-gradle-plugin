@@ -11,9 +11,31 @@ proxy](http://rubygems-proxy.torquebox.org/) provided by the
 [Torquebox](http://torquebox.org) project.
 
 
-## Usage
+## Getting Started
 
-Add the following to your project's `build.gradle` file:
+### Setting up Gradle
+
+**Note:** This assumes you already have [Gradle](http://gradle.org) installed.
+
+```bash
+% mkdir fancy-webapp
+% cd fancy-webapp
+% git init
+Initialized empty Git repository in /usr/home/tyler/source/github/fancy-webapp/.git/
+% gradle wrapper  # Create the wrappers to easily bootstrap others
+wrapper
+
+BUILD SUCCESSFUL
+
+Total time: 6.411 secs
+% git add gradle gradlew gradle.bat
+% git commit -m "Initial commit with gradle wrappers"
+```
+
+### Creating a gradle configuration file
+
+Create a `build.gradle` file in the root of `fancy-webapp/` with the following:
+
 
 ```groovy
 apply plugin: 'jruby'
@@ -40,15 +62,61 @@ dependencies {
 
 The plugin provides the following tasks:
 
+ * `jrubyWar` - Creates a runnable web archive file in `build/libs` for your
+   project.
  * `jrubyPrepare` - Extracts content of Ruby gems in `.gemcache/` into `vendor/`
    for use at runtime *or* when packaging a `.war` file. Also copies the
    content of Java-based dependencies into `.jarcache/` for interpreted use
    (see below)
- * `jrubyWar` - Creates a runnable web archive file in `build/libs` for your
-   project.
+
+### Creating a .war
+
+Currently the Gradle tooling expects the web application to reside in `src/main/webapp/WEB-INF`, so make sure your `config.ru` and application code are under that root directory. It may be useful to symbolicly link this to `app/` in your root project directory. An example of this can be found in the [ruby-gradle-example](https://github.com/rtyler/ruby-gradle-example) repository.
+
+Once your application is ready, you can create the `.war` by executing the `jrubyWar` task:
+
+```bash
+% ./gradlew jrubyWar  
+:compileJava UP-TO-DATE
+:processResources UP-TO-DATE
+:classes UP-TO-DATE
+:jrubyCacheJars
+:jrubyCacheGems
+:jrubyPrepareGems
+/home/tyler/.rvm/rubies/ruby-1.9.3-p484/lib/ruby/1.9.1/yaml.rb:84:in `<top (required)>':
+It seems your ruby installation is missing psych (for YAML output).
+To eliminate this warning, please install libyaml and reinstall your ruby.
+Successfully installed rack-1.5.2
+Successfully installed rack-protection-1.5.3
+2 gems installed
+/home/tyler/.rvm/rubies/ruby-1.9.3-p484/lib/ruby/1.9.1/yaml.rb:84:in `<top (required)>':
+It seems your ruby installation is missing psych (for YAML output).
+To eliminate this warning, please install libyaml and reinstall your ruby.
+Successfully installed rake-10.3.2
+1 gem installed
+/home/tyler/.rvm/rubies/ruby-1.9.3-p484/lib/ruby/1.9.1/yaml.rb:84:in `<top (required)>':
+It seems your ruby installation is missing psych (for YAML output).
+To eliminate this warning, please install libyaml and reinstall your ruby.
+Successfully installed tilt-1.4.1
+1 gem installed
+/home/tyler/.rvm/rubies/ruby-1.9.3-p484/lib/ruby/1.9.1/yaml.rb:84:in `<top (required)>':
+It seems your ruby installation is missing psych (for YAML output).
+To eliminate this warning, please install libyaml and reinstall your ruby.
+Successfully installed sinatra-1.4.5
+1 gem installed
+:jrubyPrepare
+:jrubyWar
+
+BUILD SUCCESSFUL
+
+Total time: 1 mins 34.84 secs
+%
+```
+
+Once the `.war` has been created you can find it in `build/libs` and deploy that into a servlet container such as Tomcat or Jetty.
 
 
-### Using the Ruby interpreter
+## Using the Ruby interpreter
 
 There are still plenty of cases, such as for local development, when you might
 not want to create a full `.war` file to run some tests. In order to use the
