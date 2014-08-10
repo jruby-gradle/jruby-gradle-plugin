@@ -19,12 +19,15 @@ class JRubyPlugin implements Plugin<Project> {
         // Set up a special configuration group for our embedding jars
         project.configurations {
             jrubyEmbeds
+            jrubyWar
         }
 
         // In order for jrubyWar to work we'll need to pull in the warbler
         // bootstrap code from this artifact
         project.dependencies {
             jrubyEmbeds group: 'com.lookout', name: 'warbler-bootstrap', version: '1.+'
+            jrubyWar group: 'org.jruby.rack', name: 'jruby-rack', version: '1.1.+'
+            jrubyWar group: 'org.jruby', name: 'jruby-complete', version: '1.7.+'
         }
 
         project.task('jrubyCacheGems', type: Copy) {
@@ -67,6 +70,8 @@ class JRubyPlugin implements Plugin<Project> {
                 from 'vendor'
                 into 'gems'
             }
+
+            classpath project.configurations.jrubyWar
 
             // note that zipTree call is wrapped in closure so that configuration
             // is only resolved at execution time. This will take the embeds
