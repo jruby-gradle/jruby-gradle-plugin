@@ -30,7 +30,7 @@ wrapper
 BUILD SUCCESSFUL
 
 Total time: 6.411 secs
-% git add gradle gradlew gradle.bat
+% git add gradle gradlew gradlew.bat
 % git commit -m "Initial commit with gradle wrappers"
 ```
 
