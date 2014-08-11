@@ -44,9 +44,7 @@ apply plugin: 'jruby'
 
 buildscript {
     repositories {
-        maven {
-            url 'http://dl.bintray.com/rtyler/jruby'
-        }
+        maven { url 'http://dl.bintray.com/rtyler/jruby' }
     }
 
     dependencies {

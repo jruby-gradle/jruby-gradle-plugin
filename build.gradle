@@ -2,9 +2,7 @@ apply plugin: 'groovy'
 apply plugin: 'maven'
 
 buildscript {
-    repositories {
-        jcenter()
-    }
+    repositories { jcenter() }
     dependencies {
         classpath 'com.jfrog.bintray.gradle:gradle-bintray-plugin:0.5'
     }
@@ -12,7 +10,7 @@ buildscript {
 apply plugin: 'com.jfrog.bintray'
 
 group = 'com.lookout'
-version = '1.0.11'
+version = '1.0.12'
 
 repositories {
     mavenCentral()

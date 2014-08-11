@@ -9,15 +9,15 @@ import org.gradle.api.file.FileTree
 
 class JRubyPlugin implements Plugin<Project> {
     void apply(Project project) {
+        project.apply plugin: 'java'
         project.repositories {
             maven {
                 // More details here: <http://rubygems-proxy.torquebox.org/>
                 url "http://rubygems-proxy.torquebox.org/releases"
-            }
-
-            maven {
                 url 'http://dl.bintray.com/rtyler/jruby'
             }
+            // We'll need jcenter to resolve the jruby .jar deps
+            jcenter()
         }
 
         // Set up a special configuration group for our embedding jars
