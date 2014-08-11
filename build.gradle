@@ -30,6 +30,14 @@ test {
     }
 }
 
+// Ensure we don't fail in CI or on a system without these values set in
+// ~/.gradle/gradle.properties
+if( !hasProperty( 'bintrayUser' ) )
+  ext.bintrayUser = ''
+
+if( !hasProperty( 'bintrayKey' ) )
+  ext.bintrayKey = ''
+
 bintray {
     user = project.bintrayUser
     key = project.bintrayKey
@@ -43,3 +51,5 @@ bintray {
     }
 }
 bintrayUpload.dependsOn assemble
+
+// vim: ft=groovy
