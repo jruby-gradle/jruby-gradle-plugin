@@ -46,7 +46,7 @@ buildscript {
     repositories { maven { url 'http://dl.bintray.com/rtyler/jruby' } }
 
     dependencies {
-      classpath group: 'com.lookout', name: 'jruby-gradle-plugin', version: '1.0.+'
+      classpath group: 'com.lookout', name: 'jruby-gradle-plugin', version: '1.1.+'
     }
 }
 ```
