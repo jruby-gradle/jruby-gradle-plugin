@@ -1,16 +1,16 @@
 apply plugin: 'groovy'
 apply plugin: 'maven'
-
-buildscript {
-    repositories { jcenter() }
-    dependencies {
-        classpath 'com.jfrog.bintray.gradle:gradle-bintray-plugin:0.5'
-    }
-}
 apply plugin: 'com.jfrog.bintray'
 
+// Pull in the bintray gradle plugin for uploading releases
+buildscript {
+    repositories { jcenter() }
+    dependencies { classpath 'com.jfrog.bintray.gradle:gradle-bintray-plugin:0.5' }
+}
+
 group = 'com.lookout'
-version = '1.0.12'
+version = '1.0.13-SNAPSHOT'
+sourceCompatibility = '1.7'
 
 repositories {
     mavenCentral()
