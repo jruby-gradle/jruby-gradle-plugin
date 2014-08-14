@@ -9,7 +9,7 @@ buildscript {
 }
 
 group = 'com.lookout'
-version = '1.0.13-SNAPSHOT'
+version = '1.1.0'
 sourceCompatibility = '1.7'
 
 repositories {
