@@ -14,8 +14,12 @@ class JRubyPlugin implements Plugin<Project> {
             maven {
                 // More details here: <http://rubygems-proxy.torquebox.org/>
                 url "http://rubygems-proxy.torquebox.org/releases"
+            }
+
+            maven {
                 url 'http://dl.bintray.com/rtyler/jruby'
             }
+
             // We'll need jcenter to resolve the jruby .jar deps
             jcenter()
         }
