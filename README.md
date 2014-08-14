@@ -83,6 +83,8 @@ The plugin provides the following tasks:
    for use at runtime *or* when packaging a `.war` file. Also copies the
    content of Java-based dependencies into `.jarcache/` for interpreted use
    (see below)
+ * `jrubyClean` - Cleans up the temporary directories that tasks like
+   `jrubyWar` create
 
 ### Creating a .war
 

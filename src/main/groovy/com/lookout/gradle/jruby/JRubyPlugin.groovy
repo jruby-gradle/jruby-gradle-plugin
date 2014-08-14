@@ -3,6 +3,7 @@ package com.lookout.gradle.jruby
 import org.gradle.api.Plugin
 import org.gradle.api.Project
 import org.gradle.api.tasks.Copy
+import org.gradle.api.tasks.Delete
 import org.gradle.api.tasks.bundling.War
 
 import org.gradle.api.file.FileTree
@@ -10,6 +11,7 @@ import org.gradle.api.file.FileTree
 class JRubyPlugin implements Plugin<Project> {
     void apply(Project project) {
         project.apply plugin: 'java'
+
         project.repositories {
             maven {
                 // More details here: <http://rubygems-proxy.torquebox.org/>
@@ -37,6 +39,13 @@ class JRubyPlugin implements Plugin<Project> {
             jrubyEmbeds group: 'com.lookout', name: 'warbler-bootstrap', version: '1.+'
             jrubyWar group: 'org.jruby.rack', name: 'jruby-rack', version: '1.1.+'
             jrubyWar group: 'org.jruby', name: 'jruby-complete', version: '1.7.+'
+        }
+
+        project.task('jrubyClean', type: Delete) {
+            group 'JRuby'
+            description 'Clean up the temporary dirs used by the JRuby plugin'
+            mustRunAfter 'clean'
+            delete '.gemcache/', '.jarcache/'
         }
 
         project.task('jrubyCacheGems', type: Copy) {

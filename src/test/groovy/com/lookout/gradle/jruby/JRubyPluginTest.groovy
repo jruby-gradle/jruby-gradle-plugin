@@ -18,7 +18,6 @@ class JRubyPluginTest {
     @Before
     void setUp() {
         project = ProjectBuilder.builder().build()
-        ['runtime', 'compile'].each { project.configurations.create(it) }
         project.apply plugin: 'jruby'
     }
 
@@ -37,6 +36,7 @@ class JRubyPluginTest {
     public void jrubyPluginAddsPrimaryTasks() {
         assertTrue(project.tasks.jrubyPrepare instanceof Task)
         assertTrue(project.tasks.jrubyWar instanceof War)
+        assertTrue(project.tasks.jrubyClean instanceof Delete)
     }
 
     @Test
@@ -55,6 +55,10 @@ class JRubyPluginTest {
 
         assertEquals(gem_name, JRubyPlugin.gemFullNameFromFile(filename))
     }
+
+    //
+    //  Helper methods for testing
+    ////////////////////////////////////////////////////////////////////////////
 
     private boolean hasRepositoryUrl(Project p, String url) {
         boolean result = false
