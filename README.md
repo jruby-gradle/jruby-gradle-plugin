@@ -43,9 +43,7 @@ Create a `build.gradle` file in the root of `fancy-webapp/` with the following:
 apply plugin: 'jruby'
 
 buildscript {
-    repositories {
-        maven { url 'http://dl.bintray.com/rtyler/jruby' }
-    }
+    repositories { maven { url 'http://dl.bintray.com/rtyler/jruby' } }
 
     dependencies {
       classpath group: 'com.lookout', name: 'jruby-gradle-plugin', version: '1.0.+'
@@ -54,14 +52,27 @@ buildscript {
 ```
 
 You can also add Ruby gem dependencies in your `build.gradle` file under the
-`runtime` configuration, e.g.:
+`gem` configuration, e.g.:
 
 ```groovy
 dependencies {
-  runtime group: 'rubygems', name: 'sinatra', version: '1.4.5'
-  runtime group: 'rubygems', name: 'rake', version: '10.3.+'
+    gems group: 'rubygems', name: 'sinatra', version: '1.4.5'
+    gems group: 'rubygems', name: 'rake', version: '10.3.+'
 }
 ```
+
+In order to include Java-based dependencies in a `.war` file, declare those
+dependencies under the `jrubyWar` configuration, e.g.:
+
+```groovy
+dependencies {
+    jrubyWar group: 'org.apache.kafka', name: 'kafka_2.9.2', version: '0.8.+'
+    jrubyWar group: 'log4j', name: 'log4j', version: '1.2.+', transitive: true
+}
+```
+
+Dependencies declared under the `jrubyWar` configuration will be copied into
+`.jarcache/` and `.war/WEB-INF/libs` when the archive is created.
 
 
 The plugin provides the following tasks:
@@ -75,7 +86,12 @@ The plugin provides the following tasks:
 
 ### Creating a .war
 
-Currently the Gradle tooling expects the web application to reside in `src/main/webapp/WEB-INF`, so make sure your `config.ru` and application code are under that root directory. It may be useful to symbolicly link this to `app/` in your root project directory. An example of this can be found in the [ruby-gradle-example](https://github.com/rtyler/ruby-gradle-example) repository.
+Currently the Gradle tooling expects the web application to reside in
+`src/main/webapp/WEB-INF`, so make sure your `config.ru` and application code
+are under that root directory. It may be useful to symbolicly link this to
+`app/` in your root project directory. An *full* example of this can be found in the
+[ruby-gradle-example](https://github.com/rtyler/ruby-gradle-example)
+repository.
 
 Once your application is ready, you can create the `.war` by executing the `jrubyWar` task:
 

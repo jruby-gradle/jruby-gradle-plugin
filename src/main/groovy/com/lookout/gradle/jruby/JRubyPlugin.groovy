@@ -28,6 +28,7 @@ class JRubyPlugin implements Plugin<Project> {
         project.configurations {
             jrubyEmbeds
             jrubyWar
+            gems
         }
 
         // In order for jrubyWar to work we'll need to pull in the warbler
@@ -40,15 +41,15 @@ class JRubyPlugin implements Plugin<Project> {
 
         project.task('jrubyCacheGems', type: Copy) {
             group 'JRuby'
-            description 'Copy gems from the runtime dependencies into .gemcache/'
-            from project.configurations.runtime
+            description 'Copy gems from the `gem` dependencies into .gemcache/'
+            from project.configurations.gems
             into '.gemcache'
             include '**/*.gem'
         }
 
         project.task('jrubyPrepareGems') {
             group 'JRuby'
-            description 'Prepare the gems from the runtime dependencies, extracts into vendor/'
+            description 'Prepare the gems from the `gem` dependencies, extracts into vendor/'
             dependsOn project.tasks.jrubyCacheGems
 
             doLast {
@@ -62,7 +63,7 @@ class JRubyPlugin implements Plugin<Project> {
         project.task('jrubyCacheJars', type: Copy) {
             group 'JRuby'
             description 'Cache .jar-based dependencies into .jarcache/'
-            from project.configurations.runtime
+            from project.configurations.jrubyWar
             into ".jarcache"
             include '**/*.jar'
         }
