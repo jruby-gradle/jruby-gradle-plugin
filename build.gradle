@@ -9,7 +9,11 @@ buildscript {
 }
 
 group = 'com.lookout'
-version = '1.1.1-SNAPSHOT'
+version = '1.1.1'
+
+if (System.env.RELEASE != '1') {
+    version = "${version}-SNAPSHOT"
+}
 sourceCompatibility = '1.7'
 
 repositories {
@@ -30,6 +34,17 @@ test {
         exceptionFormat "full"
     }
 }
+
+
+task sourcesJar(type: Jar, dependsOn: classes) {
+    classifier = 'sources'
+    from sourceSets.main.allSource
+}
+
+artifacts {
+    archives sourcesJar
+}
+
 
 // Ensure we don't fail in CI or on a system without these values set in
 // ~/.gradle/gradle.properties
