@@ -1,5 +1,9 @@
 # Changelog
 
+## v2.0.0
+
+ * Switch to a fully qualified gradle plugin name: `com.lookout.jruby`
+ * Add the `war` plugin as a dependency to properly build `jrubyWar`
 
 ## v1.1.1
 
