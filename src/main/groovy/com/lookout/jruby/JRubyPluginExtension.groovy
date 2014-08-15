@@ -1,3 +1,4 @@
+package com.lookout.jruby
 
 class JRubyPluginExtension {
     // More details here: <http://rubygems-proxy.torquebox.org/>

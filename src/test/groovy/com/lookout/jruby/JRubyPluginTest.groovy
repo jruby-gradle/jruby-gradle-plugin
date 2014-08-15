@@ -1,4 +1,4 @@
-package com.lookout.gradle.jruby
+package com.lookout.jruby
 
 import org.gradle.api.*
 import org.gradle.api.tasks.*

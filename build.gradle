@@ -9,7 +9,7 @@ buildscript {
 }
 
 group = 'com.lookout'
-version = '1.1.1'
+version = '1.1.2'
 
 if (System.env.RELEASE != '1') {
     version = "${version}-SNAPSHOT"
