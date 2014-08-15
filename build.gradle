@@ -9,7 +9,7 @@ buildscript {
 }
 
 group = 'com.lookout'
-version = '2.0.1'
+version = '2.0.2'
 
 if (System.env.RELEASE != '1') {
     version = "${version}-SNAPSHOT"
@@ -65,9 +65,14 @@ bintray {
         repo = 'jruby'
         name = 'jruby-gradle-plugin'
         labels = ['jruby']
-        attributes = [
-            'gradle-plugin' : 'com.lookout.jruby:com.lookout:jruby-gradle-plugin',
-        ]
+
+        version {
+            name = project.version
+            vcsTag = "v${project.version}"
+            attributes = ['gradle-plugin' : 'com.lookout.jruby:com.lookout:jruby-gradle-plugin']
+            desc = "The purpose of plugin is to encapsulate useful Gradle functionality for JRuby projects. Use of this plugin replaces the need for both Bundler and Warbler in JRuby projects."
+
+        }
     }
 }
 bintrayUpload.dependsOn assemble

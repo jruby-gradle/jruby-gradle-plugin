@@ -1,5 +1,9 @@
 # Changelog
 
+## v2.0.2
+
+ *  More futzing with [bintray](http://bintray.com) release code
+
 ## v2.0.1
 
  * Add attributes to `build.gradle` for incorporating plugi into
