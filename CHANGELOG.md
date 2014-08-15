@@ -1,5 +1,10 @@
 # Changelog
 
+## v2.0.1
+
+ * Add attributes to `build.gradle` for incorporating plugi into
+   [plugins.gradle.org](http://plugins.gradle.org)
+
 ## v2.0.0
 
  * Switch to a fully qualified gradle plugin name: `com.lookout.jruby`
