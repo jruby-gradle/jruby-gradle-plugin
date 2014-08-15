@@ -33,6 +33,9 @@ test {
         showStandardStreams = true
         exceptionFormat "full"
     }
+
+    systemProperties TESTROOT : new File(buildDir,'tmp/test/unittests').absolutePath
+
 }
 
 
@@ -44,7 +47,6 @@ task sourcesJar(type: Jar, dependsOn: classes) {
 artifacts {
     archives sourcesJar
 }
-
 
 // Ensure we don't fail in CI or on a system without these values set in
 // ~/.gradle/gradle.properties
