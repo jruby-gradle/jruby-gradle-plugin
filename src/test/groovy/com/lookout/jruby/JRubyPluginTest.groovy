@@ -18,7 +18,7 @@ class JRubyPluginTest {
     @Before
     void setUp() {
         project = ProjectBuilder.builder().build()
-        project.apply plugin: 'jruby'
+        project.apply plugin: 'com.lookout.jruby'
     }
 
     @Test
