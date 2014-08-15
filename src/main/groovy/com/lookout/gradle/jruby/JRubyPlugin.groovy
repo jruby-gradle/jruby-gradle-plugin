@@ -8,19 +8,21 @@ import org.gradle.api.tasks.bundling.War
 
 import org.gradle.api.file.FileTree
 
+
 class JRubyPlugin implements Plugin<Project> {
     void apply(Project project) {
         project.apply plugin: 'java'
+        project.extensions.create('jruby', JRubyPluginExtension)
 
         project.repositories {
             maven {
-                // More details here: <http://rubygems-proxy.torquebox.org/>
-                url "http://rubygems-proxy.torquebox.org/releases"
+                // The url is in a closure to ensure that we can overwrite this
+                // at runtime and have the right value come through.
+                url { project.jruby.gemrepo_url }
             }
 
-            maven {
-                url 'http://dl.bintray.com/rtyler/jruby'
-            }
+            // Required to pull in our warbler-bootstrap dependency
+            maven { url 'http://dl.bintray.com/rtyler/jruby' }
 
             // We'll need jcenter to resolve the jruby .jar deps
             jcenter()
