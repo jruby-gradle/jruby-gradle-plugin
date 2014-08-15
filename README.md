@@ -163,3 +163,32 @@ end
 
 **Note:** in the example above, the `.rb` file is assuming it's in the top
 level of the source tree, i.e. where `build.gradle` is located
+
+## Advanced Usage
+
+### Using a custom Gem repository
+
+By default the jruby plugin will use
+[rubygems-proxy.torquebox.org](http://rubygems-proxy.torquebox.org) as its
+source of Ruby gems. This is a server operated by the Torquebox project which
+presents [rubygems.org](https://rubygems.org) as a Maven repository.
+
+If you **do not** wish to use this repository, you can run your own Maven
+proxy repository for either rubygems.org or your own gem repository by
+running the [rubygems-servlets](https://github.com/torquebox/rubygems-servlets)
+server.
+
+You can then use that custom Gem repository with:
+
+```groovy
+// buildscript {} up here
+
+apply plugin: 'jruby'
+
+// Set our custom Gem repository
+jruby.gemrepo_url = 'http://localhost:8989/releases'
+
+dependencies {
+    gems group: 'com.lookout', name: 'custom-gem', version: '1.0.+'
+}
+```

@@ -3,6 +3,12 @@
 
 ## Upcoming
 
+ * [#1](https://github.com/rtyler/jruby-gradle-plugin/issues/1) added support
+   for a user-changeable Gem repo URL, defaulting to
+   [rubygems-proxy.torquebox.org](http://rubygems-proxy.torquebox.org) by
+   default.
+ * 
+
 
 ## v1.1.0
 
