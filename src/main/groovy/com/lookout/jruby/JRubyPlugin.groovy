@@ -80,12 +80,6 @@ class JRubyPlugin implements Plugin<Project> {
             group 'JRuby'
             description 'Cache .jar-based dependencies into .jarcache/'
 
-            doFirst {
-                dependencies {
-                    jrubyWar group: 'org.jruby', name: 'jruby-complete', version: project.jruby.defaultVersion
-                }
-            }
-
             from project.configurations.jrubyWar
             into ".jarcache"
             include '**/*.jar'
