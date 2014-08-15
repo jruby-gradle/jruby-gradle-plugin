@@ -1,4 +1,4 @@
-package com.lookout.gradle.jruby
+package com.lookout.jruby
 
 import org.gradle.api.Plugin
 import org.gradle.api.Project
@@ -12,6 +12,7 @@ import org.gradle.api.file.FileTree
 class JRubyPlugin implements Plugin<Project> {
     void apply(Project project) {
         project.apply plugin: 'java'
+        project.apply plugin: 'war'
         project.extensions.create('jruby', JRubyPluginExtension)
 
         project.repositories {

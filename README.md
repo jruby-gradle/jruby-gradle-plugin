@@ -40,13 +40,13 @@ Create a `build.gradle` file in the root of `fancy-webapp/` with the following:
 
 
 ```groovy
-apply plugin: 'jruby'
+apply plugin: 'com.lookout.jruby'
 
 buildscript {
-    repositories { maven { url 'http://dl.bintray.com/rtyler/jruby' } }
+    repositories { jcenter() }
 
     dependencies {
-      classpath group: 'com.lookout', name: 'jruby-gradle-plugin', version: '1.1.+'
+      classpath group: 'com.lookout', name: 'jruby-gradle-plugin', version: '2.0.+'
     }
 }
 ```
@@ -183,7 +183,7 @@ You can then use that custom Gem repository with:
 ```groovy
 // buildscript {} up here
 
-apply plugin: 'jruby'
+apply plugin: 'com.lookout.jruby'
 
 // Set our custom Gem repository
 jruby.gemrepo_url = 'http://localhost:8989/releases'

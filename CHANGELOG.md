@@ -1,5 +1,22 @@
 # Changelog
 
+## v2.0.3
+
+ * s
+
+## v2.0.2
+
+ *  More futzing with [bintray](http://bintray.com) release code
+
+## v2.0.1
+
+ * Add attributes to `build.gradle` for incorporating plugi into
+   [plugins.gradle.org](http://plugins.gradle.org)
+
+## v2.0.0
+
+ * Switch to a fully qualified gradle plugin name: `com.lookout.jruby`
+ * Add the `war` plugin as a dependency to properly build `jrubyWar`
 
 ## v1.1.1
 

@@ -1,4 +1,4 @@
-package com.lookout.gradle.jruby
+package com.lookout.jruby
 
 import org.gradle.api.*
 import org.gradle.api.tasks.*
@@ -24,7 +24,7 @@ class JRubyPluginTest {
         }
         TESTROOT.mkdirs()
         project = ProjectBuilder.builder().build()
-        project.apply plugin: 'jruby'
+        project.apply plugin: 'com.lookout.jruby'
     }
 
     @Test
