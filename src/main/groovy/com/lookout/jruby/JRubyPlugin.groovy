@@ -38,10 +38,14 @@ class JRubyPlugin implements Plugin<Project> {
 
         // In order for jrubyWar to work we'll need to pull in the warbler
         // bootstrap code from this artifact
-        project.dependencies {
-            jrubyEmbeds group: 'com.lookout', name: 'warbler-bootstrap', version: '1.+'
-            jrubyWar group: 'org.jruby.rack', name: 'jruby-rack', version: '1.1.+'
-            jrubyWar group: 'org.jruby', name: 'jruby-complete', version: '1.7.+'
+        project.afterEvaluate {
+            project.dependencies {
+                jrubyEmbeds group: 'com.lookout', name: 'warbler-bootstrap', version: '1.+'
+                jrubyWar group: 'org.jruby', name: 'jruby-complete', version: project.jruby.defaultVersion
+                jrubyWar (group: 'org.jruby.rack', name: 'jruby-rack', version: '1.1.+') {
+                    exclude module : 'jruby-complete'
+                }
+            }
         }
 
         project.task('jrubyClean', type: Delete) {
@@ -75,6 +79,7 @@ class JRubyPlugin implements Plugin<Project> {
         project.task('jrubyCacheJars', type: Copy) {
             group 'JRuby'
             description 'Cache .jar-based dependencies into .jarcache/'
+
             from project.configurations.jrubyWar
             into ".jarcache"
             include '**/*.jar'
