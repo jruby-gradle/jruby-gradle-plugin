@@ -213,17 +213,17 @@ task runMyScript( type: JRubyExec ) {
 
 Common methods for ```JRubyExec``` for executing a script
 
-|```script```|```Object``` - usually File or String|Path to the script|
-|```scriptArgs```|```List```|List of arguments to pass to script|
-|```workingDir```|```Object``` - usually File or String|Working directory for script|
-|```environment```|```Map```|Environment to be set. Do not set ```GEM_HOME``` or ```GEM_PATH``` with this method|
-|```standardInput```|```InputStream```|Set an input stream to be read by the script|
-|```standardOutput```|```OutputStream```|Capture the output of the script|
-|```errorOutput```|```OutputStream```|Capture the error output of the script|
-|```ignoreExitValue```|```Boolean```|Ignore the JVm exit value. Exit values are only effective if the exit value of the Ruby script is correctly communicated back to the JVM|
-|```configuration```|```String```|Configuration to copy gems from. (*) |
-|```classpath```|```List```|Additional Jars/Directories to place on classpath|
-|```jrubyVersion```|```String```|JRuby version to use if not the same as ```project.jruby.execVersion``` |
+| ```script``` | ```Object``` - usually File or String | Path to the script|
+| ```scriptArgs``` | ```List``` | List of arguments to pass to script|
+| ```workingDir``` | ```Object``` - usually File or String | Working directory for script|
+| ```environment``` | ```Map``` | Environment to be set. Do not set ```GEM_HOME``` or ```GEM_PATH``` with this method|
+| ```standardInput``` | ```InputStream``` | Set an input stream to be read by the script|
+| ```standardOutput``` | ```OutputStream``` | Capture the output of the script|
+| ```errorOutput``` | ```OutputStream``` | Capture the error output of the script|
+| ```ignoreExitValue``` | ```Boolean``` | Ignore the JVm exit value. Exit values are only effective if the exit value of the Ruby script is correctly communicated back to the JVM|
+| ```configuration``` | ```String``` | Configuration to copy gems from. (*) |
+| ```classpath``` | ```List``` | Additional Jars/Directories to place on classpath|
+| ```jrubyVersion``` | ```String``` | JRuby version to use if not the same as ```project.jruby.execVersion``` |
 
 (*) If ```jRubyVersion``` has not been set, ```jrubyExec``` will used as
 configuration. However, if ```jRubyVersion``` has been set, no gems will be used unless an explicit configuration has been provided
