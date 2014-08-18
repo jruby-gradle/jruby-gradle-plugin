@@ -230,14 +230,14 @@ configuration. However, if ```jRubyVersion``` has been set, no gems will be used
 
 Additional ```JRubyExec``` methods for controlling the JVM instance
 
-|```jvmArgs```|```List```|See [jvmArgs](http://www.gradle.org/docs/current/dsl/org.gradle.api.tasks.JavaExec.html#org.gradle.api.tasks.JavaExec:jvmArgs)|
-|```allJvmArgs```|```List```|See [allJvmArgs](http://www.gradle.org/docs/current/dsl/org.gradle.api.tasks.JavaExec.html#org.gradle.api.tasks.JavaExec:allJvmArgs)|
-|```systemProperties```|```Map```|See [systemProperties](http://www.gradle.org/docs/current/dsl/org.gradle.api.tasks.JavaExec.html#org.gradle.api.tasks.JavaExec:systemProperties)|
-|```bootstrapClassPath```|```FileCollection``` or ```List```|See [bootstrapClassPath](http://www.gradle.org/docs/current/dsl/org.gradle.api.tasks.JavaExec.html#org.gradle.api.tasks.JavaExec:bootstrapClasspath)|
-|```minHeapSize```|```String```|See [minHeapSize](http://www.gradle.org/docs/current/dsl/org.gradle.api.tasks.JavaExec.html)|
-|```maxHeapSize```|```String```|See [maxHeapSize](http://www.gradle.org/docs/current/dsl/org.gradle.api.tasks.JavaExec.html#org.gradle.api.tasks.JavaExec:maxHeapSize)|
-|```defaultCharacterEncoding```|```String```|See [defaultCharacterEncoding](http://www.gradle.org/docs/current/dsl/org.gradle.api.tasks.JavaExec.html)|
-|```enableAssertions```|```Boolean```|See [enableAssertions](http://www.gradle.org/docs/current/dsl/org.gradle.api.tasks.JavaExec.html#org.gradle.api.tasks.JavaExec:enableAssertions)|
-|```debug```|```Boolean```|See [debug](http://www.gradle.org/docs/current/dsl/org.gradle.api.tasks.JavaExec.html#org.gradle.api.tasks.JavaExec:debug)|
-|```copyTo```| ```JavaForkOptions``` |See [copyTo](http://www.gradle.org/docs/current/dsl/org.gradle.api.tasks.JavaExec.html)|
-|```executable```|```Object``` - usually ```File``` or ```String```|See [executable](http://www.gradle.org/docs/current/dsl/org.gradle.api.tasks.JavaExec.html#org.gradle.api.tasks.JavaExec:executable)|
+* ```jvmArgs``` - ```List```. See [jvmArgs](http://www.gradle.org/docs/current/dsl/org.gradle.api.tasks.JavaExec.html#org.gradle.api.tasks.JavaExec:jvmArgs)
+* ```allJvmArgs``` - ```List```. See [allJvmArgs](http://www.gradle.org/docs/current/dsl/org.gradle.api.tasks.JavaExec.html#org.gradle.api.tasks.JavaExec:allJvmArgs)
+* ```systemProperties``` - ```Map```. See [systemProperties](http://www.gradle.org/docs/current/dsl/org.gradle.api.tasks.JavaExec.html#org.gradle.api.tasks.JavaExec:systemProperties)
+* ```bootstrapClassPath``` - ```FileCollection``` or ```List```. See [bootstrapClassPath](http://www.gradle.org/docs/current/dsl/org.gradle.api.tasks.JavaExec.html#org.gradle.api.tasks.JavaExec:bootstrapClasspath)
+* ```minHeapSize``` - ```String```. See [minHeapSize](http://www.gradle.org/docs/current/dsl/org.gradle.api.tasks.JavaExec.html)
+* ```maxHeapSize``` - ```String```. See [maxHeapSize](http://www.gradle.org/docs/current/dsl/org.gradle.api.tasks.JavaExec.html#org.gradle.api.tasks.JavaExec:maxHeapSize)
+* ```defaultCharacterEncoding``` - ```String```. See [defaultCharacterEncoding](http://www.gradle.org/docs/current/dsl/org.gradle.api.tasks.JavaExec.html)
+* ```enableAssertions``` - ```Boolean```. See [enableAssertions](http://www.gradle.org/docs/current/dsl/org.gradle.api.tasks.JavaExec.html#org.gradle.api.tasks.JavaExec:enableAssertions)
+* ```debug``` - ```Boolean```. See [debug](http://www.gradle.org/docs/current/dsl/org.gradle.api.tasks.JavaExec.html#org.gradle.api.tasks.JavaExec:debug)
+* ```copyTo``` - ```JavaForkOptions```. See [copyTo](http://www.gradle.org/docs/current/dsl/org.gradle.api.tasks.JavaExec.html)
+* ```executable``` - ```Object``` (Usually ```File``` or ```String```). See [executable](http://www.gradle.org/docs/current/dsl/org.gradle.api.tasks.JavaExec.html#org.gradle.api.tasks.JavaExec:executable)
