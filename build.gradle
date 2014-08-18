@@ -25,17 +25,25 @@ dependencies {
     compile gradleApi()
     compile localGroovy()
 
+
     testCompile 'junit:junit:4.+'
+    testCompile ("org.spockframework:spock-core:0.7-groovy-${gradle.gradleVersion.startsWith('1.')?'1.8':'2.0'}") {
+        exclude module : 'groovy-all'
+    }
 }
 
 test {
-    testLogging {
-        showStandardStreams = true
-        exceptionFormat "full"
-    }
+//    testLogging {
+//        showStandardStreams = true
+//        exceptionFormat "full"
+//    }
 
     systemProperties TESTROOT : new File(buildDir,'tmp/test/unittests').absolutePath
+    systemProperties TEST_SCRIPT_DIR : new File(buildDir,'src/resources/scripts').absolutePath
 
+    if(gradle.startParameter.isOffline()) {
+        systemProperties 'TESTS_ARE_OFFLINE' : '1'
+    }
 }
 
 
