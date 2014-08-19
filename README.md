@@ -1,6 +1,6 @@
 # JRuby Gradle plugin
 
-[![Build Status](https://buildhive.cloudbees.com/job/rtyler/job/jruby-gradle-plugin/badge/icon)](https://buildhive.cloudbees.com/job/rtyler/job/jruby-gradle-plugin/) [![Download](https://api.bintray.com/packages/rtyler/jruby/jruby-gradle-plugin/images/download.png)](https://bintray.com/rtyler/jruby/jruby-gradle-plugin/\_latestVersion)
+[![Build Status](https://buildhive.cloudbees.com/job/rtyler/job/jruby-gradle-plugin/badge/icon)](https://buildhive.cloudbees.com/job/rtyler/job/jruby-gradle-plugin/) [![Download](https://api.bintray.com/packages/rtyler/jruby/jruby-gradle-plugin/images/download.png)](https://bintray.com/rtyler/jruby/jruby-gradle-plugin/\_latestVersion) [![Gitter chat](https://badges.gitter.im/rtyler/jruby-gradle-plugin.png)](https://gitter.im/rtyler/jruby-gradle-plugin)
 
 The purpose of plugin is to encapsulate useful [Gradle](http://www.gradle.org/)
 functionality for JRuby projects. Use of this plugin replaces the need for both
