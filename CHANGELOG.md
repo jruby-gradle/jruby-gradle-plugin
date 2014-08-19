@@ -2,6 +2,9 @@
 
 ## v2.1.0
 
+ * [#18](https://github.com/rtyler/jruby-gradle-plugin/issues/18) allow
+   changing the Gem installation directory by setting `jruby.gemInstallDir` in
+   a gradle file
  * [#16](https://github.com/rtyler/jruby-gradle-plugin/pull/16) add the
    `JRubyExec` task type for executing Ruby code with the embedded JRuby
    dependency.

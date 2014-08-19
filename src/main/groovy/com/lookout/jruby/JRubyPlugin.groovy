@@ -99,7 +99,7 @@ class JRubyPlugin implements Plugin<Project> {
             from "$project.buildDir/classes/main"
             // Bring our vendored gems into the created war file
             webInf {
-                from 'vendor'
+                from project.jruby.gemInstallDir
                 into 'gems'
             }
 

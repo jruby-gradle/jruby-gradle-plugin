@@ -3,10 +3,9 @@ package com.lookout.jruby
 import org.gradle.api.Project
 
 class JRubyPluginExtension {
-
     // More details here: <http://rubygems-proxy.torquebox.org/>
-    def String gemrepo_url = "http://rubygems-proxy.torquebox.org/releases"
-
+    String gemrepo_url = "http://rubygems-proxy.torquebox.org/releases"
+    String gemInstallDir = 'vendor'
     String defaultVersion = '1.7.13'
     String execVersion = defaultVersion
 
