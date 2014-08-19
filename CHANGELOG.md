@@ -1,5 +1,12 @@
 # Changelog
 
+## v2.1.1
+
+ * Removed `jruby.gemrepo_url` extension point (*hopefully*) before anybody
+   started using it. Renamed to `jruby.defaultGemRepo` to line up better with
+   changes that will come in to support [multiple rubygem
+   repos](https://github.com/rtyler/jruby-gradle-plugin/issues/13)
+
 ## v2.1.0
 
  * [#18](https://github.com/rtyler/jruby-gradle-plugin/issues/18) allow

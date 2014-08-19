@@ -186,7 +186,7 @@ You can then use that custom Gem repository with:
 apply plugin: 'com.lookout.jruby'
 
 // Set our custom Gem repository
-jruby.gemrepo_url = 'http://localhost:8989/releases'
+jruby.defaultGemRepo = 'http://localhost:8989/releases'
 
 dependencies {
     gems group: 'com.lookout', name: 'custom-gem', version: '1.0.+'
