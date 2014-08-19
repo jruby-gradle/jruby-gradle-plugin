@@ -1,8 +1,12 @@
 # Changelog
 
-## v2.0.3
+## v2.1.0
 
- * s
+ * [#16](https://github.com/rtyler/jruby-gradle-plugin/pull/16) add the
+   `JRubyExec` task type for executing Ruby code with the embedded JRuby
+   dependency.
+ * [#14](https://github.com/rtyler/jruby-gradle-plugin/pull/14) allow a user to
+   set/choose the version of JRuby they wish to use with the plugin
 
 ## v2.0.2
 
