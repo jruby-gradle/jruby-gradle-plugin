@@ -6,14 +6,11 @@ import org.gradle.api.tasks.Copy
 import org.gradle.api.tasks.Delete
 import org.gradle.api.tasks.bundling.War
 
-import org.gradle.api.file.FileTree
-
-
 class JRubyPlugin implements Plugin<Project> {
     void apply(Project project) {
         project.apply plugin: 'java'
         project.apply plugin: 'war'
-        project.extensions.create('jruby', JRubyPluginExtension)
+        project.extensions.create('jruby', JRubyPluginExtension, project)
 
         project.repositories {
             maven {
@@ -35,6 +32,7 @@ class JRubyPlugin implements Plugin<Project> {
             jrubyWar
             gems
         }
+        project.configurations.create(JRubyExec.JRUBYEXEC_CONFIG)
 
         // In order for jrubyWar to work we'll need to pull in the warbler
         // bootstrap code from this artifact
@@ -46,6 +44,8 @@ class JRubyPlugin implements Plugin<Project> {
                     exclude module : 'jruby-complete'
                 }
             }
+
+            JRubyExec.updateJRubyDependencies(project)
         }
 
         project.task('jrubyClean', type: Delete) {
@@ -71,7 +71,7 @@ class JRubyPlugin implements Plugin<Project> {
             doLast {
                 project.fileTree(dir: '.gemcache/',
                                  include: '*.gem').each { File f ->
-                    extractGem(project, f)
+                    GemUtils.extractGem(project, f)
                 }
             }
         }
@@ -120,25 +120,4 @@ class JRubyPlugin implements Plugin<Project> {
         }
     }
 
-    /*
-     * Take the given .gem filename (e.g. rake-10.3.2.gem) and just return the
-     * gem "full name" (e.g. rake-10.3.2)
-     */
-    static String gemFullNameFromFile(String filename) {
-        return filename.replaceAll(~".gem", "")
-    }
-
-    Boolean extractGem(Project p, File gem) {
-        def gemname = gemFullNameFromFile(gem.getName())
-        File extract_dir = new File("./vendor/gems/$gemname")
-
-        if (extract_dir.exists()) {
-            return
-        }
-
-        p.exec {
-            executable "gem"
-            args 'install', gem, '--install-dir=./vendor', '--no-ri', '--no-rdoc'
-        }
-    }
 }

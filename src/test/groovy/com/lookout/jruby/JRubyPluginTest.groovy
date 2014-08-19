@@ -8,7 +8,7 @@ import org.gradle.api.tasks.bundling.War
 import org.gradle.testfixtures.ProjectBuilder
 
 import org.junit.*
-import org.junit.Assert
+
 import static org.junit.Assert.*
 
 
@@ -66,7 +66,7 @@ class JRubyPluginTest {
         String filename = "rake-10.3.2.gem"
         String gem_name = "rake-10.3.2"
 
-        assertEquals(gem_name, JRubyPlugin.gemFullNameFromFile(filename))
+        assertEquals(gem_name, GemUtils.gemFullNameFromFile(filename))
     }
 
     // NOTE: This test will fail if no network is available

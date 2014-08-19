@@ -192,3 +192,52 @@ dependencies {
     gems group: 'com.lookout', name: 'custom-gem', version: '1.0.+'
 }
 ```
+
+## JRubyExec - Task for Executing a Ruby Script 
+
+In a similar vein to ```JavaExec``` and ```RhinoShellExec```, the ```JRubyExec``` allows for Ruby scripts to be executed
+in a Gradle script using JRuby.
+
+```groovy
+import com.lookout.jruby.JRubyExec
+
+dependencies {
+    jrubyExec 'rubygems:credit_card_validator:1.2.0'
+}
+
+task runMyScript( type: JRubyExec ) {
+    script 'scripts/runme.rb'
+    scriptArgs '-x', '-y'
+}
+```
+
+Common methods for ```JRubyExec``` for executing a script
+
+* ```script``` - ```Object``` (Usually File or String). Path to the script.
+* ```scriptArgs``` - ```List```.  List of arguments to pass to script.
+* ```workingDir``` - ```Object``` (Usually File or String).  Working directory for script.
+* ```environment``` - ```Map```.  Environment to be set. Do not set ```GEM_HOME``` or ```GEM_PATH``` with this method.
+* ```standardInput``` - ```InputStream```.  Set an input stream to be read by the script.
+* ```standardOutput``` - ```OutputStream```.  Capture the output of the script.
+* ```errorOutput``` - ```OutputStream```.  Capture the error output of the script.
+* ```ignoreExitValue``` - ```Boolean```.  Ignore the JVm exit value. Exit values are only effective if the exit value of the Ruby script is correctly communicated back to the JVM.
+* ```configuration``` - ```String```.  Configuration to copy gems from. (*) 
+* ```classpath``` - ```List```.  Additional Jars/Directories to place on classpath.
+* ```jrubyVersion``` - ```String```.  JRuby version to use if not the same as ```project.jruby.execVersion```. 
+
+(*) If ```jRubyVersion``` has not been set, ```jrubyExec``` will used as
+configuration. However, if ```jRubyVersion``` has been set, no gems will be used unless an explicit configuration has been provided
+
+Additional ```JRubyExec``` methods for controlling the JVM instance
+
+* ```jvmArgs``` - ```List```. See [jvmArgs](http://www.gradle.org/docs/current/dsl/org.gradle.api.tasks.JavaExec.html#org.gradle.api.tasks.JavaExec:jvmArgs)
+* ```allJvmArgs``` - ```List```. See [allJvmArgs](http://www.gradle.org/docs/current/dsl/org.gradle.api.tasks.JavaExec.html#org.gradle.api.tasks.JavaExec:allJvmArgs)
+* ```systemProperties``` - ```Map```. See [systemProperties](http://www.gradle.org/docs/current/dsl/org.gradle.api.tasks.JavaExec.html#org.gradle.api.tasks.JavaExec:systemProperties)
+* ```bootstrapClassPath``` - ```FileCollection``` or ```List```. See [bootstrapClassPath](http://www.gradle.org/docs/current/dsl/org.gradle.api.tasks.JavaExec.html#org.gradle.api.tasks.JavaExec:bootstrapClasspath)
+* ```minHeapSize``` - ```String```. See [minHeapSize](http://www.gradle.org/docs/current/dsl/org.gradle.api.tasks.JavaExec.html)
+* ```maxHeapSize``` - ```String```. See [maxHeapSize](http://www.gradle.org/docs/current/dsl/org.gradle.api.tasks.JavaExec.html#org.gradle.api.tasks.JavaExec:maxHeapSize)
+* ```defaultCharacterEncoding``` - ```String```. See [defaultCharacterEncoding](http://www.gradle.org/docs/current/dsl/org.gradle.api.tasks.JavaExec.html)
+* ```enableAssertions``` - ```Boolean```. See [enableAssertions](http://www.gradle.org/docs/current/dsl/org.gradle.api.tasks.JavaExec.html#org.gradle.api.tasks.JavaExec:enableAssertions)
+* ```debug``` - ```Boolean```. See [debug](http://www.gradle.org/docs/current/dsl/org.gradle.api.tasks.JavaExec.html#org.gradle.api.tasks.JavaExec:debug)
+* ```copyTo``` - ```JavaForkOptions```. See [copyTo](http://www.gradle.org/docs/current/dsl/org.gradle.api.tasks.JavaExec.html)
+* ```executable``` - ```Object``` (Usually ```File``` or ```String```). See [executable](http://www.gradle.org/docs/current/dsl/org.gradle.api.tasks.JavaExec.html#org.gradle.api.tasks.JavaExec:executable)
