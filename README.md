@@ -46,7 +46,7 @@ buildscript {
     repositories { jcenter() }
 
     dependencies {
-      classpath group: 'com.lookout', name: 'jruby-gradle-plugin', version: '2.0.+'
+      classpath group: 'com.lookout', name: 'jruby-gradle-plugin', version: '2.1.+'
     }
 }
 ```
