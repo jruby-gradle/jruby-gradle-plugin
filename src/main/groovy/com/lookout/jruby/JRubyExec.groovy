@@ -35,18 +35,6 @@ class JRubyExec extends JavaExec {
         }
     }
 
-//    static ExecResult projectJRubyExec(Project project,Closure cl) {
-//
-//        // Use cl
-//        // Put gems somewhere
-//
-//        project.javaexec {
-//            main 'org.jruby.Main'
-//            classpath // jruby.execVersion
-//            args
-//            environment
-//        }
-//    }
     /** Script to execute.
      *
      */
