@@ -26,8 +26,4 @@ task integrationTest(type: Test, dependsOn: jar) {
     systemProperties["integTest.projects"] = new File(sourceSets.integrationTest.output.resourcesDir, "projects").absolutePath
 }
 
-if( hasProperty( 'integTest' ) && ext.integTest == '0' ) {
-    logger.warn 'WARNING: Ignoring integration tests as integTest=0'
-} else {
-    check.dependsOn integrationTest
-}
+check.dependsOn integrationTest
