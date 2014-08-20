@@ -1,6 +1,6 @@
 package com.lookout.jruby
 
-
+import com.lookout.jruby.internal.JRubyExecUtils
 import org.gradle.api.Project
 import org.gradle.api.artifacts.Configuration
 import org.gradle.api.file.FileCollection
@@ -143,12 +143,12 @@ class JRubyExec extends JavaExec {
                 configurations.getByName(configuration).files.findAll { File f ->
                     f.name.endsWith('.gem')
                 }.each { File f ->
-                    GemUtils.extractGem(project,jrubyCompletePath,f,gemDir,true)
+                    GemUtils.extractGem(project,jrubyCompletePath,f,gemDir,GemUtils.OverwriteAction.OVERWRITE)
                 }
             }
         }
 
-        super.classpath project.configurations.getByName(jrubyConfigurationName).files
+        super.classpath JRubyExecUtils.classpathFromConfiguration(project.configurations.getByName(jrubyConfigurationName))
         super.setArgs(getArgs())
         super.exec()
     }
@@ -200,8 +200,8 @@ class JRubyExec extends JavaExec {
 
     private File tmpGemDir() {
         String ext = FileUtils.toSafeFileName(jrubyConfigurationName)
-        if(configuration) {
-            ext= "${ext}-${FileUtils.toSafeFileName(configuration)}"
+        if(configuration && configuration!=jrubyConfigurationName) {
+            ext= ext + "-${FileUtils.toSafeFileName(configuration)}"
         }
         new File( project.buildDir, "tmp/${ext}").absoluteFile
     }
