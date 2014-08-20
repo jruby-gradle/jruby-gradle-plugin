@@ -1,6 +1,7 @@
 apply plugin: 'groovy'
 apply plugin: 'maven'
 apply plugin: 'com.jfrog.bintray'
+apply from: 'gradle/integration-tests.gradle'
 
 // Pull in the bintray gradle plugin for uploading releases
 buildscript {
@@ -30,6 +31,10 @@ dependencies {
     testCompile ("org.spockframework:spock-core:0.7-groovy-${gradle.gradleVersion.startsWith('1.')?'1.8':'2.0'}") {
         exclude module : 'groovy-all'
     }
+    integrationTestCompile ("org.spockframework:spock-core:0.7-groovy-${gradle.gradleVersion.startsWith('1.')?'1.8':'2.0'}") {
+        exclude module : 'groovy-all'
+    }
+
 }
 
 test {
@@ -42,11 +47,17 @@ test {
     systemProperties TEST_SCRIPT_DIR : new File(projectDir,'src/test/resources/scripts').absolutePath
     systemProperties 'logback.configurationFile' : new File(projectDir,'src/test/resources/logback-test.xml').absolutePath
 
+}
+
+integrationTest {
+    systemProperties TESTROOT : new File(buildDir,'tmp/test/integration-tests').absolutePath
+    systemProperties TEST_SCRIPT_DIR : new File(projectDir,'src/integTest/resources/scripts').absolutePath
+    systemProperties 'logback.configurationFile' : new File(projectDir,'src/integTest/resources/logback-test.xml').absolutePath
+
     if(gradle.startParameter.isOffline()) {
         systemProperties 'TESTS_ARE_OFFLINE' : '1'
     }
 }
-
 
 task sourcesJar(type: Jar, dependsOn: classes) {
     classifier = 'sources'

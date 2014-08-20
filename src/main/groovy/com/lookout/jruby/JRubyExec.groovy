@@ -11,6 +11,7 @@ import org.gradle.api.tasks.JavaExec
 import org.gradle.api.tasks.Optional
 import org.gradle.api.tasks.TaskInstantiationException
 import org.gradle.internal.FileUtils
+import org.gradle.process.ExecResult
 import org.gradle.process.JavaExecSpec
 import org.gradle.util.CollectionUtils
 
