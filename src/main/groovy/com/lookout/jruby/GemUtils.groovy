@@ -10,6 +10,8 @@ import org.gradle.api.file.DuplicateFileCopyingException
  * @author Schalk W. Cronjé
  */
 class GemUtils {
+    enum OverwriteAction { FAIL, SKIP, OVERWRITE }
+
     static Boolean extractGem(Project p, File gem) {
         String gemName = gemFullNameFromFile(gem.getName())
         String installDir = p.jruby.gemInstallDir
@@ -38,15 +40,20 @@ class GemUtils {
                             def jRubyClasspath,
                             File gem,
                             File destDir,
-                            boolean overwrite) {
+                            GemUtils.OverwriteAction overwrite) {
         String gemName = gemFullNameFromFile(gem.name)
         File extractDir = new File(destDir, gemName)
 
         if (extractDir.exists()) {
-            if(overwrite) {
-                project.delete extractDir
-            } else {
-                throw new DuplicateFileCopyingException("Gem ${gem.name} already exists")
+
+            switch (overwrite) {
+                case GemUtils.OverwriteAction.SKIP:
+                    return
+                case GemUtils.OverwriteAction.OVERWRITE:
+                    project.delete extractDir
+                    break
+                case GemUtils.OverwriteAction.FAIL:
+                    throw new DuplicateFileCopyingException("Gem ${gem.name} already exists")
             }
         }
 
@@ -61,6 +68,15 @@ class GemUtils {
             classpath jRubyClasspath
             args '-S', 'gem', 'install', gem, "--install-dir=${destDir.absolutePath}", '-N'
         }
+    }
+
+    static void extractGems(Project project,def jRubyClasspath, Configuration gemConfig,File destDir,GemUtils.OverwriteAction action ) {
+        gemConfig.files.findAll { File f ->
+            f.name.endsWith('.gem')
+        }.each { File f ->
+            GemUtils.extractGem(project,jRubyClasspath,f,destDir,action)
+        }
+
     }
 
     /** Take the given .gem filename (e.g. rake-10.3.2.gem) and just return the

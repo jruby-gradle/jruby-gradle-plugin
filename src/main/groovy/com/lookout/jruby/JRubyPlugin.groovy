@@ -1,5 +1,6 @@
 package com.lookout.jruby
 
+import com.lookout.jruby.internal.JRubyExecDelegate
 import org.gradle.api.Plugin
 import org.gradle.api.Project
 import org.gradle.api.tasks.Copy
@@ -33,6 +34,7 @@ class JRubyPlugin implements Plugin<Project> {
             gems
         }
         project.configurations.create(JRubyExec.JRUBYEXEC_CONFIG)
+        JRubyExecDelegate.addToProject(project)
 
         // In order for jrubyWar to work we'll need to pull in the warbler
         // bootstrap code from this artifact

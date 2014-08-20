@@ -241,3 +241,27 @@ Additional ```JRubyExec``` methods for controlling the JVM instance
 * ```debug``` - ```Boolean```. See [debug](http://www.gradle.org/docs/current/dsl/org.gradle.api.tasks.JavaExec.html#org.gradle.api.tasks.JavaExec:debug)
 * ```copyTo``` - ```JavaForkOptions```. See [copyTo](http://www.gradle.org/docs/current/dsl/org.gradle.api.tasks.JavaExec.html)
 * ```executable``` - ```Object``` (Usually ```File``` or ```String```). See [executable](http://www.gradle.org/docs/current/dsl/org.gradle.api.tasks.JavaExec.html#org.gradle.api.tasks.JavaExec:executable)
+
+## jrubyexec extension
+
+Similar to ```javaexec``` and ```exec``` it is possible to add the execution of a jruby script within another task
+
+```groovy
+task needSomeRubyLove {
+  jrubyexec {
+    script 'scripts/runme.rb'
+    scriptArgs '-x', '-y'  
+  }
+}
+```
+
+The behaviour of ```project.jrubyexec``` is slightly different to that of ```JRubyExec```.
+
+* The version of ```jruby-complete``` is strictly tied to to ```jruby.defaultVersion```. Therefore trying to set ```jrubyVersion```
+in the ```jrubyexec``` closure will cause a failure
+* GEMs and additional JARs are only taken from the ```jrubyExec``` configuration. 
+* It is not possible to supply a ```configuration``` parameter to the ```jrubyexec``` closure.
+* GEMs will be installed to ```jruby.gemInstallDir```. Existing gems will not be overwritten.
+
+As with ```JRubyExec```, ```args```, ```setArgs``` and ```main``` are illegal within the ```jrubyexec``` closure.
+All other methods should work.
