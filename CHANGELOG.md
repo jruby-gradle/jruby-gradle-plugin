@@ -1,8 +1,22 @@
 # Changelog
 
-## v2.0.3
+## v2.1.1
 
- * s
+ * Removed `jruby.gemrepo_url` extension point (*hopefully*) before anybody
+   started using it. Renamed to `jruby.defaultGemRepo` to line up better with
+   changes that will come in to support [multiple rubygem
+   repos](https://github.com/rtyler/jruby-gradle-plugin/issues/13)
+
+## v2.1.0
+
+ * [#18](https://github.com/rtyler/jruby-gradle-plugin/issues/18) allow
+   changing the Gem installation directory by setting `jruby.gemInstallDir` in
+   a gradle file
+ * [#16](https://github.com/rtyler/jruby-gradle-plugin/pull/16) add the
+   `JRubyExec` task type for executing Ruby code with the embedded JRuby
+   dependency.
+ * [#14](https://github.com/rtyler/jruby-gradle-plugin/pull/14) allow a user to
+   set/choose the version of JRuby they wish to use with the plugin
 
 ## v2.0.2
 

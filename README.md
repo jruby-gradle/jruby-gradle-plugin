@@ -1,6 +1,6 @@
 # JRuby Gradle plugin
 
-[![Build Status](https://buildhive.cloudbees.com/job/rtyler/job/jruby-gradle-plugin/badge/icon)](https://buildhive.cloudbees.com/job/rtyler/job/jruby-gradle-plugin/) [![Download](https://api.bintray.com/packages/rtyler/jruby/jruby-gradle-plugin/images/download.png)](https://bintray.com/rtyler/jruby/jruby-gradle-plugin/\_latestVersion)
+[![Build Status](https://buildhive.cloudbees.com/job/rtyler/job/jruby-gradle-plugin/badge/icon)](https://buildhive.cloudbees.com/job/rtyler/job/jruby-gradle-plugin/) [![Download](https://api.bintray.com/packages/rtyler/jruby/jruby-gradle-plugin/images/download.png)](https://bintray.com/rtyler/jruby/jruby-gradle-plugin/\_latestVersion) [![Gitter chat](https://badges.gitter.im/rtyler/jruby-gradle-plugin.png)](https://gitter.im/rtyler/jruby-gradle-plugin)
 
 The purpose of plugin is to encapsulate useful [Gradle](http://www.gradle.org/)
 functionality for JRuby projects. Use of this plugin replaces the need for both
@@ -46,7 +46,7 @@ buildscript {
     repositories { jcenter() }
 
     dependencies {
-      classpath group: 'com.lookout', name: 'jruby-gradle-plugin', version: '2.0.+'
+      classpath group: 'com.lookout', name: 'jruby-gradle-plugin', version: '2.1.+'
     }
 }
 ```
@@ -186,7 +186,7 @@ You can then use that custom Gem repository with:
 apply plugin: 'com.lookout.jruby'
 
 // Set our custom Gem repository
-jruby.gemrepo_url = 'http://localhost:8989/releases'
+jruby.defaultGemRepo = 'http://localhost:8989/releases'
 
 dependencies {
     gems group: 'com.lookout', name: 'custom-gem', version: '1.0.+'

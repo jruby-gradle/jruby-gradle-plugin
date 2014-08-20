@@ -16,7 +16,7 @@ class JRubyPlugin implements Plugin<Project> {
             maven {
                 // The url is in a closure to ensure that we can overwrite this
                 // at runtime and have the right value come through.
-                url { project.jruby.gemrepo_url }
+                url { project.jruby.defaultGemRepo }
             }
 
             // Required to pull in our warbler-bootstrap dependency
@@ -99,7 +99,7 @@ class JRubyPlugin implements Plugin<Project> {
             from "$project.buildDir/classes/main"
             // Bring our vendored gems into the created war file
             webInf {
-                from 'vendor'
+                from project.jruby.gemInstallDir
                 into 'gems'
             }
 

@@ -11,16 +11,17 @@ import org.gradle.api.file.DuplicateFileCopyingException
  */
 class GemUtils {
     static Boolean extractGem(Project p, File gem) {
-        def gemname = gemFullNameFromFile(gem.getName())
-        File extract_dir = new File("./vendor/gems/$gemname")
+        String gemName = gemFullNameFromFile(gem.getName())
+        String installDir = p.jruby.gemInstallDir
+        File extractDir = new File("./${installDir}/gems/${gemName}")
 
-        if (extract_dir.exists()) {
+        if (extractDir.exists()) {
             return
         }
 
         p.exec {
             executable "gem"
-            args 'install', gem, '--install-dir=./vendor', '--no-ri', '--no-rdoc'
+            args 'install', gem, "--install-dir=./${installDir}", '--no-ri', '--no-rdoc'
         }
     }
 
@@ -33,13 +34,17 @@ class GemUtils {
      * @param overwrite Allow overwrite of an existing gem folder
      * @return
      */
-    static void extractGem(Project project, def jRubyClasspath, File gem,File destDir,boolean overwrite) {
-        def gemname = gemFullNameFromFile(gem.name)
-        File extract_dir = new File(destDir,gemname)
+    static void extractGem(Project project,
+                            def jRubyClasspath,
+                            File gem,
+                            File destDir,
+                            boolean overwrite) {
+        String gemName = gemFullNameFromFile(gem.name)
+        File extractDir = new File(destDir, gemName)
 
-        if (extract_dir.exists()) {
+        if (extractDir.exists()) {
             if(overwrite) {
-                project.delete extract_dir
+                project.delete extractDir
             } else {
                 throw new DuplicateFileCopyingException("Gem ${gem.name} already exists")
             }

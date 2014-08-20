@@ -55,7 +55,7 @@ class JRubyPluginTest {
     @Test
     public void jrubyPluginCustomGemRepoUrl() {
         def url = 'http://junit.maven/releases'
-        project.jruby.gemrepo_url = url
+        project.jruby.defaultGemRepo = url
         assertTrue(hasRepositoryUrl(project, url))
     }
 
