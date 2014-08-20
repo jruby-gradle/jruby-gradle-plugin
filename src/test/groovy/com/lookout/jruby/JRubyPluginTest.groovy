@@ -10,6 +10,7 @@ import org.gradle.testfixtures.ProjectBuilder
 import org.junit.*
 
 import static org.junit.Assert.*
+import static org.gradle.api.logging.LogLevel.*
 
 
 class JRubyPluginTest {
@@ -24,6 +25,7 @@ class JRubyPluginTest {
         }
         TESTROOT.mkdirs()
         project = ProjectBuilder.builder().build()
+        project.logging.level = LIFECYCLE
         project.apply plugin: 'com.lookout.jruby'
     }
 
@@ -69,36 +71,6 @@ class JRubyPluginTest {
         assertEquals(gem_name, GemUtils.gemFullNameFromFile(filename))
     }
 
-    // NOTE: This test will fail if no network is available
-    // It really needs Spock's @IgnoreIf annotation
-    // See https://gist.github.com/ysb33r/74574a45c67c9e9e8187
-    @Test
-    public void jrubyWarTaskNeedsToAddJrubyCompleteJar() {
-        final String useVersion = '1.7.3'
-        assertNotEquals "We need the test version to be different from the defaultVersion that is compiled in",
-                useVersion,project.jruby.defaultVersion
-
-        project.jruby {
-            defaultVersion useVersion
-        }
-
-        Task jrw = project.tasks.jrubyWar
-        new File(TESTROOT,'libs').mkdirs()
-        new File(TESTROOT,'classes/main').mkdirs()
-        project.buildDir = TESTROOT
-        project.evaluate()
-        jrw.copy()
-
-        assertTrue jrw.outputs.files.singleFile.exists()
-
-        def item = project.configurations.jrubyWar.files.find { it.toString().find('jruby-complete') }
-        assertNotNull 'Would expected to have a jruby-complete-XXX.jar',item
-
-        def matches = item =~ /.*(jruby-complete-.+.jar)/
-        assertNotNull 'jruby-complete-XXX.jar did not match', matches
-        assertEquals "jruby-complete-${useVersion}.jar".toString(), matches[0][1]
-
-    }
     //
     //  Helper methods for testing
     ////////////////////////////////////////////////////////////////////////////

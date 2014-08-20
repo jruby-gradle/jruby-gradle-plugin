@@ -11,6 +11,7 @@ import org.gradle.api.tasks.JavaExec
 import org.gradle.api.tasks.Optional
 import org.gradle.api.tasks.TaskInstantiationException
 import org.gradle.internal.FileUtils
+import org.gradle.process.ExecResult
 import org.gradle.process.JavaExecSpec
 import org.gradle.util.CollectionUtils
 
@@ -34,6 +35,18 @@ class JRubyExec extends JavaExec {
         }
     }
 
+//    static ExecResult projectJRubyExec(Project project,Closure cl) {
+//
+//        // Use cl
+//        // Put gems somewhere
+//
+//        project.javaexec {
+//            main 'org.jruby.Main'
+//            classpath // jruby.execVersion
+//            args
+//            environment
+//        }
+//    }
     /** Script to execute.
      *
      */
