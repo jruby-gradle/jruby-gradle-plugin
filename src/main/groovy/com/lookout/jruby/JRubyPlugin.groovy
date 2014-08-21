@@ -13,6 +13,10 @@ class JRubyPlugin implements Plugin<Project> {
         project.apply plugin: 'war'
         project.extensions.create('jruby', JRubyPluginExtension, project)
 
+        project.ext {
+            gemInstallDir = "${project.buildDir}/${project.jruby.gemInstallDir}"
+        }
+
         project.repositories {
             maven {
                 // The url is in a closure to ensure that we can overwrite this
@@ -101,7 +105,7 @@ class JRubyPlugin implements Plugin<Project> {
             from "$project.buildDir/classes/main"
             // Bring our vendored gems into the created war file
             webInf {
-                from project.jruby.gemInstallDir
+                from project.gemInstallDir
                 into 'gems'
             }
 

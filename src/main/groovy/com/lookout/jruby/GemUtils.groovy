@@ -14,8 +14,10 @@ class GemUtils {
 
     static Boolean extractGem(Project p, File gem) {
         String gemName = gemFullNameFromFile(gem.getName())
-        String installDir = p.jruby.gemInstallDir
-        File extractDir = new File("./${installDir}/gems/${gemName}")
+        // Wherever our gems will be installed, we need to make sure the
+        // directory exists since `p.exec` will silently fail
+        new File(p.gemInstallDir).mkdirs()
+        File extractDir = new File("${p.gemInstallDir}/gems/${gemName}")
 
         if (extractDir.exists()) {
             return
@@ -23,7 +25,7 @@ class GemUtils {
 
         p.exec {
             executable "gem"
-            args 'install', gem, "--install-dir=./${installDir}", '--no-ri', '--no-rdoc'
+            args 'install', gem, "--install-dir=${p.gemInstallDir}", '--no-ri', '--no-rdoc'
         }
     }
 
