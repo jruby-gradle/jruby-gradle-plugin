@@ -134,12 +134,12 @@ class JRubyExec extends JavaExec {
 
         def jrubyCompletePath = project.configurations.getByName(jrubyConfigurationName)
         File gemDir = tmpGemDir()
+        gemDir.mkdirs()
         environment 'GEM_HOME' : gemDir
 
         if(configuration != null) {
             project.configurations.getByName(jrubyConfigurationName)
             project.with {
-                mkdir gemDir
                 configurations.getByName(configuration).files.findAll { File f ->
                     f.name.endsWith('.gem')
                 }.each { File f ->

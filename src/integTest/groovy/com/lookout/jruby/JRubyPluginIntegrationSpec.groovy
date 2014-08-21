@@ -8,6 +8,7 @@ import static org.gradle.api.logging.LogLevel.LIFECYCLE
 /**
  * Created by schalkc on 20/08/2014.
  */
+@Stepwise
 class JRubyPluginIntegrationSpec extends Specification {
 
     static final boolean TESTS_ARE_OFFLINE = System.getProperty('TESTS_ARE_OFFLINE') != null

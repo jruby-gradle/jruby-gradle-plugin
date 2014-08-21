@@ -255,13 +255,13 @@ task needSomeRubyLove {
 }
 ```
 
-The behaviour of ```project.jrubyexec``` is slightly different to that of ```JRubyExec```.
+The behaviour of `project.jrubyexec` is slightly different to that of `JRubyExec`.
 
-* The version of ```jruby-complete``` is strictly tied to to ```jruby.defaultVersion```. Therefore trying to set ```jrubyVersion```
+* The version of `jruby-complete` is strictly tied to the `jruby.execVersion`. Therefore trying to set `jrubyVersion`
 in the ```jrubyexec``` closure will cause a failure
-* GEMs and additional JARs are only taken from the ```jrubyExec``` configuration. 
-* It is not possible to supply a ```configuration``` parameter to the ```jrubyexec``` closure.
-* GEMs will be installed to ```jruby.gemInstallDir```. Existing gems will not be overwritten.
+* GEMs and additional JARs are only taken from the `jrubyExec` configuration. 
+* It is not possible to supply a `configuration` parameter to the `jrubyexec` closure.
+* GEMs will be installed to `jruby.gemInstallDir`. Existing gems will not be overwritten.
 
-As with ```JRubyExec```, ```args```, ```setArgs``` and ```main``` are illegal within the ```jrubyexec``` closure.
+As with `JRubyExec`, `args`, `setArgs` and `main` are illegal within the `jrubyexec` closure.
 All other methods should work.
