@@ -1,23 +1,30 @@
 package com.lookout.jruby
 
+import org.gradle.api.artifacts.repositories.ArtifactRepository
 import org.gradle.testfixtures.ProjectBuilder
 import spock.lang.Ignore
 import spock.lang.IgnoreIf
 import spock.lang.Specification
+import spock.lang.Stepwise
 
 import static org.gradle.api.logging.LogLevel.LIFECYCLE
 
 /**
  * @author Schalk W. Cronjé
  */
+@Stepwise
 class JRubyExecExtensionIntegrationSpec extends Specification {
     static final boolean TESTS_ARE_OFFLINE = System.getProperty('TESTS_ARE_OFFLINE') != null
     static final File TEST_SCRIPT_DIR = new File( System.getProperty('TESTS_SCRIPT_DIR') ?: 'src/integTest/resources/scripts')
-    static final File TESTROOT = new File(System.getProperty('TESTROOT') ?: 'build/tmp/test/integration-tests')
+    static final File TESTROOT = new File("${System.getProperty('TESTROOT') ?: 'build/tmp/test/integration-tests'}/jreeis")
 
     def project
 
     void setup() {
+        if(TESTROOT.exists()) {
+            TESTROOT.deleteDir()
+        }
+        TESTROOT.mkdirs()
         project = ProjectBuilder.builder().build()
         project.with {
             buildDir = TESTROOT

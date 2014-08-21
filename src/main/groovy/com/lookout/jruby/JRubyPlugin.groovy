@@ -13,22 +13,14 @@ class JRubyPlugin implements Plugin<Project> {
         project.apply plugin: 'war'
         project.extensions.create('jruby', JRubyPluginExtension, project)
 
-        project.ext {
-            gemInstallDir = "${project.buildDir}/${project.jruby.gemInstallDir}"
+        if(!project.repositories.metaClass.respondsTo(project.repositories,'rubygemsRelease')) {
+            project.repositories.metaClass.rubygemsRelease << { ->
+                maven { url 'http://rubygems-proxy.torquebox.org/releases' }
+            }
         }
 
-        project.repositories {
-            maven {
-                // The url is in a closure to ensure that we can overwrite this
-                // at runtime and have the right value come through.
-                url { project.jruby.defaultGemRepo }
-            }
-
-            // Required to pull in our warbler-bootstrap dependency
-            maven { url 'http://dl.bintray.com/rtyler/jruby' }
-
-            // We'll need jcenter to resolve the jruby .jar deps
-            jcenter()
+        project.ext {
+            gemInstallDir = "${project.buildDir}/${project.jruby.gemInstallDir}"
         }
 
         // Set up a special configuration group for our embedding jars
@@ -37,12 +29,23 @@ class JRubyPlugin implements Plugin<Project> {
             jrubyWar
             gems
         }
+
         project.configurations.create(JRubyExec.JRUBYEXEC_CONFIG)
         JRubyExecDelegate.addToProject(project)
 
         // In order for jrubyWar to work we'll need to pull in the warbler
         // bootstrap code from this artifact
         project.afterEvaluate {
+            if(project.jruby.defaultRepositories) {
+                project.repositories {
+                    jcenter()
+                    rubygemsRelease()
+
+                    // Required to pull in our warbler-bootstrap dependency
+                    maven { url 'http://dl.bintray.com/rtyler/jruby' }
+
+                }
+            }
             project.dependencies {
                 jrubyEmbeds group: 'com.lookout', name: 'warbler-bootstrap', version: '1.+'
                 jrubyWar group: 'org.jruby', name: 'jruby-complete', version: project.jruby.defaultVersion
@@ -105,7 +108,7 @@ class JRubyPlugin implements Plugin<Project> {
             from "$project.buildDir/classes/main"
             // Bring our vendored gems into the created war file
             webInf {
-                from project.gemInstallDir
+                from project.jruby.gemInstallDir
                 into 'gems'
             }
 

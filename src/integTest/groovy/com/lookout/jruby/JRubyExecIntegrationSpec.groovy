@@ -8,16 +8,21 @@ import static org.gradle.api.logging.LogLevel.LIFECYCLE
 /**
  * Created by schalkc on 20/08/2014.
  */
+@Stepwise
 class JRubyExecIntegrationSpec extends Specification {
     static final boolean TESTS_ARE_OFFLINE = System.getProperty('TESTS_ARE_OFFLINE') != null
     static final File TEST_SCRIPT_DIR = new File( System.getProperty('TEST_SCRIPT_DIR') ?: 'src/integTest/resources/scripts')
-    static final File TESTROOT = new File(System.getProperty('TESTROOT') ?: 'build/tmp/test/integration-tests')
+    static final File TESTROOT = new File("${System.getProperty('TESTROOT') ?: 'build/tmp/test/integration-tests'}/jreis")
     static final String TASK_NAME = 'RubyWax'
 
     def project
     def execTask
 
     void setup() {
+        if(TESTROOT.exists()) {
+            TESTROOT.deleteDir()
+        }
+        TESTROOT.mkdirs()
         project = ProjectBuilder.builder().build()
         project.buildDir = TESTROOT
         project.logging.level = LIFECYCLE
@@ -92,7 +97,6 @@ class JRubyExecIntegrationSpec extends Specification {
                     configuration 'RubyWax'
                 }
             }
-
 
         when:
             project.evaluate()
