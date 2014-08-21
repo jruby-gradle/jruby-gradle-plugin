@@ -15,7 +15,7 @@ sourceSets {
         java.srcDir file("src/integTest/java")
         groovy.srcDir file("src/integTest/groovy")
         resources.srcDir file("src/integTest/resources")
-        compileClasspath = sourceSets.main.output + sourceSets.test.output + configurations.integrationTestCompile
+        compileClasspath = sourceSets.main.output +  configurations.integrationTestCompile
         runtimeClasspath = output + compileClasspath + configurations.integrationTestRuntime
     }
 }
@@ -23,7 +23,7 @@ sourceSets {
 task integrationTest(type: Test, dependsOn: jar) {
     testClassesDir = sourceSets.integrationTest.output.classesDir
     classpath = sourceSets.integrationTest.runtimeClasspath
-    systemProperties["integTest.projects"] = new File(sourceSets.integrationTest.output.resourcesDir, "projects").absolutePath
+    mustRunAfter test
 }
 
 check.dependsOn integrationTest
