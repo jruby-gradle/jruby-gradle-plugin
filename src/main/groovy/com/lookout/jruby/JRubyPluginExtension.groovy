@@ -4,15 +4,14 @@ import org.gradle.api.Incubating
 import org.gradle.api.Project
 
 class JRubyPluginExtension {
-    // More details here: <http://rubygems-proxy.torquebox.org/>
-//    String defaultGemRepo = 'http://rubygems-proxy.torquebox.org/releases'
-//    String gemrepo_url = defaultGemRepo
-    String gemInstallDir = 'vendor'
-
     /** The default version of jruby that will be used by jrubyWar
      *
      */
     String defaultVersion = '1.7.13'
+    /** Directory for jrubyPrepare to install .gem dependencies into
+     *
+     */
+    String gemInstallDir
 
     /** The version of jruby used by jrubyexec as well as default version of jruby that will be used by JRubyExec
      *
@@ -27,6 +26,7 @@ class JRubyPluginExtension {
 
     JRubyPluginExtension(Project p) {
         project = p
+        gemInstallDir = [p.buildDir.absolutePath, 'vendor'].join(File.separator)
     }
 
     /** Change the version of jruby for jrubyexec and JRubyExec

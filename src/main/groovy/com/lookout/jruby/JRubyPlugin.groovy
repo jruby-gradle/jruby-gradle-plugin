@@ -19,10 +19,6 @@ class JRubyPlugin implements Plugin<Project> {
             }
         }
 
-        project.ext {
-            gemInstallDir = "${project.buildDir}/${project.jruby.gemInstallDir}"
-        }
-
         // Set up a special configuration group for our embedding jars
         project.configurations {
             jrubyEmbeds
