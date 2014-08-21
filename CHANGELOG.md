@@ -1,6 +1,6 @@
 # Changelog
 
-## v2.1.1
+## v2.2.0
 
  * Removed `jruby.gemrepo_url` extension point (*hopefully*) before anybody
    started using it. Renamed to `jruby.defaultGemRepo` to line up better with
