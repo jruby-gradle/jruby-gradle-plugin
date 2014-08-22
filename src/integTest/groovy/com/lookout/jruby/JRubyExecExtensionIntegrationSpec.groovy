@@ -1,5 +1,6 @@
 package com.lookout.jruby
 
+import org.gradle.api.artifacts.Configuration
 import org.gradle.api.artifacts.repositories.ArtifactRepository
 import org.gradle.testfixtures.ProjectBuilder
 import spock.lang.FailsWith
@@ -14,9 +15,10 @@ import static org.gradle.api.logging.LogLevel.LIFECYCLE
 /**
  * @author Schalk W. Cronjé
  */
-@Stepwise
 class JRubyExecExtensionIntegrationSpec extends Specification {
-    static final boolean TESTS_ARE_OFFLINE = System.getProperty('TESTS_ARE_OFFLINE') != null
+    
+    static final boolean TESTS_ARE_OFFLINE = true
+    //static final boolean TESTS_ARE_OFFLINE = System.getProperty('TESTS_ARE_OFFLINE') != null
     static final File TEST_SCRIPT_DIR = new File( System.getProperty('TEST_SCRIPT_DIR') ?: 'src/integTest/resources/scripts')
     static final File TESTROOT = new File("${System.getProperty('TESTROOT') ?: 'build/tmp/test/integration-tests'}/jreeis")
 
@@ -37,7 +39,6 @@ class JRubyExecExtensionIntegrationSpec extends Specification {
     }
 
 
-    @IgnoreRest
     @IgnoreIf({TESTS_ARE_OFFLINE})
     def "Run a script with minimum parameters"() {
         given:
