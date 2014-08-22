@@ -28,7 +28,7 @@ class JRubyExecSpec extends Specification {
         project.buildDir = TESTROOT
         project.logging.level = LIFECYCLE
         project.apply plugin: 'com.lookout.jruby'
-        execTask = project.task(TASK_NAME,type: JRubyExec)
+        execTask = project.task(TASK_NAME, type: JRubyExec)
     }
 
     def "Do not allow JRubyExec to be instantiated if plugin has not been loaded"() {
