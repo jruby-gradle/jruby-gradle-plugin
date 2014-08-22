@@ -8,6 +8,7 @@ class JRubyPluginExtension {
      *
      */
     String defaultVersion = '1.7.13'
+
     /** Directory for jrubyPrepare to install .gem dependencies into
      *
      */
@@ -26,7 +27,7 @@ class JRubyPluginExtension {
 
     JRubyPluginExtension(Project p) {
         project = p
-        gemInstallDir = [p.buildDir.absolutePath, 'vendor'].join(File.separator)
+        gemInstallDir = new File(p.buildDir,'vendor').absolutePath
     }
 
     /** Change the version of jruby for jrubyexec and JRubyExec
