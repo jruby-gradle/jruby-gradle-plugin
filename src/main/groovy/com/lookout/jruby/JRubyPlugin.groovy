@@ -57,28 +57,14 @@ class JRubyPlugin implements Plugin<Project> {
             group 'JRuby'
             description 'Clean up the temporary dirs used by the JRuby plugin'
             mustRunAfter 'clean'
-            delete '.gemcache/', '.jarcache/'
+            delete '.jarcache/'
         }
 
-        project.task('jrubyCacheGems', type: Copy) {
+        project.task('jrubyPrepareGems', type: JRubyPrepareGems) {
             group 'JRuby'
-            description 'Copy gems from the `gem` dependencies into .gemcache/'
-            from project.configurations.gems
-            into '.gemcache'
-            include '**/*.gem'
-        }
-
-        project.task('jrubyPrepareGems') {
-            group 'JRuby'
-            description 'Prepare the gems from the `gem` dependencies, extracts into vendor/'
-            dependsOn project.tasks.jrubyCacheGems
-
-            doLast {
-                project.fileTree(dir: '.gemcache/',
-                                 include: '*.gem').each { File f ->
-                    GemUtils.extractGem(project, f)
-                }
-            }
+            description 'Prepare the gems from the `gem` dependencies, extracts into jruby.installGemDir'
+            gems project.configurations.gems
+            outputDir project.jruby.gemInstallDir
         }
 
         project.task('jrubyCacheJars', type: Copy) {

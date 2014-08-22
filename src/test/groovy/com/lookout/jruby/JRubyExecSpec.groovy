@@ -16,7 +16,6 @@ import static org.gradle.api.logging.LogLevel.*
  */
 class JRubyExecSpec extends Specification {
 
-    static final boolean TESTS_ARE_OFFLINE = System.getProperty('TESTS_ARE_OFFLINE') != null
     static final File TEST_SCRIPT_DIR = new File( System.getProperty('TEST_SCRIPT_DIR') ?: 'src/test/resources/scripts')
     static final File TESTROOT = new File(System.getProperty('TESTROOT') ?: 'build/tmp/test/unittests')
     static final String TASK_NAME = 'RubyWax'

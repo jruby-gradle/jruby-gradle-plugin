@@ -31,8 +31,7 @@ class JRubyPluginTest {
 
     @Test
     public void jrubyPluginAddsGemTasks() {
-        assertTrue(project.tasks.jrubyCacheGems instanceof AbstractCopyTask)
-        assertTrue(project.tasks.jrubyPrepareGems instanceof Task)
+        assertTrue(project.tasks.jrubyPrepareGems instanceof JRubyPrepareGems)
     }
 
     @Test
@@ -51,19 +50,6 @@ class JRubyPluginTest {
     public void jrubyPluginSetsRepositoriesCorrectly() {
         project.evaluate()
         assertTrue(hasRepositoryUrl(project, 'http://rubygems-proxy.torquebox.org/releases'))
-    }
-
-    @Test
-    @Ignore
-    public void jrubyPluginCustomGemRepoUrl() {
-        def url = 'http://junit.maven/releases'
-        project.jruby.defaultGemRepo = url
-        project.evaluate()
-        assertTrue(hasRepositoryUrl(project, url))
-    }
-
-    @Test
-    public void jrubyPluginExtractSkipsExtracted() {
     }
 
     @Test

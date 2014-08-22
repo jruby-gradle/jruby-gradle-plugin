@@ -75,18 +75,21 @@ Dependencies declared under the `jrubyWar` configuration will be copied into
 `.jarcache/` and `.war/WEB-INF/libs` when the archive is created.
 
 
+## Default Tasks
+
 The plugin provides the following tasks:
 
  * `jrubyWar` - Creates a runnable web archive file in `build/libs` for your
    project.
- * `jrubyPrepare` - Extracts content of Ruby gems in `.gemcache/` into `vendor/`
-   for use at runtime *or* when packaging a `.war` file. Also copies the
+ * `jrubyPrepareGems` - Extract GEMs declared as dependencies under `gems` to `jruby.gemInstallDir`. This is as instance
+ of `JRubyPrepareGems`.
+ * `jrubyPrepare` - Call `jrubyPrepareGems`. Also copies the
    content of Java-based dependencies into `.jarcache/` for interpreted use
    (see below)
  * `jrubyClean` - Cleans up the temporary directories that tasks like
-   `jrubyWar` create
+   `jrubyWar`- Creates a `war` file
 
-### Creating a .war
+## Creating a .war
 
 Currently the Gradle tooling expects the web application to reside in
 `src/main/webapp/WEB-INF`, so make sure your `config.ru` and application code
@@ -181,12 +184,13 @@ server.
 You can then use that custom Gem repository with:
 
 ```groovy
-// buildscript {} up here
+jruby {
+    defaultRepositories = false
+}
 
-apply plugin: 'com.lookout.jruby'
-
-// Set our custom Gem repository
-jruby.defaultGemRepo = 'http://localhost:8989/releases'
+repositories {
+    maven { url : 'http://localhost:8989/releases' }
+}
 
 dependencies {
     gems group: 'com.lookout', name: 'custom-gem', version: '1.0.+'
@@ -265,3 +269,23 @@ in the ```jrubyexec``` closure will cause a failure
 
 As with `JRubyExec`, `args`, `setArgs` and `main` are illegal within the `jrubyexec` closure.
 All other methods should work.
+
+## JRubyPrepareGems - A task for unpacking GEMs
+
+Unpacking occurs using the default `jruby` version as set by `jruby.execVersion`.
+
+```groovy
+import com.lookout.jruby.JRubyPrepareGems
+
+task unpackMyGems( type : JRubyPrepareGems ) {
+
+  // Parent directory for unpacking GEMs.
+  // Gems will end up in a subdirectory 'gems/GemName-GemVersion'
+  outputDir buildDir
+  
+  // Add one or more gems
+  // Can be String(s), File(s), FleCollection(s) or Configuration(s)
+  gems project.configuration.gems
+  
+}
+```
