@@ -25,17 +25,6 @@ class GemUtils {
         }
     }
 
-    /** Given a FileCollection return a filtered FileCollection only containing GEMs
-     *
-     * @param fc Original FileCollection
-     * @return Filtered FileCollection
-     */
-    static FileCollection getGems(Configuration fc) {
-        fc.files {  File f ->
-            f.name.toLowerCase().endsWith('.gem')
-        }
-    }
-
     /** Extract a gem to the default {@code gemInstallDir} dreictory using the default jruby version
      *
      * @param project Current project
@@ -124,9 +113,11 @@ class GemUtils {
      * @param action
      */
     static void extractGems(Project project,Configuration jRubyClasspath, Configuration gemConfig,File destDir,GemUtils.OverwriteAction action ) {
-        getGems(gemConfig).each { File f ->
+        getGems(project.files(gemConfig.files)).each { File f ->
             GemUtils.extractGem(project,jRubyClasspath,f,destDir,action)
         }
+
+
     }
 
     /** Take the given .gem filename (e.g. rake-10.3.2.gem) and just return the
