@@ -3,7 +3,7 @@ package com.lookout.jruby
 import org.gradle.api.*
 import org.gradle.api.tasks.*
 import org.gradle.api.artifacts.repositories.*
-import org.gradle.api.tasks.bundling.War
+import org.gradle.api.tasks.bundling.*
 
 import org.gradle.testfixtures.ProjectBuilder
 
@@ -43,6 +43,7 @@ class JRubyPluginTest {
     public void jrubyPluginAddsPrimaryTasks() {
         assertTrue(project.tasks.jrubyPrepare instanceof Task)
         assertTrue(project.tasks.jrubyWar instanceof War)
+        assertTrue(project.tasks.jrubyJar instanceof Jar)
         assertTrue(project.tasks.jrubyClean instanceof Delete)
     }
 

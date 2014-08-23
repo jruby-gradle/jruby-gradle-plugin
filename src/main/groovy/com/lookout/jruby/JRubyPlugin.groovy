@@ -31,6 +31,7 @@ class JRubyPlugin implements Plugin<Project> {
 
         project.configurations.create(JRubyExec.JRUBYEXEC_CONFIG)
         project.configurations.create(JRubyWar.JRUBYWAR_CONFIG)
+        project.configurations.create(JRubyJar.JRUBYJAR_CONFIG)
         JRubyExecDelegate.addToProject(project)
 
         // In order for jrubyWar to work we'll need to pull in the warbler
@@ -84,6 +85,7 @@ class JRubyPlugin implements Plugin<Project> {
         }
 
         project.task('jrubyWar', type: JRubyWar)
+        project.task('jrubyJar', type: JRubyJar)
     }
 
 }
