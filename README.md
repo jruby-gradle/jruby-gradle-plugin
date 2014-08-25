@@ -12,6 +12,9 @@ The Ruby gem dependency code for this project relies on the [Rubygems Maven
 proxy](http://rubygems-proxy.torquebox.org/) provided by the
 [Torquebox](http://torquebox.org) project.
 
+## Compatilibity
+
+This plugin requires Gradle 2.0 or better
 
 ## Getting Started
 

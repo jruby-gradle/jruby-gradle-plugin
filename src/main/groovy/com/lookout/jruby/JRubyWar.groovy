@@ -1,6 +1,7 @@
 package com.lookout.jruby
 
 import org.gradle.api.Project
+import org.gradle.api.tasks.Input
 import org.gradle.api.tasks.bundling.War
 
 /**
@@ -9,27 +10,20 @@ import org.gradle.api.tasks.bundling.War
   */
 class JRubyWar extends War {
 
-    static final String mainClass = 'com.lookout.jruby.WarMain'
+    static final String JRUBYWAR_MAINCLASS = 'com.lookout.jruby.WarMain'
     static final String JRUBYWAR_CONFIG = 'jrubyWar'
+
+    /** Setting the main class allows for a runnable War.
+     * By default the value is {@code JRUBYWAR_MAINCLASS}
+     */
+    @Input
+    String mainClass = JRUBYWAR_MAINCLASS
 
     JRubyWar() {
         super()
-        group JRubyPlugin.TASK_GROUP_NAME
-        description 'Create a JRuby-based web archive'
-        dependsOn project.tasks.jrubyPrepare
 
         // Bring in any compiled classes from our project
         from "$project.buildDir/classes/main"
-
-        // Bring our vendored gems into the created war file
-        webInf {
-            from project.jruby.gemInstallDir
-            into 'gems'
-        }
-
-        // Bring the jrubyWar configuration's dependencies into
-        // WEB-INF/libs
-        classpath project.configurations.jrubyWar
 
         // note that zipTree call is wrapped in closure so that configuration
         // is only resolved at execution time. This will take the embeds
@@ -39,12 +33,20 @@ class JRubyWar extends War {
                 project.zipTree(it)
             }
         }
+    }
 
-        // By adding the WarMain class as the main-class we can have a
-        // runnable war
+    @Override
+    void copy() {
+        // Bring our vendored gems into the created war file
+        webInf {
+            from project.jruby.gemInstallDir
+            into 'gems'
+        }
+
         manifest {
             attributes 'Main-Class' : mainClass
         }
+        super.copy()
     }
 
     /** Update dependencies on the project to include those necessary for

@@ -14,7 +14,6 @@ class JRubyPlugin implements Plugin<Project> {
 
     void apply(Project project) {
         project.apply plugin: 'java'
-        project.apply plugin: 'war'
         project.extensions.create('jruby', JRubyPluginExtension, project)
 
         if (!project.repositories.metaClass.respondsTo(project.repositories, 'rubygemsRelease')) {
@@ -51,6 +50,15 @@ class JRubyPlugin implements Plugin<Project> {
                 jrubyEmbeds group: 'com.lookout', name: 'warbler-bootstrap', version: '1.+'
             }
 
+            // In order to update the testing cycle we need to tell unit tests where to
+            // find GEMs. We are assuming that if someone includes this plugin, that they
+            // will be writing tests that includes jruby and that they might need some
+            // GEMs as part of the tests.
+            project.tasks.test {
+                environment GEM_HOME : project.extensions.getByName('jruby').gemInstallDir
+                dependsOn 'jrubyPrepareGems'
+            }
+
             JRubyExec.updateJRubyDependencies(project)
             JRubyWar.updateJRubyDependencies(project)
         }
@@ -84,8 +92,21 @@ class JRubyPlugin implements Plugin<Project> {
             dependsOn project.tasks.jrubyCacheJars, project.tasks.jrubyPrepareGems
         }
 
-        project.task('jrubyWar', type: JRubyWar)
-        project.task('jrubyJar', type: JRubyJar)
+        // Only jRubyWar will depend on jrubyPrepare. Other JRubyWar tasks created by
+        // build script authors will be under their own control
+        // jrubyWar task will use jrubyWar as configuration
+        project.task('jrubyWar', type: JRubyWar) {
+            group JRubyPlugin.TASK_GROUP_NAME
+            description 'Create a JRuby-based web archive'
+            dependsOn project.tasks.jrubyPrepare
+            classpath project.configurations.jrubyWar
+        }
+
+        project.task('jrubyJar', type: JRubyJar) {
+            group JRubyPlugin.TASK_GROUP_NAME
+            dependsOn project.tasks.jrubyPrepare
+            dependsOn project.tasks.classes
+        }
     }
 
 }
