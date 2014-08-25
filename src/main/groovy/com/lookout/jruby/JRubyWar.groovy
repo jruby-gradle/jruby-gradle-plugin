@@ -25,12 +25,6 @@ class JRubyWar extends War {
         // Bring in any compiled classes from our project
         from "$project.buildDir/classes/main"
 
-        // Bring our vendored gems into the created war file
-        webInf {
-            from project.jruby.gemInstallDir
-            into 'gems'
-        }
-
         // note that zipTree call is wrapped in closure so that configuration
         // is only resolved at execution time. This will take the embeds
         // from within the `jrubyEmbeds` configuration and dump them into the war
@@ -43,6 +37,12 @@ class JRubyWar extends War {
 
     @Override
     void copy() {
+        // Bring our vendored gems into the created war file
+        webInf {
+            from project.jruby.gemInstallDir
+            into 'gems'
+        }
+
         manifest {
             attributes 'Main-Class' : mainClass
         }

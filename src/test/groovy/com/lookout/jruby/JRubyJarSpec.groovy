@@ -28,6 +28,6 @@ class JRubyJarSpec extends Specification {
     def "basic sanity check"() {
         expect: "jarTask to be an instance"
             jarTask instanceof JRubyJar
-            jarTask.group == 'JRuby'
+            project.tasks.jrubyJar.group == 'JRuby'
     }
 }
