@@ -14,9 +14,7 @@ class JRubyJar extends Jar {
 
     JRubyJar() {
         super()
-        group JRubyPlugin.TASK_GROUP_NAME
         description 'Create a JRuby-based .jar file'
-        dependsOn project.tasks.jrubyPrepare
 
         // Bring in any compiled classes from our project
         from "$project.buildDir/classes/main"

@@ -28,6 +28,6 @@ class JRubyWarSpec extends Specification {
     def "basic sanity check"() {
         expect: "warTask to be an instance"
             warTask instanceof JRubyWar
-            warTask.group == 'JRuby'
+            project.tasks.jrubyWar.group == 'JRuby'
     }
 }
