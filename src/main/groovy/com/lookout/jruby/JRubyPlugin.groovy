@@ -50,7 +50,10 @@ class JRubyPlugin implements Plugin<Project> {
                 jrubyEmbeds group: 'com.lookout', name: 'warbler-bootstrap', version: '1.+'
             }
 
-            // In order to update the testing cycle we need to tell
+            // In order to update the testing cycle we need to tell unit tests where to
+            // find GEMs. We are assuming that if someone includes this plugin, that they
+            // will be writing tests that includes jruby and that they might need some
+            // GEMs as part of the tests.
             project.tasks.test {
                 environment GEM_HOME : project.extensions.getByName('jruby').gemInstallDir
                 dependsOn 'jrubyPrepareGems'
