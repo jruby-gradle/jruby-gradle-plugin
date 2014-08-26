@@ -1,4 +1,4 @@
-package com.lookout.jruby.internal
+package com.github.jrubygradle.internal
 
 import org.gradle.testfixtures.ProjectBuilder
 import spock.lang.Ignore

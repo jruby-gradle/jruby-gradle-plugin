@@ -1,4 +1,4 @@
-package com.lookout.jruby
+package com.github.jrubygradle
 
 import org.gradle.api.Incubating
 import org.gradle.api.Project

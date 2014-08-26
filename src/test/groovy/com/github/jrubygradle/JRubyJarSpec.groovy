@@ -1,4 +1,4 @@
-package com.lookout.jruby
+package com.github.jrubygradle
 
 import org.gradle.testfixtures.ProjectBuilder
 import spock.lang.*
@@ -8,26 +8,26 @@ import static org.gradle.api.logging.LogLevel.*
  * @author R. Tyler Croy
  *
  */
-class JRubyWarSpec extends Specification {
+class JRubyJarSpec extends Specification {
     static final File TEST_SCRIPT_DIR = new File( System.getProperty('TEST_SCRIPT_DIR') ?: 'src/test/resources/scripts')
     static final File TESTROOT = new File(System.getProperty('TESTROOT') ?: 'build/tmp/test/unittests')
-    static final String TASK_NAME = 'WarWarTask'
+    static final String TASK_NAME = 'JarJar'
 
     def project
-    def warTask
+    def jarTask
 
     void setup() {
         project = ProjectBuilder.builder().build()
         project.buildDir = TESTROOT
         project.logging.level = LIFECYCLE
         project.apply plugin: 'com.lookout.jruby'
-        warTask = project.task(TASK_NAME, type: JRubyWar)
+        jarTask = project.task(TASK_NAME, type: JRubyJar)
 
     }
 
     def "basic sanity check"() {
-        expect: "warTask to be an instance"
-            warTask instanceof JRubyWar
-            project.tasks.jrubyWar.group == 'JRuby'
+        expect: "jarTask to be an instance"
+            jarTask instanceof JRubyJar
+            project.tasks.jrubyJar.group == 'JRuby'
     }
 }
