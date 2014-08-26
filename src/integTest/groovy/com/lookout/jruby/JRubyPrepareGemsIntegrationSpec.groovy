@@ -4,6 +4,7 @@ import org.gradle.api.file.FileCollection
 import org.gradle.testfixtures.ProjectBuilder
 import spock.lang.Ignore
 import spock.lang.IgnoreIf
+import spock.lang.IgnoreRest
 import spock.lang.Specification
 
 import static org.gradle.api.logging.LogLevel.LIFECYCLE
@@ -14,7 +15,7 @@ import static org.gradle.api.logging.LogLevel.LIFECYCLE
 class JRubyPrepareGemsIntegrationSpec extends Specification {
 
     static final boolean TESTS_ARE_OFFLINE = System.getProperty('TESTS_ARE_OFFLINE') != null
-    static final File TESTROOT = new File( "${System.getProperty('TESTROOT') ?: 'build/tmp/test/integration-tests'}/jpgis")
+    static final File TESTROOT = new File( "${System.getProperty('TESTROOT') ?: 'build/tmp/integrationTest'}/jpgis")
     static final String TASK_NAME = 'RubyWax'
     static final String OUR_GEM = 'rubygems:slim:2.0.2'
 

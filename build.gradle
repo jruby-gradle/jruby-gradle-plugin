@@ -45,6 +45,7 @@ dependencies {
 repositories {
     jcenter()
     mavenLocal()
+    maven { url 'http://rubygems-proxy.torquebox.org/releases' }
 }
 
 dependencies {
@@ -77,7 +78,7 @@ test {
 }
 
 integrationTest {
-    systemProperties TESTROOT : new File(buildDir,'tmp/test/integration-tests').absolutePath
+    systemProperties TESTROOT : new File(buildDir,'tmp/integrationTest/root').absolutePath
     systemProperties TEST_SCRIPT_DIR : new File(projectDir,'src/integTest/resources/scripts').absolutePath
     systemProperties 'logback.configurationFile' : new File(projectDir,'src/integTest/resources/logback-test.xml').absolutePath
 
