@@ -47,9 +47,6 @@ class JRubyPrepareGems  extends DefaultTask {
     @TaskAction
     void copy() {
         File jrubyJar = JRubyExecUtils.jrubyJar(project.configurations.getByName(JRubyExec.JRUBYEXEC_CONFIG))
-//        getGems().each { File f ->
-//            GemUtils.extractGem(project,jrubyJar,f,outputDir,GemUtils.OverwriteAction.SKIP)
-//        }
         GemUtils.extractGems(project,jrubyJar,getGems(),outputDir,GemUtils.OverwriteAction.SKIP)
     }
 
