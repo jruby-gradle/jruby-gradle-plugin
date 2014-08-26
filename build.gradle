@@ -63,7 +63,7 @@ bintray {
     pkg {
         userOrg = 'jruby-gradle'
         repo = 'plugins'
-        name = 'jruby-gradle-plugin'
+        name = 'jruby-gradle-war-plugin'
         labels = ['jruby']
 
         version {
