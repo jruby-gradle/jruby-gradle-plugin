@@ -25,47 +25,6 @@ class GemUtils {
         }
     }
 
-    /** Extract a gem to the default {@code gemInstallDir} dreictory using the default jruby version
-     *
-     * @param project Current project
-     * @param gem GEM to extract
-     */
-    static void extractGem(Project project, File gem) {
-        extractGem(project,gem,new File(project.jruby.gemInstallDir),GemUtils.OverwriteAction.SKIP)
-    }
-
-    /** Extracts a gem to a folder using the default JRuby version
-     *
-     * @param project Project instance
-     * @param gem Gem file to extract
-     * @param destDir Directory to extract to
-     * @param overwrite Allow overwrite of an existing gem folder
-     */
-    static void extractGem(Project project,
-                           File gem,
-                           File destDir,
-                           GemUtils.OverwriteAction overwrite) {
-        extractGem(project,project.configurations.jrubyExec,gem,destDir,overwrite)
-    }
-
-    /** Extracts a gem to a folder
-     *
-     * @param project Project instance
-     * @param jRubyConfig Where to find the jruby-complete jar (FileCollection, File or Configuration)
-     * @param gem Gem file to extract
-     * @param destDir Directory to extract to
-     * @param overwrite Allow overwrite of an existing gem folder
-     */
-    static void extractGem(Project project,
-                           Configuration jRubyConfig,
-                            File gem,
-                            File destDir,
-                            GemUtils.OverwriteAction overwrite) {
-        Set<File> cp = jRubyConfig.files
-        File jRubyClasspath = cp.find { it.name.startsWith('jruby-complete-') }
-        extractGem(project,jRubyClasspath,gem,destDir,overwrite)
-    }
-
     /** Extracts a gem to a folder
      *
      * @param project Project instance
@@ -79,45 +38,76 @@ class GemUtils {
                             File gem,
                             File destDir,
                             GemUtils.OverwriteAction overwrite) {
-        String gemName = gemFullNameFromFile(gem.name)
-        File extractDir = new File(destDir, gemName)
 
-        if (extractDir.exists()) {
+        extractGems(project,jRubyClasspath,project.files(gem),destDir,overwrite)
+    }
+
+    static void extractGems(Project project,
+                           File jRubyClasspath,
+                           FileCollection gems,
+                           File destDir,
+                           GemUtils.OverwriteAction overwrite) {
+        Set<File> gemsToProcess = []
+        Set<File> deletes = []
+        getGems(gems).files.each { File gem ->
+            String gemName = gemFullNameFromFile(gem.name)
+            File extractDir = new File(destDir, gemName)
+
             switch (overwrite) {
                 case GemUtils.OverwriteAction.SKIP:
-                    return
+                    if(extractDir.exists()) {
+                        return
+                    }
                 case GemUtils.OverwriteAction.OVERWRITE:
-                    project.delete extractDir
+                    deletes.add(extractDir)
                     break
                 case GemUtils.OverwriteAction.FAIL:
-                    throw new DuplicateFileCopyingException("Gem ${gem.name} already exists")
+                    if(extractDir.exists()) {
+                        throw new DuplicateFileCopyingException("Gem ${gem.name} already exists")
+                    }
             }
+
+            gemsToProcess.add(gem)
         }
 
-        destDir.mkdirs()
+        if(gemsToProcess.size()) {
 
-        project.javaexec {
-            setEnvironment [:]
-            main 'org.jruby.Main'
-            classpath jRubyClasspath
-            args '-S', 'gem', 'install', gem, '--ignore-dependencies', "--install-dir=${destDir.absolutePath}", '-N'
+            deletes.each { project.delete it }
+            destDir.mkdirs()
+
+            project.logger.info "Installing " + (gemsToProcess.collect { File it -> it.name }).join(',')
+
+            project.javaexec {
+                setEnvironment [:]
+                main 'org.jruby.Main'
+                classpath jRubyClasspath
+                args '-S', 'gem', 'install'
+                gemsToProcess.each { File gem ->
+                    args gem
+                }
+                args '--ignore-dependencies', "--install-dir=${destDir.absolutePath}", '-N'
+            }
         }
     }
 
     /** Extract Gems from a given configuration.
      *
-     * @param project Current project
-     * @param jRubyClasspath
-     * @param gemConfig
-     * @param destDir
-     * @param action
+     * @param project Project instance
+     * @param jRubyClasspath Where to find the jruby-complete jar
+     * @param gemConfig Configuration containing GEMs
+     * @param destDir Directory to extract to
+     * @param action Allow overwrite of an existing gem folder
      */
-    static void extractGems(Project project,Configuration jRubyClasspath, Configuration gemConfig,File destDir,GemUtils.OverwriteAction action ) {
-        getGems(project.files(gemConfig.files)).each { File f ->
-            GemUtils.extractGem(project,jRubyClasspath,f,destDir,action)
-        }
+    static void extractGems(
+            Project project,
+            Configuration jRubyConfig,
+            Configuration gemConfig,
+            File destDir,
+            GemUtils.OverwriteAction action ) {
 
-
+        Set<File> cp = jRubyConfig.files
+        File jRubyClasspath = cp.find { it.name.startsWith('jruby-complete-') }
+        extractGems(project,jRubyClasspath,project.files(gemConfig.files),destDir,action)
     }
 
     /** Take the given .gem filename (e.g. rake-10.3.2.gem) and just return the

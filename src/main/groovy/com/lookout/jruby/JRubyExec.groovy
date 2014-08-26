@@ -138,14 +138,13 @@ class JRubyExec extends JavaExec {
         environment 'GEM_HOME' : gemDir
 
         if(configuration != null) {
-            project.configurations.getByName(jrubyConfigurationName)
-            project.with {
-                configurations.getByName(configuration).files.findAll { File f ->
-                    f.name.endsWith('.gem')
-                }.each { File f ->
-                    GemUtils.extractGem(project,jrubyCompletePath,f,gemDir,GemUtils.OverwriteAction.OVERWRITE)
-                }
-            }
+            GemUtils.extractGems(
+                    project,
+                    jrubyCompletePath,
+                    project.configurations.getByName(configuration),
+                    gemDir,
+                    GemUtils.OverwriteAction.OVERWRITE
+            )
         }
 
         super.classpath JRubyExecUtils.classpathFromConfiguration(project.configurations.getByName(jrubyConfigurationName))
