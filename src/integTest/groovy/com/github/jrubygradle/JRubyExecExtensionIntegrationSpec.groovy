@@ -1,4 +1,4 @@
-package com.lookout.jruby
+package com.github.jrubygradle
 
 import org.gradle.testfixtures.ProjectBuilder
 import spock.lang.*
@@ -25,7 +25,7 @@ class JRubyExecExtensionIntegrationSpec extends Specification {
         project.with {
             buildDir = TESTROOT
             logging.level = LIFECYCLE
-            apply plugin: 'com.lookout.jruby'
+            apply plugin: 'com.github.jruby-gradle.base'
             evaluate()
         }
     }

@@ -1,7 +1,7 @@
-package com.lookout.jruby.internal
+package com.github.jrubygradle.internal
 
-import com.lookout.jruby.GemUtils
-import com.lookout.jruby.JRubyExec
+import com.github.jrubygradle.GemUtils
+import com.github.jrubygradle.JRubyExec
 import groovy.transform.PackageScope
 import org.gradle.api.Project
 import org.gradle.api.artifacts.Configuration

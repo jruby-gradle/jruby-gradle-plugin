@@ -1,6 +1,6 @@
-package com.lookout.jruby
+package com.github.jrubygradle
 
-import com.lookout.jruby.internal.JRubyExecDelegate
+import com.github.jrubygradle.internal.JRubyExecDelegate
 import org.gradle.api.Plugin
 import org.gradle.api.Project
 import org.gradle.api.tasks.Copy

@@ -1,4 +1,4 @@
-package com.lookout.jruby.internal
+package com.github.jrubygradle.internal
 
 import org.gradle.testfixtures.ProjectBuilder
 import spock.lang.Ignore
@@ -27,7 +27,7 @@ class JRubyExecDelegateSpec extends Specification {
         project = ProjectBuilder.builder().build()
         project.buildDir = TESTROOT
         project.logging.level = LIFECYCLE
-        project.apply plugin: 'com.lookout.jruby'
+        project.apply plugin: 'com.github.jruby-gradle.base'
     }
 
     def "When just passing script, scriptArgs, jrubyArgs, expect local properties to be updated"() {

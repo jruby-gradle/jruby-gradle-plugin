@@ -1,4 +1,4 @@
-package com.lookout.jruby
+package com.github.jrubygradle
 
 import org.gradle.api.file.FileCollection
 import org.gradle.testfixtures.ProjectBuilder
@@ -33,7 +33,7 @@ class JRubyPrepareGemsSpec extends Specification {
         project.with {
             buildDir = TESTROOT
             logging.level = LIFECYCLE
-            apply plugin: 'com.lookout.jruby'
+            apply plugin: 'com.github.jruby-gradle.base'
             jruby.defaultRepositories = false
 
             repositories {
