@@ -32,7 +32,7 @@ class JRubyPrepareGemsIntegrationSpec extends Specification {
         project.with {
             buildDir = TESTROOT
             logging.level = LIFECYCLE
-            apply plugin: 'com.lookout.jruby'
+            apply plugin: 'com.github.jruby-gradle.base'
         }
 
         prepTask = project.task(TASK_NAME, type: JRubyPrepareGems)

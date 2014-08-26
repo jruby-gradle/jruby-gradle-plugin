@@ -20,7 +20,7 @@ class JRubyPluginIntegrationSpec extends Specification {
         project = ProjectBuilder.builder().build()
         project.buildDir = TESTROOT
         project.logging.level = LIFECYCLE
-        project.apply plugin: 'com.lookout.jruby'
+        project.apply plugin: 'com.github.jruby-gradle.base'
     }
 
     @IgnoreIf({TESTS_ARE_OFFLINE})

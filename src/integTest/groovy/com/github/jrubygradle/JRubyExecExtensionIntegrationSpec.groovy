@@ -25,7 +25,7 @@ class JRubyExecExtensionIntegrationSpec extends Specification {
         project.with {
             buildDir = TESTROOT
             logging.level = LIFECYCLE
-            apply plugin: 'com.lookout.jruby'
+            apply plugin: 'com.github.jruby-gradle.base'
             evaluate()
         }
     }

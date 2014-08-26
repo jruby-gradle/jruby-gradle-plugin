@@ -26,7 +26,7 @@ class JRubyPluginTest {
         TESTROOT.mkdirs()
         project = ProjectBuilder.builder().build()
         project.logging.level = LIFECYCLE
-        project.apply plugin: 'com.lookout.jruby'
+        project.apply plugin: 'com.github.jruby-gradle.base'
     }
 
     @Test
