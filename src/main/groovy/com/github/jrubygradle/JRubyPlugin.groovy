@@ -40,9 +40,6 @@ class JRubyPlugin implements Plugin<Project> {
                 project.repositories {
                     jcenter()
                     rubygemsRelease()
-
-                    // Required to pull in our warbler-bootstrap dependency
-                    maven { url 'http://dl.bintray.com/rtyler/jruby' }
                 }
             }
 
