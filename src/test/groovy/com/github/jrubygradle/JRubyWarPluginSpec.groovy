@@ -1,9 +1,11 @@
-package com.github.jrubygradle
+package com.github.jrubygradle.war
 
-import org.gradle.api.tasks.Delete
+import org.gradle.api.Task
+import org.gradle.api.tasks.bundling.War
 import org.gradle.testfixtures.ProjectBuilder
 import org.junit.Test
 import spock.lang.*
+
 
 import static org.gradle.api.logging.LogLevel.LIFECYCLE
 import static org.junit.Assert.assertTrue
@@ -19,8 +21,6 @@ class JRubyWarPluginSpec extends Specification {
 
     void setup() {
         project = ProjectBuilder.builder().build()
-        project.buildDir = TESTROOT
-        project.logging.level = LIFECYCLE
         project.apply plugin: 'com.github.jruby-gradle.war'
 
     }
@@ -28,9 +28,6 @@ class JRubyWarPluginSpec extends Specification {
     def "basic sanity check"() {
         expect:
             project.tasks.jrubyWar.group == 'JRuby'
-            project.tasks.jrubyCacheJars instanceof AbstractCopyTask
-            project.tasks.jrubyPrepare instanceof Task
             project.tasks.jrubyWar instanceof War
-            project.tasks.jrubyJar instanceof Jar
     }
 }
