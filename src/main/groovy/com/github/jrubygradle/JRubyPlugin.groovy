@@ -48,19 +48,19 @@ class JRubyPlugin implements Plugin<Project> {
             JRubyExec.updateJRubyDependencies(project)
         }
 
-        project.task('jrubyClean', type: Delete) {
-            group TASK_GROUP_NAME
-            description 'Clean up the temporary dirs used by the JRuby plugin'
-            mustRunAfter 'clean'
-            delete '.jarcache/'
-        }
-
         project.task('jrubyPrepareGems', type: JRubyPrepareGems) {
             group TASK_GROUP_NAME
             description 'Prepare the gems from the `gem` dependencies, extracts into jruby.installGemDir'
             gems project.configurations.gems
             outputDir project.jruby.gemInstallDir
         }
+
+        project.task('jrubyPrepare') {
+            group TASK_GROUP_NAME
+            description 'Pre-cache and prepare all dependencies (jars and gems)'
+            dependsOn project.tasks.jrubyPrepareGems
+        }
+
     }
 
 }
