@@ -8,7 +8,7 @@ buildscript {
 }
 
 group = 'com.github.jruby-gradle'
-version = '0.1.0'
+version = '0.1.1'
 
 if (System.env.RELEASE != '1') {
     version = "${version}-SNAPSHOT"
