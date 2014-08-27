@@ -13,7 +13,8 @@ class JRubyPlugin implements Plugin<Project> {
     static final String RUBYGEMS_RELEASE_URL = 'http://rubygems-proxy.torquebox.org/releases'
 
     void apply(Project project) {
-        project.apply plugin: 'java'
+        // REMOVE: project.apply plugin: 'java'
+
         project.extensions.create('jruby', JRubyPluginExtension, project)
 
         if (!project.repositories.metaClass.respondsTo(project.repositories, 'rubygemsRelease')) {
@@ -29,8 +30,7 @@ class JRubyPlugin implements Plugin<Project> {
         }
 
         project.configurations.create(JRubyExec.JRUBYEXEC_CONFIG)
-        project.configurations.create(JRubyWar.JRUBYWAR_CONFIG)
-        project.configurations.create(JRubyJar.JRUBYJAR_CONFIG)
+// MOVE:       project.configurations.create(JRubyJar.JRUBYJAR_CONFIG)
         JRubyExecDelegate.addToProject(project)
 
         // In order for jrubyWar to work we'll need to pull in the warbler
@@ -46,21 +46,9 @@ class JRubyPlugin implements Plugin<Project> {
                 }
             }
 
-            project.dependencies {
-                jrubyEmbeds group: 'com.lookout', name: 'warbler-bootstrap', version: '1.+'
-            }
 
-            // In order to update the testing cycle we need to tell unit tests where to
-            // find GEMs. We are assuming that if someone includes this plugin, that they
-            // will be writing tests that includes jruby and that they might need some
-            // GEMs as part of the tests.
-            project.tasks.test {
-                environment GEM_HOME : project.extensions.getByName('jruby').gemInstallDir
-                dependsOn 'jrubyPrepareGems'
-            }
 
             JRubyExec.updateJRubyDependencies(project)
-            JRubyWar.updateJRubyDependencies(project)
         }
 
         project.task('jrubyClean', type: Delete) {
@@ -75,37 +63,6 @@ class JRubyPlugin implements Plugin<Project> {
             description 'Prepare the gems from the `gem` dependencies, extracts into jruby.installGemDir'
             gems project.configurations.gems
             outputDir project.jruby.gemInstallDir
-        }
-
-        project.task('jrubyCacheJars', type: Copy) {
-            group TASK_GROUP_NAME
-            description 'Cache .jar-based dependencies into .jarcache/'
-
-            from project.configurations.jrubyWar
-            into ".jarcache"
-            include '**/*.jar'
-        }
-
-        project.task('jrubyPrepare') {
-            group TASK_GROUP_NAME
-            description 'Pre-cache and prepare all dependencies (jars and gems)'
-            dependsOn project.tasks.jrubyCacheJars, project.tasks.jrubyPrepareGems
-        }
-
-        // Only jRubyWar will depend on jrubyPrepare. Other JRubyWar tasks created by
-        // build script authors will be under their own control
-        // jrubyWar task will use jrubyWar as configuration
-        project.task('jrubyWar', type: JRubyWar) {
-            group JRubyPlugin.TASK_GROUP_NAME
-            description 'Create a JRuby-based web archive'
-            dependsOn project.tasks.jrubyPrepare
-            classpath project.configurations.jrubyWar
-        }
-
-        project.task('jrubyJar', type: JRubyJar) {
-            group JRubyPlugin.TASK_GROUP_NAME
-            dependsOn project.tasks.jrubyPrepare
-            dependsOn project.tasks.classes
         }
     }
 
