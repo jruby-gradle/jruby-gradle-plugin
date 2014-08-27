@@ -35,19 +35,6 @@ class JRubyPluginTest {
     }
 
     @Test
-    public void jrubyPluginAddsJarTasks() {
-        assertTrue(project.tasks.jrubyCacheJars instanceof AbstractCopyTask)
-    }
-
-    @Test
-    public void jrubyPluginAddsPrimaryTasks() {
-        assertTrue(project.tasks.jrubyPrepare instanceof Task)
-        assertTrue(project.tasks.jrubyWar instanceof War)
-        assertTrue(project.tasks.jrubyJar instanceof Jar)
-        assertTrue(project.tasks.jrubyClean instanceof Delete)
-    }
-
-    @Test
     public void jrubyPluginSetsRepositoriesCorrectly() {
         project.evaluate()
         assertTrue(hasRepositoryUrl(project, 'http://rubygems-proxy.torquebox.org/releases'))
