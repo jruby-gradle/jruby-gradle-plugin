@@ -10,7 +10,7 @@ buildscript {
 }
 
 group = 'com.github.jruby-gradle'
-version = '0.1.1'
+version = '0.1.2'
 
 if (System.env.RELEASE != '1') {
     version = "${version}-SNAPSHOT"
@@ -39,7 +39,7 @@ project.afterEvaluate {
 // --- up to here
 
 dependencies {
-    testJRubyPrepare 'org.jruby:jruby-complete:1.7.13'
+    testJRubyPrepare 'org.jruby:jruby-complete:1.7.14'
 }
 
 repositories {
