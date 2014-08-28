@@ -30,7 +30,6 @@ class JRubyPlugin implements Plugin<Project> {
         }
 
         project.configurations.create(JRubyExec.JRUBYEXEC_CONFIG)
-// MOVE:       project.configurations.create(JRubyJar.JRUBYJAR_CONFIG)
         JRubyExecDelegate.addToProject(project)
 
         // In order for jrubyWar to work we'll need to pull in the warbler
@@ -42,8 +41,6 @@ class JRubyPlugin implements Plugin<Project> {
                     rubygemsRelease()
                 }
             }
-
-
 
             JRubyExec.updateJRubyDependencies(project)
         }
