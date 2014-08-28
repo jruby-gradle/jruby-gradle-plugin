@@ -33,6 +33,8 @@ class JRubyJarPlugin implements Plugin<Project> {
             project.tasks.whenTaskAdded { Task t ->
                 if(t.name == 'test' && t instanceof Test) {
                     project.configure(t,testConfiguration)
+                } else if (t.name == 'jar' && t instanceof Jar) {
+                    t.dependsOn 'jrubyPrepareGems'
                 }
             }
         }
