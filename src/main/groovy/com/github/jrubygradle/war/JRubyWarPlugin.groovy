@@ -4,6 +4,7 @@ import org.gradle.api.Plugin
 import org.gradle.api.Project
 import org.gradle.api.tasks.bundling.War
 import org.gradle.api.tasks.Copy
+import org.gradle.api.tasks.Delete
 
 import com.github.jrubygradle.internal.WarblerBootstrap
 import com.github.jrubygradle.JRubyPlugin
@@ -13,6 +14,7 @@ import com.github.jrubygradle.JRubyPlugin
  */
 class JRubyWarPlugin implements Plugin<Project> {
     void apply(Project project) {
+        project.apply plugin: 'war'
         project.apply plugin: 'com.github.jruby-gradle.base'
         project.configurations.create(JRubyWar.JRUBYWAR_CONFIG)
         project.configurations.maybeCreate('jrubyEmbeds')
@@ -41,5 +43,17 @@ class JRubyWarPlugin implements Plugin<Project> {
             into ".jarcache"
             include '**/*.jar'
         }
+
+        // Add our dependency onto jrubyPrepare so it will serve our needs too
+        project.tasks.jrubyPrepare.dependsOn project.tasks.jrubyCacheJars
+
+        project.task('jrubyCleanJars', type: Delete) {
+            group JRubyPlugin.TASK_GROUP_NAME
+            description 'Clean up the temporary dirs created by the jrubyCacheJars task'
+            delete '.jarcache/'
+        }
+
+        // Add our dependency onto clean so it will clean up after us too
+        project.tasks.clean.dependsOn project.tasks.jrubyCleanJars
     }
 }
