@@ -24,7 +24,7 @@ dependencies {
     compile gradleApi()
     compile localGroovy()
 
-    compile group: 'com.github.jruby-gradle', name: 'jruby-gradle-plugin', version: '0.1.1-SNAPSHOT'
+    compile group: 'com.github.jruby-gradle', name: 'jruby-gradle-plugin', version: '0.1.2-SNAPSHOT'
 
     testCompile ("org.spockframework:spock-core:0.7-groovy-${gradle.gradleVersion.startsWith('1.')?'1.8':'2.0'}") {
         exclude module : 'groovy-all'
@@ -66,7 +66,7 @@ bintray {
         userOrg = 'jruby-gradle'
         repo = 'plugins'
         name = 'jruby-gradle-war-plugin'
-        labels = ['jruby']
+        labels = ['jruby','war','java']
 
         version {
             name = project.version

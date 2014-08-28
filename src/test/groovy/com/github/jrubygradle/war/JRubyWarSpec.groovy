@@ -1,4 +1,4 @@
-package com.github.jrubygradle
+package com.github.jrubygradle.war
 
 import org.gradle.testfixtures.ProjectBuilder
 import spock.lang.*
@@ -20,14 +20,14 @@ class JRubyWarSpec extends Specification {
         project = ProjectBuilder.builder().build()
         project.buildDir = TESTROOT
         project.logging.level = LIFECYCLE
-        project.apply plugin: 'com.github.jruby-gradle.base'
+        project.apply plugin: 'com.github.jruby-gradle.war'
         warTask = project.task(TASK_NAME, type: JRubyWar)
 
     }
 
     def "basic sanity check"() {
         expect: "warTask to be an instance"
-            warTask instanceof JRubyWar
+            warTask instanceof com.github.jrubygradle.war.JRubyWar
             project.tasks.jrubyWar.group == 'JRuby'
     }
 }

@@ -15,9 +15,7 @@ class JRubyWarPlugin implements Plugin<Project> {
     void apply(Project project) {
         project.apply plugin: 'com.github.jruby-gradle.base'
         project.configurations.create(JRubyWar.JRUBYWAR_CONFIG)
-
-        project.configurations.maybeCreate('jrubyEmbeds') {
-        project.configurations.create('jrubyWar') {
+        project.configurations.maybeCreate('jrubyEmbeds')
 
         project.afterEvaluate {
             JRubyWar.updateJRubyDependencies(project)

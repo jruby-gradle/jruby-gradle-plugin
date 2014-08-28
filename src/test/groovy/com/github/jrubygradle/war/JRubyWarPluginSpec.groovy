@@ -17,7 +17,6 @@ import static org.junit.Assert.assertTrue
 class JRubyWarPluginSpec extends Specification {
 
     def project
-    def warTask
 
     void setup() {
         project = ProjectBuilder.builder().build()
@@ -25,7 +24,7 @@ class JRubyWarPluginSpec extends Specification {
 
     }
 
-    def "basic sanity check"() {
+    def "Basic sanity check"() {
         expect:
             project.tasks.jrubyWar.group == 'JRuby'
             project.tasks.jrubyWar instanceof War
