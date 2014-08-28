@@ -1,21 +1,23 @@
 package com.github.jrubygradle
 
+import org.gradle.api.Plugin
+import org.gradle.api.Project
+import org.gradle.api.tasks.bundling.Jar
+
 /**
- * Created by schalkc on 27/08/2014.
+ * @author Schalk W. Cronjé
  */
-class JRubyJarPlugin {
+class JRubyJarPlugin implements Plugin<Project> {
     void apply(Project project) {
-        // MIGHT NEED: project.apply plugin: 'java', 'java-base'
 
-        project.configurations.create(JRubyWar.JRUBYWAR_CONFIG)
+        project.apply plugin : 'com.github.jruby-gradle.base'
 
-        // TODO: Should probably check whether it exists before creating it
-        project.configurations {
-            jrubyEmbeds
-        }
+        project.configurations.maybeCreate('jrubyEmbeds')
+        project.configurations.maybeCreate('testGems')
+        project.configurations.maybeCreate('runtimeGems')
 
         project.dependencies {
-            jrubyEmbeds group: 'com.lookout', name: 'warbler-bootstrap', version: '1.+'
+            jrubyEmbeds group: 'com.lookout', name: 'warbler-bootstrap', version: '1.0.0'
         }
 
 // TODO: This will depend on which plugin we pull in
@@ -28,12 +30,16 @@ class JRubyJarPlugin {
 //                dependsOn 'jrubyPrepareGems'
 //            }
 
-        project.task('jrubyJar', type: JRubyJar) {
-            group JRubyPlugin.TASK_GROUP_NAME
-            dependsOn project.tasks.jrubyPrepare
-            dependsOn project.tasks.classes
-        }
 
+       if(!Jar.metaClass.respondsTo(Jar.class,'jruby',Closure)) {
+           Jar.metaClass.jruby = { Closure extraConfig ->
+               JRubyJarConfigurator.configureArchive(delegate,extraConfig)
+           }
+       }
+
+        project.afterEvaluate {
+            JRubyJarConfigurator.afterEvaluateAction(project)
+        }
     }
 
 
