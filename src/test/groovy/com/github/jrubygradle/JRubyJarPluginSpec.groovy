@@ -10,6 +10,7 @@ import static org.gradle.api.logging.LogLevel.LIFECYCLE
 
 /**
  * @author R. Tyler Croy
+ * @author Schalk W. Cronjé
  *
  */
 class JRubyJarPluginSpec extends Specification {
