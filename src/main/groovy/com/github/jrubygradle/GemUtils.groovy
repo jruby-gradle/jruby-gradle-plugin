@@ -77,6 +77,8 @@ class GemUtils {
 
             project.logger.info "Installing " + (gemsToProcess.collect { File it -> it.name }).join(',')
 
+
+
             project.javaexec {
                 setEnvironment [:]
                 main 'org.jruby.Main'
@@ -86,6 +88,12 @@ class GemUtils {
                     args gem
                 }
                 args '--ignore-dependencies', "--install-dir=${destDir.absolutePath}", '-N'
+
+                // Workaround for bug
+                if(jRubyClasspath.name.contains('1.7.14')) {
+                    project.logger.debug "Gem installation: Working around bug in jruby 1.7.14"
+                    environment HOME : project.gradle.gradleUserHomeDir.absolutePath
+                }
             }
         }
     }
