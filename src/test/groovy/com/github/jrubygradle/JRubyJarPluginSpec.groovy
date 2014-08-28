@@ -123,7 +123,6 @@ class JRubyJarPluginSpec extends Specification {
             jarTask.manifest.attributes.'Main-Class' == 'org.scooby.doo.snackMain'
     }
 
-    @IgnoreRest
     def "Building a Jar"() {
         given: "A local repository"
             File expectedDir= new File(TESTROOT,'libs/')
