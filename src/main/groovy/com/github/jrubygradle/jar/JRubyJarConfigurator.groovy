@@ -1,4 +1,4 @@
-package com.github.jrubygradle
+package com.github.jrubygradle.jar
 
 import groovy.transform.PackageScope
 import org.gradle.api.Project

@@ -1,9 +1,9 @@
-package com.github.jrubygradle
+package com.github.jrubygradle.jar
 
+import com.github.jrubygradle.jar.JRubyJarConfigurator
 import org.gradle.api.Plugin
 import org.gradle.api.Project
 import org.gradle.api.Task
-import org.gradle.api.UnknownTaskException
 import org.gradle.api.tasks.bundling.Jar
 import org.gradle.api.tasks.testing.Test
 

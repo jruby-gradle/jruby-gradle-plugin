@@ -1,9 +1,8 @@
-package com.github.jrubygradle
+package com.github.jrubygradle.jar
 
 import org.gradle.api.file.FileCollection
 import org.gradle.api.tasks.bundling.Jar
 import org.gradle.testfixtures.ProjectBuilder
-import spock.lang.IgnoreRest
 import spock.lang.Specification
 
 import static org.gradle.api.logging.LogLevel.LIFECYCLE

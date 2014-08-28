@@ -44,7 +44,8 @@ jar {
     // Use the default GEM installation directory
     defaultGems()
 
-    // Add this directory to the list of GEM installation directories
+    // Add this GEM installation directory to the JAR.
+    // Can be called more than once for additional directories
     gemDir '/path/to/my/gemDir'
     
     // Make the JAR executable and use the default main class
