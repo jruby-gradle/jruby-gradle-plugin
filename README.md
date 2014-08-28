@@ -74,3 +74,15 @@ task myJar (type :Jar) {
 
 Using the default main class method `defaultMainClass()` will include class files from 
 [warbler-bootstrap](https://github.com/jruby-gradle/warbler-bootstrap) 
+
+## Controlling the version of warbler-bootstrap
+
+By default the version is set to `1.+` meaning anything version 1.0 or beyond. If your project wants to lock
+down the specific version, then it can be set via
+
+```groovy
+jruby {
+  warblerBootstrapversion = '1.0.0'
+}
+```
+
