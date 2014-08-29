@@ -24,11 +24,8 @@ class JRubyPlugin implements Plugin<Project> {
         }
 
         // Set up a special configuration group for our embedding jars
-        project.configurations {
-            jrubyEmbeds
-            gems
-        }
-
+        project.configurations.create('gems')
+        project.configurations.create('jrubyEmbeds')
         project.configurations.create(JRubyExec.JRUBYEXEC_CONFIG)
         JRubyExecDelegate.addToProject(project)
 

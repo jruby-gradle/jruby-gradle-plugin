@@ -2,6 +2,7 @@ package com.github.jrubygradle
 
 import org.gradle.api.Project
 import org.gradle.api.artifacts.Configuration
+import org.gradle.api.file.CopySpec
 import org.gradle.api.file.DuplicateFileCopyingException
 import org.gradle.api.file.FileCollection
 
@@ -123,5 +124,39 @@ class GemUtils {
      */
     static String gemFullNameFromFile(String filename) {
         return filename.replaceAll(~".gem", "")
+    }
+
+    /** Adds a GEM CopySpec to an archive
+     *
+     * The following are supported as properties:
+     * <ul>
+     * <li>fullGem (boolean) - Copy all of the GEM content, not just a minimal subset</li>
+     * <li>subfolder (Object) - Adds an additional subfolder into the GEM
+     * </ul>
+     *
+     * @param Additional properties to control behaviour
+     * @param dir The source of the GEM files
+     * @return Returns a CopySpec which can be attached as a child to another object that implements a CopySpec
+     * @since 0.1.2
+     */
+    static CopySpec gemCopySpec(def properties=[:],Project project,Object dir) {
+        boolean fullGem=false
+        if(properties.containsKey('fullGem')) {
+            fullGem = properties['fullGem']
+        }
+        project.copySpec {
+            from(dir) {
+                include '**'
+                if(!fullGem) {
+                    exclude 'cache/**'
+                    exclude 'gems/*/test/**'
+                    exclude 'build_info'
+                }
+            }
+
+            if(properties.containsKey('subfolder')) {
+                into properties['subfolder']
+            }
+        }
     }
 }
