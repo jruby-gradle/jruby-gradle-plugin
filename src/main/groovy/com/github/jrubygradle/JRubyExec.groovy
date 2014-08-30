@@ -132,6 +132,7 @@ class JRubyExec extends JavaExec {
             configuration = JRUBYEXEC_CONFIG
         }
 
+        GemUtils.OverwriteAction overwrite = project.gradle.startParameter.refreshDependencies ?  GemUtils.OverwriteAction.OVERWRITE : GemUtils.OverwriteAction.SKIP
         def jrubyCompletePath = project.configurations.getByName(jrubyConfigurationName)
         File gemDir = tmpGemDir()
         gemDir.mkdirs()
@@ -143,7 +144,7 @@ class JRubyExec extends JavaExec {
                     jrubyCompletePath,
                     project.configurations.getByName(configuration),
                     gemDir,
-                    GemUtils.OverwriteAction.OVERWRITE
+                    overwrite
             )
         }
 

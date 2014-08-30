@@ -120,8 +120,9 @@ class JRubyExecDelegate {
         proxy.validate()
         File gemDir=new File(project.jruby.gemInstallDir)
         Configuration config = project.configurations.getByName(JRUBYEXEC_CONFIG)
+        GemUtils.OverwriteAction overwrite = project.gradle.startParameter.refreshDependencies ?  GemUtils.OverwriteAction.OVERWRITE : GemUtils.OverwriteAction.SKIP
         project.mkdir gemDir
-        GemUtils.extractGems(project,config,config,gemDir,GemUtils.OverwriteAction.SKIP)
+        GemUtils.extractGems(project,config,config,gemDir,overwrite)
 
         project.javaexec {
             classpath JRubyExecUtils.classpathFromConfiguration(config)
