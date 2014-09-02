@@ -1,11 +1,7 @@
 package com.github.jrubygradle
 
-import org.gradle.api.file.FileCollection
 import org.gradle.testfixtures.ProjectBuilder
-import spock.lang.Ignore
-import spock.lang.IgnoreIf
-import spock.lang.IgnoreRest
-import spock.lang.Specification
+import spock.lang.*
 
 import static org.gradle.api.logging.LogLevel.LIFECYCLE
 
