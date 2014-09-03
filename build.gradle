@@ -39,7 +39,7 @@ project.afterEvaluate {
 // --- up to here
 
 dependencies {
-    testJRubyPrepare 'org.jruby:jruby-complete:1.7.14'
+    testJRubyPrepare 'org.jruby:jruby-complete:1.7.15'
 }
 
 
