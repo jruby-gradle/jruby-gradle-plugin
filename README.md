@@ -1,6 +1,6 @@
 # JRuby Gradle plugin
 
-[![Build Status](https://buildhive.cloudbees.com/job/jruby-gradle/job/jruby-gradle-plugin/badge/icon)](https://buildhive.cloudbees.com/job/jruby-gradle/job/jruby-gradle-plugin/) [![Download](https://api.bintray.com/packages/rtyler/jruby/jruby-gradle-plugin/images/download.png)](https://bintray.com/rtyler/jruby/jruby-gradle-plugin/\_latestVersion) [![Gitter chat](https://badges.gitter.im/jruby-gradle/jruby-gradle-plugin.png)](https://gitter.im/jruby-gradle/jruby-gradle-plugin)
+[![Build Status](https://buildhive.cloudbees.com/job/jruby-gradle/job/jruby-gradle-plugin/badge/icon)](https://buildhive.cloudbees.com/job/jruby-gradle/job/jruby-gradle-plugin/) [ ![Download](https://api.bintray.com/packages/jruby-gradle/plugins/jruby-gradle-plugin/images/download.png) ](https://bintray.com/jruby-gradle/plugins/jruby-gradle-plugin/_latestVersion) [![Gitter chat](https://badges.gitter.im/jruby-gradle/jruby-gradle-plugin.png)](https://gitter.im/jruby-gradle/jruby-gradle-plugin)
 
 The purpose of plugin is to encapsulate useful [Gradle](http://www.gradle.org/)
 functionality for JRuby projects. Use of this plugin replaces the need for both
@@ -16,9 +16,9 @@ This is the base plugin. If you are interesting in doing the following then cons
 plugins:
 
 * Building JRuby-based Java JARs, including making them executable - 
-[jruby-gradle-jar-plugin](http://github.come/jruby-gradle/jruby-gradle-jar-plugin)
+[jruby-gradle-jar-plugin](http://github.com/jruby-gradle/jruby-gradle-jar-plugin)
 * Building JRuby-based Java Web Applications (WARs),  - 
-[jruby-gradle-war-plugin](http://github.come/jruby-gradle/jruby-gradle-war-plugin)
+[jruby-gradle-war-plugin](http://github.com/jruby-gradle/jruby-gradle-war-plugin)
 
 
 ## Compatilibity
@@ -35,11 +35,11 @@ buildscript {
     repositories { jcenter() }
 
     dependencies {
-      classpath group: 'com.github.jrubygradle', name: 'jruby-gradle-plugin', version: '0.1.2'
+      classpath group: 'com.github.jruby-gradle', name: 'jruby-gradle-plugin', version: '0.1.2'
     }
 }
 
-apply plugin: 'com.github.jrubygradle.base'
+apply plugin: 'com.github.jruby-gradle.base'
 ```
 
 ### Adding gems
