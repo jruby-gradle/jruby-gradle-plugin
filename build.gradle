@@ -90,7 +90,7 @@ bintray {
         version {
             name = project.version
             vcsTag = "v${project.version}"
-            attributes = ['gradle-plugin' : 'com.github.jruby-gradle:com.github.jruby-gradle:jruby-gradle-jar-plugin']
+            attributes = ['gradle-plugin' : 'com.github.jruby-gradle.jar:com.github.jruby-gradle:jruby-gradle-jar-plugin']
             desc = 'This plugin encapsulates java archive building functionality for JRuby Gradle projects'
 
         }
