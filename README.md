@@ -25,9 +25,6 @@ plugins:
 
 This plugin requires Gradle 2.0 or better
 
-`JRuby 1.7.14` seem to have some bugs. Although this plugin has a workaround for this version it is recommended that you 
-avoid using `1.7.14` with the `jruby-gradle-plugin`.
-
 ## Getting Started
 
 ```groovy
