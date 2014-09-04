@@ -3,6 +3,7 @@ package com.github.jrubygradle.jar
 import groovy.transform.PackageScope
 import org.gradle.api.Project
 import org.gradle.api.tasks.bundling.Jar
+import com.github.jrubygradle.GemUtils
 
 /** Helper class to add extra methods to {@code Jar} tasks in order to add JRuby specifics.
  *
@@ -39,21 +40,17 @@ class JRubyJarConfigurator {
 
     /** Adds a GEM installation directory
      */
-    void gemDir(File f) {
-        gemDir(f.absolutePath)
+    void gemDir(def properties=[:],File f) {
+        gemDir(properties,f.absolutePath)
     }
 
     /** Adds a GEM installation directory
+     * @param Properties that affect how the GEM is packaged in the JAR. Currently only {@code fullGem} is
+     * supported. If set the full GEM content will be packed, otherwise only a subset will be packed.
      * @param dir Source folder. Will be handled by {@code project.files(dir)}
     */
-    void gemDir(Object dir) {
-        archive.with {
-            from(dir) {
-                include '**'
-                exclude 'cache/**'
-                exclude 'gems/*/test/**'
-            }
-        }
+    void gemDir(def properties=[:],Object dir) {
+        archive.with GemUtils.gemCopySpec(properties,archive.project,dir)
     }
 
     /** Makes the JAR executable by setting a custom main class
