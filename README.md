@@ -8,7 +8,7 @@ Plugin for creating JRuby-based java archives
 
 ## Compatilibity
 
-This plugin requires Gradle 2.0 or better
+This plugin requires Gradle 2.0 or better.
 
 ## Bootstrap
 
