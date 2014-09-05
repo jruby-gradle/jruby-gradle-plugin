@@ -9,7 +9,7 @@ import org.gradle.api.Project
  */
 class WarblerBootstrap {
 
-    static final String GROUP = 'com.lookout'
+    static final String GROUP = 'com.github.jruby-gradle'
     static final String ARTIFACT = 'warbler-bootstrap'
 
     /** Adds the dependency to the Project using {@code jruby , warbkerBootstrapVersion} as the version
