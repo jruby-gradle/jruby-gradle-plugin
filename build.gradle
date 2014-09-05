@@ -33,7 +33,7 @@ dependencies {
     testCompile ("org.spockframework:spock-core:0.7-groovy-${gradle.gradleVersion.startsWith('1.')?'1.8':'2.0'}") {
         exclude module : 'groovy-all'
     }
-    testWarbler group: 'com.lookout', name: 'warbler-bootstrap', version: '1.0.0'
+    testWarbler group: 'com.github.jruby-gradle', name: 'warbler-bootstrap', version: '0.1.+'
 
 }
 
