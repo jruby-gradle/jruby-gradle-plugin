@@ -134,7 +134,7 @@ class JRubyJarPluginSpec extends Specification {
             project.with {
                 jruby {
                     defaultRepositories = false
-                    warblerBootstrapVersion = '1.0.0'
+                    warblerBootstrapVersion = '0.1.0'
                 }
                 repositories {
                     ivy {
