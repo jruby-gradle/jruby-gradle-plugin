@@ -6,6 +6,7 @@ import org.gradle.api.tasks.bundling.War
 import org.gradle.api.tasks.Copy
 import org.gradle.api.tasks.Delete
 
+import com.github.jrubygradle.internal.WarblerBootstrap
 import com.github.jrubygradle.JRubyPlugin
 
 /**
@@ -16,19 +17,11 @@ class JRubyWarPlugin implements Plugin<Project> {
         project.apply plugin: 'war'
         project.apply plugin: 'com.github.jruby-gradle.base'
         project.configurations.create(JRubyWar.JRUBYWAR_CONFIG)
-
-        // TODO: Should probably check whether it exists before creating it
-        project.configurations {
-            jrubyEmbeds
-            jrubyWar
-        }
-
-        project.dependencies {
-            jrubyEmbeds group: 'com.lookout', name: 'warbler-bootstrap', version: '1.+'
-        }
+        project.configurations.maybeCreate('jrubyEmbeds')
 
         project.afterEvaluate {
             JRubyWar.updateJRubyDependencies(project)
+            WarblerBootstrap.addDependency(project)
         }
 
         // Only jRubyWar will depend on jrubyPrepare. Other JRubyWar tasks created by
