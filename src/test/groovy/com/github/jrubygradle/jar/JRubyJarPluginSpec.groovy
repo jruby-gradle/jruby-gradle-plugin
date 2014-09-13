@@ -42,6 +42,15 @@ class JRubyJarPluginSpec extends Specification {
         jarTask = project.task('JarJar', type: Jar)
     }
 
+    def "Checking configurations exist"() {
+        given:
+            def cfg = project.configurations
+
+        expect:
+            cfg.getByName('jrubyEmbeds')
+            cfg.getByName('jrubyJar')
+    }
+
     def "Adding a fake file as if it is a gem layout"() {
         when: 'We configure the jar task with jruby data'
             new File(TESTROOT,'fake.txt').text = 'fake.content'
@@ -124,10 +133,12 @@ class JRubyJarPluginSpec extends Specification {
 
     def "Building a Jar"() {
         given: "A local repository"
+            final String jrubyTestVersion = '1.7.15'
             File expectedDir= new File(TESTROOT,'libs/')
             expectedDir.mkdirs()
             File expectedJar= new File(expectedDir,'test.jar')
             project.jruby.gemInstallDir = new File(TESTROOT,'fakeGemDir').absolutePath
+
             new File(project.jruby.gemInstallDir,'gems').mkdirs()
             new File(project.jruby.gemInstallDir,'gems/fake.txt').text = 'fake.content'
 
@@ -135,6 +146,7 @@ class JRubyJarPluginSpec extends Specification {
                 jruby {
                     defaultRepositories = false
                     warblerBootstrapVersion = '0.1.0'
+                    defaultVersion = jrubyTestVersion
                 }
                 repositories {
                     ivy {
@@ -143,6 +155,9 @@ class JRubyJarPluginSpec extends Specification {
                             artifact '[module]-[revision](.[ext])'
                         }
                     }
+                }
+                dependencies {
+                    jrubyJar 'org.spockframework:spock-core:0.7-groovy-2.0'
                 }
             }
 
@@ -158,11 +173,21 @@ class JRubyJarPluginSpec extends Specification {
             project.evaluate()
 
         and: "I actually build the JAR"
+            project.tasks.getByName("${jarTask.name}ExtraManifest").execute()
+
             jarTask.copy()
+            def builtJar = fileNames(project.zipTree(expectedJar))
 
         then: "I expect to see the JarMain.class embedded in the JAR"
             expectedJar.exists()
-            fileNames(project.zipTree(expectedJar)).contains('com/lookout/jruby/JarMain.class')
-            !fileNames(project.zipTree(expectedJar)).contains('com/lookout/jruby/WarMain.class')
+            builtJar.contains('com/lookout/jruby/JarMain.class')
+            !builtJar.contains('com/lookout/jruby/WarMain.class')
+
+        and: "I expect to see jruby-complete packed in libs"
+            builtJar.contains("META-INF/lib/jruby-complete-${jrubyTestVersion}.jar".toString())
+
+        and: "I expect to see manifest to include it"
+            jarTask.manifest.effectiveManifest.attributes['Class-Path']?.contains("lib/jruby-complete-${jrubyTestVersion}.jar".toString())
+
     }
 }

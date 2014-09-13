@@ -15,6 +15,7 @@ class JRubyJarPlugin implements Plugin<Project> {
 
         project.apply plugin : 'com.github.jruby-gradle.base'
         project.configurations.maybeCreate('jrubyEmbeds')
+        project.configurations.maybeCreate('jrubyJar')
 
         // In order to update the testing cycle we need to tell unit tests where to
         // find GEMs. We are assuming that if someone includes this plugin, that they
@@ -58,6 +59,12 @@ class JRubyJarPlugin implements Plugin<Project> {
         project.afterEvaluate {
             WarblerBootstrap.addDependency(project)
             JRubyJarConfigurator.afterEvaluateAction(project)
+
+            project.dependencies {
+                jrubyJar group: 'org.jruby', name: 'jruby-complete', version: project.jruby.defaultVersion
+            }
+
+
         }
     }
 
