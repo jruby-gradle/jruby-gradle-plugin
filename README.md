@@ -6,7 +6,7 @@ jruby-gradle-jar-plugin
 Plugin for creating JRuby-based java archives
 
 
-## Compatilibity
+## Compatibility
 
 This plugin requires Gradle 2.0 or better.
 
@@ -48,14 +48,8 @@ jar {
     // Can be called more than once for additional directories
     gemDir '/path/to/my/gemDir'
     
-    // Make the JAR executable and use the default main class
-    defaultMainClass()
-    
-    // Make the JAR executable by supplying your own main class
-    mainClass 'my.own.main.'
-    
-    // Equivalent to calling defaultGems() and defaultMainClass()
-    defaults 'gem, 'mainClass'
+    // Equivalent to calling defaultGems()
+    defaults 'gem'
         
   }
   
@@ -72,8 +66,35 @@ task myJar (type :Jar) {
 
 ```
 
+## Executable JARs
+
+Please note that executable JARs are still an incubating feature. At this point appropriate libs will be copied
+to the `META-INF/lib` directory, but a working `init.rb` is not available. It is still the responsibility of the
+the user to craft an appropriate `init.rb` and copy it to `META-INF` via the provided the [metaInf {}](http://www.gradle.org/docs/current/dsl/org.gradle.api.tasks.bundling.Jar.html) closure.
+ 
+ ```groovy
+ jar {
+   jruby {
+   
+     // Make the JAR executable and use the default main class
+     defaultMainClass()
+     
+     // Make the JAR executable by supplying your own main class
+     mainClass 'my.own.main.'
+     
+     // Equivalent to calling defaultMainClass()
+     defaults 'mainClass'
+     
+     // Adds dependencies from this configuration into `META-INF/lib`
+     // If none are specified, the plugin will default to 'jrubyJar','compile' & 'runtime'
+     configurations 'myConfig'    
+   }   
+ }
+```
+
 Using the default main class method `defaultMainClass()` will include class files from 
 [warbler-bootstrap](https://github.com/jruby-gradle/warbler-bootstrap) 
+
 
 ## Controlling the version of warbler-bootstrap
 
