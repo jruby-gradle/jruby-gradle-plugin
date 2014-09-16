@@ -66,7 +66,7 @@ In a similar vein to ```JavaExec``` and ```RhinoShellExec```, the ```JRubyExec``
 in a Gradle script using JRuby.
 
 ```groovy
-import com.lookout.jruby.JRubyExec
+import com.github.jrubygradle.JRubyExec
 
 dependencies {
     jrubyExec 'rubygems:credit_card_validator:1.2.0'
@@ -138,7 +138,7 @@ All other methods should work.
 Unpacking occurs using the default `jruby` version as set by `jruby.execVersion`.
 
 ```groovy
-import com.lookout.jruby.JRubyPrepareGems
+import com.github.jrubygradle.JRubyPrepareGems
 
 task unpackMyGems( type : JRubyPrepareGems ) {
 
