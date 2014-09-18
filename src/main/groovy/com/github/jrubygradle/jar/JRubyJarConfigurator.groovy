@@ -112,7 +112,7 @@ class JRubyJarConfigurator {
      */
     @Incubating
     void configuration(String name) {
-        this.configurations.add(archive.project.configurations.getByName(name))
+        this.configuration(archive.project.configurations.getByName(name))
     }
 
     /** Adds a configuration to the list of dependencies that will be packed when creating an executable jar
@@ -122,6 +122,9 @@ class JRubyJarConfigurator {
      */
     @Incubating
     void configuration(Configuration config) {
+        if(this.configurations==null) {
+            this.configurations = []
+        }
         this.configurations.add(config)
     }
 
