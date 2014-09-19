@@ -1,0 +1,39 @@
+package com.github.jrubygradle.jar.bootstrap;
+
+import org.jruby.embed.ScriptingContainer;
+import static org.jruby.embed.PathType.*;
+
+class JarMain {
+
+    private JarMain(String[] args) throws Exception {
+        container = new ScriptingContainer();
+        container.setArgv(args);
+//        List<String> loadPaths = new ArrayList();
+//        loadPaths.add(jrubyhome);
+//        Ruby Version
+//        container.setCompatVersion(CompatVersion.%%RUBY_COMPAT_VERSION%%);
+//        RubyInstanceConfig config = container.getProvider().getRubyInstanceConfig();
+
+//        container.setEnvironment(Map environment)
+
+    }
+
+    private int run() {
+        try {
+            Object outcome = container.runScriptlet(LAUNCH_SCRIPT /*, RELATIVE|CLASSPATH */ );
+            return ( outcome instanceof Number ) ? ( (Number) outcome ).intValue() : 0;
+        } finally {
+            container.terminate();
+        }
+    }
+
+    private static final String LAUNCH_SCRIPT = "load '%%LAUNCH_SCRIPT%%'";
+
+    private ScriptingContainer container;
+
+    public static void main(String[] args) throws Exception {
+        JarMain jm = new JarMain(args);
+        System.exit(jm.run());
+    }
+
+}

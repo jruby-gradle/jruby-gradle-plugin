@@ -36,6 +36,8 @@ dependencies {
         exclude module : 'groovy-all'
     }
 
+    testRuntime 'com.github.jengelman.gradle.plugins:shadow:1.+'
+
     // For the testWarbler tests I am locking the versions, instead of a open version, as it makes
     // unit testing easier, This does not affect the final artifact.
     // If you change values here, you need to update JRubyJarPluginSpec as well.
