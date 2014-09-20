@@ -1,0 +1,47 @@
+package com.github.jrubygradle.jar.bootstrap;
+
+import org.jruby.embed.ScriptingContainer;
+import static org.jruby.embed.PathType.*;
+import org.jruby.CompatVersion;
+
+class JarMain {
+
+    private JarMain(String[] args) throws Exception {
+        container = new ScriptingContainer();
+        container.setArgv(args);
+
+        // TODO: Do we need to do anything extra for load paths ?
+//        List<String> loadPaths = new ArrayList();
+//        loadPaths.add(jrubyhome);
+
+        // TODO: Allow compatinility version to be set
+//          CompatVersion cv = CompatVersion.getVersionFromString("%%RUBY_COMPAT_VERSION%%");
+//          if(cv != null) {
+//              container.setCompatVersion(cv);
+//          }
+
+          // TODO: Do we need to do seomthign extra for environment control?
+//        container.setEnvironment(Map environment)
+
+    }
+
+    private int run() {
+        try {
+            Object outcome = container.runScriptlet(LAUNCH_SCRIPT);
+            return ( outcome instanceof Number ) ? ( (Number) outcome ).intValue() : 0;
+        } finally {
+            container.terminate();
+        }
+    }
+
+    // TODO. Allow this to be changes via a system property at run-time
+    private static final String LAUNCH_SCRIPT = "load '%%LAUNCH_SCRIPT%%'";
+
+    private ScriptingContainer container;
+
+    public static void main(String[] args) throws Exception {
+        JarMain jm = new JarMain(args);
+        System.exit(jm.run());
+    }
+
+}

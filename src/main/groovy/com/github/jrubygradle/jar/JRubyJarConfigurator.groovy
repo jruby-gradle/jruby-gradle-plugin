@@ -3,9 +3,6 @@ package com.github.jrubygradle.jar
 import groovy.transform.PackageScope
 import org.gradle.api.Incubating
 import org.gradle.api.Project
-import org.gradle.api.Task
-import org.gradle.api.artifacts.Configuration
-import org.gradle.api.file.FileCollection
 import org.gradle.api.tasks.bundling.Jar
 import com.github.jrubygradle.GemUtils
 
@@ -15,7 +12,8 @@ import com.github.jrubygradle.GemUtils
  */
 class JRubyJarConfigurator {
 
-    static final String DEFAULT_MAIN_CLASS = 'com.lookout.jruby.JarMain'
+    static final String DEFAULT_BOOTSTRAP_CLASS = 'com.github.jrubygradle.jar.bootstrap.JarMain'
+    static final String SHADOW_JAR_TASK_CLASS = 'com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar'
 
     // This is used by JRubyJarPlugin to configure Jar classes
     @PackageScope
@@ -29,15 +27,8 @@ class JRubyJarConfigurator {
     @PackageScope
     static void afterEvaluateAction( Project project ) {
         project.tasks.withType(Jar) { t ->
-            if (t.manifest.attributes.containsKey('Main-Class')) {
-                if (t.manifest.attributes.'Main-Class' == JRubyJarConfigurator.DEFAULT_MAIN_CLASS) {
-                    t.with {
-                        from({ project.configurations.jrubyEmbeds.collect { project.zipTree(it) } }) {
-                            include '**'
-                            exclude '**/WarMain.class'
-                        }
-                    }
-                }
+            if(t.class.superclass.name == SHADOW_JAR_TASK_CLASS && t.name=='shadowJar') {
+                t.configurations.add(project.configurations.getByName('jrubyJar'))
             }
         }
     }
@@ -63,14 +54,9 @@ class JRubyJarConfigurator {
      */
     @Incubating
     void mainClass(final String className) {
-        maybeAddExtraManifest()
         archive.with {
             manifest {
                 attributes 'Main-Class': className
-            }
-            metaInf {
-                from { this.getDependencies() }
-                into 'lib'
             }
         }
     }
@@ -102,74 +88,20 @@ class JRubyJarConfigurator {
      */
     @Incubating
     void defaultMainClass() {
-        mainClass(DEFAULT_MAIN_CLASS)
+        mainClass(DEFAULT_BOOTSTRAP_CLASS)
     }
 
-    /** Adds a configuration to the list of dependencies that will be packed when creating an executable jar
-     * This method is ignored if {@code mainClass} is not set.
-     *
-     * @param name Name of configuration
-     */
-    @Incubating
-    void configuration(String name) {
-        this.configuration(archive.project.configurations.getByName(name))
-    }
-
-    /** Adds a configuration to the list of dependencies that will be packed when creating an executable jar
-     * This method is ignored if {@code mainClass} is not set.
-     *
-     * @param name Configuration
-     */
-    @Incubating
-    void configuration(Configuration config) {
-        if(this.configurations==null) {
-            this.configurations = []
-        }
-        this.configurations.add(config)
+    boolean isShadowJar() {
+        shadowJar
     }
 
     private JRubyJarConfigurator(Jar a) {
         archive = a
-    }
-
-    private Set<File> getDependencies() {
-        Set<File> tmp = []
-        if(configurations == null) {
-            archive.project.configurations.each { Configuration cfg ->
-                if( ['jrubyJar','compile','runtime'].contains(cfg.name) ) {
-                    tmp.addAll(cfg.files)
-                }
-            }
-        } else {
-            configurations.each {
-                tmp.addAll(it.files)
-            }
+        if (a.class.name == SHADOW_JAR_TASK_CLASS || a.class.superclass.name == SHADOW_JAR_TASK_CLASS) {
+            shadowJar = true
         }
-        return tmp
-    }
-
-    private void maybeAddExtraManifest() {
-        if(extraManifest == null) {
-            extraManifest = new File(archive.project.buildDir,extraManifestName)
-            String taskName = "${archive.name}ExtraManifest"
-            Task task = archive.project.tasks.create(taskName)
-            task << {
-                String libs = task.inputs.files.collect { File f -> "lib/${f.name}" }.join(' ')
-                extraManifest.parentFile.mkdirs()
-                extraManifest.text = "Class-Path: ${libs}\n"
-            }
-            task.outputs.file(extraManifest)
-            task.inputs.files({this.getDependencies()})
-            archive.dependsOn task
-            archive.manifest.from({task.outputs.files.singleFile})
-        }
-    }
-
-    private String getExtraManifestName() {
-        "tmp/${archive.name}-extraManifest.mf"
     }
 
     private Jar archive
-    private List<Configuration> configurations
-    private File extraManifest
+    private boolean shadowJar = false
 }
