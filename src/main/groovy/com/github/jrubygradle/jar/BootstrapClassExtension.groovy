@@ -1,6 +1,5 @@
 package com.github.jrubygradle.jar
 
-import groovy.transform.PackageScope
 import groovy.transform.TupleConstructor
 import org.gradle.api.GradleException
 import org.gradle.api.Task
@@ -16,6 +15,8 @@ class BootstrapClassExtension {
     static final String BOOTSTRAP_TEMPLATE_PATH = 'META-INF/gradle-plugins/bootstrap.java.template'
 
     /** The task this extension instance is attached to.
+     *
+     * @since 0.1.1
      *
      */
     Task task
@@ -60,6 +61,6 @@ class BootstrapClassExtension {
             }
         }
 
-    }
+   }
 
 }

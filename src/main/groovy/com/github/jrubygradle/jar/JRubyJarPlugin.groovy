@@ -15,12 +15,12 @@ import org.gradle.api.tasks.testing.Test
  */
 class JRubyJarPlugin implements Plugin<Project> {
 
-    static final String BOOTSTRAP_TASK_NAME = 'jrubyJavaStub'
+    static final String BOOTSTRAP_TASK_NAME = 'jrubyJavaBootstrap'
 
     void apply(Project project) {
 
         project.apply plugin : 'com.github.jruby-gradle.base'
-        project.apply plugin : 'java-base'
+        project.apply plugin : 'java'
         project.configurations.maybeCreate('jrubyEmbeds')
         project.configurations.maybeCreate('jrubyJar')
 

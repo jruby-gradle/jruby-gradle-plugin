@@ -31,6 +31,7 @@ apply plugin: 'com.github.jrubygradle.jar'
 
 This loads the following plugins if they are not already loaded:
 + `com.github.jrubygradle.base`
++ `java`
 
 ## Using the plugin
 
@@ -63,47 +64,71 @@ task myJar (type :Jar) {
 
   // All other JAR methods and properties are still valid
 }
-
 ```
+
+## Controlling the Ruby entry point script
+
+If nothing is specified, then the bootstrap will look for a Ruby script `META-INF/init.rb`. 
+It is also possible to set the entry script. This must be specified relative to the root of the created JAR.
+
+```groovy
+jrubyJavaBootstrap {
+    jruby {
+        initScript = 'bin/asciidoctor'
+    }
+}
+```
+
+It is the user's responsibility to ensure that entry point script is created and added to the JAR, be it `META-INF/init.rb`
+or another specified script.
+
 
 ## Executable JARs
 
-Please note that executable JARs are still an incubating feature. At this point appropriate libs will be copied
-to the `META-INF/lib` directory, but a working `init.rb` is not available. It is still the responsibility of the
-the user to craft an appropriate `init.rb` and copy it to `META-INF` via the provided the [metaInf {}](http://www.gradle.org/docs/current/dsl/org.gradle.api.tasks.bundling.Jar.html) closure.
- 
- ```groovy
- jar {
+**Please note that executable JARs are still an incubating feature**.
+
+Executable JARs are indirectly supported via the [Gradle Shadow Jar plugin](http://plugins.gradle.org/plugin/com.github.johnrengelman.shadow).
+
+
+### Adding Shadow JAR
+```groovy
+buildscript {
+  repositories {
+    jcenter()
+  }
+  
+    dependencies {
+      classpath 'com.github.jengelman.gradle.plugins:shadow:1.1.1'
+      classpath group: 'com.github.jrubygradle:jruby-gradle-jar-plugin:0.1.1'
+    }  
+}
+
+apply plugin: 'com.github.jrubygradle.jar'
+apply plugin: 'com.github.johnrengelman.shadow'
+
+```
+
+### Configuring Shadow JAR
+
+Configuration is exactly the same as for a normal JAR class.
+
+```groovy
+shadowJar {
    jruby {
    
-     // Make the JAR executable and use the default main class
+     // Use the default bootstrap class
      defaultMainClass()
      
      // Make the JAR executable by supplying your own main class
      mainClass 'my.own.main.'
      
      // Equivalent to calling defaultMainClass()
-     defaults 'mainClass'
+     defaults 'gems', 'mainClass'
      
-     // Adds dependencies from this configuration into `META-INF/lib`
-     // If none are specified, the plugin will default to 'jrubyJar','compile' & 'runtime'
-     configurations 'myConfig'    
    }   
  }
 ```
 
-Using the default main class method `defaultMainClass()` will include class files from 
-[warbler-bootstrap](https://github.com/jruby-gradle/warbler-bootstrap) 
-
-
-## Controlling the version of warbler-bootstrap
-
-By default the version is set to `1.+` meaning anything version 1.0 or beyond. If your project wants to lock
-down the specific version, then it can be set via
-
-```groovy
-jruby {
-  warblerBootstrapversion = '1.0.0'
-}
-```
-
+See [Shadow JAR README](https://github.com/johnrengelman/shadow/blob/master/README.md) for configuration specifics.
+In a similar fashion to the `jar` task, the `shadowJar` task will make use of the `jrubyJavaBootstrap` task to
+create and compile a basic bootstrap class.
