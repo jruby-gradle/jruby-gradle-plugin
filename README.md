@@ -120,7 +120,7 @@ shadowJar {
      defaultMainClass()
      
      // Make the JAR executable by supplying your own main class
-     mainClass 'my.own.main.'
+     mainClass 'my.own.main'
      
      // Equivalent to calling defaultMainClass()
      defaults 'gems', 'mainClass'
