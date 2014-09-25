@@ -1,16 +1,21 @@
+buildscript {
+    repositories { jcenter() }
+    dependencies {
+        classpath 'com.jfrog.bintray.gradle:gradle-bintray-plugin:0.5'
+        classpath 'com.netflix.nebula:gradle-extra-configurations-plugin:1.12.+'
+    }
+}
+
 apply plugin: 'groovy'
 apply plugin: 'maven'
 apply plugin: 'com.jfrog.bintray'
+apply plugin: 'provided-base'
 apply from: 'gradle/integration-tests.gradle'
 
-// Pull in the bintray gradle plugin for uploading releases
-buildscript {
-    repositories { jcenter() }
-    dependencies { classpath 'com.jfrog.bintray.gradle:gradle-bintray-plugin:0.5' }
-}
 
 group = 'com.github.jruby-gradle'
 version = '0.1.3'
+archivesBaseName = 'jruby-gradle-plugin'
 
 if (System.env.RELEASE != '1') {
     version = "${version}-SNAPSHOT"
@@ -23,6 +28,7 @@ configurations {
 }
 
 ext {
+    jrubyVersion = '1.7.16'
     jrubyClassPathFromConfiguration = { Configuration cfg ->
         def f = cfg.files.find { it.name.startsWith('jruby-complete-') }
         return  f?.absolutePath
@@ -32,14 +38,13 @@ ext {
 project.afterEvaluate {
     test {
         systemProperties TEST_JRUBY_CLASSPATH: "${jrubyClassPathFromConfiguration(configurations.testJRubyPrepare)}"
-
     }
 }
 
 // --- up to here
 
 dependencies {
-    testJRubyPrepare 'org.jruby:jruby-complete:1.7.15'
+    testJRubyPrepare "org.jruby:jruby-complete:${jrubyVersion}"
 }
 
 
@@ -64,6 +69,8 @@ dependencies {
     integrationTestCompile (spockVersion) {
         exclude module : 'groovy-all'
     }
+
+    provided "org.jruby:jruby-complete:${jrubyVersion}"
 }
 
 test {

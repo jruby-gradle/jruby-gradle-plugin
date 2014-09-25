@@ -133,6 +133,34 @@ in the ```jrubyexec``` closure will cause a failure
 As with `JRubyExec`, `args`, `setArgs` and `main` are illegal within the `jrubyexec` closure.
 All other methods should work.
 
+### Running a Ruby PATH command
+
+Because `JRubyExec` checks for the existence of the script, it might look at first whether running Ruby commands from
+`PATH` could be difficult. However, this is totally possible by utilising `jrubyArgs`. Here is an example of running 
+`rake` as task.
+
+```groovy
+task rake( type :JRubyExec ) {
+    jrubyArgs '-S', 'rake'
+    script '/path/to/Rakefile'
+    scriptArgs 'target1', 'target2'
+}
+```
+
+or even
+
+```groovy
+ext {
+    rake = { String target ->
+        jrubyexec {
+            jrubyArgs '-S', 'rake'
+            script '/path/to/Rakefile'
+            scriptArgs target            
+        }
+    }
+}
+```
+ 
 ## JRubyPrepareGems - A task for unpacking GEMs
 
 Unpacking occurs using the default `jruby` version as set by `jruby.execVersion`.
