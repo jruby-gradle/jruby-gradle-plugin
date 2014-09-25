@@ -20,7 +20,7 @@ class JRubyJarPlugin implements Plugin<Project> {
     void apply(Project project) {
 
         project.apply plugin : 'com.github.jruby-gradle.base'
-        project.apply plugin : 'java'
+        project.apply plugin : 'java-base'
         project.configurations.maybeCreate('jrubyEmbeds')
         project.configurations.maybeCreate('jrubyJar')
 
@@ -57,12 +57,8 @@ class JRubyJarPlugin implements Plugin<Project> {
 
         }
 
-        project.sourceSets {
-            main {
-                java {
-                    srcDir new File(project.buildDir,'generated/java')
-                }
-            }
+        project.sourceSets.matching { it.name == "main" } .all {
+            it.java.srcDir new File(project.buildDir,'generated/java')
         }
     }
     @PackageScope

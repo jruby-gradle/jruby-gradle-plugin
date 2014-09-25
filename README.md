@@ -31,7 +31,7 @@ apply plugin: 'com.github.jrubygradle.jar'
 
 This loads the following plugins if they are not already loaded:
 + `com.github.jrubygradle.base`
-+ `java`
++ `java-base`
 
 ## Using the plugin
 
@@ -39,6 +39,8 @@ This plugin does not add any new tasks or extensions, extends the `Jar` task typ
 is loaded, then the `jar` task can also be configured.
 
 ```groovy
+apply plugin: 'java'
+
 jar {
   jruby {
   
@@ -105,7 +107,7 @@ buildscript {
 
 apply plugin: 'com.github.jrubygradle.jar'
 apply plugin: 'com.github.johnrengelman.shadow'
-
+apply plugin: 'java'
 ```
 
 ### Configuring Shadow JAR
