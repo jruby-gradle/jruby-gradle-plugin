@@ -57,13 +57,6 @@ class JRubyJarPlugin implements Plugin<Project> {
 
         }
 
-//        project.sourceSets {
-//            main {
-//                java {
-//                    srcDir new File(project.buildDir,'generated/java')
-//                }
-//            }
-//        }
         project.sourceSets.matching { it.name == "main" } .all {
             it.java.srcDir new File(project.buildDir,'generated/java')
         }
