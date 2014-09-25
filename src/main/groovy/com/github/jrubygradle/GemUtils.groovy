@@ -150,6 +150,7 @@ class GemUtils {
                 if(!fullGem) {
                     exclude 'cache/**'
                     exclude 'gems/*/test/**'
+                    exclude 'gems/*/tests/**'
                     exclude 'build_info'
                 }
             }
