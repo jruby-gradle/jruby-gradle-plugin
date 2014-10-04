@@ -18,13 +18,14 @@ buildscript {
   repositories {
     jcenter()
   }
-  
+
     dependencies {
-      classpath group: 'com.github.jrubygradle', name: 'jruby-gradle-jar-plugin', version: '0.1.1'
-    }  
+      classpath group: 'com.github.jruby-gradle', name: 'jruby-gradle-jar-plugin', version: '0.1.1'
+      classpath group: 'com.github.jruby-gradle', name: 'jruby-gradle-plugin', version: '0.1.+'
+    }
 }
 
-apply plugin: 'com.github.jrubygradle.jar'
+apply plugin: 'com.github.jruby-gradle.jar'
 ```
 
 ## Implicit loaded plugins
@@ -43,19 +44,19 @@ apply plugin: 'java'
 
 jar {
   jruby {
-  
+
     // Use the default GEM installation directory
     defaultGems()
 
     // Add this GEM installation directory to the JAR.
     // Can be called more than once for additional directories
     gemDir '/path/to/my/gemDir'
-    
+
     // Equivalent to calling defaultGems()
     defaults 'gem'
-        
+
   }
-  
+
   // All other JAR methods and properties are still valid
 }
 
@@ -70,7 +71,7 @@ task myJar (type :Jar) {
 
 ## Controlling the Ruby entry point script
 
-If nothing is specified, then the bootstrap will look for a Ruby script `META-INF/init.rb`. 
+If nothing is specified, then the bootstrap will look for a Ruby script `META-INF/init.rb`.
 It is also possible to set the entry script. This must be specified relative to the root of the created JAR.
 
 ```groovy
@@ -98,14 +99,15 @@ buildscript {
   repositories {
     jcenter()
   }
-  
+
     dependencies {
       classpath 'com.github.jengelman.gradle.plugins:shadow:1.1.1'
-      classpath group: 'com.github.jrubygradle:jruby-gradle-jar-plugin:0.1.1'
-    }  
+      classpath group: 'com.github.jruby-gradle:jruby-gradle-jar-plugin:0.1.1'
+      classpath group: 'com.github.jruby-gradle:jruby-gradle-plugin:0.1.+'
+    }
 }
 
-apply plugin: 'com.github.jrubygradle.jar'
+apply plugin: 'com.github.jruby-gradle.jar'
 apply plugin: 'com.github.johnrengelman.shadow'
 apply plugin: 'java'
 ```
@@ -117,17 +119,17 @@ Configuration is exactly the same as for a normal JAR class.
 ```groovy
 shadowJar {
    jruby {
-   
+
      // Use the default bootstrap class
      defaultMainClass()
-     
+
      // Make the JAR executable by supplying your own main class
      mainClass 'my.own.main'
-     
+
      // Equivalent to calling defaultMainClass()
      defaults 'gems', 'mainClass'
-     
-   }   
+
+   }
  }
 ```
 
