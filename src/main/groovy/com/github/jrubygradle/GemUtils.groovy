@@ -40,7 +40,7 @@ class GemUtils {
                             File destDir,
                             GemUtils.OverwriteAction overwrite) {
 
-        extractGems(project,jRubyClasspath,project.files(gem),destDir,overwrite)
+        extractGems(project, jRubyClasspath, project.files(gem), destDir, overwrite)
     }
 
     static void extractGems(Project project,
@@ -50,20 +50,25 @@ class GemUtils {
                            GemUtils.OverwriteAction overwrite) {
         Set<File> gemsToProcess = []
         Set<File> deletes = []
+
         getGems(gems).files.each { File gem ->
             String gemName = gemFullNameFromFile(gem.name)
-            File extractDir = new File(destDir, gemName)
+            File extractDir = new File(destDir, "gems/${gemName}")
+            // We want to check for -java specific gem installations too, e.g.
+            // thread_safe-0.3.4-java
+            File extractDirForJava = new File(destDir, "gems/${gemName}-java")
 
             switch (overwrite) {
                 case GemUtils.OverwriteAction.SKIP:
-                    if(extractDir.exists()) {
+                    if (extractDir.exists() || extractDirForJava.exists()) {
                         return
                     }
                 case GemUtils.OverwriteAction.OVERWRITE:
                     deletes.add(extractDir)
+                    deletes.add(extractDirForJava)
                     break
                 case GemUtils.OverwriteAction.FAIL:
-                    if(extractDir.exists()) {
+                    if (extractDir.exists() || extractDirForJava.exists()) {
                         throw new DuplicateFileCopyingException("Gem ${gem.name} already exists")
                     }
             }
@@ -71,14 +76,11 @@ class GemUtils {
             gemsToProcess.add(gem)
         }
 
-        if(gemsToProcess.size()) {
-
+        if (gemsToProcess.size()) {
             deletes.each { project.delete it }
             destDir.mkdirs()
 
             project.logger.info "Installing " + (gemsToProcess.collect { File it -> it.name }).join(',')
-
-
 
             project.javaexec {
                 setEnvironment [:]
@@ -88,7 +90,10 @@ class GemUtils {
                 gemsToProcess.each { File gem ->
                     args gem
                 }
-                args '--ignore-dependencies', "--install-dir=${destDir.absolutePath}", '-N'
+                args '--ignore-dependencies',
+                     "--install-dir=${destDir.absolutePath}",
+                     '-N',
+                     '--platform=java'
 
                 // Workaround for bug
                 if(jRubyClasspath.name.contains('1.7.14')) {
