@@ -38,7 +38,6 @@ class JRubyExec extends JavaExec {
     /** Script to execute.
      *
      */
-    @InputFile
     File script
 
     /** Configuration to copy gems from. If {@code jRubyVersion} has not been set, {@code jRubyExec} will used as
@@ -158,8 +157,15 @@ class JRubyExec extends JavaExec {
     @Override
     List<String> getArgs() {
         def cmdArgs = []
+
+        if ((script == null) && (jrubyArgs.size() == 0)) {
+            throw new TaskInstantiationException('Cannot instantiate a JRubyExec instance without either `script` or `jrubyArgs` set')
+        }
         cmdArgs.addAll(jrubyArgs)
-        cmdArgs.add(script.absolutePath)
+
+        if (script != null) {
+            cmdArgs.add(script.absolutePath)
+        }
         cmdArgs.addAll(scriptArgs)
         cmdArgs as List<String>
     }
