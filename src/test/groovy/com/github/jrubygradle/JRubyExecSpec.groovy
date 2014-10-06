@@ -143,4 +143,24 @@ class JRubyExecSpec extends Specification {
             execTask.getArgs() == ['-j1','-j2','-j3',new File(TEST_SCRIPT_DIR,'helloWorld.rb').absolutePath,'-s1','-s2','-s3']
     }
 
+    def "Properly handle the lack of a `script` argument"() {
+        when:
+            project.configure(execTask) {
+                jrubyArgs '-S', 'rspec'
+            }
+
+        then:
+            execTask.getArgs() == ['-S', 'rspec']
+    }
+
+    def "Error when `script` is empty and there is no `jrubyArgs`"() {
+        when:
+            project.configure(execTask) {
+            }
+            execTask.getArgs()
+
+        then: "An exception should be thrown"
+            thrown(TaskInstantiationException)
+    }
+
 }
