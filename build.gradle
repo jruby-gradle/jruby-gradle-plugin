@@ -83,6 +83,9 @@ test {
     systemProperties TEST_GEM_DIR : new File(projectDir,'src/integTest/resources/gems').absolutePath
     systemProperties 'logback.configurationFile' : new File(projectDir,'src/test/resources/logback-test.xml').absolutePath
 
+    if(gradle.startParameter.isOffline()) {
+        systemProperties 'TESTS_ARE_OFFLINE' : '1'
+    }
 }
 
 integrationTest {

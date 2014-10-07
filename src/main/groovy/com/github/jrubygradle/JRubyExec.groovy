@@ -1,6 +1,7 @@
 package com.github.jrubygradle
 
 import com.github.jrubygradle.internal.JRubyExecUtils
+import org.gradle.api.InvalidUserDataException
 import org.gradle.api.Project
 import org.gradle.api.artifacts.Configuration
 import org.gradle.api.file.FileCollection
@@ -38,6 +39,7 @@ class JRubyExec extends JavaExec {
     /** Script to execute.
      *
      */
+    @Input
     File script
 
     /** Configuration to copy gems from. If {@code jRubyVersion} has not been set, {@code jRubyExec} will used as
@@ -152,19 +154,38 @@ class JRubyExec extends JavaExec {
         super.exec()
     }
 
-    /** getArgs gets overridden in order to add JRuby options, script name and script argumens in the correct order
+    /** getArgs gets overridden in order to add JRuby options, script name and script arguments in the correct order.
+     *
+     * There are three modes of behaviour
+     * <ul>
+     *   <li> script set. no jrubyArgs, or jrubyArgs does not contain {@code -S} - Normal way to execute script. A check
+     *   whether the script exists will be performed.
+     *   <li> script set. jrubyArgs contains {@code -S} - If script is not absolute, no check will be performed to see
+     *   if the script exists and will be assumed that the script can be found using the default ruby path mechanism.
+     *   <li> script not set, but jrubyArgs set - Set up to execute jruby with no script. This should be a rarely used otion.
+     * </ul>
+     *
+     * @throw {@code org.gradle.api.InvalidUserDataException} if mode of behaviour cannot be determined.
      */
     @Override
     List<String> getArgs() {
         def cmdArgs = []
 
-        if ((script == null) && (jrubyArgs.size() == 0)) {
-            throw new TaskInstantiationException('Cannot instantiate a JRubyExec instance without either `script` or `jrubyArgs` set')
-        }
+        boolean useBinPath = jrubyArgs.contains('-S')
         cmdArgs.addAll(jrubyArgs)
 
-        if (script != null) {
+        if(script!=null && !useBinPath) {
+            if(!script.exists()) {
+                throw new InvalidUserDataException("${script} does not exist")
+            }
             cmdArgs.add(script.absolutePath)
+        } else if(script!=null && useBinPath ) {
+            if(script.isAbsolute() && !script.exists()) {
+                throw new InvalidUserDataException("${script} does not exist")
+            }
+            cmdArgs.add(script.toString())
+        } else if(script==null && jrubyArgs.size() == 0 ) {
+            throw new InvalidUserDataException('Cannot instantiate a JRubyExec instance without either `script` or `jrubyArgs` set')
         }
         cmdArgs.addAll(scriptArgs)
         cmdArgs as List<String>

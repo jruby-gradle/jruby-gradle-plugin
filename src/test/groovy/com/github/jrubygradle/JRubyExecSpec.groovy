@@ -1,5 +1,6 @@
 package com.github.jrubygradle
 
+import org.gradle.api.InvalidUserDataException
 import org.gradle.api.tasks.TaskInstantiationException
 import org.gradle.testfixtures.ProjectBuilder
 import spock.lang.*
@@ -135,12 +136,12 @@ class JRubyExecSpec extends Specification {
         when:
             project.configure(execTask) {
                 scriptArgs '-s1','-s2','-s3'
-                jrubyArgs  '-j1','-j2','-j3'
+                jrubyArgs  '-j1','-j2','-j3','-S'
                 script     "${TEST_SCRIPT_DIR}/helloWorld.rb"
             }
 
         then:
-            execTask.getArgs() == ['-j1','-j2','-j3',new File(TEST_SCRIPT_DIR,'helloWorld.rb').absolutePath,'-s1','-s2','-s3']
+            execTask.getArgs() == ['-j1','-j2','-j3','-S',new File(TEST_SCRIPT_DIR,'helloWorld.rb').toString(),'-s1','-s2','-s3']
     }
 
     def "Properly handle the lack of a `script` argument"() {
@@ -160,7 +161,7 @@ class JRubyExecSpec extends Specification {
             execTask.getArgs()
 
         then: "An exception should be thrown"
-            thrown(TaskInstantiationException)
+            thrown(InvalidUserDataException)
     }
 
 }
