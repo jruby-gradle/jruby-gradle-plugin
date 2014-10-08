@@ -136,14 +136,15 @@ All other methods should work.
 ### Running a Ruby PATH command
 
 Because `JRubyExec` checks for the existence of the script, it might look at first whether running Ruby commands from
-`PATH` could be difficult. However, this is totally possible by utilising `jrubyArgs`. Here is an example of running 
+`PATH` could be difficult. However, this is totally possible by utilising `jrubyArgs` and passing `-S` as one would do
+ when using `ruby` or `jruby` on the command-line. Here is an example of running 
 `rake` as task.
 
 ```groovy
-task rake( type :JRubyExec ) {
-    jrubyArgs '-S', 'rake'
-    script '/path/to/Rakefile'
-    scriptArgs 'target1', 'target2'
+task rake( type : JRubyExec ) {
+    jrubyArgs '-S' 
+    script 'rake'
+    scriptArgs '/path/to/Rakefile', 'target1', 'target2'
 }
 ```
 
@@ -153,9 +154,9 @@ or even
 ext {
     rake = { String target ->
         jrubyexec {
-            jrubyArgs '-S', 'rake'
-            script '/path/to/Rakefile'
-            scriptArgs target            
+            jrubyArgs '-S' 
+            script 'rake'
+            scriptArgs '/path/to/Rakefile', target            
         }
     }
 }

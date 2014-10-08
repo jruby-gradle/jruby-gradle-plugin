@@ -1,11 +1,14 @@
 package com.github.jrubygradle.internal
 
+import groovy.transform.CompileStatic
+import org.gradle.api.InvalidUserDataException
 import org.gradle.api.artifacts.Configuration
 import org.gradle.api.file.FileCollection
 
 /**
  * @author Schalk W. Cronjé.
  */
+@CompileStatic
 class JRubyExecUtils {
 
     /** Extract a list of files from a configuration that is suitable for a jruby classpath
@@ -32,7 +35,29 @@ class JRubyExecUtils {
      * @return Returns the classpath as a File or null if the jar was not found
      */
     static FileCollection jrubyJar(FileCollection fc) {
-        fc.filter { File f -> it.name.startsWith('jruby-complete-') }
+        fc.filter { File f -> f.name.startsWith('jruby-complete-') }
     }
 
+    static List<String> buildArgs( List<Object> jrubyArgs, File script, List<Object> scriptArgs ) {
+        def cmdArgs = []
+
+        boolean useBinPath = jrubyArgs.contains('-S')
+        cmdArgs.addAll(jrubyArgs)
+
+        if(script!=null && !useBinPath) {
+            if(!script.exists()) {
+                throw new InvalidUserDataException("${script} does not exist")
+            }
+            cmdArgs.add(script.absolutePath)
+        } else if(script!=null && useBinPath ) {
+            if(script.isAbsolute() && !script.exists()) {
+                throw new InvalidUserDataException("${script} does not exist")
+            }
+            cmdArgs.add(script.toString())
+        } else if(script==null && jrubyArgs.size() == 0 ) {
+            throw new InvalidUserDataException('Cannot instantiate a JRubyExec instance without either `script` or `jrubyArgs` set')
+        }
+        cmdArgs.addAll(scriptArgs)
+        cmdArgs as List<String>
+    }
 }
