@@ -77,11 +77,7 @@ class JRubyExecDelegate {
     /** buildArgs creates a list of arguments to pass to the JVM
      */
     List<String> buildArgs() {
-        def cmdArgs = []
-        cmdArgs.addAll(jrubyArgs)
-        cmdArgs.add(script.absolutePath)
-        cmdArgs.addAll(scriptArgs)
-        cmdArgs as List<String>
+        JRubyExecUtils.buildArgs(jrubyArgs,script,scriptArgs)
     }
 
     @PackageScope
@@ -117,7 +113,6 @@ class JRubyExecDelegate {
         cl2.delegate = proxy
         cl2.call()
 
-        proxy.validate()
         File gemDir=new File(project.jruby.gemInstallDir)
         Configuration config = project.configurations.getByName(JRUBYEXEC_CONFIG)
         GemUtils.OverwriteAction overwrite = project.gradle.startParameter.refreshDependencies ?  GemUtils.OverwriteAction.OVERWRITE : GemUtils.OverwriteAction.SKIP

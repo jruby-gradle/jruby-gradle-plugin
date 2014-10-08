@@ -6,6 +6,7 @@ import spock.lang.IgnoreIf
 import spock.lang.Specification
 
 import static org.gradle.api.logging.LogLevel.LIFECYCLE
+import org.gradle.api.InvalidUserDataException
 
 // ===============================================
 // *** DO NOT CAll jrubyexec IN THIS UNITTEST ***
@@ -33,8 +34,8 @@ class JRubyExecDelegateSpec extends Specification {
     def "When just passing script, scriptArgs, jrubyArgs, expect local properties to be updated"() {
         given:
             def cl = {
-                script '/path/to/file'
-                jrubyArgs 'c','d'
+                script 'path/to/file'
+                jrubyArgs 'c','d','-S'
                 scriptArgs '-x'
                 scriptArgs '-y','-z'
                 jrubyArgs 'a','b'
@@ -44,10 +45,28 @@ class JRubyExecDelegateSpec extends Specification {
 
         expect:
             jred.passthrough.size() == 0
-            jred.script == '/path/to/file'
+            jred.script == 'path/to/file'
             jred.scriptArgs == ['-x','-y','-z']
-            jred.jrubyArgs == ['c','d','a','b']
-            jred.buildArgs() == ['c','d','a','b','/path/to/file','-x','-y','-z']
+            jred.jrubyArgs == ['c','d','-S','a','b']
+            jred.buildArgs() == ['c','d','-S','a','b','path/to/file','-x','-y','-z']
+    }
+
+    def "When passing absolute file and absolute file, expect check for existence to be executed"() {
+        given:
+            def cl = {
+                script '/path/to/file'
+                jrubyArgs 'c','d','-S'
+                scriptArgs '-x'
+                scriptArgs '-y','-z'
+                jrubyArgs 'a','b'
+            }
+            cl.delegate = jred
+            cl.call()
+        when:
+            jred.buildArgs()
+
+        then:
+            thrown(InvalidUserDataException)
     }
 
     def "When just passing arbitrary javaexec, expect them to be stored"() {

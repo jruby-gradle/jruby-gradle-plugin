@@ -169,26 +169,27 @@ class JRubyExec extends JavaExec {
      */
     @Override
     List<String> getArgs() {
-        def cmdArgs = []
-
-        boolean useBinPath = jrubyArgs.contains('-S')
-        cmdArgs.addAll(jrubyArgs)
-
-        if(script!=null && !useBinPath) {
-            if(!script.exists()) {
-                throw new InvalidUserDataException("${script} does not exist")
-            }
-            cmdArgs.add(script.absolutePath)
-        } else if(script!=null && useBinPath ) {
-            if(script.isAbsolute() && !script.exists()) {
-                throw new InvalidUserDataException("${script} does not exist")
-            }
-            cmdArgs.add(script.toString())
-        } else if(script==null && jrubyArgs.size() == 0 ) {
-            throw new InvalidUserDataException('Cannot instantiate a JRubyExec instance without either `script` or `jrubyArgs` set')
-        }
-        cmdArgs.addAll(scriptArgs)
-        cmdArgs as List<String>
+        JRubyExecUtils.buildArgs(jrubyArgs,script,scriptArgs)
+//        def cmdArgs = []
+//
+//        boolean useBinPath = jrubyArgs.contains('-S')
+//        cmdArgs.addAll(jrubyArgs)
+//
+//        if(script!=null && !useBinPath) {
+//            if(!script.exists()) {
+//                throw new InvalidUserDataException("${script} does not exist")
+//            }
+//            cmdArgs.add(script.absolutePath)
+//        } else if(script!=null && useBinPath ) {
+//            if(script.isAbsolute() && !script.exists()) {
+//                throw new InvalidUserDataException("${script} does not exist")
+//            }
+//            cmdArgs.add(script.toString())
+//        } else if(script==null && jrubyArgs.size() == 0 ) {
+//            throw new InvalidUserDataException('Cannot instantiate a JRubyExec instance without either `script` or `jrubyArgs` set')
+//        }
+//        cmdArgs.addAll(scriptArgs)
+//        cmdArgs as List<String>
     }
 
     @Override
