@@ -1,6 +1,7 @@
 package com.github.jrubygradle.jar
 
 import org.gradle.api.Task
+import org.gradle.api.artifacts.Dependency
 import org.gradle.api.file.FileCollection
 import org.gradle.api.tasks.bundling.Jar
 import org.gradle.api.tasks.compile.JavaCompile
@@ -96,6 +97,9 @@ class JRubyJarPluginSpec extends Specification {
 
         then: "Then the attribute should be set to the default in the manifest"
             jarTask.manifest.attributes.'Main-Class' == JRubyJarConfigurator.DEFAULT_BOOTSTRAP_CLASS
+
+        and: "Then jruby-complete should be added as a dependency"
+            project.configurations.getByName('compile').dependencies.matching { Dependency d -> d.name == 'jruby-complete' }
     }
 
     def "Adding all defaults"() {

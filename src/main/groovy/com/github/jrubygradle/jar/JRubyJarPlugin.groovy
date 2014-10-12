@@ -21,6 +21,7 @@ class JRubyJarPlugin implements Plugin<Project> {
 
         project.apply plugin : 'com.github.jruby-gradle.base'
         project.apply plugin : 'java-base'
+        project.configurations.maybeCreate('compile')
         project.configurations.maybeCreate('jrubyEmbeds')
         project.configurations.maybeCreate('jrubyJar')
 
@@ -40,6 +41,14 @@ class JRubyJarPlugin implements Plugin<Project> {
                 BootstrapClassExtension,
                 stubTask
         )
+
+        project.repositories {
+            jcenter()
+        }
+
+        project.dependencies {
+            compile group: 'org.jruby', name: 'jruby-complete', version: project.jruby.defaultVersion
+        }
 
         project.configure(stubTask) {
             group JRubyPlugin.TASK_GROUP_NAME
