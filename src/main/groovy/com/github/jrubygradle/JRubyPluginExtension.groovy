@@ -7,7 +7,7 @@ class JRubyPluginExtension {
     /** The default version of jruby that will be used by jrubyWar
      *
      */
-    String defaultVersion = '1.7.16'
+    String defaultVersion = '1.7.15'
 
     /** Directory for jrubyPrepare to install .gem dependencies into
      *
