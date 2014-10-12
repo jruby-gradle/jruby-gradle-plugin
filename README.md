@@ -2,6 +2,8 @@
 
 [![Build Status](https://buildhive.cloudbees.com/job/jruby-gradle/job/jruby-gradle-plugin/badge/icon)](https://buildhive.cloudbees.com/job/jruby-gradle/job/jruby-gradle-plugin/) [ ![Download](https://api.bintray.com/packages/jruby-gradle/plugins/jruby-gradle-plugin/images/download.png) ](https://bintray.com/jruby-gradle/plugins/jruby-gradle-plugin/_latestVersion) [![Gitter chat](https://badges.gitter.im/jruby-gradle/jruby-gradle-plugin.png)](https://gitter.im/jruby-gradle/jruby-gradle-plugin)
 
+Join us on the [jruby-gradle mailing list](https://groups.google.com/forum/#!forum/jruby-gradle)!
+
 The purpose of plugin is to encapsulate useful [Gradle](http://www.gradle.org/)
 functionality for JRuby projects. Use of this plugin replaces the need for both
 [Bundler](http://bundler.io/) and [Warbler](https://github.com/jruby/warbler)
