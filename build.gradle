@@ -69,6 +69,7 @@ test {
     }
     systemProperties TESTROOT : new File(buildDir,'tmp/test/unittests').absolutePath
     systemProperties WARBLER_LOCATION : testWarblerDir.absolutePath
+    systemProperties 'logback.configurationFile' : new File(projectDir,'src/test/resources/logback-test.xml').absolutePath
 }
 
 task sourcesJar(type: Jar, dependsOn: classes) {
