@@ -74,6 +74,12 @@ task myJar (type :Jar) {
 If nothing is specified, then the bootstrap will look for a Ruby script `META-INF/init.rb`.
 It is also possible to set the entry script. This must be specified relative to the root of the created JAR.
 
+**NOTE:** There is currently a [known
+issue](https://github.com/jruby-gradle/jruby-gradle-jar-plugin/issues/14) with
+rebuilding a `shadowJar` when using the `initScript` setting. If you change the
+setting, you will need to execute the `clean` task and rebuild for it to take
+effect.
+
 ```groovy
 jrubyJavaBootstrap {
     jruby {
