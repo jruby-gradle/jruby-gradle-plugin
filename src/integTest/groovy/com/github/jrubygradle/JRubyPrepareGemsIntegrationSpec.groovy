@@ -49,7 +49,7 @@ class JRubyPrepareGemsIntegrationSpec extends Specification {
 
         expect:
             new File(prepTask.outputDir,'gems/slim-2.0.2').exists()
-            new File(prepTask.outputDir,'gems/temple-0.6.8').exists()
+            new File(prepTask.outputDir,'gems/temple-0.6.10').exists()
             new File(prepTask.outputDir,'gems/tilt-2.0.1').exists()
     }
 
@@ -70,7 +70,7 @@ class JRubyPrepareGemsIntegrationSpec extends Specification {
 
         expect:
             new File(prepTask.outputDir,'gems/slim-2.0.2').exists()
-            !new File(prepTask.outputDir,'gems/temple-0.6.8').exists()
+            !new File(prepTask.outputDir,'gems/temple-0.6.10').exists()
             !new File(prepTask.outputDir,'gems/tilt-2.0.1').exists()
    }
 
@@ -88,7 +88,7 @@ class JRubyPrepareGemsIntegrationSpec extends Specification {
 
         expect:
             new File(jrpg.outputDir,'gems/slim-2.0.2').exists()
-            new File(jrpg.outputDir,'gems/temple-0.6.8').exists()
+            new File(jrpg.outputDir,'gems/temple-0.6.10').exists()
             new File(jrpg.outputDir,'gems/tilt-2.0.1').exists()
     }
 }

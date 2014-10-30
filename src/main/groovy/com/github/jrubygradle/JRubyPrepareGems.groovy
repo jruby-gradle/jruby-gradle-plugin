@@ -10,7 +10,7 @@ import org.gradle.api.tasks.TaskAction
 
 /**
  * @author Schalk W. Cronjé
- * @author R Taylor Croy
+ * @author R Tyler Croy
  */
 class JRubyPrepareGems  extends DefaultTask {
 
@@ -38,7 +38,7 @@ class JRubyPrepareGems  extends DefaultTask {
      * @param f A file, directory, configuration or list of gems
      */
     void gems(Object f) {
-        if(this.gems == null) {
+        if (this.gems == null) {
             this.gems = []
         }
         this.gems.add(f)
@@ -47,7 +47,7 @@ class JRubyPrepareGems  extends DefaultTask {
     @TaskAction
     void copy() {
         File jrubyJar = JRubyExecUtils.jrubyJar(project.configurations.getByName(JRubyExec.JRUBYEXEC_CONFIG))
-        GemUtils.extractGems(project,jrubyJar,getGems(),outputDir,GemUtils.OverwriteAction.SKIP)
+        GemUtils.extractGems(project, jrubyJar, getGems(), outputDir, GemUtils.OverwriteAction.SKIP)
     }
 
     private List<Object> gems
