@@ -30,8 +30,9 @@ class JRubyExec extends JavaExec {
         }
 
         proj.tasks.withType(JRubyExec) { t ->
-            if(t.jrubyConfigurationName != proj.configurations.jrubyExec) {
-                proj.dependencies.add(t.jrubyConfigurationName,"org.jruby:jruby-complete:${t.jrubyVersion}")
+            if (t.jrubyConfigurationName != proj.configurations.jrubyExec) {
+                proj.dependencies.add(t.jrubyConfigurationName,
+                                        "org.jruby:jruby-complete:${t.jrubyVersion}")
             }
         }
     }
@@ -78,16 +79,18 @@ class JRubyExec extends JavaExec {
                 script=fName
                 break
             case String:
-                script=new File(fName)
+                script = new File(fName)
                 break
             default:
-                script=new File(fName.toString())
+                script = new File(fName.toString())
         }
     }
 
     /** Returns a list of script arguments
      */
-    List<String> scriptArgs() {CollectionUtils.stringize(this.scriptArgs)}
+    List<String> scriptArgs() {
+        CollectionUtils.stringize(this.scriptArgs)
+    }
 
     /** Set arguments for script
      *
@@ -99,7 +102,9 @@ class JRubyExec extends JavaExec {
 
     /** Returns a list of jruby arguments
      */
-    List<String> jrubyArgs()  {CollectionUtils.stringize(this.jrubyArgs)}
+    List<String> jrubyArgs() {
+        CollectionUtils.stringize(this.jrubyArgs)
+    }
 
     /** Set arguments for jruby
      *
@@ -117,7 +122,7 @@ class JRubyExec extends JavaExec {
      * @param version String in the form '1.7.13'
      */
     void setJrubyVersion(final String version) {
-        if(version == project.jruby.execVersion) {
+        if (version == project.jruby.execVersion) {
             jrubyConfigurationName = JRUBYEXEC_CONFIG
         } else {
             final String cfgName= 'jrubyExec$$' + name
@@ -129,17 +134,22 @@ class JRubyExec extends JavaExec {
 
     @Override
     void exec() {
-        if(configuration == null && jrubyConfigurationName == JRUBYEXEC_CONFIG) {
+        if (configuration == null && jrubyConfigurationName == JRUBYEXEC_CONFIG) {
             configuration = JRUBYEXEC_CONFIG
         }
 
         GemUtils.OverwriteAction overwrite = project.gradle.startParameter.refreshDependencies ?  GemUtils.OverwriteAction.OVERWRITE : GemUtils.OverwriteAction.SKIP
         def jrubyCompletePath = project.configurations.getByName(jrubyConfigurationName)
         File gemDir = tmpGemDir()
+        File path = new File([project.buildDir,
+                                'tmp',
+                                configuration,
+                                'bin'].join(File.separator))
         gemDir.mkdirs()
-        environment 'GEM_HOME' : gemDir
+        environment 'GEM_HOME' : gemDir,
+                    'PATH' : path.absolutePath + File.pathSeparatorChar + environment.PATH
 
-        if(configuration != null) {
+        if (configuration != null) {
             GemUtils.extractGems(
                     project,
                     jrubyCompletePath,
@@ -174,7 +184,7 @@ class JRubyExec extends JavaExec {
 
     @Override
     JavaExec setMain(final String mainClassName) {
-        if(mainClassName == 'org.jruby.Main') {
+        if (mainClassName == 'org.jruby.Main') {
             super.setMain(mainClassName)
         } else {
             throw notAllowed("Setting main class for jruby to ${mainClassName} is not a valid operation")
@@ -208,7 +218,7 @@ class JRubyExec extends JavaExec {
 
     private File tmpGemDir() {
         String ext = FileUtils.toSafeFileName(jrubyConfigurationName)
-        if(configuration && configuration!=jrubyConfigurationName) {
+        if (configuration && configuration != jrubyConfigurationName) {
             ext= ext + "-${FileUtils.toSafeFileName(configuration)}"
         }
         new File( project.buildDir, "tmp/${ext}").absoluteFile
