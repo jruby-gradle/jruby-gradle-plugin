@@ -164,4 +164,16 @@ class JRubyExecSpec extends Specification {
             thrown(InvalidUserDataException)
     }
 
+    def "Properly set the PATH in the Exec envirionment"() {
+        given:
+            project.configurations.maybeCreate('foo')
+
+        when:
+            project.configure(execTask) {
+                configuration 'foo'
+            }
+
+        then:
+            execTask.getComputedPATH('foo', System.env.PATH).contains('foo')
+    }
 }

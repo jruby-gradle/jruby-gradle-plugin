@@ -114,6 +114,17 @@ class JRubyExec extends JavaExec {
         this.jrubyArgs.addAll(args as List)
     }
 
+    /** Return the computed `PATH` for the task
+     *
+     */
+    String getComputedPATH(String configuration, String originalPath) {
+        File path = new File([project.buildDir,
+                                'tmp',
+                                configuration,
+                                'bin'].join(File.separator))
+        return path.absolutePath + File.pathSeparatorChar + originalPath
+    }
+
     /** Setting the {@code jruby-complete} version allows for tasks to be run using different versions of JRuby.
      * This is useful for comparing the results of different version or running with a gem that is only
      * compatible with a specific version or when running a script with a different version that what will
@@ -141,13 +152,9 @@ class JRubyExec extends JavaExec {
         GemUtils.OverwriteAction overwrite = project.gradle.startParameter.refreshDependencies ?  GemUtils.OverwriteAction.OVERWRITE : GemUtils.OverwriteAction.SKIP
         def jrubyCompletePath = project.configurations.getByName(jrubyConfigurationName)
         File gemDir = tmpGemDir()
-        File path = new File([project.buildDir,
-                                'tmp',
-                                configuration,
-                                'bin'].join(File.separator))
         gemDir.mkdirs()
         environment 'GEM_HOME' : gemDir,
-                    'PATH' : path.absolutePath + File.pathSeparatorChar + environment.PATH
+                    'PATH' : getComputedPATH(configuration, System.env.PATH)
 
         if (configuration != null) {
             GemUtils.extractGems(
