@@ -174,6 +174,6 @@ class JRubyExecSpec extends Specification {
             }
 
         then:
-            execTask.getComputedPATH('foo', System.env.PATH).contains('foo')
+            execTask.getComputedPATH(System.env.PATH).contains('foo')
     }
 }

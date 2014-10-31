@@ -117,11 +117,8 @@ class JRubyExec extends JavaExec {
     /** Return the computed `PATH` for the task
      *
      */
-    String getComputedPATH(String configuration, String originalPath) {
-        File path = new File([project.buildDir,
-                                'tmp',
-                                configuration,
-                                'bin'].join(File.separator))
+    String getComputedPATH(String originalPath) {
+        File path = new File(tmpGemDir(), 'bin')
         return path.absolutePath + File.pathSeparatorChar + originalPath
     }
 
@@ -154,7 +151,7 @@ class JRubyExec extends JavaExec {
         File gemDir = tmpGemDir()
         gemDir.mkdirs()
         environment 'GEM_HOME' : gemDir,
-                    'PATH' : getComputedPATH(configuration, System.env.PATH)
+                    'PATH' : getComputedPATH(System.env.PATH)
 
         if (configuration != null) {
             GemUtils.extractGems(
