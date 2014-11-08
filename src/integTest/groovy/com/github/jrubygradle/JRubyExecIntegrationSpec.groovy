@@ -106,4 +106,26 @@ class JRubyExecIntegrationSpec extends Specification {
             output.toString() == "Not valid\n"
     }
 
+    @IgnoreIf({TESTS_ARE_OFFLINE})
+    def "Running a script that has a custom gemdir"() {
+        given:
+            def output = new ByteArrayOutputStream()
+            project.configure(execTask) {
+                setEnvironment [:]
+                script        "${TEST_SCRIPT_DIR}/requiresGem.rb"
+                standardOutput output
+                gemWorkDir     new File(TESTROOT,'customGemDir')
+            }
+
+        when:
+            project.dependencies.add(JRubyExec.JRUBYEXEC_CONFIG,'rubygems:credit_card_validator:1.2.0' )
+            project.evaluate()
+            execTask.exec()
+
+        then:
+            output.toString() == "Not valid\n"
+            new File(TESTROOT,'customGemDir').exists()
+
+    }
+
 }
