@@ -176,4 +176,15 @@ class JRubyExecSpec extends Specification {
         then:
             execTask.getComputedPATH(System.env.PATH).contains('foo')
     }
+
+    def "Override the GEM working directory"() {
+        when:
+            project.configure(execTask) {
+                gemWorkDir 'foobar'
+            }
+
+        then:
+            execTask.gemWorkDir == new File('foobar')
+    }
+
 }

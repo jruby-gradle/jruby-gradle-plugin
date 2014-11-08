@@ -10,6 +10,7 @@ import org.gradle.api.tasks.InputFile
 import org.gradle.api.tasks.InputFiles
 import org.gradle.api.tasks.JavaExec
 import org.gradle.api.tasks.Optional
+import org.gradle.api.tasks.OutputDirectory
 import org.gradle.api.tasks.TaskInstantiationException
 import org.gradle.internal.FileUtils
 import org.gradle.process.ExecResult
@@ -55,6 +56,9 @@ class JRubyExec extends JavaExec {
     @Input
     String jrubyVersion
 
+    @OutputDirectory
+    File gemWorkDir
+
     JRubyExec() {
         super()
         super.setMain 'org.jruby.Main'
@@ -83,6 +87,27 @@ class JRubyExec extends JavaExec {
                 break
             default:
                 script = new File(fName.toString())
+        }
+    }
+
+    /** Sets the working directory used by the task for installing GEMs.
+     * By default every task will use its own private directory, so that tasks
+     * can be run in isolation avoiding potential clashes between different versions
+     * of the same GEM. If the user requires multiple tasks to share the same GEM area
+     * then this configuration property can be used to to provide such a folder..
+     *
+     * @param fName Path to script
+     */
+    void setGemWorkDir(Object fName) {
+        switch (fName) {
+            case File:
+                gemWorkDir=fName
+                break
+            case String:
+                gemWorkDir = new File(fName)
+                break
+            default:
+                gemWorkDir = new File(fName.toString())
         }
     }
 
@@ -148,9 +173,11 @@ class JRubyExec extends JavaExec {
 
         GemUtils.OverwriteAction overwrite = project.gradle.startParameter.refreshDependencies ?  GemUtils.OverwriteAction.OVERWRITE : GemUtils.OverwriteAction.SKIP
         def jrubyCompletePath = project.configurations.getByName(jrubyConfigurationName)
-        File gemDir = tmpGemDir()
-        gemDir.mkdirs()
-        environment 'GEM_HOME' : gemDir,
+        if(gemWorkDir == null) {
+            gemWorkDir = tmpGemDir()
+        }
+        gemWorkDir.mkdirs()
+        environment 'GEM_HOME' : gemWorkDir,
                     'PATH' : getComputedPATH(System.env.PATH)
 
         if (configuration != null) {
@@ -158,7 +185,7 @@ class JRubyExec extends JavaExec {
                     project,
                     jrubyCompletePath,
                     project.configurations.getByName(configuration),
-                    gemDir,
+                    gemWorkDir,
                     overwrite
             )
         }
