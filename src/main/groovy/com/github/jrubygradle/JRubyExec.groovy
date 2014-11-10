@@ -56,6 +56,12 @@ class JRubyExec extends JavaExec {
     @Input
     String jrubyVersion
 
+    /** Set the GEM directory to be used by the task. If not set, then an internal generated directory will be used.
+     * The default behaviour is to allow each JRubyExec task to run in isolation from each other. By setting this
+     * a script can allow different JRubyExec instances to utilise the same folder.
+     *
+     * @since 0.1.6
+     */
     @OutputDirectory
     File gemWorkDir
 
