@@ -92,7 +92,8 @@ Common methods for ```JRubyExec``` for executing a script
 * ```ignoreExitValue``` - ```Boolean```.  Ignore the JVm exit value. Exit values are only effective if the exit value of the Ruby script is correctly communicated back to the JVM.
 * ```configuration``` - ```String```.  Configuration to copy gems from. (*) 
 * ```classpath``` - ```List```.  Additional Jars/Directories to place on classpath.
-* ```jrubyVersion``` - ```String```.  JRuby version to use if not the same as ```project.jruby.execVersion```. 
+* ```jrubyVersion``` - ```String```.  JRuby version to use if not the same as ```project.jruby.execVersion```.
+* ```gemWorkDir``` - ```File```. Provide a custom working directory for unpacking GEMs. 
 
 (*) If ```jRubyVersion``` has not been set, ```jrubyExec``` will used as
 configuration. However, if ```jRubyVersion``` has been set, no gems will be used unless an explicit configuration has been provided
