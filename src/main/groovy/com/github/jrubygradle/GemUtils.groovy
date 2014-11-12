@@ -83,7 +83,11 @@ class GemUtils {
             project.logger.info "Installing " + (gemsToProcess.collect { File it -> it.name }).join(',')
 
             project.javaexec {
-                setEnvironment [:]
+                // Setting these environment variables will ensure that
+                // jbundler and/or jar-dependencies will not attempt to invoke
+                // Maven on a gem's behalf to install a Java dependency that we
+                // should already have taken care of, see #79
+                setEnvironment 'JBUNDLE_SKIP' : 'true', 'JARS_SKIP' : 'true'
                 main 'org.jruby.Main'
                 classpath jRubyClasspath
                 args '-S', 'gem', 'install'
