@@ -35,6 +35,16 @@ class JRubyPluginExtension {
     @Incubating
     boolean defaultRepositories = true
 
+
+    /**
+     * Set the version of Bouncycastle to include as a default dependency for
+     * JRuby
+     *
+     * @since 0.1.8
+     */
+    @Incubating
+    String bouncycastleVersion = '1.50'
+
     JRubyPluginExtension(Project p) {
         project = p
         gemInstallDir = new File(p.buildDir,'vendor').absolutePath

@@ -27,12 +27,15 @@ class JRubyExec extends JavaExec {
     static void updateJRubyDependencies(Project proj) {
         proj.dependencies {
             jrubyExec "org.jruby:jruby-complete:${proj.jruby.execVersion}"
+            jrubyExec "org.bouncycastle:bcprov-jdk15on:${proj.jruby.bouncycastleVersion}"
         }
 
         proj.tasks.withType(JRubyExec) { t ->
             if (t.jrubyConfigurationName != proj.configurations.jrubyExec) {
                 proj.dependencies.add(t.jrubyConfigurationName,
                                         "org.jruby:jruby-complete:${t.jrubyVersion}")
+                proj.dependencies.add(t.jrubyConfigurationName,
+                                        "org.bouncycastle:bcprov-jdk15on:${proj.jruby.bouncycastleVersion}")
             }
         }
     }
