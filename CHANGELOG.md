@@ -1,6 +1,11 @@
 # Changelog
 
-## 0.1.6 - ROADMAP
+## 0.1.7
+
+* [#77](https://github.com/jruby-gradle/jruby-gradle-plugin/issues/77) - Corrects issue introduced in `0.1.6` related to missing `gemWorkDir`
+
+
+## 0.1.6 - Broken
 
 * [#73](https://github.com/jruby-gradle/jruby-gradle-plugin/issues/73) - Allow user to override GEM directory for `JRubyExec`
 
