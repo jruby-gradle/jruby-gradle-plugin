@@ -63,7 +63,7 @@ class JRubyExec extends JavaExec {
      * @since 0.1.6
      */
     @OutputDirectory
-    File gemWorkDir
+    File gemWorkDir = null
 
     JRubyExec() {
         super()
@@ -149,7 +149,7 @@ class JRubyExec extends JavaExec {
      *
      */
     String getComputedPATH(String originalPath) {
-        File path = new File(tmpGemDir(), 'bin')
+        File path = new File(gemWorkDir ?: tmpGemDir(), 'bin')
         return path.absolutePath + File.pathSeparatorChar + originalPath
     }
 
@@ -183,7 +183,7 @@ class JRubyExec extends JavaExec {
             gemWorkDir = tmpGemDir()
         }
         gemWorkDir.mkdirs()
-        environment 'GEM_HOME' : gemWorkDir,
+        environment 'GEM_HOME' : gemWorkDir.absolutePath,
                     'PATH' : getComputedPATH(System.env.PATH)
 
         if (configuration != null) {
