@@ -154,7 +154,12 @@ class JRubyExec extends JavaExec {
         File gemDir = tmpGemDir()
         gemDir.mkdirs()
         environment 'GEM_HOME' : gemDir,
-                    'PATH' : getComputedPATH(System.env.PATH)
+                    'PATH' : getComputedPATH(System.env.PATH),
+                    // Skip all the default behaviors that the
+                    // jar-dependencies and jbundler might attempt at runtime
+                    'JAR_NO_REQUIRE' : 'true',
+                    'JBUNDLE_SKIP' : 'true',
+                    'JARS_SKIP' : 'true'
 
         if (configuration != null) {
             GemUtils.extractGems(
