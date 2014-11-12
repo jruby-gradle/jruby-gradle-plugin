@@ -1,6 +1,14 @@
 # Changelog
 
-## 0.1.7
+
+## 0.1.8
+
+* [#77](https://github.com/jruby-gradle/jruby-gradle-plugin/issues/77) - 0.1.6
+  regresses existing JRubyExec tasks
+* [#79](https://github.com/jruby-gradle/jruby-gradle-plugin/issues/79) - Gem
+  installation should override jbundler/jar-dependencies defaults
+
+## 0.1.7 - Broken
 
 * [#77](https://github.com/jruby-gradle/jruby-gradle-plugin/issues/77) - Corrects issue introduced in `0.1.6` related to missing `gemWorkDir`
 
