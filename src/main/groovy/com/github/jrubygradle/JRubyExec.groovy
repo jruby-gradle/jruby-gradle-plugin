@@ -157,7 +157,7 @@ class JRubyExec extends JavaExec {
                     'PATH' : getComputedPATH(System.env.PATH),
                     // Skip all the default behaviors that the
                     // jar-dependencies and jbundler might attempt at runtime
-                    'JAR_NO_REQUIRE' : 'true',
+                    'JARS_NO_REQUIRE' : 'true',
                     'JBUNDLE_SKIP' : 'true',
                     'JARS_SKIP' : 'true'
 
