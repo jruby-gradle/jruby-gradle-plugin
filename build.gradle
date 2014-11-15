@@ -14,7 +14,7 @@ apply from: 'gradle/integration-tests.gradle'
 
 
 group = 'com.github.jruby-gradle'
-version = '0.1.8'
+version = '0.1.9'
 archivesBaseName = 'jruby-gradle-plugin'
 
 if (System.env.RELEASE != '1') {
@@ -28,7 +28,7 @@ configurations {
 }
 
 ext {
-    jrubyVersion = '1.7.16'
+    jrubyVersion = '1.7.15'
     jrubyClassPathFromConfiguration = { Configuration cfg ->
         def f = cfg.files.find { it.name.startsWith('jruby-complete-') }
         return  f?.absolutePath
@@ -71,6 +71,18 @@ dependencies {
     }
 
     provided "org.jruby:jruby-complete:${jrubyVersion}"
+
+    integrationTestGems 'org.bouncycastle:bcprov-jdk15on:1.50'
+
+    // NOTE: If you change this, you will also need to update JRubyPrepareGemsIntegrationSpec
+    integrationTestGems 'rubygems:slim:2.0.2'
+
+    // NOTE: If you change this, you will also need to update JRubyExecIntegrationSpec & JRubyExecExtensionIntegrationSpec
+    integrationTestGems 'rubygems:credit_card_validator:1.1.0'
+
+    // NOTE: Leave this at .11 as it must be an older version. if
+    // you change it here you will also need to update JRubyExecIntegrationSpec
+    integrationTestGems "org.jruby:jruby-complete:1.7.11"
 }
 
 test {
@@ -88,15 +100,26 @@ test {
     }
 }
 
+task copyIntegrationTestJRuby (type:Copy) {
+    from ({configurations.testJRubyPrepare.files})
+    into new File(buildDir,'tmp/integrationTest/flatRepo')
+}
+
 integrationTest {
     systemProperties TESTROOT : new File(buildDir,'tmp/integrationTest/root').absolutePath
+    systemProperties CACHEDIR : new File(buildDir,'tmp/integrationTest/cache').absolutePath
+    systemProperties FLATREPO : new File(buildDir,'tmp/integrationTest/flatRepo').absolutePath
     systemProperties TEST_SCRIPT_DIR : new File(projectDir,'src/integTest/resources/scripts').absolutePath
     systemProperties 'logback.configurationFile' : new File(projectDir,'src/integTest/resources/logback-test.xml').absolutePath
 
     if(gradle.startParameter.isOffline()) {
         systemProperties 'TESTS_ARE_OFFLINE' : '1'
     }
+
+    dependsOn copyIntegrationTestJRuby
 }
+
+
 
 task sourcesJar(type: Jar, dependsOn: classes) {
     classifier = 'sources'
@@ -138,5 +161,6 @@ bintray {
     }
 }
 bintrayUpload.dependsOn assemble
+
 
 // vim: ft=groovy

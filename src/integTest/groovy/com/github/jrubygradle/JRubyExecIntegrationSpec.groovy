@@ -1,8 +1,7 @@
 package com.github.jrubygradle
 
-import org.gradle.testfixtures.ProjectBuilder
+import com.github.jrubygradle.testhelper.BasicProjectBuilder
 import spock.lang.*
-import static org.gradle.api.logging.LogLevel.LIFECYCLE
 
 
 /**
@@ -10,7 +9,9 @@ import static org.gradle.api.logging.LogLevel.LIFECYCLE
  */
 @Stepwise
 class JRubyExecIntegrationSpec extends Specification {
-    static final boolean TESTS_ARE_OFFLINE = System.getProperty('TESTS_ARE_OFFLINE') != null
+
+    static final File CACHEDIR = new File( System.getProperty('TEST_CACHEDIR') ?: 'build/tmp/integrationTest/cache')
+    static final File FLATREPO = new File( System.getProperty('TEST_FLATREPO') ?: 'build/tmp/integrationTest/flatRepo')
     static final File TEST_SCRIPT_DIR = new File( System.getProperty('TEST_SCRIPT_DIR') ?: 'src/integTest/resources/scripts')
     static final File TESTROOT = new File("${System.getProperty('TESTROOT') ?: 'build/tmp/test/integration-tests'}/jreis")
     static final String TASK_NAME = 'RubyWax'
@@ -23,14 +24,11 @@ class JRubyExecIntegrationSpec extends Specification {
             TESTROOT.deleteDir()
         }
         TESTROOT.mkdirs()
-        project = ProjectBuilder.builder().build()
-        project.buildDir = TESTROOT
-        project.logging.level = LIFECYCLE
-        project.apply plugin: 'com.github.jruby-gradle.base'
+        project = BasicProjectBuilder.buildWithLocalRepo(TESTROOT,FLATREPO,CACHEDIR)
         execTask = project.task(TASK_NAME,type: JRubyExec)
+
     }
 
-    @IgnoreIf({TESTS_ARE_OFFLINE})
     def "Changing the jruby version will load the correct jruby"() {
         when: "Version is set on the task"
             final String newVersion = '1.7.11'
@@ -47,7 +45,6 @@ class JRubyExecIntegrationSpec extends Specification {
             "jruby-complete-${newVersion}.jar".toString() ==  matches[0][1]
     }
 
-    @IgnoreIf({TESTS_ARE_OFFLINE})
     def "Running a Hello World script"() {
         given:
             def output = new ByteArrayOutputStream()
@@ -64,7 +61,6 @@ class JRubyExecIntegrationSpec extends Specification {
             output.toString() == "Hello, World\n"
     }
 
-    @IgnoreIf({TESTS_ARE_OFFLINE})
     def "Running a script that requires a gem"() {
         given:
             def output = new ByteArrayOutputStream()
@@ -75,7 +71,7 @@ class JRubyExecIntegrationSpec extends Specification {
             }
 
         when:
-            project.dependencies.add(JRubyExec.JRUBYEXEC_CONFIG,'rubygems:credit_card_validator:1.2.0' )
+            project.dependencies.add(JRubyExec.JRUBYEXEC_CONFIG,'rubygems:credit_card_validator:1.1.0@gem' )
             project.evaluate()
             execTask.exec()
 
@@ -83,13 +79,12 @@ class JRubyExecIntegrationSpec extends Specification {
             output.toString() == "Not valid\n"
     }
 
-    @IgnoreIf({TESTS_ARE_OFFLINE})
     def "Running a script that requires a gem, a separate jRuby and a separate configuration"() {
         given:
             def output = new ByteArrayOutputStream()
             project.with {
                 configurations.create('RubyWax')
-                dependencies.add('RubyWax','rubygems:credit_card_validator:1.1.0')
+                dependencies.add('RubyWax','rubygems:credit_card_validator:1.1.0@gem')
                 configure(execTask) {
                     script        "${TEST_SCRIPT_DIR}/requiresGem.rb"
                     standardOutput output
@@ -106,4 +101,34 @@ class JRubyExecIntegrationSpec extends Specification {
             output.toString() == "Not valid\n"
     }
 
+//    @IgnoreIf({TESTS_ARE_OFFLINE})
+//    @IgnoreRest
+//    @Issue('https://github.com/jruby-gradle/jruby-gradle-plugin/issues/77')
+//    def "Running rspec from a script should not cause a gemWorkDir failure" () {
+//        given:
+//            project.with {
+//                configurations {
+//                    jrubyExec {
+//                        extendsFrom gems
+//                    }
+//                }
+//                dependencies {
+//                    jrubyExec group: 'rubygems', name: 'rspec', version: '3.1.+'
+//                }
+//
+//                task spec(type: JRubyExec) {
+//                    group 'JRuby'
+//                    description 'Execute the RSpecs in JRuby'
+//                    jrubyArgs '-S'
+//                    script 'rspec'
+//                }
+//            }
+//
+//        when:
+////            project.spec.execute()
+//            true
+//
+//        then:
+//            false
+//    }
 }
