@@ -31,8 +31,10 @@ apply plugin: 'com.github.jruby-gradle.jar'
 ## Implicit loaded plugins
 
 This loads the following plugins if they are not already loaded:
+
 + `com.github.jrubygradle.base`
 + `java-base`
++ `com.github.johnrengelman.shadow`
 
 ## Using the plugin
 
@@ -98,25 +100,6 @@ or another specified script.
 
 Executable JARs are indirectly supported via the [Gradle Shadow Jar plugin](http://plugins.gradle.org/plugin/com.github.johnrengelman.shadow).
 
-
-### Adding Shadow JAR
-```groovy
-buildscript {
-  repositories {
-    jcenter()
-  }
-
-    dependencies {
-      classpath 'com.github.jengelman.gradle.plugins:shadow:1.1.1'
-      classpath group: 'com.github.jruby-gradle:jruby-gradle-jar-plugin:0.1.1'
-      classpath group: 'com.github.jruby-gradle:jruby-gradle-plugin:0.1.+'
-    }
-}
-
-apply plugin: 'com.github.jruby-gradle.jar'
-apply plugin: 'com.github.johnrengelman.shadow'
-apply plugin: 'java'
-```
 
 ### Configuring Shadow JAR
 
