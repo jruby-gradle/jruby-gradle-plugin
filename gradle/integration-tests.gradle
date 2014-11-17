@@ -8,6 +8,7 @@ configurations {
     integrationTestRuntime {
         extendsFrom integrationTestCompile, testRuntime
     }
+    integrationTestGems
 }
 
 sourceSets {
@@ -20,10 +21,18 @@ sourceSets {
     }
 }
 
+task copyIntegrationTestGems (type:Copy) {
+    from ({configurations.integrationTestGems.files})
+    into new File(buildDir,'tmp/integrationTest/flatRepo')
+}
+
 task integrationTest(type: Test, dependsOn: jar) {
     testClassesDir = sourceSets.integrationTest.output.classesDir
     classpath = sourceSets.integrationTest.runtimeClasspath
     mustRunAfter test
+    dependsOn copyIntegrationTestGems
 }
 
 check.dependsOn integrationTest
+
+
