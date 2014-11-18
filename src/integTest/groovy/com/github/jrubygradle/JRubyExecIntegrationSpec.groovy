@@ -1,6 +1,9 @@
 package com.github.jrubygradle
 
+import com.github.jrubygradle.internal.JRubyExecUtils
 import com.github.jrubygradle.testhelper.BasicProjectBuilder
+import com.github.jrubygradle.testhelper.VersionFinder
+import org.gradle.api.Task
 import spock.lang.*
 
 
@@ -101,34 +104,45 @@ class JRubyExecIntegrationSpec extends Specification {
             output.toString() == "Not valid\n"
     }
 
-//    @IgnoreIf({TESTS_ARE_OFFLINE})
-//    @IgnoreRest
-//    @Issue('https://github.com/jruby-gradle/jruby-gradle-plugin/issues/77')
-//    def "Running rspec from a script should not cause a gemWorkDir failure" () {
-//        given:
-//            project.with {
-//                configurations {
-//                    jrubyExec {
-//                        extendsFrom gems
-//                    }
-//                }
-//                dependencies {
-//                    jrubyExec group: 'rubygems', name: 'rspec', version: '3.1.+'
-//                }
-//
-//                task spec(type: JRubyExec) {
-//                    group 'JRuby'
-//                    description 'Execute the RSpecs in JRuby'
-//                    jrubyArgs '-S'
-//                    script 'rspec'
-//                }
-//            }
-//
-//        when:
-////            project.spec.execute()
-//            true
-//
-//        then:
-//            false
-//    }
+    @IgnoreRest
+    @Issue('https://github.com/jruby-gradle/jruby-gradle-plugin/issues/77')
+    def "Running rspec from a script should not cause a gemWorkDir failure" () {
+        given:
+
+            def jrubyVersions = FLATREPO.listFiles(
+                    [ accept : { File dir,String name ->
+                        name ==~ /^jruby-complete.+\.jar/
+                    }] as FilenameFilter
+            )
+
+            assert jrubyVersions.size()
+
+
+            project.with {
+
+                jruby.execVersion = JRubyExecUtils.jrubyJarVersion(jrubyVersions[0])
+
+                dependencies {
+                    jrubyExec "rubygems:rspec:${VersionFinder.find(FLATREPO,'rspec','gem')}@gem"
+                    jrubyExec "rubygems:rspec-core:${VersionFinder.find(FLATREPO,'rspec-core','gem')}@gem"
+                    jrubyExec "rubygems:rspec-support:${VersionFinder.find(FLATREPO,'rspec-support','gem')}@gem"
+                }
+
+                task('spec',type: JRubyExec) {
+                    group 'JRuby'
+                    description 'Execute the RSpecs in JRuby'
+                    jrubyArgs '-S'
+                    script 'rspec'
+                }
+            }
+
+
+
+        when:
+            project.evaluate()
+            project.spec.execute()
+
+        then:
+            noExceptionThrown()
+    }
 }
