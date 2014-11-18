@@ -20,7 +20,9 @@ archivesBaseName = 'jruby-gradle-plugin'
 if (System.env.RELEASE != '1') {
     version = "${version}-SNAPSHOT"
 }
+
 sourceCompatibility = '1.7'
+targetCompatibility = '1.7'
 
 // --- Could be in a separate gradle file
 configurations {

@@ -143,4 +143,29 @@ class JRubyExecIntegrationSpec extends Specification {
         then:
             noExceptionThrown()
     }
+
+    @Issue('https://github.com/jruby-gradle/jruby-gradle-plugin/issues/73')
+     def "Running a script that has a custom gemdir"() {
+         given:
+             def output = new ByteArrayOutputStream()
+             project.configure(execTask) {
+                 setEnvironment [:]
+                 script "${TEST_SCRIPT_DIR}/requiresGem.rb"
+                 standardOutput output
+                 gemWorkDir new File(TESTROOT,'customGemDir')
+             }
+        
+         when:
+             project.dependencies.add(
+                     JRubyExec.JRUBYEXEC_CONFIG,
+                     "rubygems:credit_card_validator:${VersionFinder.find(FLATREPO,'credit_card_validator','gem')}@gem"
+             )
+             project.evaluate()
+             execTask.exec()
+        
+         then:
+             output.toString() == "Not valid\n"
+             new File(TESTROOT,'customGemDir').exists()
+        
+     }
 }
