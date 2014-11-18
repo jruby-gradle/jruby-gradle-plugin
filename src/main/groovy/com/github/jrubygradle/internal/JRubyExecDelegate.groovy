@@ -122,12 +122,6 @@ class JRubyExecDelegate {
     private List<Object>  scriptArgs = []
     private List<Object>  jrubyArgs = []
 
-//    @PackageScope
-//    static File tmpGemDir(Project project) {
-//        String ext = FileUtils.toSafeFileName('project.'+JRUBYEXEC_CONFIG)
-//        new File( project.buildDir, "tmp/${ext}").absoluteFile
-//    }
-
     static def jrubyexecDelegatingClosure = { Project project, Closure cl ->
         def proxy =  new JRubyExecDelegate()
         Closure cl2 = cl.clone()
