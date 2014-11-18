@@ -3,7 +3,6 @@ package com.github.jrubygradle
 import com.github.jrubygradle.internal.JRubyExecUtils
 import com.github.jrubygradle.testhelper.BasicProjectBuilder
 import com.github.jrubygradle.testhelper.VersionFinder
-import org.gradle.api.Task
 import spock.lang.*
 
 
@@ -104,7 +103,6 @@ class JRubyExecIntegrationSpec extends Specification {
             output.toString() == "Not valid\n"
     }
 
-    @IgnoreRest
     @Issue('https://github.com/jruby-gradle/jruby-gradle-plugin/issues/77')
     def "Running rspec from a script should not cause a gemWorkDir failure" () {
         given:

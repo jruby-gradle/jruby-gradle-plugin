@@ -10,6 +10,8 @@ import org.gradle.api.tasks.InputFile
 import org.gradle.api.tasks.InputFiles
 import org.gradle.api.tasks.JavaExec
 import org.gradle.api.tasks.Optional
+import org.gradle.api.tasks.OutputDirectory
+import org.gradle.api.tasks.OutputFile
 import org.gradle.api.tasks.TaskInstantiationException
 import org.gradle.internal.FileUtils
 import org.gradle.process.ExecResult
@@ -57,6 +59,28 @@ class JRubyExec extends JavaExec {
 
     @Input
     String jrubyVersion
+
+
+    /** Directory to use for unpacking GEMs.
+     * This is optional. If not set, then an internal generated folder will be used. In general the latter behaviour
+     * is preferred as it allows for isolating different {@code JRubyExec} tasks. However, this functionality is made
+     * available for script authors for would like to control this behaviour and potentially share GEMs between
+     * various {@code JRubyExec} tasks.
+     *
+     * @since 1.9
+     */
+    Object gemWorkDir
+
+    /** Returns the directory that will be used to unapck GEMs in.
+     *
+     * @return Target directory
+     * @since 1.9
+     */
+    @Optional
+    @OutputDirectory
+    File getGemWorkDir() {
+        gemWorkDir ?: tmpGemDir()
+    }
 
     JRubyExec() {
         super()
@@ -121,7 +145,7 @@ class JRubyExec extends JavaExec {
      *
      */
     String getComputedPATH(String originalPath) {
-        File path = new File(tmpGemDir(), 'bin')
+        File path = new File(getGemWorkDir(), 'bin')
         return path.absolutePath + File.pathSeparatorChar + originalPath
     }
 
@@ -151,7 +175,7 @@ class JRubyExec extends JavaExec {
 
         GemUtils.OverwriteAction overwrite = project.gradle.startParameter.refreshDependencies ?  GemUtils.OverwriteAction.OVERWRITE : GemUtils.OverwriteAction.SKIP
         def jrubyCompletePath = project.configurations.getByName(jrubyConfigurationName)
-        File gemDir = tmpGemDir()
+        File gemDir = getGemWorkDir().absoluteFile
         gemDir.mkdirs()
         environment 'GEM_HOME' : gemDir,
                     'PATH' : getComputedPATH(System.env.PATH),
@@ -233,7 +257,7 @@ class JRubyExec extends JavaExec {
         if (configuration && configuration != jrubyConfigurationName) {
             ext= ext + "-${FileUtils.toSafeFileName(configuration)}"
         }
-        new File( project.buildDir, "tmp/${ext}").absoluteFile
+        new File( project.buildDir, "tmp/${ext}")
     }
 
     private String jrubyConfigurationName
