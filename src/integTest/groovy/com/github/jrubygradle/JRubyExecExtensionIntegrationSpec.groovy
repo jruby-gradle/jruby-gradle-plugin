@@ -1,7 +1,7 @@
 package com.github.jrubygradle
 
 import com.github.jrubygradle.testhelper.BasicProjectBuilder
-import org.gradle.testfixtures.ProjectBuilder
+import com.github.jrubygradle.testhelper.VersionFinder
 import spock.lang.*
 
 import static org.gradle.api.logging.LogLevel.LIFECYCLE
@@ -75,7 +75,8 @@ class JRubyExecExtensionIntegrationSpec extends Specification {
         when:
             project.with {
                 dependencies {
-                    jrubyExec 'rubygems:credit_card_validator:1.1.0@gem'
+                    jrubyExec VersionFinder.findDependency(FLATREPO,'','credit_card_validator','gem')
+
                 }
                 jrubyexec {
                     script        "${TEST_SCRIPT_DIR}/requiresGem.rb"
@@ -88,4 +89,27 @@ class JRubyExecExtensionIntegrationSpec extends Specification {
             output.toString() == "Not valid\n"
     }
 
+    def "Running a script that requires a gem, a separate jRuby, a separate configuration and a custom gemWorkDir"() {
+        given:
+            def output = new ByteArrayOutputStream()
+
+        when:
+            project.with {
+                dependencies {
+                    jrubyExec VersionFinder.findDependency(FLATREPO,'','credit_card_validator','gem')
+
+                }
+                jrubyexec {
+                    script        "${TEST_SCRIPT_DIR}/requiresGem.rb"
+                    standardOutput output
+                    jrubyArgs '-T1'
+                    gemWorkDir  new File(TESTROOT,'customGemDir')
+                }
+            }
+
+        then:
+            output.toString() == "Not valid\n"
+            new File(TESTROOT,'customGemDir').exists()
+
+    }
 }

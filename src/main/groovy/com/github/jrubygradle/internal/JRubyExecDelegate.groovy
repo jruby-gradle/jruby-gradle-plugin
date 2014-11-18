@@ -50,6 +50,26 @@ class JRubyExecDelegate {
 
     String getScript() { this.script }
 
+    /** Override the default directory for unpacking GEMs
+     *
+     * @since 0.1.9
+     */
+    Object gemWorkDir
+
+    /** Override the default directory for unpacking GEMs
+     *
+     * @param dir Directory to use for unpacking GEMs
+     * @since 0.1.9
+     */
+    void gemWorkDir(Object dir) {
+        this.gemWorkDir = dir
+    }
+
+    /** Override the default directory for unpacking GEMs
+     *
+     * @param dir Directory to use for unpacking GEMs
+     * @since 0.1.9
+     */
     /** Returns a list of script arguments
      */
     List<String> scriptArgs() {CollectionUtils.stringize(this.scriptArgs)}
@@ -102,18 +122,13 @@ class JRubyExecDelegate {
     private List<Object>  scriptArgs = []
     private List<Object>  jrubyArgs = []
 
-    static File tmpGemDir(Project project) {
-        String ext = FileUtils.toSafeFileName('project.'+JRUBYEXEC_CONFIG)
-        new File( project.buildDir, "tmp/${ext}").absoluteFile
-    }
-
     static def jrubyexecDelegatingClosure = { Project project, Closure cl ->
         def proxy =  new JRubyExecDelegate()
         Closure cl2 = cl.clone()
         cl2.delegate = proxy
         cl2.call()
 
-        File gemDir=new File(project.jruby.gemInstallDir)
+        File gemDir= project.file(proxy.gemWorkDir ?: project.jruby.gemInstallDir)
         Configuration config = project.configurations.getByName(JRUBYEXEC_CONFIG)
         GemUtils.OverwriteAction overwrite = project.gradle.startParameter.refreshDependencies ?  GemUtils.OverwriteAction.OVERWRITE : GemUtils.OverwriteAction.SKIP
         project.mkdir gemDir

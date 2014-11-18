@@ -22,5 +22,7 @@ class VersionFinder {
         }
     }
 
-
+    static findDependency( final File repoDir, final String organisation, final String artifact, final String extension ) {
+        "${organisation}:${artifact}:${find(repoDir,artifact,extension)}@${extension}"
+    }
 }

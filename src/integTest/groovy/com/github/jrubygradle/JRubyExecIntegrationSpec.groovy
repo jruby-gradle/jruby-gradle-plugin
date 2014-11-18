@@ -73,7 +73,7 @@ class JRubyExecIntegrationSpec extends Specification {
             }
 
         when:
-            project.dependencies.add(JRubyExec.JRUBYEXEC_CONFIG,'rubygems:credit_card_validator:1.1.0@gem' )
+            project.dependencies.add(JRubyExec.JRUBYEXEC_CONFIG,VersionFinder.findDependency(FLATREPO,'','credit_card_validator','gem'))
             project.evaluate()
             execTask.exec()
 
@@ -86,7 +86,7 @@ class JRubyExecIntegrationSpec extends Specification {
             def output = new ByteArrayOutputStream()
             project.with {
                 configurations.create('RubyWax')
-                dependencies.add('RubyWax','rubygems:credit_card_validator:1.1.0@gem')
+                dependencies.add('RubyWax',VersionFinder.findDependency(FLATREPO,'','credit_card_validator','gem'))
                 configure(execTask) {
                     script        "${TEST_SCRIPT_DIR}/requiresGem.rb"
                     standardOutput output
@@ -107,6 +107,7 @@ class JRubyExecIntegrationSpec extends Specification {
     def "Running rspec from a script should not cause a gemWorkDir failure" () {
         given:
 
+            def output = new ByteArrayOutputStream()
             def jrubyVersions = FLATREPO.listFiles(
                     [ accept : { File dir,String name ->
                         name ==~ /^jruby-complete.+\.jar/
@@ -121,9 +122,9 @@ class JRubyExecIntegrationSpec extends Specification {
                 jruby.execVersion = JRubyExecUtils.jrubyJarVersion(jrubyVersions[0])
 
                 dependencies {
-                    jrubyExec "rubygems:rspec:${VersionFinder.find(FLATREPO,'rspec','gem')}@gem"
-                    jrubyExec "rubygems:rspec-core:${VersionFinder.find(FLATREPO,'rspec-core','gem')}@gem"
-                    jrubyExec "rubygems:rspec-support:${VersionFinder.find(FLATREPO,'rspec-support','gem')}@gem"
+                    jrubyExec VersionFinder.findDependency(FLATREPO,'','rspec','gem')
+                    jrubyExec VersionFinder.findDependency(FLATREPO,'','rspec-core','gem')
+                    jrubyExec VersionFinder.findDependency(FLATREPO,'','rspec-support','gem')
                 }
 
                 task('spec',type: JRubyExec) {
@@ -131,10 +132,9 @@ class JRubyExecIntegrationSpec extends Specification {
                     description 'Execute the RSpecs in JRuby'
                     jrubyArgs '-S'
                     script 'rspec'
+                    standardOutput output
                 }
             }
-
-
 
         when:
             project.evaluate()
@@ -142,5 +142,32 @@ class JRubyExecIntegrationSpec extends Specification {
 
         then:
             noExceptionThrown()
+            output.toString().startsWith("No examples found.")
+
+    }
+
+    @Issue('https://github.com/jruby-gradle/jruby-gradle-plugin/issues/73')
+    def "Running a script that has a custom gemdir"() {
+         given:
+             def output = new ByteArrayOutputStream()
+             project.configure(execTask) {
+                 setEnvironment [:]
+                 script "${TEST_SCRIPT_DIR}/requiresGem.rb"
+                 standardOutput output
+                 gemWorkDir new File(TESTROOT,'customGemDir')
+             }
+        
+         when:
+             project.dependencies.add(
+                     JRubyExec.JRUBYEXEC_CONFIG,
+                     VersionFinder.findDependency(FLATREPO,'','credit_card_validator','gem')
+             )
+             project.evaluate()
+             execTask.exec()
+        
+         then:
+             output.toString() == "Not valid\n"
+             new File(TESTROOT,'customGemDir').exists()
+        
     }
 }
