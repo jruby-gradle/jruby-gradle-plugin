@@ -1,5 +1,8 @@
 # Changelog
 
+## 0.1.9 - Roadmap
+
+* [#73](https://github.com/jruby-gradle/jruby-gradle-plugin/issues/73) - Allow user to override GEM directory for `JRubyExec` and `project.jrubyexec`. Issues addressed that broken 0.1.6 and 0.1.7
 
 ## 0.1.8
 
