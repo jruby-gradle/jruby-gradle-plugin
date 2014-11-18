@@ -67,19 +67,19 @@ class JRubyExec extends JavaExec {
      * available for script authors for would like to control this behaviour and potentially share GEMs between
      * various {@code JRubyExec} tasks.
      *
-     * @since 1.9
+     * @since 0.1.9
      */
     Object gemWorkDir
 
     /** Returns the directory that will be used to unapck GEMs in.
      *
      * @return Target directory
-     * @since 1.9
+     * @since 0.1.9
      */
     @Optional
     @OutputDirectory
     File getGemWorkDir() {
-        gemWorkDir ?: tmpGemDir()
+        gemWorkDir ? project.file(gemWorkDir) : tmpGemDir()
     }
 
     JRubyExec() {

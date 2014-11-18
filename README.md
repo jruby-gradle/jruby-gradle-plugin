@@ -93,7 +93,8 @@ Common methods for ```JRubyExec``` for executing a script
 * ```configuration``` - ```String```.  Configuration to copy gems from. (*) 
 * ```classpath``` - ```List```.  Additional Jars/Directories to place on classpath.
 * ```jrubyVersion``` - ```String```.  JRuby version to use if not the same as ```project.jruby.execVersion```.
-* ```gemWorkDir``` - ```File```. Provide a custom working directory for unpacking GEMs. 
+* ```gemWorkDir``` - ```File```. Provide a custom working directory for unpacking GEMs. By default each `JRubyExec` task
+  uses it's own work directory. Use this to set a common work directory for a number of tasks.
 
 (*) If ```jRubyVersion``` has not been set, ```jrubyExec``` will used as
 configuration. However, if ```jRubyVersion``` has been set, no gems will be used unless an explicit configuration has been provided
