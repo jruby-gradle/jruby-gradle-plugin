@@ -72,6 +72,7 @@ dependencies {
 
     provided "org.jruby:jruby-complete:${jrubyVersion}"
 
+    // This needs to be here as JRubyExec will add it as a dependency
     integrationTestGems 'org.bouncycastle:bcprov-jdk15on:1.50'
 
     // NOTE: If you change this, you will also need to update JRubyPrepareGemsIntegrationSpec
@@ -79,6 +80,9 @@ dependencies {
 
     // NOTE: If you change this, you will also need to update JRubyExecIntegrationSpec & JRubyExecExtensionIntegrationSpec
     integrationTestGems 'rubygems:credit_card_validator:1.1.0'
+
+    // NOTE: If you change this, you will also need to update JRubyExecIntegrationSpec
+    integrationTestGems 'rubygems:rspec:3.1.0'
 
     // NOTE: Leave this at .11 as it must be an older version. if
     // you change it here you will also need to update JRubyExecIntegrationSpec
@@ -106,9 +110,9 @@ task copyIntegrationTestJRuby (type:Copy) {
 }
 
 integrationTest {
-    systemProperties TESTROOT : new File(buildDir,'tmp/integrationTest/root').absolutePath
-    systemProperties CACHEDIR : new File(buildDir,'tmp/integrationTest/cache').absolutePath
-    systemProperties FLATREPO : new File(buildDir,'tmp/integrationTest/flatRepo').absolutePath
+    systemProperties TESTROOT        : new File(buildDir,'tmp/integrationTest/root').absolutePath
+    systemProperties CACHEDIR        : new File(buildDir,'tmp/integrationTest/cache').absolutePath
+    systemProperties FLATREPO        : new File(buildDir,'tmp/integrationTest/flatRepo').absolutePath
     systemProperties TEST_SCRIPT_DIR : new File(projectDir,'src/integTest/resources/scripts').absolutePath
     systemProperties 'logback.configurationFile' : new File(projectDir,'src/integTest/resources/logback-test.xml').absolutePath
 

@@ -1,9 +1,12 @@
 package com.github.jrubygradle.internal
 
+import groovy.transform.CompileDynamic
 import groovy.transform.CompileStatic
 import org.gradle.api.InvalidUserDataException
 import org.gradle.api.artifacts.Configuration
 import org.gradle.api.file.FileCollection
+
+import java.util.regex.Matcher
 
 /**
  * @author Schalk W. Cronjé.
@@ -27,6 +30,19 @@ class JRubyExecUtils {
      */
     static File jrubyJar(Configuration cfg) {
         cfg.files.find { it.name.startsWith('jruby-complete-') }
+    }
+
+    /** Extracts the JRuby version number from a jruby-complete-XXX.jar filename
+     *
+     * @param jar JRuby Jar
+     * @return Version string or null
+     *
+     * @since 0.1.9
+     */
+    @CompileDynamic
+    static String jrubyJarVersion(File jar) {
+        Matcher matches = jar.name =~ /jruby-complete-(.+)\.jar/
+        !matches ? null : matches[0][1]
     }
 
     /** Extract the jruby-complete-XXX.jar as a FileCollection
