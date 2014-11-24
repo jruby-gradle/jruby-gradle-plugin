@@ -16,7 +16,7 @@ dependencies {
 ```
 
 Dependencies declared under the `jrubyWar` configuration will be copied into
-`.jarcache/` and `.war/WEB-INF/libs` when the archive is created.
+`.war/WEB-INF/libs` when the archive is created.
 
 ## Default Tasks
 
@@ -30,50 +30,64 @@ The plugin provides the following tasks:
 
 ## Creating a .war
 
-Currently the Gradle tooling expects the web application to reside in
-`src/main/webapp/WEB-INF`, so make sure your `config.ru` and application code
-are under that root directory. It may be useful to symbolicly link this to
-`app/` in your root project directory. An *full* example of this can be found in the
-[ruby-gradle-example](https://github.com/rtyler/ruby-gradle-example)
-repository.
+A *full* example of this can be found in the
+[hellowarld](https://github.com/rtyler/hellowarld) repository.
+
+Configuring the war:
+
+```groovy
+buildscript {
+    repositories { jcenter() }
+
+    dependencies {
+        classpath group: 'com.github.jruby-gradle', name: 'jruby-gradle-war-plugin', version: '0.1.2+'
+    }
+}
+apply plugin: 'com.github.jruby-gradle.war'
+
+
+dependencies {
+    gems 'rubygems:rake:10.0.+'
+    gems 'rubygems:colorize:0.7.3'
+    gems 'rubygems:sinatra:1.4.5'
+}
+
+jrubyWar {
+    webInf {
+        from 'Rakefile'
+        from 'config.ru'
+        into('app') { from 'app' }
+    }
+}
+```
+
+The above configuration will copy the contents of `app/`, `Rakefile`, and
+`config.ru` into the `WEB-INF/` directory within the `.war` file
 
 Once your application is ready, you can create the `.war` by executing the `jrubyWar` task:
 
 ```bash
-% ./gradlew jrubyWar  
+$ ./gradlew jrubyWar
 :compileJava UP-TO-DATE
 :processResources UP-TO-DATE
 :classes UP-TO-DATE
-:jrubyCacheJars
-:jrubyCacheGems
 :jrubyPrepareGems
-/home/tyler/.rvm/rubies/ruby-1.9.3-p484/lib/ruby/1.9.1/yaml.rb:84:in `<top (required)>':
-It seems your ruby installation is missing psych (for YAML output).
-To eliminate this warning, please install libyaml and reinstall your ruby.
+/usr/home/tyler/.gradle/caches/modules-2/files-2.1/org.jruby/jruby-complete/1.7.15/4d9cb332bad3633c9c23a720542f456dc0c58a81/jruby-complete-1.7.15.jar!/META-INF/jruby.home/lib/ruby/shared/rubygems/installer.rb:507 warning: executable? does not in this environment and will return a dummy value
+Successfully installed tilt-1.4.1
+/usr/home/tyler/.gradle/caches/modules-2/files-2.1/org.jruby/jruby-complete/1.7.15/4d9cb332bad3633c9c23a720542f456dc0c58a81/jruby-complete-1.7.15.jar!/META-INF/jruby.home/lib/ruby/shared/rubygems/installer.rb:507 warning: executable? does not in this environment and will return a dummy value
 Successfully installed rack-1.5.2
 Successfully installed rack-protection-1.5.3
-2 gems installed
-/home/tyler/.rvm/rubies/ruby-1.9.3-p484/lib/ruby/1.9.1/yaml.rb:84:in `<top (required)>':
-It seems your ruby installation is missing psych (for YAML output).
-To eliminate this warning, please install libyaml and reinstall your ruby.
-Successfully installed rake-10.3.2
-1 gem installed
-/home/tyler/.rvm/rubies/ruby-1.9.3-p484/lib/ruby/1.9.1/yaml.rb:84:in `<top (required)>':
-It seems your ruby installation is missing psych (for YAML output).
-To eliminate this warning, please install libyaml and reinstall your ruby.
-Successfully installed tilt-1.4.1
-1 gem installed
-/home/tyler/.rvm/rubies/ruby-1.9.3-p484/lib/ruby/1.9.1/yaml.rb:84:in `<top (required)>':
-It seems your ruby installation is missing psych (for YAML output).
-To eliminate this warning, please install libyaml and reinstall your ruby.
+/usr/home/tyler/.gradle/caches/modules-2/files-2.1/org.jruby/jruby-complete/1.7.15/4d9cb332bad3633c9c23a720542f456dc0c58a81/jruby-complete-1.7.15.jar!/META-INF/jruby.home/lib/ruby/shared/rubygems/installer.rb:507 warning: executable? does not in this environment and will return a dummy value
+Successfully installed rake-10.0.4
+Successfully installed colorize-0.7.3
 Successfully installed sinatra-1.4.5
-1 gem installed
+6 gems installed
 :jrubyPrepare
 :jrubyWar
 
 BUILD SUCCESSFUL
 
-Total time: 1 mins 34.84 secs
+Total time: 20.342 secs
 %
 ```
 
