@@ -33,27 +33,5 @@ class JRubyWarPlugin implements Plugin<Project> {
             dependsOn project.tasks.jrubyPrepare
             classpath project.configurations.jrubyWar
         }
-
-        // TODO: jarcache should rather be inside buildDir
-        project.task('jrubyCacheJars', type: Copy) {
-            group JRubyPlugin.TASK_GROUP_NAME
-            description 'Cache .jar-based dependencies into .jarcache/'
-
-            from project.configurations.jrubyWar
-            into ".jarcache"
-            include '**/*.jar'
-        }
-
-        // Add our dependency onto jrubyPrepare so it will serve our needs too
-        project.tasks.jrubyPrepare.dependsOn project.tasks.jrubyCacheJars
-
-        project.task('jrubyCleanJars', type: Delete) {
-            group JRubyPlugin.TASK_GROUP_NAME
-            description 'Clean up the temporary dirs created by the jrubyCacheJars task'
-            delete '.jarcache/'
-        }
-
-        // Add our dependency onto clean so it will clean up after us too
-        project.tasks.clean.dependsOn project.tasks.jrubyCleanJars
     }
 }
