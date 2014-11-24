@@ -22,12 +22,11 @@ class JRubyWarSpec extends Specification {
         project.logging.level = LIFECYCLE
         project.apply plugin: 'com.github.jruby-gradle.war'
         warTask = project.task(TASK_NAME, type: JRubyWar)
-
     }
 
     def "basic sanity check"() {
         expect: "warTask to be an instance"
-            warTask instanceof com.github.jrubygradle.war.JRubyWar
-            project.tasks.jrubyWar.group == 'JRuby'
+        warTask instanceof com.github.jrubygradle.war.JRubyWar
+        project.tasks.jrubyWar.group == 'JRuby'
     }
 }

@@ -21,7 +21,10 @@ class JRubyWarPlugin implements Plugin<Project> {
 
         project.afterEvaluate {
             JRubyWar.updateJRubyDependencies(project)
-            WarblerBootstrap.addDependency(project)
+
+            project.dependencies {
+                compile group: 'com.github.jruby-gradle', name: 'warbler-bootstrap', version: '0.1.1+'
+            }
         }
 
         // Only jRubyWar will depend on jrubyPrepare. Other JRubyWar tasks created by

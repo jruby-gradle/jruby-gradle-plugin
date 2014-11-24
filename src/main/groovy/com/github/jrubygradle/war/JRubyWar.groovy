@@ -19,10 +19,6 @@ class JRubyWar extends War {
     @Input
     String mainClass = JRUBYWAR_MAINCLASS
 
-    JRubyWar() {
-        super()
-    }
-
     @Override
     void copy() {
         // Bring our vendored gems into the created war file
@@ -46,6 +42,20 @@ class JRubyWar extends War {
         manifest {
             attributes 'Main-Class' : mainClass
         }
+
+        /* If we haven't been given a web.xml, let's pull the default one from
+         * warbler-bootstrap
+         */
+        if (webXml == null) {
+            project.configurations.compile.each {
+                if (it.name =~ 'warbler-bootstrap') {
+                    from project.zipTree(it).matching {
+                        include 'WEB-INF/web.xml'
+                    }
+                }
+            }
+        }
+
         super.copy()
     }
 
