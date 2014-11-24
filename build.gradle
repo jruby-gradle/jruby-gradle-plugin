@@ -4,7 +4,7 @@ apply plugin: 'com.jfrog.bintray'
 
 buildscript {
     repositories { jcenter() }
-    dependencies { classpath 'com.jfrog.bintray.gradle:gradle-bintray-plugin:0.5' }
+    dependencies { classpath 'com.jfrog.bintray.gradle:gradle-bintray-plugin:0.6' }
 }
 
 group = 'com.github.jruby-gradle'
@@ -24,7 +24,7 @@ dependencies {
     compile gradleApi()
     compile localGroovy()
 
-    compile group: 'com.github.jruby-gradle', name: 'jruby-gradle-plugin', version: '0.1.+'
+    compile group: 'com.github.jruby-gradle', name: 'jruby-gradle-plugin', version: '0.1.9+'
 
     testCompile ("org.spockframework:spock-core:0.7-groovy-${gradle.gradleVersion.startsWith('1.')?'1.8':'2.0'}") {
         exclude module : 'groovy-all'
