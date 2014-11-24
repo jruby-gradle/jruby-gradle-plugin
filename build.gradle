@@ -1,9 +1,9 @@
-apply plugin: 'groovy'
-apply plugin: 'maven'
-
 plugins {
   id "com.jfrog.bintray" version "0.6"
 }
+
+apply plugin: 'groovy'
+apply plugin: 'maven'
 
 group = 'com.github.jruby-gradle'
 version = '0.1.3'
