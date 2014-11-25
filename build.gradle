@@ -6,7 +6,7 @@ apply plugin: 'groovy'
 apply plugin: 'maven'
 
 group = 'com.github.jruby-gradle'
-version = '0.1.3'
+version = '0.1.4'
 
 if (System.env.RELEASE != '1') {
     version = "${version}-SNAPSHOT"
@@ -69,7 +69,7 @@ bintray {
         version {
             name = project.version
             vcsTag = "v${project.version}"
-            attributes = ['gradle-plugin' : 'com.github.jruby-gradle:com.github.jruby-gradle:jruby-gradle-war-plugin']
+            attributes = ['gradle-plugin' : 'com.github.jruby-gradle.war:com.github.jruby-gradle:jruby-gradle-war-plugin']
             desc = 'This plugin encapsulates web archive building functionality for JRuby Gradle projects'
 
         }
