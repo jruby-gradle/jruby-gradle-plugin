@@ -1,7 +1,7 @@
 jruby-gradle-war-plugin
 =======================
 
-[![Build Status](https://buildhive.cloudbees.com/job/jruby-gradle/job/jruby-gradle-war-plugin/badge/icon)](https://buildhive.cloudbees.com/job/jruby-gradle/job/jruby-gradle-war-plugin/) [![Gitter chat](https://badges.gitter.im/jruby-gradle/jruby-gradle-plugin.png)](https://gitter.im/jruby-gradle/jruby-gradle-plugin)
+[![Build Status](https://buildhive.cloudbees.com/job/jruby-gradle/job/jruby-gradle-war-plugin/badge/icon)](https://buildhive.cloudbees.com/job/jruby-gradle/job/jruby-gradle-war-plugin/) [![Download](https://api.bintray.com/packages/jruby-gradle/plugins/jruby-gradle-war-plugin/images/download.png)](https://bintray.com/jruby-gradle/plugins/jruby-gradle-war-plugin) [![Gitter chat](https://badges.gitter.im/jruby-gradle/jruby-gradle-plugin.png)](https://gitter.im/jruby-gradle/jruby-gradle-plugin)
 
 Plugin for creating JRuby-based web archives
 
