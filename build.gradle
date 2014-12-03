@@ -6,7 +6,7 @@ apply plugin: 'groovy'
 apply plugin: 'maven'
 
 group = 'com.github.jruby-gradle'
-version = '0.1.4'
+version = '0.1.5'
 
 if (System.env.RELEASE != '1') {
     version = "${version}-SNAPSHOT"
