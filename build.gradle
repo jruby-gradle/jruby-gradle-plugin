@@ -1,17 +1,19 @@
 plugins {
-  id "com.jfrog.bintray" version "0.6"
+  id "com.jfrog.bintray" version "1.0"
 }
 
 apply plugin: 'groovy'
 apply plugin: 'maven'
 
 group = 'com.github.jruby-gradle'
+description = 'This plugin encapsulates web archive building functionality for JRuby Gradle projects'
 version = '0.1.5'
 
 if (System.env.RELEASE != '1') {
     version = "${version}-SNAPSHOT"
 }
-sourceCompatibility = '1.7'
+sourceCompatibility = '1.6'
+targetCompatibility = '1.6'
 
 repositories {
     jcenter()
@@ -23,6 +25,7 @@ dependencies {
     compile localGroovy()
 
     compile group: 'com.github.jruby-gradle', name: 'jruby-gradle-plugin', version: '0.1.9+'
+    compile group: 'com.github.jruby-gradle', name: 'warbler-bootstrap', version: '0.2.0+'
 
     testCompile ("org.spockframework:spock-core:0.7-groovy-${gradle.gradleVersion.startsWith('1.')?'1.8':'2.0'}") {
         exclude module : 'groovy-all'
@@ -45,14 +48,6 @@ artifacts {
     archives sourcesJar
 }
 
-// Ensure we don't fail in CI or on a system without these values set in
-// ~/.gradle/gradle.properties
-if (!hasProperty( 'bintrayUser' ))
-  ext.bintrayUser = ''
-
-if (!hasProperty( 'bintrayKey' ))
-  ext.bintrayKey = ''
-
 bintray {
     user = project.bintrayUser
     key = project.bintrayKey
@@ -70,8 +65,7 @@ bintray {
             name = project.version
             vcsTag = "v${project.version}"
             attributes = ['gradle-plugin' : 'com.github.jruby-gradle.war:com.github.jruby-gradle:jruby-gradle-war-plugin']
-            desc = 'This plugin encapsulates web archive building functionality for JRuby Gradle projects'
-
+            desc = project.description
         }
     }
 }
