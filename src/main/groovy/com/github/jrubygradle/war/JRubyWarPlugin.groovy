@@ -23,7 +23,7 @@ class JRubyWarPlugin implements Plugin<Project> {
             JRubyWar.updateJRubyDependencies(project)
 
             project.dependencies {
-                compile group: 'com.github.jruby-gradle', name: 'warbler-bootstrap', version: '0.1.1+'
+                jrubyEmbeds group: 'com.github.jruby-gradle', name: 'warbler-bootstrap', version: '0.2.0+'
             }
         }
 

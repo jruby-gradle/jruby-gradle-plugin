@@ -10,7 +10,7 @@ import org.gradle.api.tasks.bundling.War
   */
 class JRubyWar extends War {
 
-    static final String JRUBYWAR_MAINCLASS = 'com.lookout.jruby.WarMain'
+    static final String JRUBYWAR_MAINCLASS = 'com.github.jrubygradle.warbler.WarMain'
     static final String JRUBYWAR_CONFIG = 'jrubyWar'
 
     /** Setting the main class allows for a runnable War.
