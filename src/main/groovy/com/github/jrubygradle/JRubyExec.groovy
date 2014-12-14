@@ -25,6 +25,8 @@ import org.gradle.util.CollectionUtils
 class JRubyExec extends JavaExec {
 
     static final String JRUBYEXEC_CONFIG = 'jrubyExec'
+    // Names of environment variables that we can/should filter out
+    static final ArrayList<String> FILTER_ENV_KEYS = ['GEM_PATH', 'RUBY_VERSION', 'GEM_HOME']
 
     static void updateJRubyDependencies(Project proj) {
         proj.dependencies {
@@ -60,6 +62,14 @@ class JRubyExec extends JavaExec {
     @Input
     String jrubyVersion
 
+    /** Allow JRubyExec to inherit a Ruby env from the shell (e.g. RVM)
+      *
+      * @since 0.1.10
+      */
+    @Optional
+    @Input
+    Boolean inheritRubyEnv
+
     /** Directory to use for unpacking GEMs.
      * This is optional. If not set, then an internal generated folder will be used. In general the latter behaviour
      * is preferred as it allows for isolating different {@code JRubyExec} tasks. However, this functionality is made
@@ -84,6 +94,7 @@ class JRubyExec extends JavaExec {
     JRubyExec() {
         super()
         super.setMain 'org.jruby.Main'
+        setInheritRubyEnv false
 
         try {
             project.configurations.getByName(JRUBYEXEC_CONFIG)
@@ -172,17 +183,12 @@ class JRubyExec extends JavaExec {
             configuration = JRUBYEXEC_CONFIG
         }
 
-        GemUtils.OverwriteAction overwrite = project.gradle.startParameter.refreshDependencies ?  GemUtils.OverwriteAction.OVERWRITE : GemUtils.OverwriteAction.SKIP
+        GemUtils.OverwriteAction overwrite = project.gradle.startParameter.refreshDependencies ? \
+                                                GemUtils.OverwriteAction.OVERWRITE : GemUtils.OverwriteAction.SKIP
         def jrubyCompletePath = project.configurations.getByName(jrubyConfigurationName)
         File gemDir = getGemWorkDir().absoluteFile
         gemDir.mkdirs()
-        environment 'GEM_HOME' : gemDir,
-                    'PATH' : getComputedPATH(System.env.PATH),
-                    // Skip all the default behaviors that the
-                    // jar-dependencies and jbundler might attempt at runtime
-                    'JARS_NO_REQUIRE' : 'true',
-                    'JBUNDLE_SKIP' : 'true',
-                    'JARS_SKIP' : 'true'
+        setEnvironment getPreparedEnvironment(System.env)
 
         if (configuration != null) {
             GemUtils.extractGems(
@@ -247,6 +253,34 @@ class JRubyExec extends JavaExec {
         return this.jrubyConfigurationName
     }
 
+    Map getPreparedEnvironment(Map env) {
+        Map<String, Object> newEnv = [
+                    'PATH' : getComputedPATH(System.env.PATH),
+                    'GEM_HOME' : getGemWorkDir().absoluteFile,
+                    // Skip all the default behaviors that the
+                    // jar-dependencies and jbundler might attempt at runtime
+                    'JARS_NO_REQUIRE' : 'true',
+                    'JBUNDLE_SKIP' : 'true',
+                    'JARS_SKIP' : 'true',
+                    ]
+
+        env.each { key, value ->
+            /* Filter all out all the undesirable environment variables to
+             * propogate into the child process' environment
+             */
+            if (!inheritRubyEnv) {
+                if ( (key in FILTER_ENV_KEYS) ||
+                     (key.startsWith('rvm')) ||
+                     (key in newEnv)) {
+                     return
+                }
+            }
+            newEnv.put(key, value)
+        }
+
+        return newEnv
+    }
+
     private static UnsupportedOperationException notAllowed(final String msg) {
         return new UnsupportedOperationException (msg)
     }
@@ -264,6 +298,3 @@ class JRubyExec extends JavaExec {
     private List<Object>  scriptArgs = []
 
 }
-
-
-
