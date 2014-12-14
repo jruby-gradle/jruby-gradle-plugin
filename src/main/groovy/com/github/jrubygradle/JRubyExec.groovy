@@ -60,7 +60,6 @@ class JRubyExec extends JavaExec {
     @Input
     String jrubyVersion
 
-
     /** Directory to use for unpacking GEMs.
      * This is optional. If not set, then an internal generated folder will be used. In general the latter behaviour
      * is preferred as it allows for isolating different {@code JRubyExec} tasks. However, this functionality is made
@@ -77,10 +76,10 @@ class JRubyExec extends JavaExec {
      * @since 0.1.9
      */
     @Optional
-    @OutputDirectory
     File getGemWorkDir() {
         gemWorkDir ? project.file(gemWorkDir) : tmpGemDir()
     }
+
 
     JRubyExec() {
         super()
