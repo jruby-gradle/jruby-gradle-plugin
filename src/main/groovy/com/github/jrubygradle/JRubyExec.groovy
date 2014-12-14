@@ -188,7 +188,7 @@ class JRubyExec extends JavaExec {
         def jrubyCompletePath = project.configurations.getByName(jrubyConfigurationName)
         File gemDir = getGemWorkDir().absoluteFile
         gemDir.mkdirs()
-        setEnvironment getPreparedEnvironment(System.env)
+        setEnvironment getPreparedEnvironment(environment)
 
         if (configuration != null) {
             GemUtils.extractGems(
