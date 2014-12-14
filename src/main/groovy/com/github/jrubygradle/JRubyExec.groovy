@@ -26,7 +26,7 @@ class JRubyExec extends JavaExec {
 
     static final String JRUBYEXEC_CONFIG = 'jrubyExec'
     // Names of environment variables that we can/should filter out
-    static final ArrayList<String> FILTER_ENV_KEYS = ['GEM_PATH', 'RUBY_VERSION', 'GEM_HOME']
+    static final List FILTER_ENV_KEYS = ['GEM_PATH', 'RUBY_VERSION', 'GEM_HOME']
 
     static void updateJRubyDependencies(Project proj) {
         proj.dependencies {
