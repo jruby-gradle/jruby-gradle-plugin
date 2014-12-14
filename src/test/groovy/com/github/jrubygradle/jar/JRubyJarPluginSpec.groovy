@@ -6,6 +6,7 @@ import org.gradle.api.file.FileCollection
 import org.gradle.api.tasks.bundling.Jar
 import org.gradle.api.tasks.compile.JavaCompile
 import org.gradle.testfixtures.ProjectBuilder
+import spock.lang.IgnoreIf
 import spock.lang.Specification
 
 import static org.gradle.api.logging.LogLevel.LIFECYCLE
@@ -16,6 +17,7 @@ import static org.gradle.api.logging.LogLevel.LIFECYCLE
  *
  */
 class JRubyJarPluginSpec extends Specification {
+    static final boolean TESTS_ARE_OFFLINE = System.getProperty('TESTS_ARE_OFFLINE') != null
     static final File TESTROOT = new File("${System.getProperty('TESTROOT') ?: 'build/tmp/test/unittests'}/jrjps")
     static final File WARBLER_LOCATION = new File("${System.getProperty('WARBLER_LOCATION') ?: 'build/tmp/test/repo'}")
     static final String TASK_NAME = 'JarJar'
@@ -42,6 +44,7 @@ class JRubyJarPluginSpec extends Specification {
         project.buildDir = TESTROOT
         project.logging.level = LIFECYCLE
         project.apply plugin: 'com.github.jruby-gradle.jar'
+        project.jruby.defaultRepositories = false
         jarTask = project.task('JarJar', type: Jar)
     }
 
@@ -200,6 +203,8 @@ class JRubyJarPluginSpec extends Specification {
 
     }
 
+
+    @IgnoreIf({TESTS_ARE_OFFLINE})
     def "Setting up a java project"() {
         given: "All jar, java & shadowJar plugins have been applied"
             project = ProjectBuilder.builder().build()
@@ -207,6 +212,7 @@ class JRubyJarPluginSpec extends Specification {
             project.logging.level = LIFECYCLE
             project.apply plugin : 'java'
             project.apply plugin: 'com.github.jruby-gradle.jar'
+            project.jruby.defaultRepositories = false
             project.apply plugin: 'com.github.johnrengelman.shadow'
             Task jar = project.tasks.getByName('jar')
             Task shadowJar = project.tasks.getByName('shadowJar')
@@ -221,6 +227,7 @@ class JRubyJarPluginSpec extends Specification {
                     contains(project.tasks.getByName('jrubyPrepareGems'))
     }
 
+    @IgnoreIf({TESTS_ARE_OFFLINE})
     def "Building a ShadowJar with a custom configuration and 'java' plugin is applied"() {
         given: "Java plugin applied before JRuby Jar plugin"
             project = ProjectBuilder.builder().build()
@@ -228,6 +235,7 @@ class JRubyJarPluginSpec extends Specification {
             project.logging.level = LIFECYCLE
             project.apply plugin : 'java'
             project.apply plugin: 'com.github.jruby-gradle.jar'
+            project.jruby.defaultRepositories = false
             project.apply plugin: 'com.github.johnrengelman.shadow'
             Task jar = project.tasks.getByName('shadowJar')
             JavaCompile compile = project.tasks.getByName('compileJava') as JavaCompile
@@ -294,6 +302,7 @@ class JRubyJarPluginSpec extends Specification {
             project.buildDir = TESTROOT
             project.logging.level = LIFECYCLE
             project.apply plugin: 'com.github.jruby-gradle.jar'
+            project.jruby.defaultRepositories = false
             Task generator = project.tasks.getByName(JRubyJarPlugin.BOOTSTRAP_TASK_NAME)
 
         expect:
