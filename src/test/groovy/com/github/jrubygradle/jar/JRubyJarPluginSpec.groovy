@@ -34,6 +34,8 @@ class JRubyJarPluginSpec extends Specification {
     static Project setupProject( boolean withShadow ) {
         Project project = ProjectBuilder.builder().build()
 
+        project.gradle.startParameter.offline = true
+        
         project.buildscript {
             repositories {
                 flatDir dirs : TESTREPO_LOCATION.absolutePath
