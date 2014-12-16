@@ -117,7 +117,6 @@ class JRubyJarPlugin implements Plugin<Project> {
             project.dependencies {
                 jrubyJar group: 'org.jruby', name: 'jruby-complete', version: project.jruby.defaultVersion
             }
-//            WarblerBootstrap.addDependency(project)
             JRubyJarConfigurator.afterEvaluateAction(project)
         }
     }
