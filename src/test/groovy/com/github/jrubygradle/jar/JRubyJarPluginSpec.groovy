@@ -1,5 +1,6 @@
 package com.github.jrubygradle.jar
 
+import org.gradle.api.Project
 import org.gradle.api.Task
 import org.gradle.api.artifacts.Dependency
 import org.gradle.api.file.FileCollection
@@ -17,8 +18,7 @@ import static org.gradle.api.logging.LogLevel.LIFECYCLE
  */
 class JRubyJarPluginSpec extends Specification {
     static final File TESTROOT = new File("${System.getProperty('TESTROOT') ?: 'build/tmp/test/unittests'}/jrjps")
-    static final File WARBLER_LOCATION = new File("${System.getProperty('WARBLER_LOCATION') ?: 'build/tmp/test/repo'}")
-    static final String TASK_NAME = 'JarJar'
+    static final File TESTREPO_LOCATION = new File("${System.getProperty('TESTREPO_LOCATION') ?: 'build/tmp/test/repo'}")
 
     def project
     def jarTask
@@ -31,6 +31,36 @@ class JRubyJarPluginSpec extends Specification {
         return names
     }
 
+    static Project setupProject( boolean withShadow ) {
+        Project project = ProjectBuilder.builder().build()
+
+        project.gradle.startParameter.offline = true
+        
+        project.buildscript {
+            repositories {
+                flatDir dirs : TESTREPO_LOCATION.absolutePath
+            }
+
+            dependencies {
+                classpath 'com.github.jengelman.gradle.plugins:shadow:1.1.2'
+            }
+        }
+        project.buildDir = TESTROOT
+        project.logging.level = LIFECYCLE
+        project.apply plugin: 'com.github.jruby-gradle.jar'
+        project.jruby.defaultRepositories = false
+
+        project.repositories {
+            flatDir dirs : TESTREPO_LOCATION.absolutePath
+        }
+
+        if(withShadow) {
+            project.apply plugin: 'com.github.johnrengelman.shadow'
+        }
+
+        return project
+    }
+
     void setup() {
 
         if(TESTROOT.exists()) {
@@ -38,10 +68,7 @@ class JRubyJarPluginSpec extends Specification {
         }
         TESTROOT.mkdirs()
 
-        project = ProjectBuilder.builder().build()
-        project.buildDir = TESTROOT
-        project.logging.level = LIFECYCLE
-        project.apply plugin: 'com.github.jruby-gradle.jar'
+        project = setupProject(false)
         jarTask = project.task('JarJar', type: Jar)
     }
 
@@ -140,11 +167,8 @@ class JRubyJarPluginSpec extends Specification {
 
     def "Building a Jar and 'java' plugin is applied"() {
         given: "Java plugin applied before JRuby Jar plugin"
-            project = ProjectBuilder.builder().build()
-            project.buildDir = TESTROOT
-            project.logging.level = LIFECYCLE
+            project= setupProject(false)
             project.apply plugin : 'java'
-            project.apply plugin: 'com.github.jruby-gradle.jar'
             Task jar = project.tasks.getByName('jar')
 
         and: "A local repository"
@@ -160,16 +184,7 @@ class JRubyJarPluginSpec extends Specification {
             project.with {
                 jruby {
                     defaultRepositories = false
-                    warblerBootstrapVersion = '0.1.0'
                     defaultVersion = jrubyTestVersion
-                }
-                repositories {
-                    ivy {
-                        url  WARBLER_LOCATION
-                        layout('pattern') {
-                            artifact '[module]-[revision](.[ext])'
-                        }
-                    }
                 }
                 dependencies {
                     jrubyJar 'org.spockframework:spock-core:0.7-groovy-2.0'
@@ -200,14 +215,11 @@ class JRubyJarPluginSpec extends Specification {
 
     }
 
+
     def "Setting up a java project"() {
         given: "All jar, java & shadowJar plugins have been applied"
-            project = ProjectBuilder.builder().build()
-            project.buildDir = TESTROOT
-            project.logging.level = LIFECYCLE
+            project = setupProject(true)
             project.apply plugin : 'java'
-            project.apply plugin: 'com.github.jruby-gradle.jar'
-            project.apply plugin: 'com.github.johnrengelman.shadow'
             Task jar = project.tasks.getByName('jar')
             Task shadowJar = project.tasks.getByName('shadowJar')
             Task compileJava = project.tasks.getByName('compileJava')
@@ -223,12 +235,8 @@ class JRubyJarPluginSpec extends Specification {
 
     def "Building a ShadowJar with a custom configuration and 'java' plugin is applied"() {
         given: "Java plugin applied before JRuby Jar plugin"
-            project = ProjectBuilder.builder().build()
-            project.buildDir = TESTROOT
-            project.logging.level = LIFECYCLE
+            project = setupProject(true)
             project.apply plugin : 'java'
-            project.apply plugin: 'com.github.jruby-gradle.jar'
-            project.apply plugin: 'com.github.johnrengelman.shadow'
             Task jar = project.tasks.getByName('shadowJar')
             JavaCompile compile = project.tasks.getByName('compileJava') as JavaCompile
 
@@ -245,16 +253,7 @@ class JRubyJarPluginSpec extends Specification {
             project.with {
                 jruby {
                     defaultRepositories = false
-                    warblerBootstrapVersion = '0.1.0'
                     defaultVersion = jrubyTestVersion
-                }
-                repositories {
-                    ivy {
-                        url  WARBLER_LOCATION
-                        layout('pattern') {
-                            artifact '[module]-[revision](.[ext])'
-                        }
-                    }
                 }
                 dependencies {
                     jrubyJar 'org.spockframework:spock-core:0.7-groovy-2.0'
@@ -290,10 +289,7 @@ class JRubyJarPluginSpec extends Specification {
 
     def "Check code generation configuration"() {
         given:
-            project = ProjectBuilder.builder().build()
-            project.buildDir = TESTROOT
-            project.logging.level = LIFECYCLE
-            project.apply plugin: 'com.github.jruby-gradle.jar'
+            project= setupProject(false)
             Task generator = project.tasks.getByName(JRubyJarPlugin.BOOTSTRAP_TASK_NAME)
 
         expect:
@@ -303,10 +299,7 @@ class JRubyJarPluginSpec extends Specification {
 
     def "Run code generation"() {
         given: "That the jar plugin has been applied"
-            project = ProjectBuilder.builder().build()
-            project.buildDir = TESTROOT
-            project.logging.level = LIFECYCLE
-            project.apply plugin: 'com.github.jruby-gradle.jar'
+            project= setupProject(false)
             Task generator = project.tasks.getByName(JRubyJarPlugin.BOOTSTRAP_TASK_NAME)
             File expectedFile = new File(generator.destinationDir,'bootstrap.java')
 

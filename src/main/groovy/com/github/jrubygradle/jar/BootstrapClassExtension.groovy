@@ -14,6 +14,18 @@ class BootstrapClassExtension {
 
     static final String BOOTSTRAP_TEMPLATE_PATH = 'META-INF/gradle-plugins/bootstrap.java.template'
 
+    /** During construction the inputs of Task will be updated to also look here for updates
+     *
+     * @param t Task this extension is associated to
+     */
+    BootstrapClassExtension(Task t) {
+        task = t
+
+        task.inputs.property 'jrubyInitScript', { -> this.initScript}
+        task.inputs.property 'jrubyCompatMode', { -> this.compatMode}
+        task.inputs.property 'jrubySource',     { -> this.getSource()}
+    }
+
     /** The task this extension instance is attached to.
      *
      * @since 0.1.1
