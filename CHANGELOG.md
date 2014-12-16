@@ -1,10 +1,17 @@
 # Changelog
 
 
-## 0.1.10 - Roadmap
+## 0.1.10
 
-* TBD
- 
+* [#84](https://github.com/jruby-gradle/jruby-gradle-plugin/issues/84) - Set
+  sourceCompatibility to 1.6
+* [#89](https://github.com/jruby-gradle/jruby-gradle-plugin/issues/89) -
+  Upgrade default JRuby version to 1.7.17
+* [#90](https://github.com/jruby-gradle/jruby-gradle-plugin/issues/90) -
+  JRubyExec should overwrite/clean the environment of RVM settings
+* [#91](https://github.com/jruby-gradle/jruby-gradle-plugin/issues/91) -
+  JRubyExec task not executing because it's always "up to date"
+
 ## 0.1.9
 
 * [#73](https://github.com/jruby-gradle/jruby-gradle-plugin/issues/73) - Allow
