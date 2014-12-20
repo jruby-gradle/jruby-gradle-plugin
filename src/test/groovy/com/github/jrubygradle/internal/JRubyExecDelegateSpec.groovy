@@ -20,6 +20,7 @@ import org.gradle.api.InvalidUserDataException
 class JRubyExecDelegateSpec extends Specification {
     static final File TEST_SCRIPT_DIR = new File( System.getProperty('TESTS_SCRIPT_DIR') ?: 'src/test/resources/scripts')
     static final File TESTROOT = new File(System.getProperty('TESTROOT') ?: 'build/tmp/test/unittests')
+    static final String absFilePrefix = System.getProperty('os.name').toLowerCase().startsWith('windows') ? 'C:' : ''
 
     def project
     JRubyExecDelegate jred = new JRubyExecDelegate()
@@ -33,6 +34,7 @@ class JRubyExecDelegateSpec extends Specification {
 
     def "When just passing script, scriptArgs, jrubyArgs, expect local properties to be updated"() {
         given:
+            def xplatformFileName = new File('path/to/file').toString()
             def cl = {
                 script 'path/to/file'
                 jrubyArgs 'c','d','-S'
@@ -45,16 +47,16 @@ class JRubyExecDelegateSpec extends Specification {
 
         expect:
             jred.passthrough.size() == 0
-            jred.script == 'path/to/file'
+            jred.script == xplatformFileName
             jred.scriptArgs == ['-x','-y','-z']
             jred.jrubyArgs == ['c','d','-S','a','b']
-            jred.buildArgs() == ['c','d','-S','a','b','path/to/file','-x','-y','-z']
+            jred.buildArgs() == ['c','d','-S','a','b',xplatformFileName,'-x','-y','-z']
     }
 
     def "When passing absolute file and absolute file, expect check for existence to be executed"() {
         given:
             def cl = {
-                script '/path/to/file'
+                script absFilePrefix + '/path/to/file'
                 jrubyArgs 'c','d','-S'
                 scriptArgs '-x'
                 scriptArgs '-y','-z'
