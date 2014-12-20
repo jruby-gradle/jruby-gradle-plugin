@@ -14,3 +14,7 @@ branches:
     - master
     - development
 
+matrix:
+  - platform: x86
+  - platform: x64
+
