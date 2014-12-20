@@ -7,7 +7,7 @@ build_script:
   - gradlew.bat assemble --info
 
 test_script:
-  - gradlew.bat check --info
+  - gradlew.bat test check --info
 
 branches:
   only:
