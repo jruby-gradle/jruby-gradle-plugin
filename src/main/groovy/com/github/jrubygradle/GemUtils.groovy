@@ -104,6 +104,11 @@ class GemUtils {
                     project.logger.debug "Gem installation: Working around bug in jruby 1.7.14"
                     environment HOME : project.gradle.gradleUserHomeDir.absolutePath
                 }
+
+                // Workaround for FFI bug that is seen on some Windows environments
+                if(System.getProperty('os.name').toLowerCase().startsWith('windows')) {
+                  environment 'TMP' : System.env.TMP, 'TEMP' : System.env.TEMP
+                }
             }
         }
     }
