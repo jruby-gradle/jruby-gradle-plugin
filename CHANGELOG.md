@@ -1,5 +1,23 @@
 # Changelog
 
+## 0.1.11 - Roadmap
+
+### Features
+
+* [#29](https://github.com/jruby-gradle/jruby-gradle-plugin/issues/29) - Ability to generate a gradle.rb file
+
+### Bugfixes
+
+* [#83](https://github.com/jruby-gradle/jruby-gradle-plugin/issues/83) - Installing GEMs
+  on Windows
+* [#93](https://github.com/jruby-gradle/jruby-gradle-plugin/issues/93) - More consistency
+  between `JRubyExec` and `project.jrubyexec` in the way the execution environment is prepared
+  way
+
+### Improvements
+
+* [#92](https://github.com/jruby-gradle/jruby-gradle-plugin/issues/92) - Support for building
+  and testing Windows environments on Appveyor
 
 ## 0.1.10
 

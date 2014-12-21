@@ -1,20 +1,13 @@
 package com.github.jrubygradle
 
 import com.github.jrubygradle.internal.JRubyExecUtils
-import org.gradle.api.InvalidUserDataException
 import org.gradle.api.Project
-import org.gradle.api.artifacts.Configuration
-import org.gradle.api.file.FileCollection
 import org.gradle.api.tasks.Input
-import org.gradle.api.tasks.InputFile
-import org.gradle.api.tasks.InputFiles
+import org.gradle.api.tasks.InputDirectory
 import org.gradle.api.tasks.JavaExec
 import org.gradle.api.tasks.Optional
-import org.gradle.api.tasks.OutputDirectory
-import org.gradle.api.tasks.OutputFile
 import org.gradle.api.tasks.TaskInstantiationException
 import org.gradle.internal.FileUtils
-import org.gradle.process.ExecResult
 import org.gradle.process.JavaExecSpec
 import org.gradle.util.CollectionUtils
 
@@ -25,8 +18,6 @@ import org.gradle.util.CollectionUtils
 class JRubyExec extends JavaExec {
 
     static final String JRUBYEXEC_CONFIG = 'jrubyExec'
-    // Names of environment variables that we can/should filter out
-    static final List FILTER_ENV_KEYS = ['GEM_PATH', 'RUBY_VERSION', 'GEM_HOME']
 
     static void updateJRubyDependencies(Project proj) {
         proj.dependencies {
@@ -66,9 +57,8 @@ class JRubyExec extends JavaExec {
       *
       * @since 0.1.10
       */
-    @Optional
     @Input
-    Boolean inheritRubyEnv
+    Boolean inheritRubyEnv = false
 
     /** Directory to use for unpacking GEMs.
      * This is optional. If not set, then an internal generated folder will be used. In general the latter behaviour
@@ -80,12 +70,13 @@ class JRubyExec extends JavaExec {
      */
     Object gemWorkDir
 
-    /** Returns the directory that will be used to unapck GEMs in.
+    /** Returns the directory that will be used to unpack GEMs in.
      *
      * @return Target directory
      * @since 0.1.9
      */
     @Optional
+    @Input
     File getGemWorkDir() {
         gemWorkDir ? project.file(gemWorkDir) : tmpGemDir()
     }
@@ -94,7 +85,6 @@ class JRubyExec extends JavaExec {
     JRubyExec() {
         super()
         super.setMain 'org.jruby.Main'
-        setInheritRubyEnv false
 
         try {
             project.configurations.getByName(JRUBYEXEC_CONFIG)
@@ -155,8 +145,7 @@ class JRubyExec extends JavaExec {
      *
      */
     String getComputedPATH(String originalPath) {
-        File path = new File(getGemWorkDir(), 'bin')
-        return path.absolutePath + File.pathSeparatorChar + originalPath
+        JRubyExecUtils.prepareWorkingPath(getGemWorkDir(),originalPath)
     }
 
     /** Setting the {@code jruby-complete} version allows for tasks to be run using different versions of JRuby.
@@ -254,31 +243,10 @@ class JRubyExec extends JavaExec {
     }
 
     Map getPreparedEnvironment(Map env) {
-        Map<String, Object> newEnv = [
-                    'PATH' : getComputedPATH(System.env.PATH),
-                    'GEM_HOME' : getGemWorkDir().absoluteFile,
-                    // Skip all the default behaviors that the
-                    // jar-dependencies and jbundler might attempt at runtime
-                    'JARS_NO_REQUIRE' : 'true',
-                    'JBUNDLE_SKIP' : 'true',
-                    'JARS_SKIP' : 'true',
-                    ]
-
-        env.each { key, value ->
-            /* Filter all out all the undesirable environment variables to
-             * propogate into the child process' environment
-             */
-            if (!inheritRubyEnv) {
-                if ( (key in FILTER_ENV_KEYS) ||
-                     (key.startsWith('rvm')) ||
-                     (key in newEnv)) {
-                     return
-                }
-            }
-            newEnv.put(key, value)
-        }
-
-        return newEnv
+        JRubyExecUtils.preparedEnvironment(env,inheritRubyEnv) + [
+                'PATH' : getComputedPATH(System.env."${JRubyExecUtils.pathVar()}"),
+                'GEM_HOME' : getGemWorkDir().absolutePath,
+        ]
     }
 
     private static UnsupportedOperationException notAllowed(final String msg) {

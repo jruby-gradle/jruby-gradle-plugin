@@ -109,6 +109,8 @@ class GemUtils {
                 if(System.getProperty('os.name').toLowerCase().startsWith('windows')) {
                   environment 'TMP' : System.env.TMP, 'TEMP' : System.env.TEMP
                 }
+
+                systemProperties 'file.encoding' : 'utf-8'
             }
         }
     }

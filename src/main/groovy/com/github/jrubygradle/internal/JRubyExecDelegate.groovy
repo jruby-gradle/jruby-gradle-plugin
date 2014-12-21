@@ -100,6 +100,12 @@ class JRubyExecDelegate {
         JRubyExecUtils.buildArgs(jrubyArgs,script,scriptArgs)
     }
 
+    /** Allow jrubyexec to inherit a Ruby env from the shell (e.g. RVM)
+     *
+     * @since 0.1.11
+     */
+    boolean inheritRubyEnv = false
+
     @PackageScope
     def keyAt(Integer index) {
         passthrough[index].keySet()[0]
@@ -133,7 +139,7 @@ class JRubyExecDelegate {
         GemUtils.OverwriteAction overwrite = project.gradle.startParameter.refreshDependencies ?  GemUtils.OverwriteAction.OVERWRITE : GemUtils.OverwriteAction.SKIP
         project.mkdir gemDir
         GemUtils.extractGems(project,config,config,gemDir,overwrite)
-
+        String pathVar = JRubyExecUtils.pathVar()
         project.javaexec {
             classpath JRubyExecUtils.classpathFromConfiguration(config)
             proxy.passthrough.each { item ->
@@ -145,6 +151,9 @@ class JRubyExecDelegate {
             proxy.buildArgs().each { item ->
                args item.toString()
             }
+
+            setEnvironment JRubyExecUtils.preparedEnvironment(getEnvironment(),proxy.inheritRubyEnv)
+            environment 'PATH' : JRubyExecUtils.prepareWorkingPath(gemDir,System.env."${pathVar}")
             environment 'GEM_HOME' : gemDir.absolutePath
         }
     }

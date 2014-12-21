@@ -14,6 +14,8 @@ import java.util.regex.Matcher
 @CompileStatic
 class JRubyExecUtils {
 
+    static final List FILTER_ENV_KEYS = ['GEM_PATH', 'RUBY_VERSION', 'GEM_HOME']
+
     /** Extract a list of files from a configuration that is suitable for a jruby classpath
      *
      * @param cfg Configuration to use
@@ -76,4 +78,46 @@ class JRubyExecUtils {
         cmdArgs.addAll(scriptArgs)
         cmdArgs as List<String>
     }
+
+    /** Prepare a basic environment for usage with an external JRuby environment
+     *
+     * @param env Environment to start from
+     * @param inheritRubyEnv Set to {@code true} is the global RUby environment should be inherited
+     * @return Map of environmental variables
+     * @since 0.1.11
+     */
+    static Map<String, Object> preparedEnvironment(Map<String, Object> env,boolean inheritRubyEnv) {
+        Map<String, Object> newEnv = [
+                'JARS_NO_REQUIRE' : 'true',
+                'JBUNDLE_SKIP' : 'true',
+                'JARS_SKIP' : 'true',
+        ] as Map<String, Object>
+
+        env.findAll { String key,Object value ->
+            inheritRubyEnv || !(key in FILTER_ENV_KEYS || key.toLowerCase().startsWith('rvm'))
+        } + newEnv
+
+    }
+
+    /** Get the name of the system search path environmental variable
+     *
+     * @return Name of variable
+     * @since 0.1.11
+     */
+    static String pathVar() {
+        org.gradle.internal.os.OperatingSystem.current().pathVar
+    }
+
+    /** Create a search path that includes the GEM working directory
+     *
+     * @param gemWorkDir GEM work dir instance
+     * @param originalPath The original platform-specific search path
+     * @return A search suitable for the specific operating system the job will run on
+     * @since 0.1.11
+     */
+    static String prepareWorkingPath(File gemWorkDir, String originalPath) {
+        File path = new File(gemWorkDir, 'bin')
+        return path.absolutePath + File.pathSeparatorChar + originalPath
+    }
+
 }
