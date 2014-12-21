@@ -3,6 +3,7 @@ package com.github.jrubygradle
 import com.github.jrubygradle.internal.JRubyExecUtils
 import org.gradle.api.Project
 import org.gradle.api.tasks.Input
+import org.gradle.api.tasks.InputDirectory
 import org.gradle.api.tasks.JavaExec
 import org.gradle.api.tasks.Optional
 import org.gradle.api.tasks.TaskInstantiationException
@@ -69,12 +70,13 @@ class JRubyExec extends JavaExec {
      */
     Object gemWorkDir
 
-    /** Returns the directory that will be used to unapck GEMs in.
+    /** Returns the directory that will be used to unpack GEMs in.
      *
      * @return Target directory
      * @since 0.1.9
      */
     @Optional
+    @Input
     File getGemWorkDir() {
         gemWorkDir ? project.file(gemWorkDir) : tmpGemDir()
     }
@@ -83,7 +85,6 @@ class JRubyExec extends JavaExec {
     JRubyExec() {
         super()
         super.setMain 'org.jruby.Main'
-        setInheritRubyEnv false
 
         try {
             project.configurations.getByName(JRUBYEXEC_CONFIG)
