@@ -264,21 +264,10 @@ class JRubyExec extends JavaExec {
                     'JARS_SKIP' : 'true',
                     ]
 
-        env.each { key, value ->
-            /* Filter all out all the undesirable environment variables to
-             * propogate into the child process' environment
-             */
-            if (!inheritRubyEnv) {
-                if ( (key in FILTER_ENV_KEYS) ||
-                     (key.startsWith('rvm')) ||
-                     (key in newEnv)) {
-                     return
-                }
-            }
-            newEnv.put(key, value)
-        }
+        env.findAll { String key,Object value ->
+            inheritRubyEnv || !(key in FILTER_ENV_KEYS || key.toLowerCase().startsWith('rvm'))
+        } + newEnv
 
-        return newEnv
     }
 
     private static UnsupportedOperationException notAllowed(final String msg) {
