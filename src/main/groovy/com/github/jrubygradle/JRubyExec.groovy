@@ -1,20 +1,12 @@
 package com.github.jrubygradle
 
 import com.github.jrubygradle.internal.JRubyExecUtils
-import org.gradle.api.InvalidUserDataException
 import org.gradle.api.Project
-import org.gradle.api.artifacts.Configuration
-import org.gradle.api.file.FileCollection
 import org.gradle.api.tasks.Input
-import org.gradle.api.tasks.InputFile
-import org.gradle.api.tasks.InputFiles
 import org.gradle.api.tasks.JavaExec
 import org.gradle.api.tasks.Optional
-import org.gradle.api.tasks.OutputDirectory
-import org.gradle.api.tasks.OutputFile
 import org.gradle.api.tasks.TaskInstantiationException
 import org.gradle.internal.FileUtils
-import org.gradle.process.ExecResult
 import org.gradle.process.JavaExecSpec
 import org.gradle.util.CollectionUtils
 
@@ -25,8 +17,6 @@ import org.gradle.util.CollectionUtils
 class JRubyExec extends JavaExec {
 
     static final String JRUBYEXEC_CONFIG = 'jrubyExec'
-    // Names of environment variables that we can/should filter out
-    static final List FILTER_ENV_KEYS = ['GEM_PATH', 'RUBY_VERSION', 'GEM_HOME']
 
     static void updateJRubyDependencies(Project proj) {
         proj.dependencies {
@@ -254,20 +244,10 @@ class JRubyExec extends JavaExec {
     }
 
     Map getPreparedEnvironment(Map env) {
-        Map<String, Object> newEnv = [
-                    'PATH' : getComputedPATH(System.env.PATH),
-                    'GEM_HOME' : getGemWorkDir().absoluteFile,
-                    // Skip all the default behaviors that the
-                    // jar-dependencies and jbundler might attempt at runtime
-                    'JARS_NO_REQUIRE' : 'true',
-                    'JBUNDLE_SKIP' : 'true',
-                    'JARS_SKIP' : 'true',
-                    ]
-
-        env.findAll { String key,Object value ->
-            inheritRubyEnv || !(key in FILTER_ENV_KEYS || key.toLowerCase().startsWith('rvm'))
-        } + newEnv
-
+        JRubyExecUtils.preparedEnvironment(env,inheritRubyEnv) + [
+                (JRubyExecUtils.pathVar()) : getComputedPATH(System.env."${JRubyExecUtils.pathVar()}"),
+                'GEM_HOME' : getGemWorkDir().absoluteFile,
+        ]
     }
 
     private static UnsupportedOperationException notAllowed(final String msg) {

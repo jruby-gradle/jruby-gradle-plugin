@@ -14,6 +14,8 @@ import java.util.regex.Matcher
 @CompileStatic
 class JRubyExecUtils {
 
+    static final List FILTER_ENV_KEYS = ['GEM_PATH', 'RUBY_VERSION', 'GEM_HOME']
+
     /** Extract a list of files from a configuration that is suitable for a jruby classpath
      *
      * @param cfg Configuration to use
@@ -75,5 +77,22 @@ class JRubyExecUtils {
         }
         cmdArgs.addAll(scriptArgs)
         cmdArgs as List<String>
+    }
+
+    static Map<String, Object> preparedEnvironment(Map<String, Object> env,boolean inheritRubyEnv) {
+        Map<String, Object> newEnv = [
+                'JARS_NO_REQUIRE' : 'true',
+                'JBUNDLE_SKIP' : 'true',
+                'JARS_SKIP' : 'true',
+        ] as Map<String, Object>
+
+        env.findAll { String key,Object value ->
+            inheritRubyEnv || !(key in FILTER_ENV_KEYS || key.toLowerCase().startsWith('rvm'))
+        } + newEnv
+
+    }
+
+    static String pathVar() {
+        org.gradle.internal.os.OperatingSystem.current().pathVar
     }
 }
