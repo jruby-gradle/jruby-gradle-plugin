@@ -79,6 +79,13 @@ class JRubyExecUtils {
         cmdArgs as List<String>
     }
 
+    /** Prepare a basic environment for usage with an external JRuby environment
+     *
+     * @param env Environment to start from
+     * @param inheritRubyEnv Set to {@code true} is the global RUby environment should be inherited
+     * @return Map of environmental variables
+     * @since 0.1.11
+     */
     static Map<String, Object> preparedEnvironment(Map<String, Object> env,boolean inheritRubyEnv) {
         Map<String, Object> newEnv = [
                 'JARS_NO_REQUIRE' : 'true',
@@ -92,7 +99,25 @@ class JRubyExecUtils {
 
     }
 
+    /** Get the name of the system search path environmental variable
+     *
+     * @return Name of variable
+     * @since 0.1.11
+     */
     static String pathVar() {
         org.gradle.internal.os.OperatingSystem.current().pathVar
     }
+
+    /** Create a search path that includes the GEM working directory
+     *
+     * @param gemWorkDir GEM work dir instance
+     * @param originalPath The original platform-specific search path
+     * @return A search suitable for the specific operating system the job will run on
+     * @since 0.1.11
+     */
+    static String prepareWorkingPath(File gemWorkDir, String originalPath) {
+        File path = new File(gemWorkDir, 'bin')
+        return path.absolutePath + File.pathSeparatorChar + originalPath
+    }
+
 }

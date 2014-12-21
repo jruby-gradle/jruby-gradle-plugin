@@ -145,8 +145,7 @@ class JRubyExec extends JavaExec {
      *
      */
     String getComputedPATH(String originalPath) {
-        File path = new File(getGemWorkDir(), 'bin')
-        return path.absolutePath + File.pathSeparatorChar + originalPath
+        JRubyExecUtils.prepareWorkingPath(getGemWorkDir(),originalPath)
     }
 
     /** Setting the {@code jruby-complete} version allows for tasks to be run using different versions of JRuby.
