@@ -244,7 +244,6 @@ class JRubyExec extends JavaExec {
 
     Map getPreparedEnvironment(Map env) {
         JRubyExecUtils.preparedEnvironment(env,inheritRubyEnv) + [
-                //(JRubyExecUtils.pathVar()) : getComputedPATH(System.env."${JRubyExecUtils.pathVar()}"),
                 'PATH' : getComputedPATH(System.env."${JRubyExecUtils.pathVar()}"),
                 'GEM_HOME' : getGemWorkDir().absolutePath,
         ]

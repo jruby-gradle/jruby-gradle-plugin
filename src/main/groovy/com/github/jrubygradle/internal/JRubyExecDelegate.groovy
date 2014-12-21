@@ -153,7 +153,7 @@ class JRubyExecDelegate {
             }
 
             setEnvironment JRubyExecUtils.preparedEnvironment(getEnvironment(),proxy.inheritRubyEnv)
-            environment pathVar , JRubyExecUtils.prepareWorkingPath(gemDir,System.env."${pathVar}")
+            environment 'PATH' : JRubyExecUtils.prepareWorkingPath(gemDir,System.env."${pathVar}")
             environment 'GEM_HOME' : gemDir.absolutePath
         }
     }
