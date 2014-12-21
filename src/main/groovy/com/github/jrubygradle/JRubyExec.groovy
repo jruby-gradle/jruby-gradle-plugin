@@ -56,9 +56,8 @@ class JRubyExec extends JavaExec {
       *
       * @since 0.1.10
       */
-    @Optional
     @Input
-    Boolean inheritRubyEnv
+    Boolean inheritRubyEnv = false
 
     /** Directory to use for unpacking GEMs.
      * This is optional. If not set, then an internal generated folder will be used. In general the latter behaviour
@@ -245,7 +244,7 @@ class JRubyExec extends JavaExec {
     Map getPreparedEnvironment(Map env) {
         JRubyExecUtils.preparedEnvironment(env,inheritRubyEnv) + [
                 (JRubyExecUtils.pathVar()) : getComputedPATH(System.env."${JRubyExecUtils.pathVar()}"),
-                'GEM_HOME' : getGemWorkDir().absoluteFile,
+                'GEM_HOME' : getGemWorkDir().absolutePath,
         ]
     }
 
