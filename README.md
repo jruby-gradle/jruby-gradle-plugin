@@ -1,6 +1,6 @@
 # JRuby Gradle plugin
 
-[![Build Status](https://buildhive.cloudbees.com/job/jruby-gradle/job/jruby-gradle-plugin/badge/icon)](https://buildhive.cloudbees.com/job/jruby-gradle/job/jruby-gradle-plugin/) [ ![Download](https://api.bintray.com/packages/jruby-gradle/plugins/jruby-gradle-plugin/images/download.png) ](https://bintray.com/jruby-gradle/plugins/jruby-gradle-plugin/_latestVersion) [![Gitter chat](https://badges.gitter.im/jruby-gradle/jruby-gradle-plugin.png)](https://gitter.im/jruby-gradle/jruby-gradle-plugin)
+[![Build Status](https://buildhive.cloudbees.com/job/jruby-gradle/job/jruby-gradle-plugin/badge/icon)](https://buildhive.cloudbees.com/job/jruby-gradle/job/jruby-gradle-plugin/) [![Appveyor Build Status](https://ci.appveyor.com/api/projects/status/github/ysb33r/jruby-gradle-plugin-134?svg=true)](https://ci.appveyor.com/project/ysb33r/jruby-gradle-plugin-134) [ ![Download](https://api.bintray.com/packages/jruby-gradle/plugins/jruby-gradle-plugin/images/download.png) ](https://bintray.com/jruby-gradle/plugins/jruby-gradle-plugin/_latestVersion) [![Gitter chat](https://badges.gitter.im/jruby-gradle/jruby-gradle-plugin.png)](https://gitter.im/jruby-gradle/jruby-gradle-plugin)
 
 Join us on the [jruby-gradle mailing list](https://groups.google.com/forum/#!forum/jruby-gradle)!
 
