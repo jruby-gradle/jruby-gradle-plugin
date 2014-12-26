@@ -1,10 +1,6 @@
 # Changelog
 
-## 0.1.11 - Roadmap
-
-### Features
-
-* [#29](https://github.com/jruby-gradle/jruby-gradle-plugin/issues/29) - Ability to generate a gradle.rb file
+## 0.1.11
 
 ### Bugfixes
 
