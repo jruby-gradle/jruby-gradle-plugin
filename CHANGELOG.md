@@ -8,7 +8,7 @@
    did not result in a clean build.
 * [#20](https://github.com/jruby-gradle/jruby-gradle-jar-plugin/issues/20) -  jrubyJavaBootstrap should set `GEM_HOME`
   and `GEM_PATH`.
-  
+
 ### Improvements
 
 * [#26](https://github.com/jruby-gradle/jruby-gradle-jar-plugin/issues/26) - Remove any dependency on warbler-bootstrap
@@ -33,6 +33,5 @@
 * [#9](https://github.com/jruby-gradle/jruby-gradle-jar-plugin/pull/9) - Fixed it so that 'java-base' instead of 'java' plugin is applied
 
 ## v0.1.0
-
 
 * [#1](https://github.com/jruby-gradle/jruby-gradle-jar-plugin/issues/1) - Extension to build JARs containing GEMs.

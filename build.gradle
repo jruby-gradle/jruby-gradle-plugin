@@ -35,7 +35,7 @@ configurations {
 dependencies {
     compile gradleApi()
     compile localGroovy()
-    compile 'com.github.jruby-gradle:jruby-gradle-plugin:0.1.12-SNAPSHOT'
+    compile 'com.github.jruby-gradle:jruby-gradle-plugin:0.1.11+'
     runtime 'com.github.jengelman.gradle.plugins:shadow:1.1.2+'
 
     testCompile ("org.spockframework:spock-core:0.7-groovy-${gradle.gradleVersion.startsWith('1.')?'1.8':'2.0'}") {
