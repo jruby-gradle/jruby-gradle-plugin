@@ -1,5 +1,24 @@
 # Changelog
 
+## v0.1.4 - Roadmap
+
+### Bugfixes
+
+* [#14](https://github.com/jruby-gradle/jruby-gradle-jar-plugin/issues/14) - Configuration changes for `jrubyJavaBootstrap`
+   did not result in a clean build.
+* [#20](https://github.com/jruby-gradle/jruby-gradle-jar-plugin/issues/20) -  jrubyJavaBootstrap should set `GEM_HOME`
+  and `GEM_PATH`.
+  
+### Improvements
+
+* [#26](https://github.com/jruby-gradle/jruby-gradle-jar-plugin/issues/26) - Remove any dependency on warbler-bootstrap
+* [#24](https://github.com/jruby-gradle/jruby-gradle-jar-plugin/issues/24) - Unittests are no longer going online to pull
+  down dependencies
+* Rolled back to support JDK 1.6
+
+## v0.1.3
+
+* Shadow plugin is now an implicit dependency
 
 ## v0.1.2
 

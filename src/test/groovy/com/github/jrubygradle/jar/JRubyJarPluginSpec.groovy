@@ -35,15 +35,15 @@ class JRubyJarPluginSpec extends Specification {
         Project project = ProjectBuilder.builder().build()
 
         project.gradle.startParameter.offline = true
-        
+
         project.buildscript {
             repositories {
                 flatDir dirs : TESTREPO_LOCATION.absolutePath
             }
 
-            dependencies {
-                classpath 'com.github.jengelman.gradle.plugins:shadow:1.1.2'
-            }
+//            dependencies {
+//                classpath 'com.github.jengelman.gradle.plugins:shadow:1.1.2'
+//            }
         }
         project.buildDir = TESTROOT
         project.logging.level = LIFECYCLE
