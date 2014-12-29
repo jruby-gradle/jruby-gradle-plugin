@@ -4,7 +4,9 @@ import groovy.transform.TupleConstructor
 import org.gradle.api.GradleException
 import org.gradle.api.Task
 
-/**
+/** The Bootstrap extension allows for JRUBy-based Java code to be generated, compiled and
+ * included into the final JAR artifact. It is meant to extend a JAR type task.
+ *
  * @author Schalk W. Cronjé.
  *
  * @since 0.1.1

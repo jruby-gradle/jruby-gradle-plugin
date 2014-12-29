@@ -1,12 +1,15 @@
+buildscript {
+    repositories { jcenter() }
+    dependencies {
+        classpath 'com.jfrog.bintray.gradle:gradle-bintray-plugin:0.5'
+    }
+}
+
 apply plugin: 'groovy'
 apply plugin: 'maven'
 apply plugin: 'com.jfrog.bintray'
 
 
-buildscript {
-    repositories { jcenter() }
-    dependencies { classpath 'com.jfrog.bintray.gradle:gradle-bintray-plugin:0.5' }
-}
 
 group = 'com.github.jruby-gradle'
 version = '0.1.4'
@@ -32,7 +35,7 @@ configurations {
 dependencies {
     compile gradleApi()
     compile localGroovy()
-    compile 'com.github.jruby-gradle:jruby-gradle-plugin:0.1.9+'
+    compile 'com.github.jruby-gradle:jruby-gradle-plugin:0.1.11+'
     runtime 'com.github.jengelman.gradle.plugins:shadow:1.1.2+'
 
     testCompile ("org.spockframework:spock-core:0.7-groovy-${gradle.gradleVersion.startsWith('1.')?'1.8':'2.0'}") {
@@ -42,7 +45,7 @@ dependencies {
     // For the testRepo tests I am locking the versions, instead of a open version, as it makes
     // unit testing easier, This does not affect the final artifact.
     // If you change values here, you need to update JRubyJarPluginSpec as well.
-    testRepo ('org.jruby:jruby-complete:1.7.15') {
+    testRepo ('org.jruby:jruby-complete:1.7.17') {
         transitive = false
     }
     testRepo ("org.spockframework:spock-core:0.7-groovy-2.0") {
@@ -96,6 +99,19 @@ if (!hasProperty( 'bintrayUser' ))
 if (!hasProperty( 'bintrayKey' ))
   ext.bintrayKey = ''
 
+groovydoc {
+    docTitle = "${archivesBaseName} ${version}"
+}
+
+task installGroovyDoc (type : Copy) {
+    from ({new File(buildDir,'docs/groovydoc')}) {
+        include '**'
+    }
+    into {new File(project.properties.jrubyGradleWebsiteInstallDir,"docs/api/${archivesBaseName}/${version}")}
+    onlyIf { project.hasProperty('jrubyGradleWebsiteInstallDir') }
+}
+
+
 bintray {
     user = project.bintrayUser
     key = project.bintrayKey
@@ -118,6 +134,7 @@ bintray {
         }
     }
 }
+
 bintrayUpload.dependsOn assemble
 
 // vim: ft=groovy

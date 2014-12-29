@@ -19,6 +19,7 @@ import static org.gradle.api.logging.LogLevel.LIFECYCLE
 class JRubyJarPluginSpec extends Specification {
     static final File TESTROOT = new File("${System.getProperty('TESTROOT') ?: 'build/tmp/test/unittests'}/jrjps")
     static final File TESTREPO_LOCATION = new File("${System.getProperty('TESTREPO_LOCATION') ?: 'build/tmp/test/repo'}")
+    static final String jrubyTestVersion = '1.7.17'
 
     def project
     def jarTask
@@ -35,15 +36,15 @@ class JRubyJarPluginSpec extends Specification {
         Project project = ProjectBuilder.builder().build()
 
         project.gradle.startParameter.offline = true
-        
+
         project.buildscript {
             repositories {
                 flatDir dirs : TESTREPO_LOCATION.absolutePath
             }
 
-            dependencies {
-                classpath 'com.github.jengelman.gradle.plugins:shadow:1.1.2'
-            }
+//            dependencies {
+//                classpath 'com.github.jengelman.gradle.plugins:shadow:1.1.2'
+//            }
         }
         project.buildDir = TESTROOT
         project.logging.level = LIFECYCLE
@@ -172,7 +173,6 @@ class JRubyJarPluginSpec extends Specification {
             Task jar = project.tasks.getByName('jar')
 
         and: "A local repository"
-            final String jrubyTestVersion = '1.7.15'
             File expectedDir= new File(TESTROOT,'libs/')
             expectedDir.mkdirs()
             File expectedJar= new File(expectedDir,'test.jar')
@@ -241,7 +241,6 @@ class JRubyJarPluginSpec extends Specification {
             JavaCompile compile = project.tasks.getByName('compileJava') as JavaCompile
 
         and: "A local repository"
-            final String jrubyTestVersion = '1.7.15'
             File expectedDir= new File(TESTROOT,'libs/')
             expectedDir.mkdirs()
             File expectedJar= new File(expectedDir,'test-all.jar')
