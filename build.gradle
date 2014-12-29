@@ -136,6 +136,14 @@ artifacts {
     archives sourcesJar
 }
 
+task installGroovyDoc (type : Copy) {
+    from ({new File(buildDir,'docs/groovydoc')}) {
+        include '**'
+    }
+    into {new File(project.properties.jrubyGradleWebsiteInstallDir,"docs/api/${archivesBaseName}/${version}")}
+    onlyIf { project.hasProperty('jrubyGradleWebsiteInstallDir') }
+}
+
 bintray {
     user = project.bintrayUser
     key = project.bintrayKey

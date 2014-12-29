@@ -14,7 +14,7 @@ import org.gradle.api.tasks.TaskAction
  */
 class JRubyPrepareGems  extends DefaultTask {
 
-    /** Target directory for GEMs. Extracted GEMs should end up in {@code ${outputDir}/gems}
+    /** Target directory for GEMs. Extracted GEMs should end up in {@code outputDir + "/gems"}
      */
     @OutputDirectory
     File outputDir
