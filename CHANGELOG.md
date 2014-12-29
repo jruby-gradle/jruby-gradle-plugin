@@ -1,5 +1,17 @@
 # Changelog
 
+## 0.1.12 - Roadmap
+
+### Improvements
+
+* [#97](https://github.com/jruby-gradle/jruby-gradle-plugin/issues/97) - Allow gemInstallDir to be customized.
+
+### Breaking changes
+
+* `jruby.gemInstallDir` is no longer of type `String`, but now of type `Object` and is of private scope. Access via
+   assignment (as per previous versions) or use getter/setter methods.
+* Default for `gemInstallDir` is now `"${buildDir}/gems"` instead of `"${buildDir}/vendor/gems"`
+
 ## 0.1.11
 
 ### Bugfixes

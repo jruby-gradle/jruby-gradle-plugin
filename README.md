@@ -242,27 +242,3 @@ end
 
 **Note:** in the example above, the `.rb` file is assuming it's in the top
 level of the source tree, i.e. where `build.gradle` is located
-
-
-## Quickstart for those unfamiliar with Gradle
-
-**Note:** This assumes you already have [Gradle](http://gradle.org) installed. If you are not on Windows it is recommended
-that you use [GVM](http://gvmtool.net) to install Gradle
-
-```bash
-% mkdir fancy-webapp
-% cd fancy-webapp
-% git init
-Initialized empty Git repository in /usr/home/tyler/source/github/fancy-webapp/.git/
-% gradle wrapper init  # Create the wrappers to easily bootstrap others
-:wrapper
-:init 
-
-BUILD SUCCESSFUL
-
-Total time: 6.411 secs
-% git add gradle gradlew gradlew.bat
-% git commit -m "Initial commit with gradle wrappers"
-```
-
-Edit the created `build.gradle` file in the root of `fancy-webapp/` as above
