@@ -1,10 +1,14 @@
 # Changelog
 
-## 0.1.12 - Roadmap
+## 0.1.12
 
 ### Improvements
 
-* [#97](https://github.com/jruby-gradle/jruby-gradle-plugin/issues/97) - Allow gemInstallDir to be customized.
+* [#97](https://github.com/jruby-gradle/jruby-gradle-plugin/issues/97) - Allow
+  gemInstallDir to be customized
+* [#100](https://github.com/jruby-gradle/jruby-gradle-plugin/issues/100) - Bump
+  default JRuby version to 1.7.19
+
 
 ### Breaking changes
 
