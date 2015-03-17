@@ -30,7 +30,7 @@ configurations {
 }
 
 ext {
-    jrubyVersion = '1.7.17'
+    jrubyVersion = '1.7.19'
     jrubyClassPathFromConfiguration = { Configuration cfg ->
         def f = cfg.files.find { it.name.startsWith('jruby-complete-') }
         return  f?.absolutePath
