@@ -19,13 +19,14 @@ class JRubyPluginExtensionSpec extends Specification {
         then:
             jrpe.defaultRepositories == true
             jrpe.defaultVersion == jrpe.execVersion
-            jrpe.gemInstallDir == project.buildDir.absoluteFile
+            jrpe.gemInstallDir != project.buildDir
+            jrpe.gemInstallDir == new File(project.buildDir, 'gems').absoluteFile
 
         when:
             jrpe.gemInstallDir = { 'vendor2' }
 
         then:
-            jrpe.gemInstallDir == new File(project.projectDir,'vendor2').absoluteFile
+            jrpe.gemInstallDir == new File(project.projectDir, 'vendor2').absoluteFile
 
     }
 }

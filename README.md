@@ -226,17 +226,10 @@ for your application:
 
 ```ruby
 # Hack our GEM_HOME to make sure that the `rubygems` support can find our
-# unpacked gems in build/vendor/
-vendored_gems = File.expand_path(File.dirname(__FILE__) + '/build/vendor')
+# unpacked gems in build/gems/
+vendored_gems = File.expand_path(File.dirname(__FILE__) + '/build/gems')
 if File.exists?(vendored_gems)
   ENV['GEM_HOME'] = vendored_gems
-end
-
-jar_cache = File.expand_path(File.dirname(__FILE__) + '/.jarcache/')
-if File.exists?(jar_cache)
-  # Under JRuby `require`ing a `.jar` file will result in it being added to the
-  # classpath for easy importing
-  Dir["#{jar_cache}/*.jar"].each { |j| require j }
 end
 ```
 
