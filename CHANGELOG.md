@@ -1,5 +1,12 @@
 # Changelog
 
+
+## 0.1.13
+
+* Added support for using closures in the `scriptArgs` for `JRubyExec` tasks
+  which are evaluated at execution time.
+
+
 ## 0.1.12
 
 ### Improvements
