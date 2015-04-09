@@ -127,6 +127,10 @@ class JRubyExec extends JavaExec {
         this.scriptArgs.addAll(args as List)
     }
 
+    void scriptArgs(Closure c) {
+        this.scriptArgs << c
+    }
+
     /** Returns a list of jruby arguments
      */
     List<String> jrubyArgs() {
@@ -209,7 +213,7 @@ class JRubyExec extends JavaExec {
      */
     @Override
     List<String> getArgs() {
-        JRubyExecUtils.buildArgs(jrubyArgs,script,scriptArgs)
+        JRubyExecUtils.buildArgs(jrubyArgs, script, scriptArgs)
     }
 
     @Override

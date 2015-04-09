@@ -56,27 +56,36 @@ class JRubyExecUtils {
         fc.filter { File f -> f.name.startsWith('jruby-complete-') }
     }
 
-    static List<String> buildArgs( List<Object> jrubyArgs, File script, List<Object> scriptArgs ) {
+    static List<String> buildArgs(List<Object> jrubyArgs, File script, List<Object> scriptArgs) {
         def cmdArgs = []
 
         boolean useBinPath = jrubyArgs.contains('-S')
         cmdArgs.addAll(jrubyArgs)
 
-        if(script!=null && !useBinPath) {
-            if(!script.exists()) {
+        if ((script != null) && (!useBinPath)) {
+            if (!script.exists()) {
                 throw new InvalidUserDataException("${script} does not exist")
             }
             cmdArgs.add(script.absolutePath)
-        } else if(script!=null && useBinPath ) {
-            if(script.isAbsolute() && !script.exists()) {
+        }
+        else if ((script != null) && useBinPath) {
+            if (script.isAbsolute() && (!script.exists())) {
                 throw new InvalidUserDataException("${script} does not exist")
             }
             cmdArgs.add(script.toString())
-        } else if(script==null && jrubyArgs.size() == 0 ) {
+        }
+        else if ((script == null) && (jrubyArgs.size() == 0)) {
             throw new InvalidUserDataException('Cannot instantiate a JRubyExec instance without either `script` or `jrubyArgs` set')
         }
-        cmdArgs.addAll(scriptArgs)
-        cmdArgs as List<String>
+
+        cmdArgs.addAll(scriptArgs.flatten { element ->
+            if (element instanceof Closure) {
+                return ((Closure)element).call()
+            }
+            return element
+        } as List<String>)
+
+        return cmdArgs
     }
 
     /** Prepare a basic environment for usage with an external JRuby environment
