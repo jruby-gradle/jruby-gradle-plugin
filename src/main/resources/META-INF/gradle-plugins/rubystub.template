@@ -1,0 +1,13 @@
+# Hack our GEM_HOME to make sure that the `rubygems` support can find our
+# unpacked gems in ./vendor/
+vendored_gems = File.expand_path(File.dirname(__FILE__) + '/%%GEMFOLDER%%')
+if File.exists?(vendored_gems)
+  ENV['GEM_HOME'] = vendored_gems
+end
+
+jar_cache = File.expand_path(File.dirname(__FILE__) + '/%%JARCACHE%%/')
+if File.exists?(jar_cache)
+  # Under JRuby `require`ing a `.jar` file will result in it being added to the
+  # classpath for easy importing
+  Dir["#{jar_cache}/*.jar"].each { |j| require j }
+end

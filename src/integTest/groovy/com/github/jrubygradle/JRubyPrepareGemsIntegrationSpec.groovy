@@ -26,7 +26,6 @@ class JRubyPrepareGemsIntegrationSpec extends Specification {
             TESTROOT.deleteDir()
         }
         TESTROOT.mkdirs()
-
     }
 
     def "Check that default 'jrubyPrepareGems' uses the correct directory"() {
