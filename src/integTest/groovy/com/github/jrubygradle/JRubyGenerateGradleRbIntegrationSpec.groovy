@@ -15,7 +15,7 @@ class JRubyGenerateGradleRbIntegrationSpec extends Specification {
     static final String TASK_NAME = 'RubyWax'
 
     void setup() {
-        if(TESTROOT.exists()) {
+        if (TESTROOT.exists()) {
             TESTROOT.deleteDir()
         }
         TESTROOT.mkdirs()
@@ -23,9 +23,10 @@ class JRubyGenerateGradleRbIntegrationSpec extends Specification {
 
     def "Generate gradle.rb"() {
         given: "A set of gems"
-            def project=BasicProjectBuilder.buildWithLocalRepo(TESTROOT,FLATREPO,CACHEDIR)
-            def prepTask = project.task(TASK_NAME, type: JRubyGenerate)
-            def expected = new File(project.buildDir,"${prepTask.destinationDir}/${prepTask.baseName}")
+            def project = BasicProjectBuilder.buildWithLocalRepo(TESTROOT,FLATREPO,CACHEDIR)
+            def prepTask = project.task(TASK_NAME, type: GenerateGradleRb)
+            def expected = new File(prepTask.destinationDir, prepTask.baseName)
+            project.evaluate()
 
 
         when: "The load path file is generated "
@@ -35,9 +36,10 @@ class JRubyGenerateGradleRbIntegrationSpec extends Specification {
             expected.exists()
 
         and: "The GEM_HOME to include gemInstallDir"
-            expected.text.find("vendored_gems = File.expand_path(File.dirname(__FILE__) + '${project.buildDir}/${project.jruby.gemInstallDir}')")
+            expected.text.find("export GEM_HOME=\"${project.jruby.gemInstallDir}\"")
 
-        and: "The jarcache folder to be the configured jarCacheFolder"
-            expected.text.find("vendored_gems = File.expand_path(File.dirname(__FILE__) + '${project.buildDir}/${prepTask.jarCache}')")
+        and: "The java command invoked with the -cp flag"
+            expected.text.find(project.configurations.jrubyExec.asPath)
+
     }
 }
