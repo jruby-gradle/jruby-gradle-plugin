@@ -55,6 +55,10 @@ class JRubyPlugin implements Plugin<Project> {
             dependsOn project.tasks.jrubyPrepareGems
         }
 
+        project.task('jrubyGenerateGradleRb', type: GenerateGradleRb) {
+            group TASK_GROUP_NAME
+            description 'Generate a gradle.rb stub for executing Ruby binstubs'
+            dependsOn project.tasks.jrubyPrepareGems
+        }
     }
-
 }

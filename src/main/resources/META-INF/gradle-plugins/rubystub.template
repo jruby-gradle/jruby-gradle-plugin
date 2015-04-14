@@ -1,0 +1,9 @@
+#!/bin/sh
+
+## Hack our GEM_HOME to make sure that the `rubygems` support can find our
+# unpacked gems in the given GEMFOLDER
+export GEM_HOME="%%GEMFOLDER%%"
+export GEM_PATH="%%GEMFOLDER%%"
+
+exec java -cp %%JRUBYEXEC_CLASSPATH%% org.jruby.Main -S $@
+
