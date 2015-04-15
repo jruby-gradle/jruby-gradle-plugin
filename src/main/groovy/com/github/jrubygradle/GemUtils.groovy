@@ -100,7 +100,7 @@ class GemUtils {
                 args '--ignore-dependencies',
                      "--install-dir=${destDir.absolutePath}",
 		     '--no-user-install',
-		     '--wrapper',
+		     '--wrappers',
                      '-N',
                      '--platform=java'
 
