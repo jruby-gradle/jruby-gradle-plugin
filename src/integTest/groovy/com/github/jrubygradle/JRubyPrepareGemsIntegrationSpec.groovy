@@ -44,6 +44,7 @@ class JRubyPrepareGemsIntegrationSpec extends Specification {
 
         expect:
             new File(jrpg.outputDir,"gems/slim-${SLIM_VERSION}").exists()
+            new File(jrpg.outputDir,"specifications/.jrubydir").exists()
     }
 
 //    @IgnoreIf({TESTS_ARE_OFFLINE})
