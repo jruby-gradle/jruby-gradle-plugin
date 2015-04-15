@@ -94,8 +94,13 @@ class GemUtils {
                 gemsToProcess.each { File gem ->
                     args gem
                 }
+                // there are a few extra args which look like defaults
+                // but we need to make sure any config in $HOME/.gemrc
+                // is overwritten
                 args '--ignore-dependencies',
                      "--install-dir=${destDir.absolutePath}",
+		     '--no-user-install',
+		     '--wrapper',
                      '-N',
                      '--platform=java'
 
