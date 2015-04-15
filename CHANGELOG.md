@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.1.16
+
+
+## 0.1.15
+
+* [#105](https://github.com/jruby-gradle/jruby-gradle-plugin/pull/105) support
+  generating a `gradle.rb` file for executing JRuby code outside of Gradle
+
 ## 0.1.14
 
 * [#101](https://github.com/jruby-gradle/jruby-gradle-plugin/issues/101) -
