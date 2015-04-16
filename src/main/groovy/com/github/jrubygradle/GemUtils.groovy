@@ -200,4 +200,12 @@ class GemUtils {
             }
         }
     }
+
+    static CopySpec jarCopySpec(Project project,Object dir) {
+	project.copySpec {
+	    from(dir) {
+                include '**'
+	    }
+        }
+    }
 }

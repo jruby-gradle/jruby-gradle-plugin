@@ -50,6 +50,26 @@ class JRubyPluginExtension {
         this.gemInstallDir = dir
     }
 
+    /** Resolves the currently configured Jars installation directory.
+     *
+     * @return Install directory as an absolute path
+     * @since 0.1.16
+     */
+    File getJarInstallDir() {
+        project.file(this.jarInstallDir).absoluteFile
+    }
+
+    /** Sets the jar installation directory. Anything that can be passed to {@code project.file} can be
+     * passed here as well.
+     *
+     * @param dir Directory (String, GString, File, Closure etc.)
+     * @return The passed object.
+     * @since 0.1.16
+     */
+    Object setJarInstallDir(Object dir) {
+        this.jarInstallDir = dir
+    }
+
     /**
      * Set the version of Bouncycastle to include as a default dependency for
      * JRuby
@@ -62,6 +82,7 @@ class JRubyPluginExtension {
     JRubyPluginExtension(Project p) {
         project = p
         this.gemInstallDir = { new File(p.buildDir, 'gems').absolutePath }
+        this.jarInstallDir = { new File(p.buildDir, 'jars').absolutePath }
     }
 
     /** Change the version of jruby for jrubyexec and JRubyExec
@@ -82,5 +103,8 @@ class JRubyPluginExtension {
      */
     private Object gemInstallDir
 
+    /** Directory for jrubyPrepare to install JAR dependencies into
+     */
+    private Object jarInstallDir
 
 }
