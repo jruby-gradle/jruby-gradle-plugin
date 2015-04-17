@@ -73,7 +73,7 @@ task myJar (type :Jar) {
 
 ## Controlling the Ruby entry point script
 
-If nothing is specified, then the bootstrap will look for a Ruby script `META-INF/init.rb`.
+If nothing is specified, then the bootstrap will look for a Ruby script `META-INF/jar-bootstrap.rb`.
 It is also possible to set the entry script. This must be specified relative to the root of the created JAR.
 
 **NOTE:** There is currently a [known
@@ -90,7 +90,7 @@ jrubyJavaBootstrap {
 }
 ```
 
-It is the user's responsibility to ensure that entry point script is created and added to the JAR, be it `META-INF/init.rb`
+It is the user's responsibility to ensure that entry point script is created and added to the JAR, be it `META-INF/jar-bootstrap.rb`
 or another specified script.
 
 
