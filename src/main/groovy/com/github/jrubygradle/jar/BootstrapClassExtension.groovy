@@ -39,9 +39,12 @@ class BootstrapClassExtension {
      * The default bootstrap class will look for a file in this relative location.
      * It is the user's responsibility that this script is added to the Jar.
      *
+     * Prior to to 0.1.4 the default value was {@code 'META-INF/init.rb'}. As from
+     * 0.1.4 the default value is {@code 'META-INF/jar-bootstrap.rb'}
+     *
      * @since 0.1.1
      */
-    String initScript = 'META-INF/init.rb'
+    String initScript = 'META-INF/jar-bootstrap.rb'
 
     /** This is the JRuby language compatibility mode.
      * @since 0.1.1
