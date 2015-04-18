@@ -19,7 +19,7 @@ import static org.gradle.api.logging.LogLevel.LIFECYCLE
 class JRubyJarPluginSpec extends Specification {
     static final File TESTROOT = new File("${System.getProperty('TESTROOT') ?: 'build/tmp/test/unittests'}/jrjps")
     static final File TESTREPO_LOCATION = new File("${System.getProperty('TESTREPO_LOCATION') ?: 'build/tmp/test/repo'}")
-    static final String jrubyTestVersion = '1.7.17'
+    static final String jrubyTestVersion = '1.7.19'
 
     def project
     def jarTask
@@ -32,7 +32,7 @@ class JRubyJarPluginSpec extends Specification {
         return names
     }
 
-    static Project setupProject( boolean withShadow ) {
+    static Project setupProject() {
         Project project = ProjectBuilder.builder().build()
 
         project.gradle.startParameter.offline = true
@@ -41,10 +41,6 @@ class JRubyJarPluginSpec extends Specification {
             repositories {
                 flatDir dirs : TESTREPO_LOCATION.absolutePath
             }
-
-//            dependencies {
-//                classpath 'com.github.jengelman.gradle.plugins:shadow:1.1.2'
-//            }
         }
         project.buildDir = TESTROOT
         project.logging.level = LIFECYCLE
@@ -53,10 +49,6 @@ class JRubyJarPluginSpec extends Specification {
 
         project.repositories {
             flatDir dirs : TESTREPO_LOCATION.absolutePath
-        }
-
-        if(withShadow) {
-            project.apply plugin: 'com.github.johnrengelman.shadow'
         }
 
         return project
@@ -69,8 +61,8 @@ class JRubyJarPluginSpec extends Specification {
         }
         TESTROOT.mkdirs()
 
-        project = setupProject(false)
-        jarTask = project.task('JarJar', type: Jar)
+        project = setupProject()
+        jarTask = project.task('jrubyJar', type: Jar)
     }
 
     def "Checking configurations exist"() {
@@ -124,34 +116,54 @@ class JRubyJarPluginSpec extends Specification {
             }
 
         then: "Then the attribute should be set to the default in the manifest"
-            jarTask.manifest.attributes.'Main-Class' == JRubyJarConfigurator.DEFAULT_BOOTSTRAP_CLASS
+            jarTask.manifest.attributes.'Main-Class' == JRubyJarConfigurator.DEFAULT_MAIN_CLASS
+    }
 
-        and: "Then jruby-complete should be added as a dependency"
-            project.configurations.getByName('compile').dependencies.matching { Dependency d -> d.name == 'jruby-complete' }
+    def "Adding a default extracting main class"() {
+        when: "Setting a default extracting main class"
+            project.configure(jarTask) {
+                jruby {
+                    defaultExtractingMainClass()
+                }
+            }
+
+        then: "Then the attribute should be set to the default in the manifest"
+            jarTask.manifest.attributes.'Main-Class' == JRubyJarConfigurator.DEFAULT_EXTRACTING_MAIN_CLASS
     }
 
     def "Adding all defaults"() {
         given: "Given some files in a gem location or which some should be excluded"
-            project.jruby.gemInstallDir = TESTROOT.absolutePath
-            new File(TESTROOT,'gems').mkdirs()
-            new File(TESTROOT,'data').mkdirs()
-            new File(TESTROOT,'cache').mkdirs()
-            new File(TESTROOT,'gems/fake.txt').text = 'fake.content'
-            new File(TESTROOT,'data/data.txt').text = 'data.content'
+            def gems = new File(TESTROOT,'gems')
+            gems.mkdirs()
+            project.jruby.gemInstallDir = gems
+            new File(gems,'gems').mkdirs()
+            new File(gems,'data').mkdirs()
+            new File(gems,'cache').mkdirs()
+            new File(gems,'gems/fake.txt').text = 'fake.content'
+            new File(gems,'data/data.txt').text = 'data.content'
+
+            def jars = new File(TESTROOT,'jars')
+            jars.mkdirs()
+            project.jruby.jarInstallDir = jars
+            new File(jars,'fake.jar').text = 'fake.content'
+            new File(jars,'Jars.lock').text = 'fake'
+
+            def init = new File(TESTROOT,'init.rb')
+            init.text = 'fake.content'
 
         when: "Setting a default main class and default gems via the 'defaults' method"
             project.configure(jarTask) {
                 jruby {
                     defaults 'gems','mainClass'
+                    initScript "${init.absolutePath}"
                 }
             }
 
         then: "The appropriate files included"
-            fileNames(jarTask.source) == (['MANIFEST.MF','gems','gems/fake.txt','data','data/data.txt'] as Set<String>)
+            fileNames(jarTask.source) == (['MANIFEST.MF','gems','gems/fake.txt','data','data/data.txt', 'fake.jar', 'Jars.lock', 'init.rb'] as Set<String>)
 
         and: "Then the attribute should be set to the default in the manifest"
-            jarTask.manifest.attributes.'Main-Class' == JRubyJarConfigurator.DEFAULT_BOOTSTRAP_CLASS
-
+            jarTask.manifest.attributes.'Main-Class' == JRubyJarConfigurator.DEFAULT_MAIN_CLASS
     }
 
     def "Adding a custom main class"() {
@@ -166,16 +178,29 @@ class JRubyJarPluginSpec extends Specification {
             jarTask.manifest.attributes.'Main-Class' == 'org.scooby.doo.snackMain'
     }
 
-    def "Building a Jar and 'java' plugin is applied"() {
+    def "Setting up a java project"() {
+        given: "All jar, java plugins have been applied"
+            project = setupProject()
+            project.apply plugin : 'java'
+            Task jar = project.tasks.getByName('jrubyJar')
+            project.evaluate()
+
+        expect:
+            jar.taskDependencies.getDependencies(jar).
+                    contains(project.tasks.getByName('jrubyPrepare'))
+    }
+
+    def "Building a Jar with a custom configuration and 'java' plugin is applied"() {
         given: "Java plugin applied before JRuby Jar plugin"
-            project= setupProject(false)
+            project = setupProject()
             project.apply plugin : 'java'
             Task jar = project.tasks.getByName('jar')
+            Task jrubyJar = project.tasks.getByName('jrubyJar')
 
         and: "A local repository"
             File expectedDir= new File(TESTROOT,'libs/')
             expectedDir.mkdirs()
-            File expectedJar= new File(expectedDir,'test.jar')
+            File expectedJar= new File(expectedDir,'test-all.jar')
             project.jruby.gemInstallDir = new File(TESTROOT,'fakeGemDir').absolutePath
 
             new File(project.jruby.gemInstallDir,'gems').mkdirs()
@@ -187,7 +212,7 @@ class JRubyJarPluginSpec extends Specification {
                     defaultVersion = jrubyTestVersion
                 }
                 dependencies {
-                    jrubyJar 'org.spockframework:spock-core:0.7-groovy-2.0'
+                  //    jrubyJar 'org.spockframework:spock-core:0.7-groovy-2.0'
                 }
             }
 
@@ -205,74 +230,7 @@ class JRubyJarPluginSpec extends Specification {
 
         and: "I actually build the JAR"
             jar.copy()
-            def builtJar = fileNames(project.zipTree(expectedJar))
-
-        then: "I don't want to see jruby-complete unpacked"
-            !builtJar.contains("META-INF/jruby.home/lib/ruby".toString())
-
-        and: "I expect the new main class to be listed in the manifest"
-            jar.manifest.effectiveManifest.attributes['Main-Class']?.contains('bogus.does.not.exist')
-
-    }
-
-
-    def "Setting up a java project"() {
-        given: "All jar, java & shadowJar plugins have been applied"
-            project = setupProject(true)
-            project.apply plugin : 'java'
-            Task jar = project.tasks.getByName('jar')
-            Task shadowJar = project.tasks.getByName('shadowJar')
-            Task compileJava = project.tasks.getByName('compileJava')
-
-        expect:
-            compileJava.taskDependencies.getDependencies(compileJava).
-                contains(project.tasks.getByName(JRubyJarPlugin.BOOTSTRAP_TASK_NAME))
-            jar.taskDependencies.getDependencies(jar).
-                    contains(project.tasks.getByName('jrubyPrepareGems'))
-            shadowJar.taskDependencies.getDependencies(shadowJar).
-                    contains(project.tasks.getByName('jrubyPrepareGems'))
-    }
-
-    def "Building a ShadowJar with a custom configuration and 'java' plugin is applied"() {
-        given: "Java plugin applied before JRuby Jar plugin"
-            project = setupProject(true)
-            project.apply plugin : 'java'
-            Task jar = project.tasks.getByName('shadowJar')
-            JavaCompile compile = project.tasks.getByName('compileJava') as JavaCompile
-
-        and: "A local repository"
-            File expectedDir= new File(TESTROOT,'libs/')
-            expectedDir.mkdirs()
-            File expectedJar= new File(expectedDir,'test-all.jar')
-            project.jruby.gemInstallDir = new File(TESTROOT,'fakeGemDir').absolutePath
-
-            new File(project.jruby.gemInstallDir,'gems').mkdirs()
-            new File(project.jruby.gemInstallDir,'gems/fake.txt').text = 'fake.content'
-
-            project.with {
-                jruby {
-                    defaultRepositories = false
-                    defaultVersion = jrubyTestVersion
-                }
-                dependencies {
-                    jrubyJar 'org.spockframework:spock-core:0.7-groovy-2.0'
-                }
-            }
-
-        when: "I set the default main class"
-            project.configure(jar) {
-                archiveName = 'test-all.jar'
-                destinationDir = expectedDir
-                jruby {
-                    defaults 'gems'
-                    mainClass 'bogus.does.not.exist'
-                }
-
-            }
-            project.evaluate()
-
-        and: "I actually build the JAR"
-            jar.copy()
+            jrubyJar.copy()
             def builtJar = fileNames(project.zipTree(expectedJar))
 
         then: "I expect to see jruby.home unpacked "
@@ -282,35 +240,7 @@ class JRubyJarPluginSpec extends Specification {
             builtJar.contains("gems/fake.txt".toString())
 
         and: "I expect the new main class to be listed in the manifest"
-            jar.manifest.effectiveManifest.attributes['Main-Class']?.contains('bogus.does.not.exist')
+            jrubyJar.manifest.effectiveManifest.attributes['Main-Class']?.contains('bogus.does.not.exist')
 
-    }
-
-    def "Check code generation configuration"() {
-        given:
-            project= setupProject(false)
-            Task generator = project.tasks.getByName(JRubyJarPlugin.BOOTSTRAP_TASK_NAME)
-
-        expect:
-            generator.jruby.getSource().toString().endsWith(BootstrapClassExtension.BOOTSTRAP_TEMPLATE_PATH)
-            generator.destinationDir == new File(project.buildDir,'generated/java')
-    }
-
-    def "Run code generation"() {
-        given: "That the jar plugin has been applied"
-            project= setupProject(false)
-            Task generator = project.tasks.getByName(JRubyJarPlugin.BOOTSTRAP_TASK_NAME)
-            File expectedFile = new File(generator.destinationDir,'bootstrap.java')
-
-        when: "The task is executed"
-            project.evaluate()
-            generator.copy()
-
-        then: "Expect to find the generated file"
-            expectedFile.exists()
-
-        and: "The tokens has been replaced"
-            !expectedFile.text.contains('%%LAUNCH_SCRIPT%%')
-            expectedFile.text.contains(generator.jruby.initScript)
     }
 }
