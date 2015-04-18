@@ -104,8 +104,8 @@ class GemUtils {
                      "--install-dir=${destDir.absolutePath}",
                      '--no-user-install',
                      '--wrappers',
-                     '-N',
-                     '--platform=java'
+                     '--no-document',
+                     '--local'
 
                 // Workaround for bug
                 if(JRubyExecUtils.jrubyJarVersion(jRubyClasspath) == '1.7.14') {
@@ -183,10 +183,14 @@ class GemUtils {
         project.copySpec {
             from(dir) {
                 include '**'
+                // TODO have some standard which is bin/*, gems/**
+                // specifications/*
                 if(!fullGem) {
                     exclude 'cache/**'
                     exclude 'gems/*/test/**'
                     exclude 'gems/*/tests/**'
+                    exclude 'gems/*/spec/**'
+                    exclude 'gems/*/specs/**'
                     exclude 'build_info'
                 }
             }
