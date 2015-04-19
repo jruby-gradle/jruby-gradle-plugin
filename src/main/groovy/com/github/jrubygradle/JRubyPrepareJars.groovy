@@ -1,6 +1,7 @@
 package com.github.jrubygradle
 
 import com.github.jrubygradle.internal.JRubyExecUtils
+import groovy.transform.PackageScope
 import org.gradle.api.DefaultTask
 import org.gradle.api.Project
 import org.gradle.api.file.FileCollection
@@ -53,6 +54,12 @@ class JRubyPrepareJars  extends DefaultTask {
             fileRenameMap[dep.file.name] = newFileName
             // TODO omit system-scoped files
             files << dep.file
+
+        // create Jars.lock file used by jar-dependencies
+        def jarsLock = new File(outputDir, 'Jars.lock')
+        jarsLock.parentFile.mkdirs();
+        jarsLock.withWriter { writer ->
+            coordinates.each { writer.println it }
         }
 
         project.copy() {
