@@ -40,13 +40,14 @@ class JRubyPrepareJars  extends DefaultTask {
         def fileRenameMap = [:]
         def coordinates = []
         def files = []
-	artifacts.each { dep ->
+        artifacts.each { dep ->
 
             def group = dep.moduleVersion.id.group
-            def groupAsPath = group.replace('.', File.separatorChar)
+            def groupAsPath = group.replace('.' as char, File.separatorChar)
             def version = dep.moduleVersion.id.version
             // TODO classifier
             def newFileName = "${groupAsPath}/${dep.name}/${version}/${dep.name}-${version}.${dep.type}"
+
             if (group != 'rubygems' ) {
                 // TODO classifier and system-scope
                 coordinates << "${group}:${dep.name}:${version}:"
@@ -54,23 +55,22 @@ class JRubyPrepareJars  extends DefaultTask {
             fileRenameMap[dep.file.name] = newFileName
             // TODO omit system-scoped files
             files << dep.file
+        }
 
         // create Jars.lock file used by jar-dependencies
         def jarsLock = new File(outputDir, 'Jars.lock')
-        jarsLock.parentFile.mkdirs();
+        jarsLock.parentFile.mkdirs()
         jarsLock.withWriter { writer ->
             coordinates.each { writer.println it }
         }
 
+        // TODO use synch but need a different place to create the Jars.lock
         project.copy() {
             from files
-
             include '**/*.jar'
             exclude '**/jruby-complete*.jar'
-
             rename { oldName -> fileRenameMap[oldName] }
             into(outputDir)
         }
     }
 }
-
