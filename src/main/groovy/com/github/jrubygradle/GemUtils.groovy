@@ -1,5 +1,6 @@
 package com.github.jrubygradle
 
+import com.github.jrubygradle.internal.JRubyExecUtils
 import org.gradle.api.Project
 import org.gradle.api.artifacts.Configuration
 import org.gradle.api.file.CopySpec
@@ -51,6 +52,8 @@ class GemUtils {
         Set<File> gemsToProcess = []
         Set<File> deletes = []
 
+        Map jrubyVersion = JRubyExecUtils.jrubyJarVersionTriple(jRubyClasspath)
+
         getGems(gems).files.each { File gem ->
             String gemName = gemFullNameFromFile(gem.name)
             File extractDir = new File(destDir, "gems/${gemName}")
@@ -99,13 +102,13 @@ class GemUtils {
                 // is overwritten
                 args '--ignore-dependencies',
                      "--install-dir=${destDir.absolutePath}",
-		     '--no-user-install',
-		     '--wrappers',
+                     '--no-user-install',
+                     '--wrappers',
                      '-N',
                      '--platform=java'
 
                 // Workaround for bug
-                if(jRubyClasspath.name.contains('1.7.14')) {
+                if(JRubyExecUtils.jrubyJarVersion(jRubyClasspath) == '1.7.14') {
                     project.logger.debug "Gem installation: Working around bug in jruby 1.7.14"
                     environment HOME : project.gradle.gradleUserHomeDir.absolutePath
                 }
@@ -117,10 +120,16 @@ class GemUtils {
 
                 systemProperties 'file.encoding' : 'utf-8'
             }
-            project.javaexec {
-                main 'org.jruby.Main'
-                classpath jRubyClasspath
-                args '-r', 'jruby/commands', '-e', "JRuby::Commands.generate_dir_info( '${destDir.absolutePath}' )"
+
+            if(jrubyVersion.major == 1 && jrubyVersion.minor <= 7 && jrubyVersion.patchlevel < 19) {
+                project.logger.warn "Not generating JRuby directory info information as current JRuby version < 1.7.19"
+            } else {
+                project.javaexec {
+                    main 'org.jruby.Main'
+                    classpath jRubyClasspath
+                    args '-r', 'jruby/commands', '-e', "JRuby::Commands.generate_dir_info( '${destDir.absolutePath}' )"
+
+                }
             }
         }
     }
