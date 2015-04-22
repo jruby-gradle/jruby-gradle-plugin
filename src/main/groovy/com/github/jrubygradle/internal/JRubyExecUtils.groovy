@@ -42,9 +42,30 @@ class JRubyExecUtils {
      * @since 0.1.9
      */
     @CompileDynamic
-    static String jrubyJarVersion(File jar) {
+    static String jrubyJarVersion(final File jar) {
         Matcher matches = jar.name =~ /jruby-complete-(.+)\.jar/
         !matches ? null : matches[0][1]
+    }
+
+    /** Extracts the JRuby version number as a triplet from a jruby-complete-XXX.jar filename
+     *
+     * @param jar JRuby Jar
+     * @return Version string map [major,minor,patchlevel] or null
+     *
+     * @since 0.1.16
+     */
+    @CompileDynamic
+    static Map jrubyJarVersionTriple(final File jar) {
+        String version = jrubyJarVersion(jar)
+        if(!version) {return null}
+
+        Matcher matches = version =~ /(\d{1,2})\.(\d{1,3})\.(\d{1,3})/
+
+        (!matches.matches() || matches[0].size() != 4) ? null : [
+            major : matches[0][1].toInteger(),
+            minor : matches[0][2].toInteger(),
+            patchlevel : matches[0][3].toInteger()
+        ]
     }
 
     /** Extract the jruby-complete-XXX.jar as a FileCollection
