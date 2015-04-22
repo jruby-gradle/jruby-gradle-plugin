@@ -117,6 +117,11 @@ class GemUtils {
 
                 systemProperties 'file.encoding' : 'utf-8'
             }
+            project.javaexec {
+                main 'org.jruby.Main'
+                classpath jRubyClasspath
+                args '-r', 'jruby/commands', '-e', "JRuby::Commands.generate_dir_info( '${destDir.absolutePath}' )"
+            }
         }
     }
 
