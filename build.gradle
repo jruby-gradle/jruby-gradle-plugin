@@ -78,6 +78,9 @@ dependencies {
     // NOTE: If you change this, you will also need to update JRubyPrepareGemsIntegrationSpec
     integrationTestGems 'rubygems:slim:2.0.2'
 
+    // NOTE: If you change this, you will also need to update JRubyPrepareJarsIntegrationSpec
+    integrationTestGems 'rubygems:leafy-complete:0.4.0'
+
     // NOTE: If you change this, you will also need to update JRubyExecIntegrationSpec & JRubyExecExtensionIntegrationSpec
     integrationTestGems 'rubygems:credit_card_validator:1.1.0'
 

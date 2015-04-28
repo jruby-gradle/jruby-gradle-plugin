@@ -49,10 +49,17 @@ class JRubyPlugin implements Plugin<Project> {
             outputDir project.jruby.gemInstallDir
         }
 
+        project.task('jrubyPrepareJars', type: JRubyPrepareJars) {
+            group TASK_GROUP_NAME
+            description 'Prepare the jar dependencies from the `gem` dependencies, collect them into '
+            outputDir project.jruby.jarInstallDir
+        }
+
         project.task('jrubyPrepare') {
             group TASK_GROUP_NAME
             description 'Pre-cache and prepare all dependencies (jars and gems)'
             dependsOn project.tasks.jrubyPrepareGems
+            dependsOn project.tasks.jrubyPrepareJars
         }
 
         project.task('jrubyGenerateGradleRb', type: GenerateGradleRb) {
