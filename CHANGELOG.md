@@ -2,6 +2,10 @@
 
 ## 0.1.16
 
+* [#106](https://github.com/jruby-gradle/jruby-gradle-plugin/pull/106) - some little improvements on calling gem install
+* [#108](https://github.com/jruby-gradle/jruby-gradle-plugin/pull/108) - generate .jrubydir files for installed gems
+* [#110](https://github.com/jruby-gradle/jruby-gradle-plugin/pull/110) - WIP Jruby jar dependencies
+* [#111](https://github.com/jruby-gradle/jruby-gradle-plugin/pull/111) -  Resolved issues port #108 merge
 
 ## 0.1.15
 
