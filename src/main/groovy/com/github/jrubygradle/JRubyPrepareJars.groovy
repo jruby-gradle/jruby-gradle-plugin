@@ -4,6 +4,7 @@ import com.github.jrubygradle.internal.JRubyExecUtils
 import groovy.transform.PackageScope
 import org.gradle.api.DefaultTask
 import org.gradle.api.Project
+import org.gradle.api.Incubating
 import org.gradle.api.file.FileCollection
 import org.gradle.api.tasks.InputFiles
 import org.gradle.api.tasks.OutputDirectory
@@ -18,6 +19,7 @@ import org.gradle.api.tasks.TaskAction
  * @author R Tyler Croy
  * @author Christian Meier
  */
+@Incubating
 class JRubyPrepareJars  extends DefaultTask {
 
     /** Target directory for JARs {@code outputDir + "/jars"}
@@ -65,7 +67,7 @@ class JRubyPrepareJars  extends DefaultTask {
         }
 
         // TODO use synch but need a different place to create the Jars.lock
-        project.copy() {
+        project.copy {
             from files
             include '**/*.jar'
             exclude '**/jruby-complete*.jar'
