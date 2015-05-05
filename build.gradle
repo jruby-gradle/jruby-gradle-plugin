@@ -14,7 +14,7 @@ apply from: 'gradle/integration-tests.gradle'
 
 
 group = 'com.github.jruby-gradle'
-version = '0.1.16'
+version = '0.1.17'
 archivesBaseName = 'jruby-gradle-plugin'
 
 if (System.env.RELEASE != '1') {
@@ -30,7 +30,7 @@ configurations {
 }
 
 ext {
-    jrubyVersion = '1.7.19'
+    jrubyVersion = '1.7.20'
     jrubyClassPathFromConfiguration = { Configuration cfg ->
         def f = cfg.files.find { it.name.startsWith('jruby-complete-') }
         return  f?.absolutePath
