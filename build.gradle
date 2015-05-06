@@ -8,7 +8,7 @@ buildscript {
     dependencies {
         classpath 'com.jfrog.bintray.gradle:gradle-bintray-plugin:0.5'
         classpath 'com.netflix.nebula:gradle-extra-configurations-plugin:1.12.+'
-        classpath 'org.ysb33r.gradle:gradletest:0.5.1'
+        classpath 'org.ysb33r.gradle:gradletest:0.5.2'
     }
 }
 
@@ -182,7 +182,10 @@ bintrayUpload.dependsOn assemble
 
 
 gradleLocations {
-//    searchGvm = false
+    if(System.getenv('APPVEYOR')) {
+        searchGvm = false
+        download = true
+    }
 }
 
 gradleTest {
