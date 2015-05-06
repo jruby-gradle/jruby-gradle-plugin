@@ -1,6 +1,8 @@
 package com.github.jrubygradle
 
 import com.github.jrubygradle.testhelper.BasicProjectBuilder
+import org.gradle.internal.os.OperatingSystem
+import spock.lang.IgnoreIf
 import spock.lang.Specification
 
 
@@ -21,6 +23,7 @@ class JRubyGenerateGradleRbIntegrationSpec extends Specification {
         TESTROOT.mkdirs()
     }
 
+    @IgnoreIf({OperatingSystem.current().isWindows()})
     def "Generate gradle.rb"() {
         given: "A set of gems"
             def project = BasicProjectBuilder.buildWithLocalRepo(TESTROOT,FLATREPO,CACHEDIR)
