@@ -6,11 +6,14 @@ install:
 script:
  - ./gradlew build gradleTest
 
+#jdk:
+# - oraclejdk7
+# - oraclejdk8
+# - openjdk7
+# - openjdk6
+
 jdk:
  - oraclejdk7
- - oraclejdk8
- - openjdk7
- - openjdk6
 
 os:
  - linux
