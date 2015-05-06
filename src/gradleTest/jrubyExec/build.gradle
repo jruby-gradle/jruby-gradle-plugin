@@ -1,0 +1,25 @@
+import com.github.jrubygradle.JRubyExec
+
+buildscript {
+    dependencies {
+        classpath 'com.github.jruby-gradle:jruby-gradle-plugin:%%VERSION%%'
+    }
+}
+
+apply plugin : 'com.github.jruby-gradle.base'
+
+dependencies {
+    jrubyExec ':credit_card_validator:1.1.0@gem'
+}
+
+jruby {
+    defaultRepositories = false
+}
+
+task runGradleTest {
+    dependsOn jrubyPrepareGems
+}
+
+task requiresGems( type : JRubyExec ) {
+    script        "scripts/requiresGem.rb"
+}

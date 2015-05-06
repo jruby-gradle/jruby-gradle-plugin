@@ -1,8 +1,14 @@
 buildscript {
-    repositories { jcenter() }
+    repositories {
+        jcenter()
+        maven {
+            url "https://plugins.gradle.org/m2/"
+        }
+    }
     dependencies {
         classpath 'com.jfrog.bintray.gradle:gradle-bintray-plugin:0.5'
         classpath 'com.netflix.nebula:gradle-extra-configurations-plugin:1.12.+'
+        classpath 'org.ysb33r.gradle:gradletest:0.5.1'
     }
 }
 
@@ -10,6 +16,7 @@ apply plugin: 'groovy'
 apply plugin: 'maven'
 apply plugin: 'com.jfrog.bintray'
 apply plugin: 'provided-base'
+apply plugin: 'org.ysb33r.gradletest'
 apply from: 'gradle/integration-tests.gradle'
 
 
@@ -90,6 +97,10 @@ dependencies {
     // NOTE: Leave this at .11 as it must be an older version. if
     // you change it here you will also need to update JRubyExecIntegrationSpec
     integrationTestGems "org.jruby:jruby-complete:1.7.11"
+
+    gradleTest "org.jruby:jruby-complete:${jrubyVersion}"
+    gradleTest 'rubygems:credit_card_validator:1.1.0'
+    gradleTest 'org.bouncycastle:bcprov-jdk15on:1.50'
 }
 
 test {
@@ -169,5 +180,13 @@ bintray {
 }
 bintrayUpload.dependsOn assemble
 
+
+gradleLocations {
+//    searchGvm = false
+}
+
+gradleTest {
+    versions '2.0','2.2','2.4'
+}
 
 // vim: ft=groovy

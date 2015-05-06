@@ -1,7 +1,23 @@
-language: java
+language: groovy
+
+install:
+ - ./gradlew clean
+
+script:
+ - ./gradlew build gradleTest
+
 jdk:
-  - oraclejdk8
-  - oraclejdk7
+ - oraclejdk7
+ - oraclejdk8
+ - openjdk7
+ - openjdk6
+
+os:
+ - linux
+ - osx
+
+env: TERM=dumb
+
 cache:
   directories:
     - $HOME/.gradle
