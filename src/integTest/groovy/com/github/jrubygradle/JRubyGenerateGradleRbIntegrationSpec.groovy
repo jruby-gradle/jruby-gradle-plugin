@@ -1,6 +1,8 @@
 package com.github.jrubygradle
 
 import com.github.jrubygradle.testhelper.BasicProjectBuilder
+import org.gradle.internal.os.OperatingSystem
+import spock.lang.IgnoreIf
 import spock.lang.Specification
 
 
@@ -21,6 +23,7 @@ class JRubyGenerateGradleRbIntegrationSpec extends Specification {
         TESTROOT.mkdirs()
     }
 
+    @IgnoreIf({OperatingSystem.current().isWindows()})
     def "Generate gradle.rb"() {
         given: "A set of gems"
             def project = BasicProjectBuilder.buildWithLocalRepo(TESTROOT,FLATREPO,CACHEDIR)
@@ -36,7 +39,7 @@ class JRubyGenerateGradleRbIntegrationSpec extends Specification {
             expected.exists()
 
         and: "The GEM_HOME to include gemInstallDir"
-            expected.text.find("export GEM_HOME=\"${project.jruby.gemInstallDir}\"")
+            expected.text.contains('export GEM_HOME="' + project.jruby.gemInstallDir + '"')
 
         and: "The java command invoked with the -cp flag"
             expected.text.find(project.configurations.jrubyExec.asPath)
