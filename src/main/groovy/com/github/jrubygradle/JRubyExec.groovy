@@ -35,53 +35,6 @@ class JRubyExec extends JavaExec {
         }
     }
 
-    /** Script to execute.
-     *
-     */
-    @Input
-    File script
-
-    /** Configuration to copy gems from. If {@code jRubyVersion} has not been set, {@code jRubyExec} will used as
-     * configuration. However, if {@code jRubyVersion} has been set, not gems will be used unless an explicit
-     * configuration has been provided
-     *
-     */
-    @Optional
-    @Input
-    String configuration
-
-    @Input
-    String jrubyVersion
-
-    /** Allow JRubyExec to inherit a Ruby env from the shell (e.g. RVM)
-      *
-      * @since 0.1.10
-      */
-    @Input
-    Boolean inheritRubyEnv = false
-
-    /** Directory to use for unpacking GEMs.
-     * This is optional. If not set, then an internal generated folder will be used. In general the latter behaviour
-     * is preferred as it allows for isolating different {@code JRubyExec} tasks. However, this functionality is made
-     * available for script authors for would like to control this behaviour and potentially share GEMs between
-     * various {@code JRubyExec} tasks.
-     *
-     * @since 0.1.9
-     */
-    Object gemWorkDir
-
-    /** Returns the directory that will be used to unpack GEMs in.
-     *
-     * @return Target directory
-     * @since 0.1.9
-     */
-    @Optional
-    @Input
-    File getGemWorkDir() {
-        gemWorkDir ? project.file(gemWorkDir) : tmpGemDir()
-    }
-
-
     JRubyExec() {
         super()
         super.setMain 'org.jruby.Main'
@@ -96,21 +49,134 @@ class JRubyExec extends JavaExec {
         jrubyConfigurationName = JRUBYEXEC_CONFIG
     }
 
-    /** Sets the scriptname
+
+    /** Allow JRubyExec to inherit a Ruby env from the shell (e.g. RVM)
      *
-     * @param fName Path to script
+     * @since 0.1.10
      */
-    void setScript(Object fName) {
-        switch (fName) {
+    @Input
+    Boolean inheritRubyEnv = false
+
+    /** Script to execute.
+     * @return The path to the script (or nul if not set)
+     */
+    @Input
+    File getScript() {
+        switch (this.script) {
+            case null:
+                return null
             case File:
-                script=fName
-                break
+                return this.script
             case String:
-                script = new File(fName)
-                break
+                return new File(this.script)
             default:
-                script = new File(fName.toString())
+                return new File(this.script.toString())
         }
+    }
+
+
+    /** Set script to execute.
+     *
+     * @param scr Path to script. Can be any object that is convertible to File.
+     */
+    void script(def scr) {
+        setScript(scr)
+    }
+
+    /** Set script to execute.
+     *
+     * @param scr Path to script. Can be any object that is convertible to File.
+     */
+    void setScript(def scr) {
+        this.script = scr
+    }
+
+    /** Configuration to copy gems from. If {@code jRubyVersion} has not been set, {@code jRubyExec} will used as
+     * configuration. However, if {@code jRubyVersion} has been set, not gems will be used unless an explicit
+     * configuration has been provided
+     *
+     */
+    @Optional
+    @Input
+    String configuration
+
+    /** Sets the configurations
+     *
+     * @param cfg Name of configuration
+     */
+    void configuration(final String cfg) {
+        configuration = cfg
+    }
+
+    /** If it is required that a JRubyExec task needs to be executed with a different version of JRuby that the
+     * globally configured one, it can be done by setting it here.
+     */
+    @Input
+    String jrubyVersion
+
+    /** Setting the {@code jruby-complete} version allows for tasks to be run using different versions of JRuby.
+     * This is useful for comparing the results of different version or running with a gem that is only
+     * compatible with a specific version or when running a script with a different version that what will
+     * be packaged.
+     *
+     * @param version String in the form '1.7.13'
+     * @since 0.1.18
+     */
+    void jrubyVersion(final String ver) {
+        setJrubyVersion(ver)
+    }
+
+    /** Setting the {@code jruby-complete} version allows for tasks to be run using different versions of JRuby.
+     * This is useful for comparing the results of different version or running with a gem that is only
+     * compatible with a specific version or when running a script with a different version that what will
+     * be packaged.
+     *
+     * @param version String in the form '1.7.13'
+     */
+    void setJrubyVersion(final String version) {
+        if (version == project.jruby.execVersion) {
+            jrubyConfigurationName = JRUBYEXEC_CONFIG
+        } else {
+            final String cfgName= 'jrubyExec$$' + name
+            project.configurations.maybeCreate(cfgName)
+            jrubyConfigurationName = cfgName
+        }
+        jrubyVersion = version
+    }
+
+    /** Directory to use for unpacking GEMs.
+     * This is optional. If not set, then an internal generated folder will be used. In general the latter behaviour
+     * is preferred as it allows for isolating different {@code JRubyExec} tasks. However, this functionality is made
+     * available for script authors for would like to control this behaviour and potentially share GEMs between
+     * various {@code JRubyExec} tasks.
+     *
+     * @since 0.1.9
+     */
+    void setGemWorkDir( Object wd ) {
+        this.gemWorkDir = wd
+    }
+
+    /** Directory to use for unpacking GEMs.
+     * This is optional. If not set, then an internal generated folder will be used. In general the latter behaviour
+     * is preferred as it allows for isolating different {@code JRubyExec} tasks. However, this functionality is made
+     * available for script authors for would like to control this behaviour and potentially share GEMs between
+     * various {@code JRubyExec} tasks.
+     *
+     * @since 0.1.18
+     */
+    void gemWorkDir( Object wd ) {
+        this.gemWorkDir = wd
+    }
+
+    /** Returns the directory that will be used to unpack GEMs in.
+     *
+     * @return Target directory
+     * @since 0.1.9
+     */
+    @Optional
+    @Input
+    File getGemWorkDir() {
+        this.gemWorkDir ? project.file(this.gemWorkDir) : tmpGemDir()
     }
 
     /** Returns a list of script arguments
@@ -152,23 +218,6 @@ class JRubyExec extends JavaExec {
         JRubyExecUtils.prepareWorkingPath(getGemWorkDir(),originalPath)
     }
 
-    /** Setting the {@code jruby-complete} version allows for tasks to be run using different versions of JRuby.
-     * This is useful for comparing the results of different version or running with a gem that is only
-     * compatible with a specific version or when running a script with a different version that what will
-     * be packaged.
-     *
-     * @param version String in the form '1.7.13'
-     */
-    void setJrubyVersion(final String version) {
-        if (version == project.jruby.execVersion) {
-            jrubyConfigurationName = JRUBYEXEC_CONFIG
-        } else {
-            final String cfgName= 'jrubyExec$$' + name
-            project.configurations.maybeCreate(cfgName)
-            jrubyConfigurationName = cfgName
-        }
-        jrubyVersion = version
-    }
 
     @Override
     void exec() {
@@ -213,7 +262,7 @@ class JRubyExec extends JavaExec {
      */
     @Override
     List<String> getArgs() {
-        JRubyExecUtils.buildArgs(jrubyArgs, script, scriptArgs)
+        JRubyExecUtils.buildArgs(jrubyArgs, getScript(), scriptArgs)
     }
 
     @Override
@@ -268,5 +317,6 @@ class JRubyExec extends JavaExec {
     private String jrubyConfigurationName
     private List<Object>  jrubyArgs = []
     private List<Object>  scriptArgs = []
-
+    private Object script
+    private Object gemWorkDir
 }

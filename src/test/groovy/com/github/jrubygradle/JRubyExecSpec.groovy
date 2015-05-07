@@ -17,15 +17,15 @@ import static org.gradle.api.logging.LogLevel.*
  */
 class JRubyExecSpec extends Specification {
 
-    static final File TEST_SCRIPT_DIR = new File( System.getProperty('TEST_SCRIPT_DIR') ?: 'src/test/resources/scripts')
-    static final File TESTROOT = new File(System.getProperty('TESTROOT') ?: 'build/tmp/test/unittests')
+    static final File TEST_SCRIPT_DIR = new File( System.getProperty('TEST_SCRIPT_DIR') ?: 'src/integTest/resources/scripts').absoluteFile
+    static final File TESTROOT = new File( System.getProperty('TESTROOT') ?: 'build/tmp/test/unittests', 'jes')
     static final String TASK_NAME = 'RubyWax'
 
     def project
     def execTask
 
     void setup() {
-        project = ProjectBuilder.builder().build()
+        project = ProjectBuilder.builder().withProjectDir(TESTROOT).build()
         project.buildDir = TESTROOT
         project.logging.level = LIFECYCLE
         project.apply plugin: 'com.github.jruby-gradle.base'
@@ -141,7 +141,7 @@ class JRubyExecSpec extends Specification {
             }
 
         then:
-            execTask.getArgs() == ['-j1','-j2','-j3','-S',new File(TEST_SCRIPT_DIR,'helloWorld.rb').toString(),'-s1','-s2','-s3']
+            execTask.getArgs() == ['-j1','-j2','-j3','-S',new File(TEST_SCRIPT_DIR,'helloWorld.rb').absolutePath,'-s1','-s2','-s3']
     }
 
     def "Properly handle the lack of a `script` argument"() {
