@@ -16,10 +16,11 @@ jruby {
     defaultRepositories = false
 }
 
-task runGradleTest {
-    dependsOn jrubyPrepareGems
-}
-
 task requiresGems( type : JRubyExec ) {
     script        "scripts/requiresGem.rb"
 }
+
+task runGradleTest {
+    dependsOn requiresGems
+}
+
