@@ -24,9 +24,9 @@ class JRubyPlugin implements Plugin<Project> {
         }
 
         // Set up a special configuration group for our embedding jars
-        project.configurations.create('gems')
-        project.configurations.create('jrubyEmbeds')
-        project.configurations.create(JRubyExec.JRUBYEXEC_CONFIG)
+        GemUtils.createGemConfiguration(project, 'gems')
+        GemUtils.createGemConfiguration(project, 'jrubyEmbeds')
+        GemUtils.createGemConfiguration(project, JRubyExec.JRUBYEXEC_CONFIG)
         JRubyExecDelegate.addToProject(project)
 
         // In order for jrubyWar to work we'll need to pull in the warbler
