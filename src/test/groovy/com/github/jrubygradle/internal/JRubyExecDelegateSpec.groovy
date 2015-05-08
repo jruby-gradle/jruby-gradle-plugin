@@ -34,13 +34,14 @@ class JRubyExecDelegateSpec extends Specification {
 
     def "When just passing script, scriptArgs, jrubyArgs, expect local properties to be updated"() {
         given:
-            def xplatformFileName = new File('path/to/file').toString()
+            def xplatformFileName = new File('path/to/file')
             def cl = {
                 script 'path/to/file'
                 jrubyArgs 'c','d','-S'
                 scriptArgs '-x'
                 scriptArgs '-y','-z'
                 jrubyArgs 'a','b'
+                gemWorkDir 'path/to/file'
             }
             cl.delegate = jred
             cl.call()
@@ -48,9 +49,10 @@ class JRubyExecDelegateSpec extends Specification {
         expect:
             jred.passthrough.size() == 0
             jred.script == xplatformFileName
-            jred.scriptArgs == ['-x','-y','-z']
-            jred.jrubyArgs == ['c','d','-S','a','b']
-            jred.buildArgs() == ['c','d','-S','a','b',xplatformFileName,'-x','-y','-z']
+            jred._convertScriptArgs() == ['-x','-y','-z']
+            jred._convertJrubyArgs() == ['c','d','-S','a','b']
+            jred.buildArgs() == ['c','d','-S','a','b',xplatformFileName.toString(),'-x','-y','-z']
+            jred._convertGemWorkDir(project) == project.file('path/to/file')
     }
 
     def "When passing absolute file and absolute file, expect check for existence to be executed"() {

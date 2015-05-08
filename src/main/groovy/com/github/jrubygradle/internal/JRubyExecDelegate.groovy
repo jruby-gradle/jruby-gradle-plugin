@@ -11,7 +11,7 @@ import org.gradle.util.CollectionUtils
 /**
  * @author Schalk W. Cronjé
  */
-class JRubyExecDelegate {
+class JRubyExecDelegate implements JRubyExecTraits   {
 
     static final String JRUBYEXEC_CONFIG = JRubyExec.JRUBYEXEC_CONFIG
 
@@ -30,81 +30,29 @@ class JRubyExecDelegate {
         }
     }
 
-    /** Sets the scriptname
+    /** Gets the script to use.
      *
-     * @param fName Path to script
+     * @return Get the script to use. Can be null.
      */
-    void script(Object fName) {
-        switch (fName) {
-            case File:
-                this.script=fName
-                break
-            case String:
-                this.script=new File(fName)
-                break
-            default:
-                this.script=new File(fName.toString())
-        }
-    }
+    File getScript() { _convertScript() }
 
-
-    String getScript() { this.script }
-
-    /** Override the default directory for unpacking GEMs
+    /** Directory to use for unpacking GEMs.
+     * This is optional. If not set, then an internal generated folder will be used. In general the latter behaviour
+     * is preferred as it allows for isolating different {@code JRubyExec} tasks. However, this functionality is made
+     * available for script authors for would like to control this behaviour and potentially share GEMs between
+     * various {@code JRubyExec} tasks.
      *
      * @since 0.1.9
      */
-    Object gemWorkDir
-
-    /** Override the default directory for unpacking GEMs
-     *
-     * @param dir Directory to use for unpacking GEMs
-     * @since 0.1.9
-     */
-    void gemWorkDir(Object dir) {
-        this.gemWorkDir = dir
-    }
-
-    /** Override the default directory for unpacking GEMs
-     *
-     * @param dir Directory to use for unpacking GEMs
-     * @since 0.1.9
-     */
-    /** Returns a list of script arguments
-     */
-    List<String> scriptArgs() {CollectionUtils.stringize(this.scriptArgs)}
-
-    /** Set arguments for script
-     *
-     * @param args
-     */
-    void scriptArgs(Object... args) {
-        this.scriptArgs.addAll(args as List)
-    }
-
-    /** Returns a list of jruby arguments
-     */
-    List<String> jrubyArgs()  {CollectionUtils.stringize(this.jrubyArgs)}
-
-    /** Set arguments for jruby
-     *
-     * @param args
-     */
-    void jrubyArgs(Object... args) {
-        this.jrubyArgs.addAll(args as List)
+    File getGemWorkDir() {
+        _convertGemWorkDir(project)
     }
 
     /** buildArgs creates a list of arguments to pass to the JVM
      */
     List<String> buildArgs() {
-        JRubyExecUtils.buildArgs(jrubyArgs,script,scriptArgs)
+        JRubyExecUtils.buildArgs(_convertJrubyArgs(),script,_convertScriptArgs())
     }
-
-    /** Allow jrubyexec to inherit a Ruby env from the shell (e.g. RVM)
-     *
-     * @since 0.1.11
-     */
-    boolean inheritRubyEnv = false
 
     @PackageScope
     def keyAt(Integer index) {
@@ -124,9 +72,6 @@ class JRubyExecDelegate {
     }
 
     private def passthrough = []
-    private File script
-    private List<Object>  scriptArgs = []
-    private List<Object>  jrubyArgs = []
 
     static def jrubyexecDelegatingClosure = { Project project, Closure cl ->
         def proxy =  new JRubyExecDelegate()
@@ -134,12 +79,14 @@ class JRubyExecDelegate {
         cl2.delegate = proxy
         cl2.call()
 
-        File gemDir= project.file(proxy.gemWorkDir ?: project.jruby.gemInstallDir)
+        File gemDir= proxy._convertGemWorkDir(project) ?: project.file(project.jruby.gemInstallDir)
+
         Configuration config = project.configurations.getByName(JRUBYEXEC_CONFIG)
         GemUtils.OverwriteAction overwrite = project.gradle.startParameter.refreshDependencies ?  GemUtils.OverwriteAction.OVERWRITE : GemUtils.OverwriteAction.SKIP
         project.mkdir gemDir
         GemUtils.extractGems(project,config,config,gemDir,overwrite)
         String pathVar = JRubyExecUtils.pathVar()
+
         project.javaexec {
             classpath JRubyExecUtils.classpathFromConfiguration(config)
             proxy.passthrough.each { item ->

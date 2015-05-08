@@ -10,11 +10,9 @@ import static org.gradle.api.logging.LogLevel.LIFECYCLE
  */
 class BasicProjectBuilder {
 
-    static Project buildWithStdRepo( final File buildDir_, final File cacheDir_ ) {
-        Project project = ProjectBuilder.builder().build()
+    static Project buildWithStdRepo( final File projectDir_, final File cacheDir_ ) {
+        Project project = ProjectBuilder.builder().withProjectDir(projectDir_).build()
         project.with {
-            gradle.startParameter.projectCacheDir= cacheDir_
-            buildDir = buildDir_
             logging.level = LIFECYCLE
             apply plugin: 'com.github.jruby-gradle.base'
             jruby.defaultRepositories = true
@@ -23,11 +21,9 @@ class BasicProjectBuilder {
         project
     }
 
-    static Project buildWithLocalRepo( final File buildDir_, final File repoDir_, final File cacheDir_ ) {
-        Project project = ProjectBuilder.builder().build()
+    static Project buildWithLocalRepo( final File projectDir_, final File repoDir_, final File cacheDir_ ) {
+        Project project = ProjectBuilder.builder().withProjectDir(projectDir_).build()
         project.with {
-            gradle.startParameter.projectCacheDir= cacheDir_
-            buildDir = buildDir_
             logging.level = LIFECYCLE
             apply plugin: 'com.github.jruby-gradle.base'
 

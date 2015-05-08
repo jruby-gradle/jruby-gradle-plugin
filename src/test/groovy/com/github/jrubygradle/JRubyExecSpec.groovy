@@ -119,7 +119,7 @@ class JRubyExecSpec extends Specification {
             }
 
         then: "append everything"
-            execTask.jrubyArgs() == ['a','b','c','d','e','f']
+            execTask.jrubyArgs == ['a','b','c','d','e','f']
     }
 
     def "Setting script arguments"()  {
@@ -129,7 +129,7 @@ class JRubyExecSpec extends Specification {
                 scriptArgs 'd', 'e', 'f'
             }
         then: "append everything"
-            execTask.scriptArgs() == ['a','b','c','d','e','f']
+            execTask.scriptArgs == ['a','b','c','d','e','f']
     }
 
     def "Getting correct command-line passed"() {

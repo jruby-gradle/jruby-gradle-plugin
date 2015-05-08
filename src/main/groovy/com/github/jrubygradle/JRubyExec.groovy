@@ -1,5 +1,6 @@
 package com.github.jrubygradle
 
+import com.github.jrubygradle.internal.JRubyExecTraits
 import com.github.jrubygradle.internal.JRubyExecUtils
 import org.gradle.api.Project
 import org.gradle.api.tasks.Input
@@ -15,7 +16,7 @@ import org.gradle.util.CollectionUtils
  *
  * @author Schalk W. Cronjé
  */
-class JRubyExec extends JavaExec {
+class JRubyExec extends JavaExec implements JRubyExecTraits {
 
     static final String JRUBYEXEC_CONFIG = 'jrubyExec'
 
@@ -55,40 +56,16 @@ class JRubyExec extends JavaExec {
      * @since 0.1.10
      */
     @Input
-    Boolean inheritRubyEnv = false
+    boolean getInheritRubyEnv() {
+        this.inheritRubyEnv
+    }
 
     /** Script to execute.
      * @return The path to the script (or nul if not set)
      */
     @Input
     File getScript() {
-        switch (this.script) {
-            case null:
-                return null
-            case File:
-                return this.script
-            case String:
-                return new File(this.script)
-            default:
-                return new File(this.script.toString())
-        }
-    }
-
-
-    /** Set script to execute.
-     *
-     * @param scr Path to script. Can be any object that is convertible to File.
-     */
-    void script(def scr) {
-        setScript(scr)
-    }
-
-    /** Set script to execute.
-     *
-     * @param scr Path to script. Can be any object that is convertible to File.
-     */
-    void setScript(def scr) {
-        this.script = scr
+        _convertScript()
     }
 
     /** Configuration to copy gems from. If {@code jRubyVersion} has not been set, {@code jRubyExec} will used as
@@ -144,30 +121,6 @@ class JRubyExec extends JavaExec {
         jrubyVersion = version
     }
 
-    /** Directory to use for unpacking GEMs.
-     * This is optional. If not set, then an internal generated folder will be used. In general the latter behaviour
-     * is preferred as it allows for isolating different {@code JRubyExec} tasks. However, this functionality is made
-     * available for script authors for would like to control this behaviour and potentially share GEMs between
-     * various {@code JRubyExec} tasks.
-     *
-     * @since 0.1.9
-     */
-    void setGemWorkDir( Object wd ) {
-        this.gemWorkDir = wd
-    }
-
-    /** Directory to use for unpacking GEMs.
-     * This is optional. If not set, then an internal generated folder will be used. In general the latter behaviour
-     * is preferred as it allows for isolating different {@code JRubyExec} tasks. However, this functionality is made
-     * available for script authors for would like to control this behaviour and potentially share GEMs between
-     * various {@code JRubyExec} tasks.
-     *
-     * @since 0.1.18
-     */
-    void gemWorkDir( Object wd ) {
-        this.gemWorkDir = wd
-    }
-
     /** Returns the directory that will be used to unpack GEMs in.
      *
      * @return Target directory
@@ -176,39 +129,23 @@ class JRubyExec extends JavaExec {
     @Optional
     @Input
     File getGemWorkDir() {
-        this.gemWorkDir ? project.file(this.gemWorkDir) : tmpGemDir()
+        _convertGemWorkDir(project) ?: tmpGemDir()
     }
 
     /** Returns a list of script arguments
      */
-    List<String> scriptArgs() {
-        CollectionUtils.stringize(this.scriptArgs)
-    }
-
-    /** Set arguments for script
-     *
-     * @param args
-     */
-    void scriptArgs(Object... args) {
-        this.scriptArgs.addAll(args as List)
-    }
-
-    void scriptArgs(Closure c) {
-        this.scriptArgs << c
+    @Optional
+    @Input
+    List<String> getScriptArgs() {
+        _convertScriptArgs()
     }
 
     /** Returns a list of jruby arguments
      */
-    List<String> jrubyArgs() {
-        CollectionUtils.stringize(this.jrubyArgs)
-    }
-
-    /** Set arguments for jruby
-     *
-     * @param args
-     */
-    void jrubyArgs(Object... args) {
-        this.jrubyArgs.addAll(args as List)
+    @Optional
+    @Input
+    List<String> getJrubyArgs() {
+        _convertJrubyArgs()
     }
 
     /** Return the computed `PATH` for the task
@@ -315,8 +252,4 @@ class JRubyExec extends JavaExec {
     }
 
     private String jrubyConfigurationName
-    private List<Object>  jrubyArgs = []
-    private List<Object>  scriptArgs = []
-    private Object script
-    private Object gemWorkDir
 }
