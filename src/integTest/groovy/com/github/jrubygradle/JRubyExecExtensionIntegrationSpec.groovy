@@ -14,8 +14,8 @@ class JRubyExecExtensionIntegrationSpec extends Specification {
     static final File CACHEDIR = new File( System.getProperty('TEST_CACHEDIR') ?: 'build/tmp/integrationTest/cache')
     static final File FLATREPO = new File( System.getProperty('TEST_FLATREPO') ?: 'build/tmp/integrationTest/flatRepo')
     static final boolean TESTS_ARE_OFFLINE = System.getProperty('TESTS_ARE_OFFLINE') != null
-    static final File TEST_SCRIPT_DIR = new File( System.getProperty('TEST_SCRIPT_DIR') ?: 'src/integTest/resources/scripts')
-    static final File TESTROOT = new File("${System.getProperty('TESTROOT') ?: 'build/tmp/test/integration-tests'}/jreeis")
+    static final File TEST_SCRIPT_DIR = new File( System.getProperty('TEST_SCRIPT_DIR') ?: 'src/integTest/resources/scripts').absoluteFile
+    static final File TESTROOT = new File("${System.getProperty('TESTROOT') ?: 'build/tmp/test/integration-tests'}/jreeis").absoluteFile
 
     def project
 
@@ -103,13 +103,13 @@ class JRubyExecExtensionIntegrationSpec extends Specification {
                     script        "${TEST_SCRIPT_DIR}/requiresGem.rb"
                     standardOutput output
                     jrubyArgs '-T1'
-                    gemWorkDir  new File(TESTROOT,'customGemDir')
+                    gemWorkDir  new File(buildDir,'customGemDir')
                 }
             }
 
         then:
             output.toString() == "Not valid\n"
-            new File(TESTROOT,'customGemDir').exists()
+            new File(project.buildDir,'customGemDir').exists()
 
     }
 }
