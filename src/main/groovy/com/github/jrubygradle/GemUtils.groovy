@@ -1,6 +1,7 @@
 package com.github.jrubygradle
 
 import com.github.jrubygradle.internal.JRubyExecUtils
+import com.github.jrubygradle.internal.GemVersionResolver
 import org.gradle.api.Project
 import org.gradle.api.artifacts.Configuration
 import org.gradle.api.file.CopySpec
@@ -206,6 +207,15 @@ class GemUtils {
 	    from(dir) {
                 include '**'
 	    }
+        }
+    }
+
+    static void createGemConfiguration(Project project, String configName) {
+        project.configurations.create(configName) {
+            resolutionStrategy {
+                def resolver = new GemVersionResolver()
+                eachDependency { resolver.resolve(it) }
+            }
         }
     }
 }
