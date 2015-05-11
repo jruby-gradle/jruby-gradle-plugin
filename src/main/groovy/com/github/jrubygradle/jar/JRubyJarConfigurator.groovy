@@ -9,11 +9,12 @@ import com.github.jrubygradle.GemUtils
 /** Helper class to add extra methods to {@code Jar} tasks in order to add JRuby specifics.
  *
  * @author Schalk W. Cronjé
+ * @author Christian Meier
  */
 class JRubyJarConfigurator {
 
-    static final String DEFAULT_BOOTSTRAP_CLASS = 'com.github.jrubygradle.jar.bootstrap.JarMain'
-    static final String SHADOW_JAR_TASK_CLASS = 'com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar'
+    static final String DEFAULT_MAIN_CLASS = 'de.saumya.mojo.mains.JarMain'
+    static final String DEFAULT_EXTRACTING_MAIN_CLASS = 'de.saumya.mojo.mains.ExtractingMain'
 
     // This is used by JRubyJarPlugin to configure Jar classes
     @PackageScope
@@ -22,15 +23,6 @@ class JRubyJarConfigurator {
         Closure configure = c.clone()
         configure.delegate = configurator
         configure()
-    }
-
-    @PackageScope
-    static void afterEvaluateAction( Project project ) {
-        project.tasks.withType(Jar) { t ->
-            if(t.class.superclass.name == SHADOW_JAR_TASK_CLASS && t.name=='shadowJar') {
-                t.configurations.add(project.configurations.getByName('jrubyJar'))
-            }
-        }
     }
 
     /** Adds a GEM installation directory
@@ -45,7 +37,20 @@ class JRubyJarConfigurator {
      * @param dir Source folder. Will be handled by {@code project.files(dir)}
     */
     void gemDir(def properties=[:],Object dir) {
-        archive.with GemUtils.gemCopySpec(properties,archive.project,dir)
+        jar().with GemUtils.gemCopySpec(properties,archive.project,dir)
+    }
+
+    /** Adds a GEM installation directory
+     */
+    void jarDir(File f) {
+        jarDir(f.absolutePath)
+    }
+
+    /** Adds a JAR installation directory
+     * @param dir Source folder. Will be handled by {@code project.files(dir)}
+    */
+    void jarDir(Object dir) {
+        jar().with GemUtils.jarCopySpec(archive.project, dir)
     }
 
     /** Makes the JAR executable by setting a custom main class
@@ -54,10 +59,32 @@ class JRubyJarConfigurator {
      */
     @Incubating
     void mainClass(final String className) {
-        archive.with {
+        jar().with {
             manifest {
                 attributes 'Main-Class': className
             }
+        }
+        jar().with archive.project.copySpec {
+            from {
+                archive.project.configurations.jrubyJar.collect {
+                    archive.project.zipTree( it )
+                }
+            }
+            include '**'
+            exclude 'META-INF/MANIFEST.MF'
+            // some pom.xml are readonly which creates problems
+            // with zipTree on second run
+            exclude 'META-INF/maven/**/pom.xml'
+        }
+    }
+
+    @Incubating
+    void initScript(final String scriptName) {
+        def script = archive.project.file(scriptName)
+        jar().with archive.project.copySpec {
+            from(script.parent)
+            include script.name
+            rename { 'jar-bootstrap.rb' }
         }
     }
 
@@ -71,16 +98,20 @@ class JRubyJarConfigurator {
             switch(it) {
                 case 'gems':
                 case 'mainClass':
+                case 'extractingMainClass':
                     "default${it.capitalize()}"()
             }
         }
     }
 
-    /** Loads the default GEM installation directory
+    /** Loads the default GEM installation directory and
+     * JAR installation directory
      *
      */
     void defaultGems() {
         gemDir({archive.project.jruby.gemInstallDir})
+        // gems depend on jars so we need to add meaningful default
+        jarDir({archive.project.jruby.jarInstallDir})
     }
 
     /** Makes the executable by adding a default main class
@@ -88,20 +119,25 @@ class JRubyJarConfigurator {
      */
     @Incubating
     void defaultMainClass() {
-        mainClass(DEFAULT_BOOTSTRAP_CLASS)
+        mainClass(DEFAULT_MAIN_CLASS)
     }
 
-    boolean isShadowJar() {
-        shadowJar
+    /** Makes the executable by adding a default main class
+     * which extracts the jar to temporary directory
+     *
+     */
+    @Incubating
+    void defaultExtractingMainClass() {
+        mainClass(DEFAULT_EXTRACTING_MAIN_CLASS)
     }
 
     private JRubyJarConfigurator(Jar a) {
         archive = a
-        if (a.class.name == SHADOW_JAR_TASK_CLASS || a.class.superclass.name == SHADOW_JAR_TASK_CLASS) {
-            shadowJar = true
-        }
+    }
+
+    private Jar jar() {
+        return archive.project.tasks.getByName('jrubyJar')
     }
 
     private Jar archive
-    private boolean shadowJar = false
 }

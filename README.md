@@ -5,6 +5,11 @@ jruby-gradle-jar-plugin
 
 Plugin for creating JRuby-based java archives
 
+## Breaking Changes
+
+the default init script is now: META-INF/jar-bootstrap.rb
+
+this breaks the old behaviour where  the init script was META-INF/init.rb
 
 ## Compatibility
 
@@ -34,7 +39,6 @@ This loads the following plugins if they are not already loaded:
 
 + `com.github.jrubygradle.base`
 + `java-base`
-+ `com.github.johnrengelman.shadow`
 
 ## Using the plugin
 
@@ -76,12 +80,6 @@ task myJar (type :Jar) {
 If nothing is specified, then the bootstrap will look for a Ruby script `META-INF/jar-bootstrap.rb`.
 It is also possible to set the entry script. This must be specified relative to the root of the created JAR.
 
-**NOTE:** There is currently a [known
-issue](https://github.com/jruby-gradle/jruby-gradle-jar-plugin/issues/14) with
-rebuilding a `shadowJar` when using the `initScript` setting. If you change the
-setting, you will need to execute the `clean` task and rebuild for it to take
-effect.
-
 ```groovy
 jrubyJavaBootstrap {
     jruby {
@@ -98,15 +96,10 @@ or another specified script.
 
 **Please note that executable JARs are still an incubating feature**.
 
-Executable JARs are indirectly supported via the [Gradle Shadow Jar plugin](http://plugins.gradle.org/plugin/com.github.johnrengelman.shadow).
-
-
-### Configuring Shadow JAR
-
-Configuration is exactly the same as for a normal JAR class.
+Configuration is needs to declare the main class then the jar will be executable.
 
 ```groovy
-shadowJar {
+jar {
    jruby {
 
      // Use the default bootstrap class
@@ -121,7 +114,3 @@ shadowJar {
    }
  }
 ```
-
-See [Shadow JAR README](https://github.com/johnrengelman/shadow/blob/master/README.md) for configuration specifics.
-In a similar fashion to the `jar` task, the `shadowJar` task will make use of the `jrubyJavaBootstrap` task to
-create and compile a basic bootstrap class.

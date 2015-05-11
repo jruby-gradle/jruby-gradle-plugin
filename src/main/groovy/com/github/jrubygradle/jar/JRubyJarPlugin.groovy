@@ -5,8 +5,10 @@ import groovy.transform.PackageScope
 import org.gradle.api.Plugin
 import org.gradle.api.Project
 import org.gradle.api.Task
+import org.gradle.api.file.FileCopyDetails
 import org.gradle.api.tasks.Copy
 import org.gradle.api.tasks.bundling.Jar
+import org.gradle.api.tasks.bundling.Zip
 import org.gradle.api.tasks.compile.JavaCompile
 import org.gradle.api.tasks.testing.Test
 
@@ -15,91 +17,42 @@ import org.gradle.api.tasks.testing.Test
  */
 class JRubyJarPlugin implements Plugin<Project> {
 
-    static final String BOOTSTRAP_TASK_NAME = 'jrubyJavaBootstrap'
-
     void apply(Project project) {
 
         project.apply plugin : 'com.github.jruby-gradle.base'
         project.apply plugin : 'java-base'
-        project.configurations.maybeCreate('compile')
         project.configurations.maybeCreate('jrubyEmbeds')
         project.configurations.maybeCreate('jrubyJar')
 
         updateTestTask(project)
-        addCodeGenerationTask(project)
         addDependentTasks(project)
         addJrubyExtensionToJar(project)
         addAfterEvaluateHooks(project)
     }
 
     @PackageScope
-    void addCodeGenerationTask(Project project) {
-
-        Task stubTask = project.tasks.create( name: BOOTSTRAP_TASK_NAME, type : Copy )
-        stubTask.extensions.create(
-                'jruby',
-                BootstrapClassExtension,
-                stubTask
-        )
-
-        project.repositories {
-            jcenter()
-        }
-
-        project.dependencies {
-            compile group: 'org.jruby', name: 'jruby-complete', version: project.jruby.defaultVersion
-        }
-
-        project.configure(stubTask) {
-            group JRubyPlugin.TASK_GROUP_NAME
-            description 'Generates a JRuby Java bootstrap class'
-
-            from({extensions.jruby.getSource()})
-            into new File(project.buildDir,'generated/java')
-
-
-            filter { String line ->
-                line.replaceAll('%%LAUNCH_SCRIPT%%',extensions.jruby.initScript)
-            }
-
-            rename '(.+)\\.java\\.template','$1.java'
-
-        }
-
-        project.sourceSets.matching { it.name == "main" } .all {
-            it.java.srcDir new File(project.buildDir,'generated/java')
-        }
-    }
-    @PackageScope
     void addDependentTasks(Project project) {
-        ['jar','shadowJar'].each { taskName ->
-            try {
-                Task t = project.tasks.getByName(taskName)
-                if( t instanceof Jar) {
-                    t.dependsOn 'jrubyPrepareGems'
-                }
-            } catch(UnknownTaskException) {
-                project.tasks.whenTaskAdded { Task t ->
-                    if (t.name == taskName && t instanceof Jar) {
-                        t.dependsOn 'jrubyPrepareGems'
+        try {
+            Task t = project.tasks.getByName('jar')
+            if( t instanceof Jar) {
+                t.dependsOn 'jrubyPrepare'
+            }
+        } catch(UnknownTaskException) {
+            project.tasks.whenTaskAdded { Task t ->
+                if (t.name == 'jar' && t instanceof Jar) {
+                    project.task('jrubyJar', type: Jar) {
+                        dependsOn 'jrubyPrepare'
+                        destinationDir = t.destinationDir
+                        baseName = t.baseName
+                        extension = t.extension
+                        version = t.version
+                        appendix = 'all'
+                        from project.file("${project.buildDir}/dirinfo")
+                        from project.zipTree("${t.destinationDir}/${t.archiveName}")
                     }
                 }
             }
         }
-
-        try {
-            Task t = project.tasks.getByName('compileJava')
-            if( t instanceof JavaCompile) {
-                t.dependsOn BOOTSTRAP_TASK_NAME
-            }
-        } catch(UnknownTaskException) {
-            project.tasks.whenTaskAdded { Task t ->
-                if (t.name == 'compileJava' && t instanceof JavaCompile) {
-                    t.dependsOn BOOTSTRAP_TASK_NAME
-                }
-            }
-        }
-
     }
 
     @PackageScope
@@ -116,8 +69,51 @@ class JRubyJarPlugin implements Plugin<Project> {
         project.afterEvaluate {
             project.dependencies {
                 jrubyJar group: 'org.jruby', name: 'jruby-complete', version: project.jruby.defaultVersion
+                // TODO remove hardcoded version to config
+                jrubyJar group: 'de.saumya.mojo', name: 'jruby-mains', version: '0.2.0'
             }
-            JRubyJarConfigurator.afterEvaluateAction(project)
+            project.tasks.withType(Jar) { task ->
+                if (task.name == 'jar') {
+                    finalizedBy( 'jrubyJar' )
+
+                    def newLine = System.getProperty("line.separator")
+                    def dirsCache = [:]
+                    def dirInfo = project.file("${project.buildDir}/dirinfo")
+                    dirInfo.deleteDir()
+                    eachFile { FileCopyDetails details ->
+                        if (details.relativePath.lastName != '.jrubydir') {
+                            def path = null
+                            details.relativePath.segments.each {
+                                if (path == null) {
+                                    path = new File(it)
+                                }
+                                else {
+                                    path = new File(path, it)
+                                }
+                                def file = new File(dirInfo,
+                                                    path.parent == null ? '.jrubydir' :
+                                                    new File(path.parent, '.jrubydir').path)
+                                def name = path.name
+                                def dir = file.parentFile
+                                def dirs = dirsCache[dir]
+                                if (dirs == null) {
+                                    dirs = dirsCache[dir] = []
+                                }
+                                if (!dirs.contains(name)) {
+                                    dirs << name
+                                    dir.mkdirs()
+                                    if (file.exists()) {
+                                        file.append(name + newLine)
+                                    }
+                                    else {
+                                        file.write(name + newLine)
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
         }
     }
 
@@ -129,7 +125,8 @@ class JRubyJarPlugin implements Plugin<Project> {
         // GEMs as part of the tests.
         def testConfiguration = { Task t ->
             environment GEM_HOME : project.extensions.getByName('jruby').gemInstallDir
-            dependsOn 'jrubyPrepareGems'
+            environment JARS_HOME : project.extensions.getByName('jruby').jarInstallDir
+            dependsOn 'jrubyPrepare'
         }
 
         try {
