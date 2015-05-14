@@ -14,6 +14,7 @@ import org.gradle.api.tasks.testing.Test
 
 /**
  * @author Schalk W. Cronjé
+ * @author Christian Meier
  */
 class JRubyJarPlugin implements Plugin<Project> {
 
@@ -23,42 +24,22 @@ class JRubyJarPlugin implements Plugin<Project> {
         project.apply plugin : 'java-base'
         project.configurations.maybeCreate('jrubyEmbeds')
         project.configurations.maybeCreate('jrubyJar')
+        project.tasks.create( 'jrubyJar',JRubyJar)
 
         updateTestTask(project)
-        addDependentTasks(project)
         addJrubyExtensionToJar(project)
         addAfterEvaluateHooks(project)
-    }
-
-    @PackageScope
-    void addDependentTasks(Project project) {
-        try {
-            Task t = project.tasks.getByName('jar')
-            if( t instanceof Jar) {
-                t.dependsOn 'jrubyPrepare'
-            }
-        } catch(UnknownTaskException) {
-            project.tasks.whenTaskAdded { Task t ->
-                if (t.name == 'jar' && t instanceof Jar) {
-                    project.task('jrubyJar', type: Jar) {
-                        dependsOn 'jrubyPrepare'
-                        destinationDir = t.destinationDir
-                        baseName = t.baseName
-                        extension = t.extension
-                        version = t.version
-                        appendix = 'all'
-                        from project.file("${project.buildDir}/dirinfo")
-                        from project.zipTree("${t.destinationDir}/${t.archiveName}")
-                    }
-                }
-            }
-        }
     }
 
     @PackageScope
     void addJrubyExtensionToJar(Project project) {
         if(!Jar.metaClass.respondsTo(Jar.class,'jruby',Closure)) {
             Jar.metaClass.jruby = { Closure extraConfig ->
+                JRubyJarConfigurator.configureArchive(delegate,extraConfig)
+            }
+        }
+        if(!JRubyJar.metaClass.respondsTo(JRubyJar.class,'jruby',Closure)) {
+            JRubyJar.metaClass.jruby = { Closure extraConfig ->
                 JRubyJarConfigurator.configureArchive(delegate,extraConfig)
             }
         }
@@ -71,48 +52,6 @@ class JRubyJarPlugin implements Plugin<Project> {
                 jrubyJar group: 'org.jruby', name: 'jruby-complete', version: project.jruby.defaultVersion
                 // TODO remove hardcoded version to config
                 jrubyJar group: 'de.saumya.mojo', name: 'jruby-mains', version: '0.2.0'
-            }
-            project.tasks.withType(Jar) { task ->
-                if (task.name == 'jar') {
-                    finalizedBy( 'jrubyJar' )
-
-                    def newLine = System.getProperty("line.separator")
-                    def dirsCache = [:]
-                    def dirInfo = project.file("${project.buildDir}/dirinfo")
-                    dirInfo.deleteDir()
-                    eachFile { FileCopyDetails details ->
-                        if (details.relativePath.lastName != '.jrubydir') {
-                            def path = null
-                            details.relativePath.segments.each {
-                                if (path == null) {
-                                    path = new File(it)
-                                }
-                                else {
-                                    path = new File(path, it)
-                                }
-                                def file = new File(dirInfo,
-                                                    path.parent == null ? '.jrubydir' :
-                                                    new File(path.parent, '.jrubydir').path)
-                                def name = path.name
-                                def dir = file.parentFile
-                                def dirs = dirsCache[dir]
-                                if (dirs == null) {
-                                    dirs = dirsCache[dir] = []
-                                }
-                                if (!dirs.contains(name)) {
-                                    dirs << name
-                                    dir.mkdirs()
-                                    if (file.exists()) {
-                                        file.append(name + newLine)
-                                    }
-                                    else {
-                                        file.write(name + newLine)
-                                    }
-                                }
-                            }
-                        }
-                    }
-                }
             }
         }
     }
