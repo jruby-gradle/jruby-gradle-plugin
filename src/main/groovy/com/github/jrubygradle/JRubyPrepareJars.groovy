@@ -52,7 +52,7 @@ class JRubyPrepareJars  extends DefaultTask {
 
             if (group != 'rubygems' ) {
                 // TODO classifier and system-scope
-                coordinates << "${group}:${dep.name}:${version}:"
+                coordinates << "${group}:${dep.name}:${version}:runtime:"
             }
             fileRenameMap[dep.file.name] = newFileName
             // TODO omit system-scoped files
