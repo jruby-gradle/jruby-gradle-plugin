@@ -42,7 +42,7 @@ class JRubyPrepareJarsIntegrationSpec extends Specification {
             jrpg.copy()
 
         expect:
-            new File(jrpg.outputDir, 'Jars.lock').text.trim() == 'io.dropwizard.metrics:metrics-core:3.1.0:'
+            new File(jrpg.outputDir, 'Jars.lock').text.trim() == 'io.dropwizard.metrics:metrics-core:3.1.0:runtime:'
             new File(jrpg.outputDir, 'io/dropwizard/metrics/metrics-core/3.1.0/metrics-core-3.1.0.jar').exists()
     }
 }
