@@ -1,10 +1,19 @@
 package com.github.jrubygradle.jar
 
+import com.github.jrubygradle.GemUtils
+import com.github.jrubygradle.jar.internal.JRubyDirInfo
+
 import groovy.transform.PackageScope
 import org.gradle.api.Incubating
+import org.gradle.api.file.CopySpec
 import org.gradle.api.Project
+import org.gradle.api.Task
+import org.gradle.api.execution.TaskExecutionListener
+import org.gradle.api.execution.TaskExecutionGraph
+import org.gradle.api.file.DuplicatesStrategy
+import org.gradle.api.tasks.TaskState
 import org.gradle.api.tasks.bundling.Jar
-import com.github.jrubygradle.GemUtils
+import org.gradle.api.tasks.StopExecutionException
 
 /** Helper class to add extra methods to {@code Jar} tasks in order to add JRuby specifics.
  *
@@ -13,8 +22,10 @@ import com.github.jrubygradle.GemUtils
  */
 class JRubyJarConfigurator {
 
+    enum Type { RUNNABLE, LIBRARY }
+
     static final String DEFAULT_MAIN_CLASS = 'de.saumya.mojo.mains.JarMain'
-    static final String DEFAULT_EXTRACTING_MAIN_CLASS = 'de.saumya.mojo.mains.ExtractingMain'
+    static final String EXTRACTING_MAIN_CLASS = 'de.saumya.mojo.mains.ExtractingMain'
 
     // This is used by JRubyJarPlugin to configure Jar classes
     @PackageScope
@@ -37,7 +48,9 @@ class JRubyJarConfigurator {
      * @param dir Source folder. Will be handled by {@code project.files(dir)}
     */
     void gemDir(def properties=[:],Object dir) {
-        jar().with GemUtils.gemCopySpec(properties,archive.project,dir)
+        CopySpec spec = GemUtils.gemCopySpec(properties,archive.project,dir)
+        spec.exclude '.jrubydir'
+        archive.with spec
     }
 
     /** Adds a GEM installation directory
@@ -50,7 +63,7 @@ class JRubyJarConfigurator {
      * @param dir Source folder. Will be handled by {@code project.files(dir)}
     */
     void jarDir(Object dir) {
-        jar().with GemUtils.jarCopySpec(archive.project, dir)
+         archive.with GemUtils.jarCopySpec(archive.project, dir)
     }
 
     /** Makes the JAR executable by setting a custom main class
@@ -59,33 +72,51 @@ class JRubyJarConfigurator {
      */
     @Incubating
     void mainClass(final String className) {
-        jar().with {
+        if (this.hasMainClassName) {
+            throw new StopExecutionException('mainClass can be set only once')
+        }
+        if (className == null) {
+            throw new StopExecutionException('mainClass can be null')
+        }
+        archive.with {
             manifest {
                 attributes 'Main-Class': className
             }
         }
-        jar().with archive.project.copySpec {
-            from {
-                archive.project.configurations.jrubyJar.collect {
-                    archive.project.zipTree( it )
-                }
-            }
-            include '**'
-            exclude 'META-INF/MANIFEST.MF'
-            // some pom.xml are readonly which creates problems
-            // with zipTree on second run
-            exclude 'META-INF/maven/**/pom.xml'
-        }
+        this.hasMainClassName = true
     }
 
     @Incubating
-    void initScript(final String scriptName) {
-        def script = archive.project.file(scriptName)
-        jar().with archive.project.copySpec {
-            from(script.parent)
-            include script.name
-            rename { 'jar-bootstrap.rb' }
+    void initScript(final Object scriptName) {
+        if (this.scriptName != null) {
+            throw new StopExecutionException('initScript can be set only once')
         }
+        if (scriptName == null) {
+            throw new StopExecutionException('mainClass can be null')
+        }
+        if (scriptName != Type.RUNNABLE && scriptName != Type.LIBRARY) {
+            File script = archive.project.file(scriptName)
+            archive.with archive.project.copySpec {
+                from script.parent
+                include script.name
+                rename(script.name, 'jar-bootstrap.rb')
+            }
+        }
+        if (scriptName != Type.LIBRARY) {
+            archive.with archive.project.copySpec {
+              from {
+                  archive.project.configurations.jrubyJar.collect {
+                      archive.project.zipTree( it )
+                  }
+              }
+              include '**'
+              exclude 'META-INF/MANIFEST.MF'
+              // some pom.xml are readonly which creates problems
+              // with zipTree on second run
+              exclude 'META-INF/maven/**/pom.xml'
+            }
+        }
+        this.scriptName = scriptName
     }
 
     /** Sets the defaults
@@ -98,7 +129,6 @@ class JRubyJarConfigurator {
             switch(it) {
                 case 'gems':
                 case 'mainClass':
-                case 'extractingMainClass':
                     "default${it.capitalize()}"()
             }
         }
@@ -127,17 +157,75 @@ class JRubyJarConfigurator {
      *
      */
     @Incubating
-    void defaultExtractingMainClass() {
-        mainClass(DEFAULT_EXTRACTING_MAIN_CLASS)
+    void extractingMainClass() {
+        mainClass(EXTRACTING_MAIN_CLASS)
     }
 
-    private JRubyJarConfigurator(Jar a) {
-        archive = a
+    void applyConfig() {
+        if (scriptName == null) {
+            throw new StopExecutionException('there is no initScript configured')
+        }
+        if (scriptName == Type.LIBRARY) {
+            if (hasMainClassName) {
+                throw new StopExecutionException('can not have mainClass for library')
+            }
+        }
+        else {
+            if (!hasMainClassName) {
+                archive.with {
+                   manifest {
+                       attributes 'Main-Class': DEFAULT_MAIN_CLASS
+                   }
+                }
+            }
+        }
     }
 
-    private Jar jar() {
-        return archive.project.tasks.getByName('jrubyJar')
+    Type library() {
+        Type.LIBRARY
     }
 
+    Type runnable() {
+        Type.RUNNABLE
+    }
+
+    JRubyJarConfigurator(final Jar archive) {
+        this.archive = archive
+        File dir = archive.project.file("${archive.project.buildDir}/dirinfo/${archive.name}")
+        JRubyDirInfo dirInfo = new JRubyDirInfo(dir)
+
+        archive.from(dir) {
+            include '**'
+        }
+        // TODO we should provide proper sourceSet instead !?
+        archive.from("${archive.project.projectDir}/src/main/ruby")
+
+        // TODO currently this picks ONLY the 'gems' configuration
+        archive.dependsOn 'jrubyPrepare'
+
+        // TODO get rid of this and try to adjust the CopySpec for the gems
+        // to exclude '.jrubydir'
+        // there are other duplicates as well :(
+        archive.setDuplicatesStrategy(DuplicatesStrategy.EXCLUDE)
+
+        archive.project.gradle.taskGraph.addTaskExecutionListener(
+            new TaskExecutionListener() {
+                void afterExecute(Task task, TaskState state) {
+                }
+
+                void beforeExecute(Task task) {
+                    if (task == archive) {
+                        task.getSource().visit {
+                            dirInfo.add(it.relativePath)
+                        }
+                        applyConfig()
+                    }
+                }
+            }
+        )
+    }
+
+    private Object scriptName
+    private boolean hasMainClassName
     private Jar archive
 }
