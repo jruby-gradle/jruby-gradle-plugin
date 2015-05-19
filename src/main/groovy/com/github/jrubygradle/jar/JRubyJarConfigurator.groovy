@@ -78,10 +78,8 @@ class JRubyJarConfigurator {
         if (className == null) {
             throw new StopExecutionException('mainClass can be null')
         }
-        archive.with {
-            manifest {
-                attributes 'Main-Class': className
-            }
+        archive.manifest = archive.project.manifest {
+             attributes 'Main-Class': className
         }
         this.hasMainClassName = true
     }
@@ -172,11 +170,7 @@ class JRubyJarConfigurator {
         }
         else {
             if (!hasMainClassName) {
-                archive.with {
-                   manifest {
-                       attributes 'Main-Class': DEFAULT_MAIN_CLASS
-                   }
-                }
+                defaultMainClass()
             }
         }
     }
