@@ -1,6 +1,18 @@
 # Changelog
 
-## v0.1.4 - Roadmap
+## v0.2.0
+
+* no more dependency to shadowJar plugin
+* no generation of bootStrap class, will use jruby-mains instead
+* all jars from gem dependencies will be added as jars into the fat-jar
+* there is JRubyJar task now
+* the plugin can pack
+  * library jar which is basically include embedded gems (with their jar depdencies) to the jar. there is jruby extension for the Jar task
+  * executable jar: jruby executes a bootstrap script
+  * runnable jar: jruby can launch any executable from an embedded gem
+* the library jar (and all other jars) are packed in way which works for all possible classloader, i.e. it generates .jrubydir files for embedded ruby directories.
+
+## v0.1.4
 
 ### Bugfixes
 
