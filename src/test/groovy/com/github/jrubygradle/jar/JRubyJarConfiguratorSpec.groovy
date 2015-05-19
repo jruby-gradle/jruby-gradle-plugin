@@ -21,13 +21,9 @@ class JRubyJarConfiguratorSpec extends Specification {
 
     void setup() {
         Project project = ProjectBuilder.builder().build()
-        jarTask = project.tasks.create( name: 'jar', type: JRubyJar )
+        project.apply plugin: 'java'
+        jarTask = project.tasks.findByName( 'jar' )
         configurator = new JRubyJarConfigurator(jarTask)
-    }
-  
-    def 'Checking appendix'() {
-        expect:
-            jarTask.appendix == 'jruby'
     }
   
     def 'Checking setting no mainClass'() {

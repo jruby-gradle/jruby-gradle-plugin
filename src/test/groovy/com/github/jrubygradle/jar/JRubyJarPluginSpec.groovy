@@ -70,6 +70,12 @@ class JRubyJarPluginSpec extends Specification {
             project.tasks.getByName('jrubyJar')
     }
 
+  
+    def 'Checking appendix'() {
+        expect:
+            project.tasks.getByName('jrubyJar').appendix == 'jruby'
+    }
+  
     def "Checking configurations exist"() {
         given:
             def cfg = project.configurations
