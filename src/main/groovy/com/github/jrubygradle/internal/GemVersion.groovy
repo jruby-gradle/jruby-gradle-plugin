@@ -72,6 +72,9 @@ class GemVersion {
             postfix = version.charAt( version.size() - 1 ).toString()
             low = FIRST.matcher(TAIL.matcher(version).replaceFirst('')).replaceFirst('')
             high = LAST.matcher(HEAD.matcher(version).replaceFirst('')).replaceFirst('')
+            if (high == '' ){
+              high = '99999'
+            }
         }
         else {
             low = version
@@ -155,7 +158,7 @@ class GemVersion {
                 return 0
             }
             else {
-                return -1
+                return 1
             }
         }
         def aaObject

@@ -27,6 +27,14 @@ class GemVersionSpec extends Specification {
         subject.toString() == '[1.2.0,1.2.99999]'
     }
 
+    def "parses maven open version range"() {
+        given:
+        GemVersion subject = new GemVersion('[1.2,)')
+
+        expect:
+        subject.toString() == '[1.2,99999)'
+    }
+
     def "parses maven version range first sample"() {
         given:
         GemVersion subject = new GemVersion('(1.2.0, 1.2.4)')
@@ -121,6 +129,22 @@ class GemVersionSpec extends Specification {
 
         expect:
         subject.intersect('[1.2.2, 1.3]').toString() == '[1.2.2,1.2.14]'
+    }
+
+    def "intersects two versions special one"() {
+        given:
+        GemVersion subject = new GemVersion('[0.9.0,0.9.99999]')
+
+        expect:
+        subject.intersect('[0,)').toString() == '[0.9.0,0.9.99999]'
+    }
+
+    def "intersects two versions special one"() {
+        given:
+        GemVersion subject = new GemVersion('[0,)')
+
+        expect:
+        subject.intersect('[0.9.0,0.9.99999]').toString() == '[0.9.0,0.9.99999]'
     }
 
     def "intersects with conflict"() {
