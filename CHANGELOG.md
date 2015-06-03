@@ -1,5 +1,14 @@
 # Changelog
 
+## 0.2.1
+
+* [#125](https://github.com/jruby-gradle/jruby-gradle-plugin/pull/125) - fixes one severe and one little issue with version resolution for gem artifacts
+
+## 0.2.0
+
+* [#122](https://github.com/jruby-gradle/jruby-gradle-plugin/pull/122) - fix generated Jars.lock file
+* [#120](https://github.com/jruby-gradle/jruby-gradle-plugin/pull/120) - better version resolution of gem artifacts
+
 ## 0.1.16
 
 * [#106](https://github.com/jruby-gradle/jruby-gradle-plugin/pull/106) - some little improvements on calling gem install
