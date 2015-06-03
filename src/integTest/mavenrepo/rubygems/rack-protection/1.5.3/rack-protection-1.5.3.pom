@@ -1,0 +1,174 @@
+<project>
+  <modelVersion>4.0.0</modelVersion>
+  <groupId>rubygems</groupId>
+  <artifactId>rack-protection</artifactId>
+  <version>1.5.3</version>
+  <packaging>gem</packaging>
+  <name>You should use protection!</name>
+  <url>http://github.com/rkh/rack-protection</url>
+  <description>You should use protection!</description>
+  <developers>
+    <developer>
+      <name>Konstantin Haase</name>
+      <email>konstantin.mailinglists@googlemail.com</email>
+    </developer>
+    <developer>
+      <name>Alex Rodionov</name>
+      <email>p0deje@gmail.com</email>
+    </developer>
+    <developer>
+      <name>Patrick Ellis</name>
+      <email>jstaten07@gmail.com</email>
+    </developer>
+    <developer>
+      <name>Jason Staten</name>
+      <email>patrick@soundcloud.com</email>
+    </developer>
+    <developer>
+      <name>ITO Nobuaki</name>
+      <email>jeff.welling@gmail.com</email>
+    </developer>
+    <developer>
+      <name>Jeff Welling</name>
+      <email>bugant@gmail.com</email>
+    </developer>
+    <developer>
+      <name>Matteo Centenaro</name>
+      <email>daydream.trippers@gmail.com</email>
+    </developer>
+    <developer>
+      <name>Egor Homakov</name>
+      <email>florian.gilcher@asquera.de</email>
+    </developer>
+    <developer>
+      <name>Florian Gilcher</name>
+      <email>developer@fojasaur.us</email>
+    </developer>
+    <developer>
+      <name>Fojas</name>
+      <email>ujifgc@gmail.com</email>
+    </developer>
+    <developer>
+      <name>Igor Bochkariov</name>
+      <email>mael@clerambault.fr</email>
+    </developer>
+    <developer>
+      <name>Mael Clerambault</name>
+      <email>martin.mauch@gmail.com</email>
+    </developer>
+    <developer>
+      <name>Martin Mauch</name>
+      <email>rennex@iki.fi</email>
+    </developer>
+    <developer>
+      <name>Renne Nissinen</name>
+      <email>kaz.july.7@gmail.com</email>
+    </developer>
+    <developer>
+      <name>SAKAI, Kazuaki</name>
+      <email>s.savulchik@gmail.com</email>
+    </developer>
+    <developer>
+      <name>Stanislav Savulchik</name>
+      <email>steve.agalloco@gmail.com</email>
+    </developer>
+    <developer>
+      <name>Steve Agalloco</name>
+      <email>toby.net.info.mail+git@gmail.com</email>
+    </developer>
+    <developer>
+      <name>TOBY</name>
+      <email>dev+narwen+rkh@rkh.im</email>
+    </developer>
+    <developer>
+      <name>Thais Camilo and Konstantin Haase</name>
+      <email>vipulnsward@gmail.com</email>
+    </developer>
+    <developer>
+      <name>Vipul A M</name>
+      <email>akzhan.abdulin@gmail.com</email>
+    </developer>
+    <developer>
+      <name>Akzhan Abdulin</name>
+      <email>brooke@digitalocean.com</email>
+    </developer>
+    <developer>
+      <name>brookemckim</name>
+      <email>bjoerge@bengler.no</email>
+    </developer>
+    <developer>
+      <name>Bjørge Næss</name>
+      <email>cheald@gmail.com</email>
+    </developer>
+    <developer>
+      <name>Chris Heald</name>
+      <email>self@hecticjeff.net</email>
+    </developer>
+    <developer>
+      <name>Chris Mytton</name>
+      <email>coreyward@me.com</email>
+    </developer>
+    <developer>
+      <name>Corey Ward</name>
+      <email>dario@uxtemple.com</email>
+    </developer>
+    <developer>
+      <name>Dario Cravero</name>
+      <email>dek-oss@gravitext.com</email>
+    </developer>
+    <developer>
+      <name>David Kellum</name>
+      <email>homakov@gmail.com</email>
+    </developer>
+  </developers>
+  <scm>
+    <connection>https://github.com/rkh/rack-protection.git</connection>
+    <url>http://github.com/rkh/rack-protection</url>
+  </scm>
+  <properties>
+    <project.build.sourceEncoding>utf-8</project.build.sourceEncoding>
+    <jruby.plugins.version>1.0.4</jruby.plugins.version>
+  </properties>
+  <dependencies>
+    <dependency>
+      <groupId>rubygems</groupId>
+      <artifactId>rack</artifactId>
+      <version>[0,)</version>
+      <type>gem</type>
+    </dependency>
+    <dependency>
+      <groupId>rubygems</groupId>
+      <artifactId>rack-test</artifactId>
+      <version>[0,)</version>
+      <type>gem</type>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>rubygems</groupId>
+      <artifactId>rspec</artifactId>
+      <version>[2.0,2.99999]</version>
+      <type>gem</type>
+      <scope>test</scope>
+    </dependency>
+  </dependencies>
+  <build>
+    <extensions>
+      <extension>
+        <groupId>de.saumya.mojo</groupId>
+        <artifactId>gem-extension</artifactId>
+        <version>${jruby.plugins.version}</version>
+      </extension>
+    </extensions>
+    <directory>${basedir}/pkg</directory>
+    <plugins>
+      <plugin>
+        <groupId>de.saumya.mojo</groupId>
+        <artifactId>gem-maven-plugin</artifactId>
+        <version>${jruby.plugins.version}</version>
+        <configuration>
+          <gemspec>rack-protection-1.5.3.gemspec</gemspec>
+        </configuration>
+      </plugin>
+    </plugins>
+  </build>
+</project>

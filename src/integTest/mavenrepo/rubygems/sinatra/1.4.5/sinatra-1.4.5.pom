@@ -1,0 +1,71 @@
+<project>
+  <modelVersion>4.0.0</modelVersion>
+  <groupId>rubygems</groupId>
+  <artifactId>sinatra</artifactId>
+  <version>1.4.5</version>
+  <packaging>gem</packaging>
+  <name>Classy web-development dressed in a DSL</name>
+  <url>http://www.sinatrarb.com/</url>
+  <description>Sinatra is a DSL for quickly creating web applications in Ruby with minimal effort.</description>
+  <developers>
+    <developer>
+      <name>Blake Mizerany</name>
+      <email>sinatrarb@googlegroups.com</email>
+    </developer>
+    <developer>
+      <name>Ryan Tomayko</name>
+    </developer>
+    <developer>
+      <name>Simon Rozet</name>
+    </developer>
+    <developer>
+      <name>Konstantin Haase</name>
+    </developer>
+  </developers>
+  <properties>
+    <project.build.sourceEncoding>utf-8</project.build.sourceEncoding>
+    <jruby.plugins.version>1.0.4</jruby.plugins.version>
+  </properties>
+  <dependencies>
+    <dependency>
+      <groupId>rubygems</groupId>
+      <artifactId>rack</artifactId>
+      <version>[1.4,1.99999]</version>
+      <type>gem</type>
+    </dependency>
+    <!--
+    <dependency>
+      <groupId>rubygems</groupId>
+      <artifactId>tilt</artifactId>
+      <version>[1.3.4,1.99999]</version>
+      <type>gem</type>
+    </dependency>
+    -->
+    <dependency>
+      <groupId>rubygems</groupId>
+      <artifactId>rack-protection</artifactId>
+      <version>[1.4,1.99999]</version>
+      <type>gem</type>
+    </dependency>
+  </dependencies>
+  <build>
+    <extensions>
+      <extension>
+        <groupId>de.saumya.mojo</groupId>
+        <artifactId>gem-extension</artifactId>
+        <version>${jruby.plugins.version}</version>
+      </extension>
+    </extensions>
+    <directory>${basedir}/pkg</directory>
+    <plugins>
+      <plugin>
+        <groupId>de.saumya.mojo</groupId>
+        <artifactId>gem-maven-plugin</artifactId>
+        <version>${jruby.plugins.version}</version>
+        <configuration>
+          <gemspec>sinatra-1.4.5.gemspec</gemspec>
+        </configuration>
+      </plugin>
+    </plugins>
+  </build>
+</project>

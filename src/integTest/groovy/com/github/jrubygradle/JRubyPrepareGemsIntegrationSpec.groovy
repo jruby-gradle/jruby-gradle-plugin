@@ -45,6 +45,27 @@ class JRubyPrepareGemsIntegrationSpec extends Specification {
             new File(jrpg.outputDir,"gems/slim-${SLIM_VERSION}").exists()
             new File(jrpg.outputDir,"specifications/.jrubydir").exists()
     }
+  
+    def "Check if rack version gets resolved"() {
+        given:
+            def root= new File(TESTROOT, "rack-resolve")
+            def project = BasicProjectBuilder.buildWithStdRepo(root,CACHEDIR)
+            def prepTask = project.task(TASK_NAME, type: JRubyPrepareGems)
+            def jrpg = project.tasks.jrubyPrepareGems
+            project.jruby.gemInstallDir = root.absolutePath
+
+            project.dependencies {
+                gems "rubygems:sinatra:1.4.5"
+                gems "rubygems:rack:[0,)"
+                gems "rubygems:lookout-rack-utils:3.1.0.12"
+            }
+            project.evaluate()
+            jrpg.copy()
+
+        expect:
+            new File(jrpg.outputDir,"gems/rack-1.5.3").exists()
+    }
+  
 
 //    @IgnoreIf({TESTS_ARE_OFFLINE})
     @Ignore
