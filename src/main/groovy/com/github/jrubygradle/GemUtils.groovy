@@ -203,18 +203,9 @@ class GemUtils {
     }
 
     static CopySpec jarCopySpec(Project project,Object dir) {
-	project.copySpec {
-	    from(dir) {
+	    project.copySpec {
+            from(dir) {
                 include '**'
-	    }
-        }
-    }
-
-    static void createGemConfiguration(Project project, String configName) {
-        project.configurations.create(configName) {
-            resolutionStrategy {
-                def resolver = new GemVersionResolver()
-                eachDependency { resolver.resolve(it) }
             }
         }
     }

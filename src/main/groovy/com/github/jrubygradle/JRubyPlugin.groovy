@@ -1,6 +1,7 @@
 package com.github.jrubygradle
 
 import com.github.jrubygradle.internal.JRubyExecDelegate
+import com.github.jrubygradle.internal.GemVersionResolver
 import org.gradle.api.Plugin
 import org.gradle.api.Project
 import org.gradle.api.tasks.Copy
@@ -24,9 +25,9 @@ class JRubyPlugin implements Plugin<Project> {
         }
 
         // Set up a special configuration group for our embedding jars
-        GemUtils.createGemConfiguration(project, 'gems')
-        GemUtils.createGemConfiguration(project, 'jrubyEmbeds')
-        GemUtils.createGemConfiguration(project, JRubyExec.JRUBYEXEC_CONFIG)
+        project.configurations.create('gems')
+        project.configurations.create('jrubyEmbeds')
+        project.configurations.create(JRubyExec.JRUBYEXEC_CONFIG)
         JRubyExecDelegate.addToProject(project)
 
         project.afterEvaluate {
@@ -36,7 +37,7 @@ class JRubyPlugin implements Plugin<Project> {
                     rubygemsRelease()
                 }
             }
-
+            GemVersionResolver.setup(project)
             JRubyExec.updateJRubyDependencies(project)
         }
 

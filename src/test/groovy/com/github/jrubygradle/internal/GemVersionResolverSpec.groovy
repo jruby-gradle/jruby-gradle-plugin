@@ -5,11 +5,19 @@ import spock.lang.*
 import org.gradle.api.artifacts.DependencyResolveDetails
 import org.gradle.api.artifacts.ModuleVersionSelector
 
+class TestGemVersionResolver extends GemVersionResolver {
+    void firstRun() {
+        this.versions = [:]
+    }
+    void log(Closure msg) {
+    }
+}
+
 class GemVersionResolverSpec extends Specification {
 
     def "ignore non rubygems group modules"() {
         setup:
-            GemVersionResolver subject = new GemVersionResolver()
+            GemVersionResolver subject = new TestGemVersionResolver()
             def details = Mock(DependencyResolveDetails)
             def requested = Mock(ModuleVersionSelector)
             details.getRequested() >> requested
@@ -24,7 +32,7 @@ class GemVersionResolverSpec extends Specification {
 
     def "keep rubygems group modules as is on first visit"() {
         setup:
-            GemVersionResolver subject = new GemVersionResolver()
+            GemVersionResolver subject = new TestGemVersionResolver()
             def details = Mock(DependencyResolveDetails)
             def requested = Mock(ModuleVersionSelector)
             details.getRequested() >> requested
@@ -42,7 +50,7 @@ class GemVersionResolverSpec extends Specification {
 
     def "narrows down version range on second visit"() {
         setup:
-            GemVersionResolver subject = new GemVersionResolver()
+            GemVersionResolver subject = new TestGemVersionResolver()
             def details1 = Mock(DependencyResolveDetails)
             def requested1 = Mock(ModuleVersionSelector)
             details1.getRequested() >> requested1
@@ -68,7 +76,7 @@ class GemVersionResolverSpec extends Specification {
 
     def "version conflict"() {
         setup:
-            GemVersionResolver subject = new GemVersionResolver()
+            GemVersionResolver subject = new TestGemVersionResolver()
             def details1 = Mock(DependencyResolveDetails)
             def requested1 = Mock(ModuleVersionSelector)
             details1.getRequested() >> requested1

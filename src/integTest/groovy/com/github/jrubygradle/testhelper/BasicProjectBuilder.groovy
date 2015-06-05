@@ -12,11 +12,19 @@ class BasicProjectBuilder {
 
     static Project buildWithStdRepo( final File projectDir_, final File cacheDir_ ) {
         Project project = ProjectBuilder.builder().withProjectDir(projectDir_).build()
+        File repo = project.file("../../../../../../src/integTest/mavenrepo")
+        if (!repo.exists()){
+          throw new RuntimeException("no repo at " + repo)
+        }
         project.with {
             logging.level = LIFECYCLE
             apply plugin: 'com.github.jruby-gradle.base'
             jruby.defaultRepositories = true
-
+            repositories {
+                maven {
+                    url "file://" + repo.absolutePath
+                }
+            }
         }
         project
     }
