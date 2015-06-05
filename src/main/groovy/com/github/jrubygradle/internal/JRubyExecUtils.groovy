@@ -99,13 +99,7 @@ class JRubyExecUtils {
             throw new InvalidUserDataException('Cannot instantiate a JRubyExec instance without either `script` or `jrubyArgs` set')
         }
 
-        cmdArgs.addAll(scriptArgs.flatten { element ->
-            if (element instanceof Closure) {
-                return ((Closure)element).call()
-            }
-            return element
-        } as List<String>)
-
+        cmdArgs.addAll(scriptArgs as List<String>)
         return cmdArgs
     }
 

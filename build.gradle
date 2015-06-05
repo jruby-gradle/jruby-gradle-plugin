@@ -21,7 +21,7 @@ apply from: 'gradle/integration-tests.gradle'
 
 
 group = 'com.github.jruby-gradle'
-version = '0.2.1'
+version = '0.2.2'
 archivesBaseName = 'jruby-gradle-plugin'
 
 if (System.env.RELEASE != '1') {

@@ -99,7 +99,19 @@ trait JRubyExecTraits {
 
     @CompileDynamic
     List<String> _convertScriptArgs() {
-        CollectionUtils.stringize(this.scriptArgs)
+        CollectionUtils.stringize(
+            this.scriptArgs.collect { arg ->
+                /* In order to support closures in scriptArgs for lazy
+                 * evaluation, we need to evaluate the closure if it is present
+                 */
+                if (arg instanceof Closure) {
+                    (arg as Closure).call()
+                }
+                else {
+                    arg
+                }
+            } .flatten()
+        )
     }
 
     @CompileDynamic
@@ -112,3 +124,4 @@ trait JRubyExecTraits {
     private List<Object> scriptArgs = []
     private List<Object> jrubyArgs = []
 }
+

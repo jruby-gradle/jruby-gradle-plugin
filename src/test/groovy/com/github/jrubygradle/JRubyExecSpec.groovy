@@ -132,6 +132,15 @@ class JRubyExecSpec extends Specification {
             execTask.scriptArgs == ['a','b','c','d','e','f']
     }
 
+    def "Setting script arguments with Closures"() {
+        when: "caling scriptArgs with a Closure in the array"
+            project.configure(execTask) {
+                scriptArgs 'a', { 'b' }, 'c'
+            }
+        then: "evaluate the closure when retrieving scriptArgs"
+            execTask.scriptArgs == ['a','b','c']
+    }
+
     def "Getting correct command-line passed"() {
         when:
             project.configure(execTask) {

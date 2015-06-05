@@ -29,8 +29,6 @@ class JRubyPlugin implements Plugin<Project> {
         GemUtils.createGemConfiguration(project, JRubyExec.JRUBYEXEC_CONFIG)
         JRubyExecDelegate.addToProject(project)
 
-        // In order for jrubyWar to work we'll need to pull in the warbler
-        // bootstrap code from this artifact
         project.afterEvaluate {
             if (project.jruby.defaultRepositories) {
                 project.repositories {

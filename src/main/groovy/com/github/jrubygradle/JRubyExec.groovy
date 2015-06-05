@@ -136,7 +136,7 @@ class JRubyExec extends JavaExec implements JRubyExecTraits {
      */
     @Optional
     @Input
-    List<String> getScriptArgs() {
+    List<Object> getScriptArgs() {
         _convertScriptArgs()
     }
 
