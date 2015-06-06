@@ -52,3 +52,9 @@ subprojects {
         archives sourcesJar
     }
 }
+
+task release(type: Exec) {
+    description 'Create and upload a release'
+    dependsOn subprojects.collect { ":${it.name}:bintrayUpload" }
+    commandLine 'git', 'tag', "v${project.version}"
+}
