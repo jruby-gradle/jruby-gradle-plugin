@@ -1,35 +1,7 @@
-buildscript {
-    repositories {
-        jcenter()
-        maven {
-            url "https://plugins.gradle.org/m2/"
-        }
-    }
-    dependencies {
-        classpath 'com.jfrog.bintray.gradle:gradle-bintray-plugin:0.5'
-        classpath 'com.netflix.nebula:gradle-extra-configurations-plugin:1.12.+'
-        classpath 'org.ysb33r.gradle:gradletest:0.5.3'
-    }
-}
-
-apply plugin: 'groovy'
-apply plugin: 'maven'
-apply plugin: 'com.jfrog.bintray'
-apply plugin: 'provided-base'
 apply plugin: 'org.ysb33r.gradletest'
-apply from: 'gradle/integration-tests.gradle'
 
-
-group = 'com.github.jruby-gradle'
-version = '0.2.2'
-archivesBaseName = 'jruby-gradle-plugin'
-
-if (System.env.RELEASE != '1') {
-    version = "${version}-SNAPSHOT"
-}
-
-sourceCompatibility = '1.6'
-targetCompatibility = '1.6'
+group = rootProject.group
+version = rootProject.version
 
 // --- Could be in a separate gradle file
 configurations {
@@ -58,15 +30,11 @@ dependencies {
 
 
 repositories {
-    jcenter()
     mavenLocal()
     maven { url 'http://rubygems-proxy.torquebox.org/releases' }
 }
 
 dependencies {
-    compile gradleApi()
-    compile localGroovy()
-
     String spockVersion = "org.spockframework:spock-core:1.0-groovy-2.3"
 
     testCompile (spockVersion) {
@@ -104,16 +72,11 @@ dependencies {
 }
 
 test {
-    testLogging {
-        showStandardStreams = true
-        exceptionFormat "full"
-    }
-
     systemProperties TESTROOT : new File(buildDir,'tmp/test/unittests').absolutePath
     systemProperties TEST_GEM_DIR : new File(projectDir,'src/integTest/resources/gems').absolutePath
     systemProperties 'logback.configurationFile' : new File(projectDir,'src/test/resources/logback-test.xml').absolutePath
 
-    if(gradle.startParameter.isOffline()) {
+    if (gradle.startParameter.isOffline()) {
         systemProperties 'TESTS_ARE_OFFLINE' : '1'
     }
 }
@@ -138,15 +101,6 @@ integrationTest {
 }
 
 
-
-task sourcesJar(type: Jar, dependsOn: classes) {
-    classifier = 'sources'
-    from sourceSets.main.allSource
-}
-
-artifacts {
-    archives sourcesJar
-}
 
 task installGroovyDoc (type : Copy) {
     from ({new File(buildDir,'docs/groovydoc')}) {
@@ -192,5 +146,4 @@ gradleTest {
     versions '2.0','2.2','2.4'
     dependsOn jar
 }
-
 // vim: ft=groovy

@@ -1,0 +1,1 @@
+include 'jruby-gradle-plugin', 'jruby-gradle-jar-plugin', 'jruby-gradle-war-plugin'

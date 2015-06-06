@@ -6,7 +6,6 @@ import org.gradle.api.tasks.bundling.War
 import org.gradle.api.tasks.Copy
 import org.gradle.api.tasks.Delete
 
-import com.github.jrubygradle.internal.WarblerBootstrap
 import com.github.jrubygradle.JRubyPlugin
 
 /**
