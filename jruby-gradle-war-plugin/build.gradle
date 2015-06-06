@@ -1,0 +1,38 @@
+description = 'This plugin encapsulates web archive building functionality for JRuby Gradle projects'
+group = rootProject.group
+version = rootProject.version
+
+
+dependencies {
+    compile project(':jruby-gradle-plugin')
+    compile group: 'com.github.jruby-gradle', name: 'warbler-bootstrap', version: '0.2.0+'
+
+    testCompile ("org.spockframework:spock-core:0.7-groovy-${gradle.gradleVersion.startsWith('1.')?'1.8':'2.0'}") {
+        exclude module : 'groovy-all'
+    }
+}
+
+bintray {
+    user = project.bintrayUser
+    key = project.bintrayKey
+    publish = true
+    dryRun = false
+    configurations = ['archives']
+
+    pkg {
+        userOrg = 'jruby-gradle'
+        repo = 'plugins'
+        name = 'jruby-gradle-war-plugin'
+        labels = ['jruby','war','java']
+
+        version {
+            name = project.version
+            vcsTag = "v${project.version}"
+            attributes = ['gradle-plugin' : 'com.github.jruby-gradle.war:com.github.jruby-gradle:jruby-gradle-war-plugin']
+            desc = project.description
+        }
+    }
+}
+bintrayUpload.dependsOn assemble
+
+// vim: ft=groovy

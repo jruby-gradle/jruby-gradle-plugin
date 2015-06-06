@@ -6,191 +6,49 @@ buildscript {
         }
     }
     dependencies {
-        classpath 'com.jfrog.bintray.gradle:gradle-bintray-plugin:0.5'
+        classpath 'com.jfrog.bintray.gradle:gradle-bintray-plugin:1.2'
         classpath 'com.netflix.nebula:gradle-extra-configurations-plugin:1.12.+'
         classpath 'org.ysb33r.gradle:gradletest:0.5.3'
     }
 }
 
-apply plugin: 'groovy'
-apply plugin: 'maven'
-apply plugin: 'com.jfrog.bintray'
-apply plugin: 'provided-base'
-apply plugin: 'org.ysb33r.gradletest'
-apply from: 'gradle/integration-tests.gradle'
-
-
 group = 'com.github.jruby-gradle'
-version = '0.2.2'
-archivesBaseName = 'jruby-gradle-plugin'
+version = '0.3.0'
+defaultTasks 'check', 'assemble'
 
-if (System.env.RELEASE != '1') {
+if (!releaseBuild) {
     version = "${version}-SNAPSHOT"
 }
 
-sourceCompatibility = '1.6'
-targetCompatibility = '1.6'
+subprojects {
+    apply plugin: 'groovy'
+    apply plugin: 'maven'
+    apply plugin: 'com.jfrog.bintray'
+    apply plugin: 'provided-base'
+    apply from: "${rootProject.projectDir}/gradle/integration-tests.gradle"
 
-// --- Could be in a separate gradle file
-configurations {
-    testJRubyPrepare
-}
-
-ext {
-    jrubyVersion = '1.7.20'
-    jrubyClassPathFromConfiguration = { Configuration cfg ->
-        def f = cfg.files.find { it.name.startsWith('jruby-complete-') }
-        return  f?.absolutePath
+    repositories {
+        jcenter()
     }
-}
 
-project.afterEvaluate {
+    dependencies {
+        compile gradleApi()
+        compile localGroovy()
+    }
+
     test {
-        systemProperties TEST_JRUBY_CLASSPATH: "${jrubyClassPathFromConfiguration(configurations.testJRubyPrepare)}"
-    }
-}
-
-// --- up to here
-
-dependencies {
-    testJRubyPrepare "org.jruby:jruby-complete:${jrubyVersion}"
-}
-
-
-repositories {
-    jcenter()
-    mavenLocal()
-    maven { url 'http://rubygems-proxy.torquebox.org/releases' }
-}
-
-dependencies {
-    compile gradleApi()
-    compile localGroovy()
-
-    String spockVersion = "org.spockframework:spock-core:1.0-groovy-2.3"
-
-    testCompile (spockVersion) {
-        exclude module : 'groovy-all'
-    }
-
-    integrationTestCompile (spockVersion) {
-        exclude module : 'groovy-all'
-    }
-
-    provided "org.jruby:jruby-complete:${jrubyVersion}"
-
-    // This needs to be here as JRubyExec will add it as a dependency
-    integrationTestGems 'org.bouncycastle:bcprov-jdk15on:1.50'
-
-    // NOTE: If you change this, you will also need to update JRubyPrepareGemsIntegrationSpec
-    integrationTestGems 'rubygems:slim:2.0.2'
-
-    // NOTE: If you change this, you will also need to update JRubyPrepareJarsIntegrationSpec
-    integrationTestGems 'rubygems:leafy-complete:0.4.0'
-
-    // NOTE: If you change this, you will also need to update JRubyExecIntegrationSpec & JRubyExecExtensionIntegrationSpec
-    integrationTestGems 'rubygems:credit_card_validator:1.1.0'
-
-    // NOTE: If you change this, you will also need to update JRubyExecIntegrationSpec
-    integrationTestGems 'rubygems:rspec:3.1.0'
-
-    // NOTE: Leave this at .11 as it must be an older version. if
-    // you change it here you will also need to update JRubyExecIntegrationSpec
-    integrationTestGems "org.jruby:jruby-complete:1.7.11"
-
-    gradleTest "org.jruby:jruby-complete:${jrubyVersion}"
-    gradleTest 'rubygems:credit_card_validator:1.1.0'
-    gradleTest 'org.bouncycastle:bcprov-jdk15on:1.50'
-}
-
-test {
-    testLogging {
-        showStandardStreams = true
-        exceptionFormat "full"
-    }
-
-    systemProperties TESTROOT : new File(buildDir,'tmp/test/unittests').absolutePath
-    systemProperties TEST_GEM_DIR : new File(projectDir,'src/integTest/resources/gems').absolutePath
-    systemProperties 'logback.configurationFile' : new File(projectDir,'src/test/resources/logback-test.xml').absolutePath
-
-    if(gradle.startParameter.isOffline()) {
-        systemProperties 'TESTS_ARE_OFFLINE' : '1'
-    }
-}
-
-task copyIntegrationTestJRuby (type:Copy) {
-    from ({configurations.testJRubyPrepare.files})
-    into new File(buildDir,'tmp/integrationTest/flatRepo')
-}
-
-integrationTest {
-    systemProperties TESTROOT        : new File(buildDir,'tmp/integrationTest/root').absolutePath
-    systemProperties CACHEDIR        : new File(buildDir,'tmp/integrationTest/cache').absolutePath
-    systemProperties FLATREPO        : new File(buildDir,'tmp/integrationTest/flatRepo').absolutePath
-    systemProperties TEST_SCRIPT_DIR : new File(projectDir,'src/integTest/resources/scripts').absolutePath
-    systemProperties 'logback.configurationFile' : new File(projectDir,'src/integTest/resources/logback-test.xml').absolutePath
-
-    if(gradle.startParameter.isOffline()) {
-        systemProperties 'TESTS_ARE_OFFLINE' : '1'
-    }
-
-    dependsOn copyIntegrationTestJRuby
-}
-
-
-
-task sourcesJar(type: Jar, dependsOn: classes) {
-    classifier = 'sources'
-    from sourceSets.main.allSource
-}
-
-artifacts {
-    archives sourcesJar
-}
-
-task installGroovyDoc (type : Copy) {
-    from ({new File(buildDir,'docs/groovydoc')}) {
-        include '**'
-    }
-    into {new File(project.properties.jrubyGradleWebsiteInstallDir,"docs/api/${archivesBaseName}/${version}")}
-    onlyIf { project.hasProperty('jrubyGradleWebsiteInstallDir') }
-}
-
-bintray {
-    user = project.bintrayUser
-    key = project.bintrayKey
-    publish = true
-    dryRun = false
-    configurations = ['archives']
-
-    pkg {
-        userOrg = 'jruby-gradle'
-        repo = 'plugins'
-        name = 'jruby-gradle-plugin'
-        labels = ['jruby']
-
-        version {
-            name = project.version
-            vcsTag = "v${project.version}"
-            attributes = ['gradle-plugin' : 'com.github.jruby-gradle.base:com.github.jruby-gradle:jruby-gradle-plugin']
-            desc = 'The purpose of plugin is to encapsulate useful Gradle functionality for JRuby projects.'
-
+        testLogging {
+            showStandardStreams = true
+            exceptionFormat "full"
         }
     }
-}
-bintrayUpload.dependsOn assemble
 
+    task sourcesJar(type: Jar, dependsOn: classes) {
+        classifier = 'sources'
+        from sourceSets.main.allSource
+    }
 
-gradleLocations {
-    if(System.getenv('APPVEYOR')) {
-        searchGvm = false
-        download = true
+    artifacts {
+        archives sourcesJar
     }
 }
-
-gradleTest {
-    versions '2.0','2.2','2.4'
-    dependsOn jar
-}
-
-// vim: ft=groovy
