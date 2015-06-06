@@ -1,0 +1,74 @@
+plugins {
+  id "com.jfrog.bintray" version "1.0"
+}
+
+apply plugin: 'groovy'
+apply plugin: 'maven'
+
+group = 'com.github.jruby-gradle'
+description = 'This plugin encapsulates web archive building functionality for JRuby Gradle projects'
+version = '0.1.5'
+
+if (System.env.RELEASE != '1') {
+    version = "${version}-SNAPSHOT"
+}
+sourceCompatibility = '1.6'
+targetCompatibility = '1.6'
+
+repositories {
+    jcenter()
+    mavenLocal()
+}
+
+dependencies {
+    compile gradleApi()
+    compile localGroovy()
+
+    compile group: 'com.github.jruby-gradle', name: 'jruby-gradle-plugin', version: '0.1.9+'
+    compile group: 'com.github.jruby-gradle', name: 'warbler-bootstrap', version: '0.2.0+'
+
+    testCompile ("org.spockframework:spock-core:0.7-groovy-${gradle.gradleVersion.startsWith('1.')?'1.8':'2.0'}") {
+        exclude module : 'groovy-all'
+    }
+}
+
+test {
+    testLogging {
+        showStandardStreams = true
+        exceptionFormat "full"
+    }
+}
+
+task sourcesJar(type: Jar, dependsOn: classes) {
+    classifier = 'sources'
+    from sourceSets.main.allSource
+}
+
+artifacts {
+    archives sourcesJar
+}
+
+bintray {
+    user = project.bintrayUser
+    key = project.bintrayKey
+    publish = true
+    dryRun = false
+    configurations = ['archives']
+
+    pkg {
+        userOrg = 'jruby-gradle'
+        repo = 'plugins'
+        name = 'jruby-gradle-war-plugin'
+        labels = ['jruby','war','java']
+
+        version {
+            name = project.version
+            vcsTag = "v${project.version}"
+            attributes = ['gradle-plugin' : 'com.github.jruby-gradle.war:com.github.jruby-gradle:jruby-gradle-war-plugin']
+            desc = project.description
+        }
+    }
+}
+bintrayUpload.dependsOn assemble
+
+// vim: ft=groovy
