@@ -30,7 +30,7 @@ class GemVersionResolver {
     GemVersionResolver() {
     }
 
-    // keep it not private for testing  
+    // keep it not private for testing
     void firstRun() {
         log({"${configuration.name}\n" +
              "                       --------------------------\n" +

@@ -21,7 +21,7 @@ class GemVersionResolverSpec extends Specification {
             def details = Mock(DependencyResolveDetails)
             def requested = Mock(ModuleVersionSelector)
             details.getRequested() >> requested
-            
+
         when:
             subject.resolve( details )
 
@@ -36,7 +36,7 @@ class GemVersionResolverSpec extends Specification {
             def details = Mock(DependencyResolveDetails)
             def requested = Mock(ModuleVersionSelector)
             details.getRequested() >> requested
-            
+
         when:
             subject.resolve( details )
 
@@ -54,11 +54,11 @@ class GemVersionResolverSpec extends Specification {
             def details1 = Mock(DependencyResolveDetails)
             def requested1 = Mock(ModuleVersionSelector)
             details1.getRequested() >> requested1
-            
+
             def details2 = Mock(DependencyResolveDetails)
             def requested2 = Mock(ModuleVersionSelector)
             details2.getRequested() >> requested2
-            
+
         when:
             subject.resolve( details1 )
             subject.resolve( details2 )
@@ -80,11 +80,11 @@ class GemVersionResolverSpec extends Specification {
             def details1 = Mock(DependencyResolveDetails)
             def requested1 = Mock(ModuleVersionSelector)
             details1.getRequested() >> requested1
-            
+
             def details2 = Mock(DependencyResolveDetails)
             def requested2 = Mock(ModuleVersionSelector)
             details2.getRequested() >> requested2
-            
+
         when:
             subject.resolve( details1 )
             subject.resolve( details2 )
