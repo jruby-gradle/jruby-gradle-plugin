@@ -45,7 +45,7 @@ class JRubyPrepareGemsIntegrationSpec extends Specification {
             new File(jrpg.outputDir,"gems/slim-${SLIM_VERSION}").exists()
             new File(jrpg.outputDir,"specifications/.jrubydir").exists()
     }
-  
+
     def "Check if rack version gets resolved"() {
         given:
             def root= new File(TESTROOT, "rack-resolve")
@@ -65,9 +65,30 @@ class JRubyPrepareGemsIntegrationSpec extends Specification {
         expect:
             new File(jrpg.outputDir,"gems/rack-1.5.3").exists()
     }
-  
 
-//    @IgnoreIf({TESTS_ARE_OFFLINE})
+    @Issue('https://github.com/jruby-gradle/jruby-gradle-plugin/issues/129')
+    @Ignore
+    def "Resolve x < Gem < y type gem ranges properly"() {
+        given:
+            def root= new File(TESTROOT, "rack-resolve")
+            def project = BasicProjectBuilder.buildWithStdRepo(root,CACHEDIR)
+            def prepTask = project.task(TASK_NAME, type: JRubyPrepareGems)
+            def jrpg = project.tasks.jrubyPrepareGems
+            project.jruby.gemInstallDir = root.absolutePath
+
+            project.dependencies {
+                gems "rubygems:rspec-core:2.99.+"
+                gems "rubygems:ci_reporter_rspec:1.0.0"
+            }
+            project.evaluate()
+            jrpg.copy()
+
+        expect:
+            new File(jrpg.outputDir,"gems/rspec-3.2.0").exists()
+    }
+
+
+    @IgnoreIf({TESTS_ARE_OFFLINE})
     @Ignore
     def "Unpack our gem as normal"() {
         given:
