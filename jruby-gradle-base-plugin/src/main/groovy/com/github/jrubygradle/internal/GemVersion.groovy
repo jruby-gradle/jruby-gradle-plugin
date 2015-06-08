@@ -6,12 +6,12 @@ import java.util.regex.Pattern
  * since with rubygems most (almost all) dependencies will be declared
  * via versions ranges an tools like bundler are very strict on how to
  * resolve those versions - i.e. the reolved version needs to obey each given
- * contraint. maven does the same but gradle and ivy do pick the latest and 
+ * contraint. maven does the same but gradle and ivy do pick the latest and
  * newest version when there are more then on contraint for the same gem -
  * which can create problems when using bundler alongside gradle.
  *
  * when converting a gempsec into a maven pom.xml the translation of a
- * gem version range into a maven version range. typically '~> 1.0' from ruby 
+ * gem version range into a maven version range. typically '~> 1.0' from ruby
  * becomes [1.0, 1.99999] on the maven side. so most dependencies from
  * gem artifacts will use such version ranges.
  *
@@ -32,9 +32,9 @@ import java.util.regex.Pattern
 class GemVersion {
 
     private static LOW_EX = '('
-    private static LOW_IN = '[' 
+    private static LOW_IN = '['
     private static UP_EX = ')'
-    private static UP_IN = ']' 
+    private static UP_IN = ']'
     private static Pattern DOT_PLUS = Pattern.compile('\\.\\+')
     private static Pattern PLUS = Pattern.compile('\\+')
     private static Pattern DIGITS_PLUS = Pattern.compile('[0-9]+\\+')
@@ -47,14 +47,14 @@ class GemVersion {
     private String high
     private prefix = LOW_IN
     private postfix = UP_IN
-  
+
     private GemVersion(String pre, String low, String high, String post) {
         prefix = pre
         this.low = low
         this.high = high
         postfix = post
     }
-    
+
     /**
      * converts the given string to a version range with inclusive or
      * exclusive boundaries.
@@ -181,7 +181,7 @@ class GemVersion {
         }
         else {
             0
-        } 
+        }
     }
 
     /**
