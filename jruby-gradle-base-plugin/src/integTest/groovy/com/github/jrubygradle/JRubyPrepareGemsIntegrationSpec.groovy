@@ -67,7 +67,6 @@ class JRubyPrepareGemsIntegrationSpec extends Specification {
     }
 
     @Issue('https://github.com/jruby-gradle/jruby-gradle-plugin/issues/129')
-    @Ignore
     def "Resolve x < Gem < y type gem ranges properly"() {
         given:
             def root= new File(TESTROOT, "rack-resolve")
