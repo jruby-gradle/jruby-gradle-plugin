@@ -22,7 +22,7 @@ class JRubyExecUtils {
      * @return
      */
     static def classpathFromConfiguration(Configuration cfg) {
-        cfg.files.findAll { File f -> !f.name.toLowerCase().endsWith('.gem') }
+        cfg.files.findAll { File f -> f.name.startsWith('jruby-complete-') }
     }
 
     /** Extract the jruby-complete-XXX.jar classpath
@@ -78,8 +78,13 @@ class JRubyExecUtils {
     }
 
     static List<String> buildArgs(List<Object> jrubyArgs, File script, List<Object> scriptArgs) {
-        def cmdArgs = []
+        buildArgs([], jrubyArgs, script, scriptArgs)
+    }
 
+    static List<String> buildArgs(List<Object> extra, List<Object> jrubyArgs, File script, List<Object> scriptArgs) {
+        def cmdArgs = extra
+        // load Jars.lock on startup
+        cmdArgs.add('-rjars/setup')
         boolean useBinPath = jrubyArgs.contains('-S')
         cmdArgs.addAll(jrubyArgs)
 
@@ -112,7 +117,6 @@ class JRubyExecUtils {
      */
     static Map<String, Object> preparedEnvironment(Map<String, Object> env,boolean inheritRubyEnv) {
         Map<String, Object> newEnv = [
-                'JARS_NO_REQUIRE' : 'true',
                 'JBUNDLE_SKIP' : 'true',
                 'JARS_SKIP' : 'true',
         ] as Map<String, Object>

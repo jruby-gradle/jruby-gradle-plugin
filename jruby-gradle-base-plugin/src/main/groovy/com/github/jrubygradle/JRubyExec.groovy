@@ -19,19 +19,32 @@ import org.gradle.util.CollectionUtils
 class JRubyExec extends JavaExec implements JRubyExecTraits {
 
     static final String JRUBYEXEC_CONFIG = 'jrubyExec'
+    static final String JAR_DEPENDENCIES_VERSION = '0.1.15'
+
+    static String jarDependenciesGemLibPath(File gemDir) {
+        new File(gemDir, "gems/jar-dependencies-${JAR_DEPENDENCIES_VERSION}/lib").absolutePath
+    }
 
     static void updateJRubyDependencies(Project proj) {
         proj.dependencies {
             jrubyExec "org.jruby:jruby-complete:${proj.jruby.execVersion}"
-            jrubyExec "org.bouncycastle:bcprov-jdk15on:${proj.jruby.bouncycastleVersion}"
+            // jruby-1.7.20 comes with jar-dependencies-0.1.13 which provides
+            // Jars.lock files. to be sure old jrubies can load Jars.lock
+            // we inject jar-dependencies here.
+            if (proj.jruby.execVersion.startsWith("1.7.1")) {
+                jrubyExec "rubygems:jar-dependencies:${JAR_DEPENDENCIES_VERSION}"
+            }
         }
 
         proj.tasks.withType(JRubyExec) { t ->
             if (t.jrubyConfigurationName != proj.configurations.jrubyExec) {
                 proj.dependencies.add(t.jrubyConfigurationName,
                                         "org.jruby:jruby-complete:${t.jrubyVersion}")
-                proj.dependencies.add(t.jrubyConfigurationName,
-                                        "org.bouncycastle:bcprov-jdk15on:${proj.jruby.bouncycastleVersion}")
+                if (t.jrubyVersion.startsWith("1.7.1")) {
+                    String config = configuration ? t.configuration :JRUBYEXEC_CONFIG
+                    proj.dependencies.add(config,
+                                          "rubygems:jar-dependencies:${JAR_DEPENDENCIES_VERSION}")
+                }
             }
         }
     }
@@ -177,6 +190,11 @@ class JRubyExec extends JavaExec implements JRubyExecTraits {
                     gemDir,
                     overwrite
             )
+            GemUtils.setupJars(
+                    project.configurations.getByName(configuration),
+                    gemDir,
+                    overwrite
+            )
         }
 
         super.classpath JRubyExecUtils.classpathFromConfiguration(project.configurations.getByName(jrubyConfigurationName))
@@ -199,7 +217,9 @@ class JRubyExec extends JavaExec implements JRubyExecTraits {
      */
     @Override
     List<String> getArgs() {
-        JRubyExecUtils.buildArgs(jrubyArgs, getScript(), scriptArgs)
+        // just add the extra load-path even if it does not exists
+        List<String> extra = ['-I', jarDependenciesGemLibPath(getGemWorkDir())]
+        JRubyExecUtils.buildArgs(extra, jrubyArgs, getScript(), scriptArgs)
     }
 
     @Override
@@ -236,6 +256,9 @@ class JRubyExec extends JavaExec implements JRubyExecTraits {
         JRubyExecUtils.preparedEnvironment(env,inheritRubyEnv) + [
                 'PATH' : getComputedPATH(System.env."${JRubyExecUtils.pathVar()}"),
                 'GEM_HOME' : getGemWorkDir().absolutePath,
+                'GEM_PATH' : getGemWorkDir().absolutePath,
+                'JARS_HOME' : new File(getGemWorkDir().absolutePath, 'jars'),
+                'JARS_LOCK' : new File(getGemWorkDir().absolutePath, 'Jars.lock')
         ]
     }
 

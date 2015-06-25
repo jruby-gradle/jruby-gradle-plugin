@@ -67,6 +67,9 @@ dependencies {
     // you change it here you will also need to update JRubyExecIntegrationSpec
     integrationTestGems "org.jruby:jruby-complete:1.7.11"
 
+    // NOTE: older jruby versions needs this for exec to work properly
+    integrationTestGems "rubygems:jar-dependencies:0.1.15"
+
     gradleTest "org.jruby:jruby-complete:${jrubyVersion}"
     gradleTest 'rubygems:credit_card_validator:1.1.0'
     gradleTest 'org.bouncycastle:bcprov-jdk15on:1.50'

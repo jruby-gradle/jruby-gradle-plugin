@@ -83,14 +83,18 @@ class JRubyExecIntegrationSpec extends Specification {
 
     def "Running a script that requires a gem, a separate jRuby and a separate configuration"() {
         given:
+            final String newVersion = '1.7.11'
+            assert project.jruby.execVersion != newVersion
             def output = new ByteArrayOutputStream()
             project.with {
                 configurations.create('RubyWax')
                 dependencies.add('RubyWax',VersionFinder.findDependency(FLATREPO,'','credit_card_validator','gem'))
+                // we need it from flatrepo and not from regular repo. needed only for jruby <1.7.20
+                dependencies.add('RubyWax',VersionFinder.findDependency(FLATREPO,'rubygems','jar-dependencies','gem'))
                 configure(execTask) {
                     script        "${TEST_SCRIPT_DIR}/requiresGem.rb"
                     standardOutput output
-                    jrubyVersion   '1.7.11'
+                    jrubyVersion   newVersion
                     configuration 'RubyWax'
                 }
             }

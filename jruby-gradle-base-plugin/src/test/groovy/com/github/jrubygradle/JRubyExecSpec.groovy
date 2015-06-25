@@ -19,6 +19,7 @@ class JRubyExecSpec extends Specification {
 
     static final File TEST_SCRIPT_DIR = new File( System.getProperty('TEST_SCRIPT_DIR') ?: 'src/integTest/resources/scripts').absoluteFile
     static final File TESTROOT = new File( System.getProperty('TESTROOT') ?: 'build/tmp/test/unittests', 'jes')
+    static final String TEST_JAR_DEPENDENCIES = JRubyExec.jarDependenciesGemLibPath(new File(TESTROOT, 'tmp/jrubyExec'))
     static final String TASK_NAME = 'RubyWax'
 
     def project
@@ -150,7 +151,7 @@ class JRubyExecSpec extends Specification {
             }
 
         then:
-            execTask.getArgs() == ['-j1','-j2','-j3','-S',new File(TEST_SCRIPT_DIR,'helloWorld.rb').absolutePath,'-s1','-s2','-s3']
+        execTask.getArgs() == ['-I', TEST_JAR_DEPENDENCIES, '-rjars/setup', '-j1','-j2','-j3','-S',new File(TEST_SCRIPT_DIR,'helloWorld.rb').absolutePath,'-s1','-s2','-s3']
     }
 
     def "Properly handle the lack of a `script` argument"() {
@@ -160,7 +161,7 @@ class JRubyExecSpec extends Specification {
             }
 
         then:
-            execTask.getArgs() == ['-S', 'rspec']
+            execTask.getArgs() == ['-I', TEST_JAR_DEPENDENCIES, '-rjars/setup', '-S', 'rspec']
     }
 
     def "Error when `script` is empty and there is no `jrubyArgs`"() {
