@@ -43,6 +43,20 @@ class JRubyExecExtensionIntegrationSpec extends Specification {
             output.toString() == "Hello, World\n"
     }
 
+    def "Run an inline script"() {
+        given:
+            def output = new ByteArrayOutputStream()
+
+        when: "I call jrubyexec with only a script name"
+            project.jrubyexec {
+                jrubyArgs      "-e", "puts 'Hello, World'"
+                standardOutput output
+            }
+
+        then: "I expect the Ruby script to be executed"
+            output.toString() == "Hello, World\n"
+    }
+
     def "Run a script containing a conditional"() {
         given:
             def output = new ByteArrayOutputStream()

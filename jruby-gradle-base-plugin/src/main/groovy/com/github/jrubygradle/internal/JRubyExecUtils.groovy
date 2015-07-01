@@ -86,6 +86,7 @@ class JRubyExecUtils {
         // load Jars.lock on startup
         cmdArgs.add('-rjars/setup')
         boolean useBinPath = jrubyArgs.contains('-S')
+        boolean hasInlineScript = jrubyArgs.contains('-e')
         cmdArgs.addAll(jrubyArgs)
 
         if ((script != null) && (!useBinPath)) {
@@ -100,8 +101,11 @@ class JRubyExecUtils {
             }
             cmdArgs.add(script.toString())
         }
+        else if ((script == null) && !(hasInlineScript || useBinPath)) {
+            throw new InvalidUserDataException("no `script` property or inline script via `-e` specified.")
+        }
         else if ((script == null) && (jrubyArgs.size() == 0)) {
-            throw new InvalidUserDataException('Cannot instantiate a JRubyExec instance without either `script` or `jrubyArgs` set')
+            throw new InvalidUserDataException('Cannot instantiate a JRubyExec instance without either `script` or `jrubyArgs` or noset')
         }
 
         cmdArgs.addAll(scriptArgs as List<String>)

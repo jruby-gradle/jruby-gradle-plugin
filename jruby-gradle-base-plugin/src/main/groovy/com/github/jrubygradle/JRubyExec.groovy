@@ -76,6 +76,7 @@ class JRubyExec extends JavaExec implements JRubyExecTraits {
     /** Script to execute.
      * @return The path to the script (or nul if not set)
      */
+    @Optional
     @Input
     File getScript() {
         _convertScript()

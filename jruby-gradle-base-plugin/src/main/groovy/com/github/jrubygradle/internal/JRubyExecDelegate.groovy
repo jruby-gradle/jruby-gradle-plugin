@@ -64,13 +64,6 @@ class JRubyExecDelegate implements JRubyExecTraits   {
         passthrough[index].values()[0]
     }
 
-    @PackageScope
-    void validate() {
-        if( this.script == null ) {
-            throw new NullPointerException("'script' is not set")
-        }
-    }
-
     private def passthrough = []
 
     static def jrubyexecDelegatingClosure = { Project project, Closure cl ->
