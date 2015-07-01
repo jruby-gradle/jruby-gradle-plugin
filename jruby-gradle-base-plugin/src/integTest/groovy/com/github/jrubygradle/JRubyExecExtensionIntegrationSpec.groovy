@@ -16,6 +16,7 @@ class JRubyExecExtensionIntegrationSpec extends Specification {
     static final boolean TESTS_ARE_OFFLINE = System.getProperty('TESTS_ARE_OFFLINE') != null
     static final File TEST_SCRIPT_DIR = new File( System.getProperty('TEST_SCRIPT_DIR') ?: 'src/integTest/resources/scripts').absoluteFile
     static final File TESTROOT = new File("${System.getProperty('TESTROOT') ?: 'build/tmp/test/integration-tests'}/jreeis").absoluteFile
+    static final File TEST_JARS_DIR = new File(TESTROOT, "build/gems/jars")
 
     def project
 
@@ -80,6 +81,27 @@ class JRubyExecExtensionIntegrationSpec extends Specification {
             0     | "Hello, Stan\n"
             1     | "Hello, man\n"
 
+    }
+
+    def "Running a script that requires a jar"() {
+        given:
+            def output = new ByteArrayOutputStream()
+
+        when:
+            project.with {
+                dependencies {
+                    jrubyExec VersionFinder.findDependency(FLATREPO,'org.bouncycastle','bcprov-jdk15on','jar')
+
+                }
+                jrubyexec {
+                    jrubyArgs '-e'
+                    jrubyArgs 'print $CLASSPATH'
+                    standardOutput output
+                }
+            }
+
+        then:
+            output.toString() == "[\"${new File(TEST_JARS_DIR, 'org/bouncycastle/bcprov-jdk15on/1.50/bcprov-jdk15on-1.50.jar').toURL()}\"]"
     }
 
     def "Running a script that requires a gem, a separate jRuby and a separate configuration"() {

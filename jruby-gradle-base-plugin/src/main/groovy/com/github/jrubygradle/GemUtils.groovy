@@ -179,7 +179,7 @@ class GemUtils {
                                        Map<String, String> renameMap,
                                        GemUtils.OverwriteAction overwrite) {
         dependencies.each { File dependency ->
-            if (!dependency.name.toLowerCase().endsWith('.gem') && !dependency.name.startsWith('jruby-complete-')) {
+            if (dependency.name.toLowerCase().endsWith('.jar') && !dependency.name.startsWith('jruby-complete-')) {
                 File destination = new File (jarsDir, renameMap[dependency.name])
                 switch(overwrite) {
                     case OverwriteAction.FAIL:
