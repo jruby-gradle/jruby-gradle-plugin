@@ -27,31 +27,17 @@ class JRubyJarPlugin implements Plugin<Project> {
         project.tasks.create( 'jrubyJar',JRubyJar)
 
         updateTestTask(project)
-        addJrubyExtensionToJar(project)
         addAfterEvaluateHooks(project)
-    }
-
-    @PackageScope
-    void addJrubyExtensionToJar(Project project) {
-        if(!Jar.metaClass.respondsTo(Jar.class,'jruby',Closure)) {
-            Jar.metaClass.jruby = { Closure extraConfig ->
-                JRubyJarConfigurator.configureArchive(delegate,extraConfig)
-            }
-        }
-        if(!JRubyJar.metaClass.respondsTo(JRubyJar.class,'jruby',Closure)) {
-            JRubyJar.metaClass.jruby = { Closure extraConfig ->
-                JRubyJarConfigurator.configureArchive(delegate,extraConfig)
-            }
-        }
     }
 
     @PackageScope
     void addAfterEvaluateHooks(Project project) {
         project.afterEvaluate {
-            project.dependencies {
-                jrubyJar group: 'org.jruby', name: 'jruby-complete', version: project.jruby.defaultVersion
-                // TODO remove hardcoded version to config
-                jrubyJar group: 'de.saumya.mojo', name: 'jruby-mains', version: '0.2.0'
+            project.tasks.withType(JRubyJar) { Task task ->
+                project.configurations.maybeCreate(task.name)
+                project.dependencies.add(task.name, "org.jruby:jruby-complete:${task.jrubyVersion}")
+                project.dependencies.add(task.name, "de.saumya.mojo:jruby-mains:${task.jrubyMainsVersion}")
+                task.applyConfig()
             }
         }
     }
