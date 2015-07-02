@@ -156,6 +156,80 @@ class GemUtils {
         extractGems(project,jRubyClasspath,project.files(gemConfig.files),destDir,action)
     }
 
+    static void writeJarsLock(File jarsLock, List<String> coordinates,
+                              GemUtils.OverwriteAction overwrite) {
+        switch(overwrite) {
+            case OverwriteAction.FAIL:
+                if (jarsLock.exists()) {
+                    throw new DuplicateFileCopyingException("${jarsLock.name} already exists")
+                }
+            case OverwriteAction.SKIP:
+                if (jarsLock.exists()) {
+                    break
+                }
+            case OverwriteAction.OVERWRITE:
+                jarsLock.parentFile.mkdirs()
+                jarsLock.withWriter { writer ->
+                    coordinates.each { writer.println it }
+                }
+        }
+    }
+
+    static void rewriteJarDependencies(File jarsDir, List<File> dependencies,
+                                       Map<String, String> renameMap,
+                                       GemUtils.OverwriteAction overwrite) {
+        dependencies.each { File dependency ->
+            if (dependency.name.toLowerCase().endsWith('.jar') && !dependency.name.startsWith('jruby-complete-')) {
+                File destination = new File (jarsDir, renameMap[dependency.name])
+                switch(overwrite) {
+                    case OverwriteAction.FAIL:
+                        if (destination.exists()) {
+                            throw new DuplicateFileCopyingException("Jar ${destination.name} already exists")
+                        }
+                    case OverwriteAction.SKIP:
+                        if (destination.exists()) {
+                            break
+                        }
+                    case OverwriteAction.OVERWRITE:
+                        destination.delete()
+                        destination.parentFile.mkdirs()
+                        dependency.withInputStream { destination << it }
+                }
+            }
+        }
+    }
+
+    static void setupJars(Configuration config,
+                          File destDir,
+                          GemUtils.OverwriteAction overwrite) {
+        def artifacts = config.resolvedConfiguration.resolvedArtifacts
+        Map<String,String> fileRenameMap = [:]
+        List<String> coordinates = []
+        List<File> files = []
+        artifacts.each { dep ->
+
+            def group = dep.moduleVersion.id.group
+            def groupAsPath = group.replace('.' as char, File.separatorChar)
+            def version = dep.moduleVersion.id.version
+            // TODO classifier
+            String newFileName = "${groupAsPath}/${dep.name}/${version}/${dep.name}-${version}.${dep.type}"
+
+            // we do not want jruby-complete.jar or gems
+            if (group != 'rubygems' && dep.type != 'gem' && dep.name != 'jruby-complete') {
+                // TODO classifier and system-scope
+                coordinates << "${group}:${dep.name}:${version}:runtime:"
+            }
+            fileRenameMap[dep.file.name] = newFileName
+            // TODO omit system-scoped files
+            files << dep.file
+        }
+
+        // create Jars.lock file used by jar-dependencies
+        writeJarsLock(new File(destDir, 'Jars.lock'), coordinates, overwrite)
+
+        rewriteJarDependencies(new File(destDir, 'jars'), files, fileRenameMap, overwrite)
+    }
+
     /** Take the given .gem filename (e.g. rake-10.3.2.gem) and just return the
      * gem "full name" (e.g. rake-10.3.2)
      */

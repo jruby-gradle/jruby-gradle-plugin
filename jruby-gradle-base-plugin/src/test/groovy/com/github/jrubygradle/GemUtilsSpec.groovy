@@ -1,5 +1,6 @@
 package com.github.jrubygradle
 
+import org.gradle.api.file.DuplicateFileCopyingException
 import org.gradle.testfixtures.ProjectBuilder
 import spock.lang.*
 
@@ -118,4 +119,120 @@ class GemUtilsSpec extends Specification {
             new File(dest,'foo/gems/mygem-1.0/test/test.txt').exists()
             new File(dest,'foo/cache').exists()
     }
+
+    def "write Jars.lock"() {
+        when:
+            GemUtils.OverwriteAction.values().each { 
+                File jarsLock = new File(dest, "jars-${it}.lock")
+                jarsLock.delete()
+                GemUtils.writeJarsLock(jarsLock, [ 'something' ], it)
+            }
+
+        then:
+            new File(dest, "jars-FAIL.lock").length() == 10
+            new File(dest, "jars-SKIP.lock").length() == 10
+            new File(dest, "jars-OVERWRITE.lock").length() == 10
+    }
+
+    def "skip write Jars.lock"() {
+        when:
+            File jarsLock = new File(dest, "jars.lock")
+            jarsLock << ''
+            GemUtils.writeJarsLock(jarsLock, [ 'something' ], GemUtils.OverwriteAction.SKIP)
+
+        then:
+            new File(dest, "jars.lock").length() == 0
+    }
+
+    def "overwrite write Jars.lock"() {
+        when:
+            File jarsLock = new File(dest, "jars.lock")
+            jarsLock << ''
+            GemUtils.writeJarsLock(jarsLock, [ 'something' ], GemUtils.OverwriteAction.OVERWRITE)
+
+        then:
+            new File(dest, "jars.lock").length() == 10
+    }
+  
+    def "fail write Jars.lock"() {
+        when:
+            File jarsLock = new File(dest, "jars.lock")
+            jarsLock << ''
+            GemUtils.writeJarsLock(jarsLock, [ 'something' ], GemUtils.OverwriteAction.FAIL)
+
+        then: 
+            thrown(DuplicateFileCopyingException)
+    }
+  
+    def "rewrite jar dependency"() {
+        when:
+            File jars = new File(dest, 'jars')
+            GemUtils.OverwriteAction.values().each { 
+                File jar = new File(dest, "${it}.jar")
+                jar << 'something'
+                GemUtils.rewriteJarDependencies(jars, [jar], ['FAIL.jar':'fail.jar', 'SKIP.jar':'skip.jar', 'OVERWRITE.jar':'over.jar'], it)
+            }
+
+        then:
+            new File(jars, "fail.jar").length() == 9
+            new File(jars, "skip.jar").length() == 9
+            new File(jars, "over.jar").length() == 9
+    }
+
+    def "skip rewrite jars dependency"() {
+        when:
+            File jars = new File(dest, 'jars')
+            File jar1 = new File(dest, "jar1.jar")
+            File jar2 = new File(dest, "jar2.jar")
+            File target1 = new File(jars, "jar1.jar")
+            File target2 = new File(jars, "jar2.jar")
+            jar1 << 'something'
+            jar2 << 'something'
+            jars.mkdir()
+            target1 << ''
+            target2.delete()
+            GemUtils.rewriteJarDependencies(jars, [jar1, jar2],
+                                            ['jar1.jar':'jar1.jar', 'jar2.jar':'jar2.jar'],
+                                            GemUtils.OverwriteAction.SKIP)
+
+        then:
+            target1.length() == 0
+            target2.length() == 9
+    }
+  
+    def "overwrite rewrite jars dependency"() {
+        when:
+            File jars = new File(dest, 'jars')
+            File jar1 = new File(dest, "jar1.jar")
+            File jar2 = new File(dest, "jar2.jar")
+            File target1 = new File(jars, "jar1.jar")
+            File target2 = new File(jars, "jar2.jar")
+            jar1 << 'something'
+            jar2 << 'something'
+            jars.mkdir()
+            target1 << ''
+            target2.delete()
+            GemUtils.rewriteJarDependencies(jars, [jar1, jar2],
+                                            ['jar1.jar':'jar1.jar', 'jar2.jar':'jar2.jar'],
+                                            GemUtils.OverwriteAction.OVERWRITE)
+
+        then:
+            target1.length() == 9
+            target2.length() == 9
+    }
+
+    def "fail rewrite jars dependency"() {
+        when:
+            File jars = new File(dest, 'jars')
+            File jar = new File(dest, "jar.jar")
+            File target = new File(jars, "jar.jar")
+            jar << 'something'
+            jars.mkdir()
+            target << ''
+            GemUtils.rewriteJarDependencies(jars, [jar], ['jar.jar':'jar.jar'], GemUtils.OverwriteAction.FAIL)
+
+        then: 
+            thrown(DuplicateFileCopyingException)
+    }
+  
 }

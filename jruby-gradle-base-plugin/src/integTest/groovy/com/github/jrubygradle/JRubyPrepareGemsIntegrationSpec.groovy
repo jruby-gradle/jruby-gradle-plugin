@@ -63,7 +63,9 @@ class JRubyPrepareGemsIntegrationSpec extends Specification {
             jrpg.copy()
 
         expect:
-            new File(jrpg.outputDir,"gems/rack-1.5.3").exists()
+            // since we need a version range in the setup the
+            // resolved version here can vary over time
+            new File(jrpg.outputDir,"gems/rack-1.5.5").exists()
     }
   
 

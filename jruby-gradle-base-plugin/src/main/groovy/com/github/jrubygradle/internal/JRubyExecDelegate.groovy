@@ -64,13 +64,6 @@ class JRubyExecDelegate implements JRubyExecTraits   {
         passthrough[index].values()[0]
     }
 
-    @PackageScope
-    void validate() {
-        if( this.script == null ) {
-            throw new NullPointerException("'script' is not set")
-        }
-    }
-
     private def passthrough = []
 
     static def jrubyexecDelegatingClosure = { Project project, Closure cl ->
@@ -85,6 +78,7 @@ class JRubyExecDelegate implements JRubyExecTraits   {
         GemUtils.OverwriteAction overwrite = project.gradle.startParameter.refreshDependencies ?  GemUtils.OverwriteAction.OVERWRITE : GemUtils.OverwriteAction.SKIP
         project.mkdir gemDir
         GemUtils.extractGems(project,config,config,gemDir,overwrite)
+        GemUtils.setupJars(config,gemDir,overwrite)
         String pathVar = JRubyExecUtils.pathVar()
 
         project.javaexec {
@@ -95,13 +89,20 @@ class JRubyExecDelegate implements JRubyExecTraits   {
                 "${k}" v
             }
             main 'org.jruby.Main'
+            // just keep this even if it does not exists
+            args '-I' + JRubyExec.jarDependenciesGemLibPath(gemDir)
+            // load Jars.lock on startup
+            args '-rjars/setup'
             proxy.buildArgs().each { item ->
-               args item.toString()
+                args item.toString()
             }
 
             setEnvironment JRubyExecUtils.preparedEnvironment(getEnvironment(),proxy.inheritRubyEnv)
             environment 'PATH' : JRubyExecUtils.prepareWorkingPath(gemDir,System.env."${pathVar}")
             environment 'GEM_HOME' : gemDir.absolutePath
+            environment 'GEM_PATH' : gemDir.absolutePath
+            environment 'JARS_HOME' : new File(gemDir.absolutePath, 'jars')
+            environment 'JARS_LOCK' : new File(gemDir.absolutePath, 'Jars.lock')
         }
     }
 

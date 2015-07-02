@@ -22,7 +22,7 @@ class JRubyExecUtils {
      * @return
      */
     static def classpathFromConfiguration(Configuration cfg) {
-        cfg.files.findAll { File f -> !f.name.toLowerCase().endsWith('.gem') }
+        cfg.files.findAll { File f -> f.name.startsWith('jruby-complete-') }
     }
 
     /** Extract the jruby-complete-XXX.jar classpath
@@ -78,9 +78,15 @@ class JRubyExecUtils {
     }
 
     static List<String> buildArgs(List<Object> jrubyArgs, File script, List<Object> scriptArgs) {
-        def cmdArgs = []
+        buildArgs([], jrubyArgs, script, scriptArgs)
+    }
 
+    static List<String> buildArgs(List<Object> extra, List<Object> jrubyArgs, File script, List<Object> scriptArgs) {
+        def cmdArgs = extra
+        // load Jars.lock on startup
+        cmdArgs.add('-rjars/setup')
         boolean useBinPath = jrubyArgs.contains('-S')
+        boolean hasInlineScript = jrubyArgs.contains('-e')
         cmdArgs.addAll(jrubyArgs)
 
         if ((script != null) && (!useBinPath)) {
@@ -95,8 +101,11 @@ class JRubyExecUtils {
             }
             cmdArgs.add(script.toString())
         }
+        else if ((script == null) && !(hasInlineScript || useBinPath)) {
+            throw new InvalidUserDataException("no `script` property or inline script via `-e` specified.")
+        }
         else if ((script == null) && (jrubyArgs.size() == 0)) {
-            throw new InvalidUserDataException('Cannot instantiate a JRubyExec instance without either `script` or `jrubyArgs` set')
+            throw new InvalidUserDataException('Cannot instantiate a JRubyExec instance without either `script` or `jrubyArgs` or noset')
         }
 
         cmdArgs.addAll(scriptArgs as List<String>)
@@ -112,7 +121,6 @@ class JRubyExecUtils {
      */
     static Map<String, Object> preparedEnvironment(Map<String, Object> env,boolean inheritRubyEnv) {
         Map<String, Object> newEnv = [
-                'JARS_NO_REQUIRE' : 'true',
                 'JBUNDLE_SKIP' : 'true',
                 'JARS_SKIP' : 'true',
         ] as Map<String, Object>

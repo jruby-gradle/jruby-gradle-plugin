@@ -51,7 +51,7 @@ class JRubyExecDelegateSpec extends Specification {
             jred.script == xplatformFileName
             jred._convertScriptArgs() == ['-x','-y','-z']
             jred._convertJrubyArgs() == ['c','d','-S','a','b']
-            jred.buildArgs() == ['c','d','-S','a','b',xplatformFileName.toString(),'-x','-y','-z']
+            jred.buildArgs() == ['-rjars/setup', 'c','d','-S','a','b',xplatformFileName.toString(),'-x','-y','-z']
             jred._convertGemWorkDir(project) == project.file('path/to/file')
     }
 
