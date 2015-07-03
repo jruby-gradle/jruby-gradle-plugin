@@ -120,13 +120,15 @@ class JRubyJar extends Jar {
       this.jrubyMainsVersion = version
     }
 
+    @Deprecated
     void jruby(Closure cfg) {
         project.logger.info 'It is no longer necessary to use the jruby closure on a JRubyJar task.' 
         def cl = cfg.clone()
         cl.delegate = this
         cl.call()
     }
-  
+
+    @PackageScope
     void applyConfig() {
         if (scriptName == null) {
             scriptName = runnable()

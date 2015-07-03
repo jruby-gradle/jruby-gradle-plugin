@@ -46,39 +46,34 @@ This plugin adds a new ```JRubyJar``` task and extends the `Jar` task type with 
 
 the ```Jar``` task is mainly used to create a library jar with embedded gems and ruby scripts. the ```JRubyJar``` task is meant to create runnable or executable fat jars.
 
-## Jar task
+## JRubyJar task
 
 ```groovy
 apply plugin: 'java'
 
-jar {
-  jruby {
+jrubyJar {
 
-    // Use the default GEM installation directory
-    defaultGems()
+  // Use the default GEM installation directory
+  defaultGems()
 
-    // Add this GEM installation directory to the JAR.
-    // Can be called more than once for additional directories
-    gemDir '/path/to/my/gemDir'
+  // Add this GEM installation directory to the JAR.
+  // Can be called more than once for additional directories
+  gemDir '/path/to/my/gemDir'
 
-    // Equivalent to calling defaultGems()
-    defaults 'gem'
+  // Equivalent to calling defaultGems()
+  defaults 'gem'
 
-  }
-
-  // All other JAR methods and properties are still valid
+  // All methods and properties from JAR task can be used 
 }
 
-task myJar (type :Jar) {
-  jruby {
-    // As above
-  }
+task myJar (type :JRubyJarTask) {
+  // As above
 
-  // All other JAR methods and properties are still valid
+  // All methods and properties from JAR task can be used 
 }
 ```
 
-## JRubyJar task
+## JRubyJar task types
 
 There are three types of jar which can be created:
 
@@ -120,24 +115,22 @@ Configuration is needs to declare the main class then the jar will be executable
 
 ```groovy
 jrubyJar {
-   jruby {
 
-     // tell the plugin to pack a runnable jar (no bootstrap script)
-     initScript runnable()
+   // tell the plugin to pack a runnable jar (no bootstrap script)
+   initScript runnable()
 
-     // Use the default bootstrap class (can be omitted)
-     defaultMainClass()
+   // Use the default bootstrap class (can be omitted)
+   defaultMainClass()
 
-     // Includes the default gems to the jar (can be omitted)
-     defaultGems()
+   // Includes the default gems to the jar (can be omitted)
+   defaultGems()
 
-     // Make the JAR executable by supplying your own main class
-     mainClass 'my.own.main'
+   // Make the JAR executable by supplying your own main class
+   mainClass 'my.own.main'
 
-     // Equivalent to calling defaultMainClass() and defaultGems()
-     defaults 'gems', 'mainClass'
+   // Equivalent to calling defaultMainClass() and defaultGems()
+   defaults 'gems', 'mainClass'
 
-   }
  }
  ```
 
@@ -147,33 +140,15 @@ jrubyJar {
 
 ```groovy
 jrubyJar {
-   jruby {
 
-     // tell the plugin to pack a runnable jar (no bootstrap script)
-     initScript library()
+   // tell the plugin to pack a runnable jar (no bootstrap script)
+   initScript library()
 
-     // Includes the default gems to the jar (can be omitted)
-     defaultGems()
+   // Includes the default gems to the jar (can be omitted)
+   defaultGems()
  
-     // Equivalent to calling defaultGems()
-     defaults 'gems'
+   // Equivalent to calling defaultGems()
+   defaults 'gems'
 
-   }
  }
 ```
-or
-```groovy
-jar {
-   jruby {
-
-     // Includes the default gems to the jar (can be omitted)
-     defaultGems()
- 
-     // Equivalent to calling defaultGems()
-     defaults 'gems'
-
-   }
-}
-```
-
-note that jar plugin does not need ``` initScript library()``` which is implied.
