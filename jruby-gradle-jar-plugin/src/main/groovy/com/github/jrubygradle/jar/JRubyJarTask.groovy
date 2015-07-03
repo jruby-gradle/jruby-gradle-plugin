@@ -2,9 +2,9 @@ package com.github.jrubygradle.jar
 
 import com.github.jrubygradle.GemUtils
 import com.github.jrubygradle.jar.internal.JRubyDirInfo
-
 import groovy.transform.PackageScope
 import org.gradle.api.Incubating
+import org.gradle.api.InvalidUserDataException
 import org.gradle.api.file.CopySpec
 import org.gradle.api.Project
 import org.gradle.api.Task
@@ -162,6 +162,9 @@ class JRubyJar extends Jar {
         }
         if (scriptName != Type.RUNNABLE && scriptName != Type.LIBRARY) {
             File script = project.file(scriptName)
+            if (!script.exists()) {
+                throw new InvalidUserDataException("initScript ${script} does not exists");
+            }
             with project.copySpec {
                 from script.parent
                 include script.name

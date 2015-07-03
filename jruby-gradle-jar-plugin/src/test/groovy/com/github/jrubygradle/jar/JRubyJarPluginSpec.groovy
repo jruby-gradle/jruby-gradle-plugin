@@ -1,5 +1,6 @@
 package com.github.jrubygradle.jar
 
+import org.gradle.api.InvalidUserDataException
 import org.gradle.api.Project
 import org.gradle.api.Task
 import org.gradle.api.artifacts.Dependency
@@ -100,6 +101,24 @@ class JRubyJarPluginSpec extends Specification {
         then: 'Expecting jar task'
             !jarTask.manifest.attributes.containsKey('Main-Class')
             names == (['MANIFEST.MF','fake.txt'] as Set<String>)
+    }
+
+    def "Fails on adding non-existing initScript"() {
+        given:
+            project.jruby.gemInstallDir = TESTROOT.absolutePath
+            new File(TESTROOT,'gems').mkdirs()
+            new File(TESTROOT,'gems/fake.txt').text = 'fake.content'
+
+        when: "Setting a default main class"
+            project.configure(jarTask) {
+                jruby {
+                    initScript 'not.existing'
+                }
+            }
+            jarTask.applyConfig()
+
+        then: "Then expecting use error"
+            thrown(InvalidUserDataException)
     }
 
     def "Adding the default gem directory"() {
@@ -260,6 +279,7 @@ class JRubyJarPluginSpec extends Specification {
   
     def 'Checking setting no mainClass'() {
         when:
+            project.file( 'app.rb') << ''
             jarTask.initScript('app.rb')
             jarTask.applyConfig()
 
@@ -269,6 +289,7 @@ class JRubyJarPluginSpec extends Specification {
 
     def 'Checking setting of mainClass once'() {
         when:
+            project.file( 'app.rb') << ''
             jarTask.initScript('app.rb')
             jarTask.mainClass('org.example.Main')
             jarTask.applyConfig()
