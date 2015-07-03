@@ -30,7 +30,7 @@ class JRubyJar extends Jar {
     @Input
     String jrubyVersion = project.jruby.defaultVersion
     @Input
-    String jrubyMainsVersion = '0.2.0'
+    String jrubyMainsVersion = '0.3.0'
     @Input
     String mainClass
     
