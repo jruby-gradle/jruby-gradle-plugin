@@ -75,8 +75,8 @@ class GemVersionResolver {
     }
 
     void log(Closure message) {
-        if (this.logger.isInfoEnabled()) {
-            this.logger.info(message.call())
+        if (this.logger.isDebugEnabled()) {
+            this.logger.debug(message.call())
         }
     }
 

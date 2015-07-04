@@ -19,7 +19,7 @@ dependencies {
     testRepo ('org.jruby:jruby-complete:1.7.20') {
         transitive = false
     }
-    testRepo ('de.saumya.mojo:jruby-mains:0.2.0') {
+    testRepo ('de.saumya.mojo:jruby-mains:0.3.0') {
         transitive = false
     }
     testRepo ("org.spockframework:spock-core:0.7-groovy-2.0") {
