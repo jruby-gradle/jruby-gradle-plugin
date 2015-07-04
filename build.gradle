@@ -14,7 +14,7 @@ buildscript {
 }
 
 group = 'com.github.jruby-gradle'
-version = '0.3.0'
+version = '0.3.1'
 defaultTasks 'check', 'assemble'
 
 if (!releaseBuild) {
