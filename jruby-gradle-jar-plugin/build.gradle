@@ -16,7 +16,7 @@ dependencies {
     // For the testRepo tests I am locking the versions, instead of a open version, as it makes
     // unit testing easier, This does not affect the final artifact.
     // If you change values here, you need to update JRubyJarPluginSpec as well.
-    testRepo ('org.jruby:jruby-complete:1.7.20') {
+    testRepo ("org.jruby:jruby-complete:${jrubyVersion}") {
         transitive = false
     }
     testRepo ('de.saumya.mojo:jruby-mains:0.3.0') {

@@ -7,7 +7,7 @@ class JRubyPluginExtension {
     /** The default version of jruby that will be used by jrubyWar
      *
      */
-    String defaultVersion = '1.7.20'
+    String defaultVersion = '1.7.21'
 
     /** The version of jruby used by jrubyexec as well as default version of jruby that will be used by JRubyExec
      *
