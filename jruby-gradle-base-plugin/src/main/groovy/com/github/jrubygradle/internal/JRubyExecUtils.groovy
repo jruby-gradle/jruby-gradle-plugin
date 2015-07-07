@@ -59,7 +59,7 @@ class JRubyExecUtils {
         String version = jrubyJarVersion(jar)
         if(!version) {return null}
 
-        Matcher matches = version =~ /(\d{1,2})\.(\d{1,3})\.(\d{1,3})/
+        Matcher matches = version =~ /(\d{1,2})\.(\d{1,3})\.(\d{1,3}).*/
 
         (!matches.matches() || matches[0].size() != 4) ? null : [
             major : matches[0][1].toInteger(),
