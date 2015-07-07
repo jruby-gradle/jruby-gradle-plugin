@@ -21,7 +21,7 @@ import static org.gradle.api.logging.LogLevel.LIFECYCLE
 class JRubyJarPluginSpec extends Specification {
     static final File TESTROOT = new File("${System.getProperty('TESTROOT') ?: 'build/tmp/test/unittests'}/jrjps")
     static final File TESTREPO_LOCATION = new File("${System.getProperty('TESTREPO_LOCATION') ?: 'build/tmp/test/repo'}")
-    static final String jrubyTestVersion = '1.7.20'
+    static final String jrubyTestVersion = '1.7.21'
 
     def project
     def jarTask
