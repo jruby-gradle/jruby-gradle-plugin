@@ -4,7 +4,8 @@ install:
  - ./gradlew clean
 
 script:
- - ./gradlew -S -i build gradleTest
+ - ./gradlew -S -i
+ - ./gradlew -S -i gradleTest
 
 jdk:
  - oraclejdk7
