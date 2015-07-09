@@ -27,15 +27,13 @@ class JRubyPrepareJarsIntegrationSpec extends Specification {
         TESTROOT.mkdirs()
     }
 
-    def "Check that default 'jrubyPrepareJars' uses the correct directory"() {
+    def "Check that default 'jrubyPrepare' uses the correct directory for the jars"() {
         given:
             def project=BasicProjectBuilder.buildWithLocalRepo(TESTROOT,FLATREPO,CACHEDIR)
-            def prepTask = project.task(TASK_NAME, type: JRubyPrepareJars)
-            def jrpg = project.tasks.jrubyPrepareJars
-            project.jruby.jarInstallDir = TESTROOT.absolutePath
+            def jrpg = project.tasks.jrubyPrepare
+            project.jruby.gemInstallDir = TESTROOT.absolutePath
 
             project.dependencies {
-                // this is actually a dependency of OUR_GEM
                 gems 'io.dropwizard.metrics:metrics-core:3.1.0'
             }
             project.evaluate()
@@ -43,6 +41,6 @@ class JRubyPrepareJarsIntegrationSpec extends Specification {
 
         expect:
             new File(jrpg.outputDir, 'Jars.lock').text.trim() == 'io.dropwizard.metrics:metrics-core:3.1.0:runtime:'
-            new File(jrpg.outputDir, 'io/dropwizard/metrics/metrics-core/3.1.0/metrics-core-3.1.0.jar').exists()
+            new File(jrpg.outputDir, 'jars/io/dropwizard/metrics/metrics-core/3.1.0/metrics-core-3.1.0.jar').exists()
     }
 }
