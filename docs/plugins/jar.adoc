@@ -1,0 +1,3 @@
+= The Jar Plugin
+
+// vim: ft=asciidoc

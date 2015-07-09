@@ -1,0 +1,21 @@
+local_tz: UTC
+haml:
+  :ugly: true
+asciidoctor:
+  :safe: unsafe
+  :base_dir: null
+  :attributes:
+    # TODO Awestruct should set env-awestruct
+    #env-awestruct: ''
+    compat-mode: '@'
+    attribute-missing: warn
+    relfileprefix: '../'
+    outfilesuffix: '/'
+    idprefix: ''
+    idseparator: '-'
+    icons: font
+    sectanchors: ''
+    linkattrs: ''
+    #source-highlighter: highlight.js
+    source-highlighter: coderay
+    prewrap: null

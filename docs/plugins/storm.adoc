@@ -1,0 +1,23 @@
+= The Storm Plugin
+
+The
+link:http://plugins.gradle.org/plugin/com.github.jruby-gradle.storm[jruby-gradle
+storm plugin] enables developers to build, test and deploy
+link:http://storm;apache.org[Apache Storm] topologies in JRuby.
+
+NOTE: To learn more about Apache Storm itself, please consult
+link:http://storm.apache.org/documentation/Home.html[their documentation]. This
+documentation intends only to cover the JRuby Gradle plugin's functionality.
+
+
+
+== Working with a basic topology
+
+[source,gradle]
+.build.gradle
+----
+include::../examples/basic-topology.gradle[]
+----
+
+
+// vim: ft=asciidoc

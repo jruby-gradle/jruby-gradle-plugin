@@ -1,0 +1,50 @@
+buildscript {
+    repositories { jcenter() }
+    dependencies {
+        classpath 'com.github.jruby-gradle:jruby-gradle-storm-plugin:0.1.6+'
+    }
+}
+
+apply plugin: 'com.github.jruby-gradle.storm'
+
+/* Need the JRubyStormLocal task to run a "local topology" */
+import com.github.jrubygradle.storm.JRubyStormLocal
+
+dependencies {
+    /* Including a Ruby gem dependency for our topology */
+    gems 'rubygems:colorize:0.7.3+'
+
+    /* Our topology consumes from Kafka so we need our Java dependencies to be
+     * enumerated under the `jrubyStorm` configuration so they get properly
+     * unpacked into the resulting topology .jar file
+     */
+    jrubyStorm group: 'org.apache.storm',
+                name: 'storm-kafka',
+             version: '0.9.2-incubating',
+          transitive: false
+    jrubyStorm group: 'org.apache.kafka',
+                name: 'kafka_2.10',
+             version: '0.8.1.+'
+
+    /* Excluding Zookeeper because storm-core is already pulling in ZK as
+     * dependency to prevent conflicts
+     */
+    jrubyStorm('org.apache.curator:curator-framework:2+') {
+        exclude module: 'zookeeper'
+    }
+}
+
+// topologies/ and bolts/ are already included by default, so we just need to
+// add a few more files to the jar file
+jrubyStorm {
+    /* Pull our code from lib/ into the root of the topology */
+    from 'lib'
+    /* Pull the code in config/ into a config/ dir in the topology */
+    into('config') { from 'config' }
+}
+
+task runLocal(type: JRubyStormLocal) {
+    description 'Run the topology in local topology mode'
+    topology 'topologies/basic_topology.rb'
+    standardInput System.in
+}

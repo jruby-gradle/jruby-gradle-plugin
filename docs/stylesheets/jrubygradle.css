@@ -1,0 +1,28 @@
+#main_nav {
+  background: #1A1A1A;
+  text-align: center;
+  padding: 4px 0;
+  font-size: 1.1em;
+}
+#main_nav ul {
+  margin: 0;
+  padding: 0;
+}
+#main_nav li {
+  display: inline;
+  margin: 0 6px;
+}
+#main_nav a {
+  color: #CCC;
+  text-decoration: none;
+}
+#main_nav a img {
+  vertical-align: middle;
+}
+#main_nav a:hover {
+  color: #EEE;
+  text-decoration: none;
+}
+#main_nav .on a {
+  color: #FFF;
+}

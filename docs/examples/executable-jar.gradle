@@ -1,0 +1,42 @@
+buildscript {
+    repositories { mavenLocal() }
+    dependencies {
+        classpath 'com.github.jruby-gradle:jruby-gradle-plugin:0.1.9'
+    }
+}
+plugins {
+  id "com.github.jruby-gradle.jar" version "0.1.2"
+  id "com.github.johnrengelman.shadow" version "1.1.2"
+}
+
+apply plugin: 'java'
+
+dependencies {
+    gems group: 'rubygems', name: 'protobuf', version: '3.0.+'
+    gems group: 'rubygems', name: 'rake', version: '10.3.+'
+}
+
+
+jrubyJavaBootstrap {
+    jruby {
+        initScript = 'bin/rake'
+    }
+}
+
+// Pull the contents of lib and bin into the root of the created jar file
+sourceSets {
+    main {
+        resources.srcDirs = ['lib', 'bin']
+    }
+}
+
+shadowJar {
+    baseName 'blick-agent'
+    exclude '*.sw*', '*.gitkeep', '*.md'
+
+    jruby {
+        // Use the default GEM installation directory
+        defaultGems()
+        defaultMainClass()
+    }
+}

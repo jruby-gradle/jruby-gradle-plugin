@@ -1,0 +1,77 @@
+buildscript {
+    repositories {
+        jcenter()
+        maven {
+            url "https://plugins.gradle.org/m2/"
+        }
+    }
+    dependencies {
+        classpath 'com.jfrog.bintray.gradle:gradle-bintray-plugin:1.2'
+        classpath 'com.netflix.nebula:gradle-extra-configurations-plugin:1.12.+'
+        classpath 'org.ysb33r.gradle:gradletest:0.5.3'
+        classpath "org.ajoberstar:gradle-git:1.2.0"
+
+        /* wow. so recursion */
+        classpath "com.github.jruby-gradle:jruby-gradle-plugin:0.4.0"
+    }
+}
+apply plugin: 'org.ajoberstar.github-pages'
+apply plugin: 'com.github.jruby-gradle.base'
+
+import com.github.jrubygradle.JRubyExec
+
+
+task generateLatestNews {
+    group 'Documentation'
+    description 'Take the latest news article and prepare it for asciidoctor'
+
+    doLast {
+        def newsItems = fileTree(dir: "${projectDir}/docs/news", include: "*.ad").collect { it }
+        copy {
+            from newsItems.last()
+            into "${projectDir}/docs/asciidoc"
+            rename "(.*).ad", "latest-news.ad"
+        }
+    }
+}
+
+repositories {
+    maven {
+        url rubygemsProxy
+    }
+}
+
+
+configurations {
+    asciidoctor
+}
+
+dependencies {
+    asciidoctor('rubygems:awestruct:0.5.5')
+
+    /* later versions of 1.6.x have a dependency incompatibility with
+     * mime-types 2.x
+     */
+    asciidoctor('rubygems:rest-client:1.6.7') { force = true }
+}
+
+task assembleDocs(type: JRubyExec) {
+    jrubyArgs '-S'
+    script 'awestruct'
+    scriptArgs "--generate", "--verbose",
+                "--output-dir", "${buildDir}/_site"
+    configuration = 'asciidoctor'
+}
+
+
+githubPages {
+    repoUri = 'git@github.com:jruby-gradle/jruby-gradle.github.io'
+    targetBranch = 'master'
+    pages {
+        from rootProject.subprojects.collect { ":${it.name}:groovydoc" }
+        from "${buildDir}/_site"
+        from '../CNAME'
+    }
+}
+publishGhPages.dependsOn rootProject.subprojects.collect { ":${it.name}:groovydoc" }
+publishGhPages.dependsOn assembleDocs

@@ -1,0 +1,27 @@
+= JRuby Gradle Cookbook
+
+== Running RSpec
+
+[source,gradle]
+.build.gradle
+----
+include::examples/rspec.gradle[]
+----
+
+== Building an executable .jar file
+
+[source,gradle]
+.build.gradle
+----
+include::examples/executable-jar.gradle[]
+----
+
+== Creating a .war file
+
+[source,gradle]
+.build.gradle
+----
+include::examples/building-wars.gradle[]
+----
+
+// vim: ft=asciidoc

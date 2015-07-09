@@ -1,0 +1,28 @@
+%html
+  %head
+    %link(href='stylesheets/foundation.css'  rel='stylesheet')
+    %link(href='stylesheets/jrubygradle.css'  rel='stylesheet')
+    %title
+      = page.title
+  %body
+    %div#main_nav
+      %ul
+        %li
+          %a(href='index.html')
+            Home
+        %li
+          %a(href='docs.html')
+            Documentation
+        %li
+          %a(href='community.html')
+            Community
+        %li
+          %a(href='news.html')
+            News
+    %h1
+      = page.title
+
+    = content
+
+
+    %hr/

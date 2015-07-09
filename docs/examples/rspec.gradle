@@ -1,0 +1,25 @@
+/* Add the JRuby Gradle "base" plugin as a dependency of our build script */
+buildscript {
+    repositories { jcenter() }
+    dependencies {
+        classpath 'com.github.jruby-gradle:jruby-gradle-plugin:0.1.9'
+    }
+}
+
+/*
+ * Importing the JRubyExec type class so we can create our own JRubyExec-based
+ * task below
+ */
+import com.github.jrubygradle.JRubyExec
+
+dependencies {
+    /* We need RSpec gems from rubygems.org to run RSpec */
+    jrubyExec group: 'rubygems', name: 'rspec', version: '3.1.+'
+}
+
+task spec(type: JRubyExec) {
+    group 'JRuby'
+    description 'Execute the RSpecs in JRuby'
+    jrubyArgs '-S'
+    script 'rspec'
+}

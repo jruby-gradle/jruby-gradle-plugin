@@ -1,0 +1,22 @@
+= JRuby/Gradle
+:page-layout: base
+
+== About
+
+link:https://github.com/jruby-gradle/[JRuby/Gradle] is a collection of
+link:http://www.gradle.org[Gradle] plugins which make it easy to build, test,
+manage and package Ruby applications. By compbining the portability of
+link:http://jruby.org[JRuby] with Gradle's excellent task and dependency
+management functionality, JRuby/Gradle provides high quality build tooling for
+Ruby and Java developers alike.
+
+== Quick Start
+
+
+=== Running some Ruby
+
+
+=== Packaging some Ruby
+
+
+

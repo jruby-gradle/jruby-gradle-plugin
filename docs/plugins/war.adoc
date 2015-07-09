@@ -1,0 +1,4 @@
+= The War Plugin
+
+
+// vim: ft=asciidoc

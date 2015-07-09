@@ -1,0 +1,25 @@
+/* Add the JRuby Gradle "war" plugin as a dependency of our build script */
+buildscript {
+    repositories { jcenter() }
+
+    dependencies {
+        classpath 'com.github.jruby-gradle:jruby-gradle-war-plugin:0.1.5'
+    }
+}
+
+apply plugin: 'com.github.jruby-gradle.war'
+
+dependencies {
+    /* Enumerate some dependencies that will get pulled into the .war */
+    gems 'rubygems:colorize:0.7.3'
+    gems 'rubygems:sinatra:1.4.5'
+}
+
+jrubyWar {
+    webInf {
+        /* Include our app inside of `my.war/WEB-INF` */
+        from 'app.rb'
+        /* Include the config.ru to boot the app properly */
+        from 'config.ru'
+    }
+}

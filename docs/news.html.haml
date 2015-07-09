@@ -1,0 +1,13 @@
+---
+layout: base
+title: "JRuby/Gradle News"
+---
+
+- for post in site.posts
+  .post
+    %h1 
+      %a{:href=>post.url}= post.title
+    %h2 
+      = post.date.strftime( '%d %B %Y' )
+    .content
+      = post.content

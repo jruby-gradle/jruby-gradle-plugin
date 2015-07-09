@@ -29,7 +29,7 @@ dependencies {
 
 repositories {
     mavenLocal()
-    maven { url 'http://rubygems.lasagna.io/proxy/maven/releases' }
+    maven { url rubygemsProxy }
 }
 
 dependencies {
