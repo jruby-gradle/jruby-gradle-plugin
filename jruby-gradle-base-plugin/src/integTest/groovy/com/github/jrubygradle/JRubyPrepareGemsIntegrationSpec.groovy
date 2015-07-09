@@ -31,8 +31,7 @@ class JRubyPrepareGemsIntegrationSpec extends Specification {
     def "Check that default 'jrubyPrepareGems' uses the correct directory"() {
         given:
             def project=BasicProjectBuilder.buildWithLocalRepo(TESTROOT,FLATREPO,CACHEDIR)
-            def prepTask = project.task(TASK_NAME, type: JRubyPrepareGems)
-            def jrpg = project.tasks.jrubyPrepareGems
+            def jrpg = project.tasks.jrubyPrepare
             project.jruby.gemInstallDir = TESTROOT.absolutePath
 
             project.dependencies {
@@ -50,8 +49,7 @@ class JRubyPrepareGemsIntegrationSpec extends Specification {
         given:
             def root= new File(TESTROOT, "rack-resolve")
             def project = BasicProjectBuilder.buildWithStdRepo(root,CACHEDIR)
-            def prepTask = project.task(TASK_NAME, type: JRubyPrepareGems)
-            def jrpg = project.tasks.jrubyPrepareGems
+            def jrpg = project.tasks.jrubyPrepare
             project.jruby.gemInstallDir = root.absolutePath
 
             project.dependencies {

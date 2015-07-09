@@ -22,6 +22,11 @@ import org.gradle.api.tasks.TaskAction
 @Deprecated
 class JRubyPrepareJars  extends DefaultTask {
 
+    JRubyPrepareJars () {
+        super()
+        project.logger.info "The 'JRubyPrepareJars' task type is deprecated and will be removed in a future version. Please use 'JRubyPrepare' tasl type instead."
+    }
+
     /** Target directory for JARs {@code outputDir + "/jars"}
      */
     @OutputDirectory

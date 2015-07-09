@@ -31,7 +31,7 @@ class JRubyPluginTest {
 
     @Test
     public void jrubyPluginAddsGemTasks() {
-        assertTrue(project.tasks.jrubyPrepareGems instanceof JRubyPrepareGems)
+        assertTrue(project.tasks.jrubyPrepareGems != null)
     }
 
     @Test

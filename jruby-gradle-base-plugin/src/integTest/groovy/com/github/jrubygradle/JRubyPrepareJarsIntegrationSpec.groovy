@@ -27,11 +27,10 @@ class JRubyPrepareJarsIntegrationSpec extends Specification {
         TESTROOT.mkdirs()
     }
 
-    def "Check that default 'jrubyPrepareJars' uses the correct directory"() {
+    def "Check that default 'jrubyPrepare' uses the correct directory for the jars"() {
         given:
             def project=BasicProjectBuilder.buildWithLocalRepo(TESTROOT,FLATREPO,CACHEDIR)
-            def prepTask = project.task(TASK_NAME, type: JRubyPrepareGems)
-            def jrpg = project.tasks.jrubyPrepareGems
+            def jrpg = project.tasks.jrubyPrepare
             project.jruby.gemInstallDir = TESTROOT.absolutePath
 
             project.dependencies {
