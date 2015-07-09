@@ -1,5 +1,3 @@
-apply plugin: 'org.ysb33r.gradletest'
-
 group = rootProject.group
 version = rootProject.version
 archivesBaseName = 'jruby-gradle-plugin'
