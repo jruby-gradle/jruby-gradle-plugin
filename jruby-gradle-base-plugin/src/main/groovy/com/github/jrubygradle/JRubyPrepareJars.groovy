@@ -19,7 +19,7 @@ import org.gradle.api.tasks.TaskAction
  * @author R Tyler Croy
  * @author Christian Meier
  */
-@Incubating
+@Deprecated
 class JRubyPrepareJars  extends DefaultTask {
 
     /** Target directory for JARs {@code outputDir + "/jars"}
@@ -38,41 +38,6 @@ class JRubyPrepareJars  extends DefaultTask {
 
     @TaskAction
     void copy() {
-        def artifacts = project.configurations.gems.resolvedConfiguration.resolvedArtifacts
-        def fileRenameMap = [:]
-        def coordinates = []
-        def files = []
-        artifacts.each { dep ->
-
-            def group = dep.moduleVersion.id.group
-            def groupAsPath = group.replace('.' as char, File.separatorChar)
-            def version = dep.moduleVersion.id.version
-            // TODO classifier
-            def newFileName = "${groupAsPath}/${dep.name}/${version}/${dep.name}-${version}.${dep.type}"
-
-            if (group != 'rubygems' ) {
-                // TODO classifier and system-scope
-                coordinates << "${group}:${dep.name}:${version}:runtime:"
-            }
-            fileRenameMap[dep.file.name] = newFileName
-            // TODO omit system-scoped files
-            files << dep.file
-        }
-
-        // create Jars.lock file used by jar-dependencies
-        def jarsLock = new File(outputDir, 'Jars.lock')
-        jarsLock.parentFile.mkdirs()
-        jarsLock.withWriter { writer ->
-            coordinates.each { writer.println it }
-        }
-
-        // TODO use synch but need a different place to create the Jars.lock
-        project.copy {
-            from files
-            include '**/*.jar'
-            exclude '**/jruby-complete*.jar'
-            rename { oldName -> fileRenameMap[oldName] }
-            into(outputDir)
-        }
+        project.logger.info 'Obsolete tasks - does nothing anymore.' 
     }
 }

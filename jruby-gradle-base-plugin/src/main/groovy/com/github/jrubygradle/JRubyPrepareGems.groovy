@@ -3,6 +3,7 @@ package com.github.jrubygradle
 import com.github.jrubygradle.internal.JRubyExecUtils
 import org.gradle.api.DefaultTask
 import org.gradle.api.Project
+import org.gradle.api.artifacts.Configuration
 import org.gradle.api.file.FileCollection
 import org.gradle.api.tasks.InputFiles
 import org.gradle.api.tasks.OutputDirectory
@@ -48,6 +49,14 @@ class JRubyPrepareGems  extends DefaultTask {
     void copy() {
         File jrubyJar = JRubyExecUtils.jrubyJar(project.configurations.getByName(JRubyExec.JRUBYEXEC_CONFIG))
         GemUtils.extractGems(project, jrubyJar, getGems(), outputDir, GemUtils.OverwriteAction.SKIP)
+        
+        if (gems != null) {
+            gems.each {
+                if (it instanceof Configuration) {
+                    GemUtils.setupJars(it, outputDir, GemUtils.OverwriteAction.SKIP)
+                }
+            }
+        }
     }
 
     private List<Object> gems

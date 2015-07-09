@@ -42,23 +42,23 @@ class JRubyPlugin implements Plugin<Project> {
         }
 
         project.task('jrubyPrepareGems', type: JRubyPrepareGems) {
+            logger.info 'Deprecated use "jrubyPrepare" instead.'
             group TASK_GROUP_NAME
-            description 'Prepare the gems from the `gem` dependencies, extracts into jruby.installGemDir'
+            description 'Prepare the gems/jars from the `gem` dependencies, extracts the gems into jruby.installGemDir and sets up the jars in jruby.installGemDir/jars'
             gems project.configurations.gems
             outputDir project.jruby.gemInstallDir
         }
 
         project.task('jrubyPrepareJars', type: JRubyPrepareJars) {
-            group TASK_GROUP_NAME
-            description 'Prepare the jar dependencies from the `gem` dependencies, collect them into '
-            outputDir project.jruby.jarInstallDir
+            logger.info 'Obsolete tasks - does nothing anymore.'
+            outputDir project.jruby.gemInstallDir
         }
 
-        project.task('jrubyPrepare') {
+        project.task('jrubyPrepare', type: JRubyPrepareGems) {
             group TASK_GROUP_NAME
-            description 'Pre-cache and prepare all dependencies (jars and gems)'
-            dependsOn project.tasks.jrubyPrepareGems
-            dependsOn project.tasks.jrubyPrepareJars
+            description 'Prepare the gems from the `gem` dependencies, extracts into jruby.installGemDir'
+            gems project.configurations.gems
+            outputDir project.jruby.gemInstallDir
         }
 
         project.task('jrubyGenerateGradleRb', type: GenerateGradleRb) {
