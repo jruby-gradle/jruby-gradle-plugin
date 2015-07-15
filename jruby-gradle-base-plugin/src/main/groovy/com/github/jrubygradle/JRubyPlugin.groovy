@@ -12,7 +12,7 @@ import org.gradle.api.tasks.bundling.War
 class JRubyPlugin implements Plugin<Project> {
     static final String TASK_GROUP_NAME = 'JRuby'
 
-    static final String RUBYGEMS_RELEASE_URL = 'http://rubygems-proxy.torquebox.org/releases'
+    static final String RUBYGEMS_RELEASE_URL = 'http://rubygems.lasagna.io/proxy/maven/releases'
 
     void apply(Project project) {
         // REMOVE: project.apply plugin: 'java'

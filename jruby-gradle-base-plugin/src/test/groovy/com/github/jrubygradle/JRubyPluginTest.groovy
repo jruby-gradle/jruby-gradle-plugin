@@ -37,7 +37,7 @@ class JRubyPluginTest {
     @Test
     public void jrubyPluginSetsRepositoriesCorrectly() {
         project.evaluate()
-        assertTrue(hasRepositoryUrl(project, 'http://rubygems-proxy.torquebox.org/releases'))
+        assertTrue(hasRepositoryUrl(project, 'http://rubygems.lasagna.io/proxy/maven/releases'))
     }
 
     @Test
@@ -53,7 +53,7 @@ class JRubyPluginTest {
         project.evaluate()
         assertTrue project.repositories.metaClass.respondsTo(project.repositories,'rubygemsRelease') != null
         def repo = project.repositories.rubygemsRelease()
-        assertTrue(hasRepositoryUrl(project, 'http://rubygems-proxy.torquebox.org/releases'))
+        assertTrue(hasRepositoryUrl(project, 'http://rubygems.lasagna.io/proxy/maven/releases'))
     }
 
     //
