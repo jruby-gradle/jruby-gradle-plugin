@@ -1,0 +1,95 @@
+group = rootProject.group
+version = rootProject.version
+
+
+configurations {
+    testRepo
+}
+
+repositories {
+    mavenLocal()
+    maven { url 'http://rubygems.lasagna.io/proxy/maven/releases' }
+}
+
+dependencies {
+    compile project(':jruby-gradle-base-plugin')
+
+    testCompile ("org.spockframework:spock-core:0.7-groovy-${gradle.gradleVersion.startsWith('1.')?'1.8':'2.0'}") {
+        exclude module : 'groovy-all'
+    }
+
+    // For the testRepo tests I am locking the versions, instead of a open version, as it makes
+    // unit testing easier, This does not affect the final artifact.
+    // If you change values here, you need to update JRubyJarPluginSpec as well.
+    testRepo ("org.jruby:jruby-complete:${jrubyVersion}") {
+        transitive = false
+    }
+    testRepo ('rubygems:rspec:3.3.0') {
+        transitive = true
+    }
+    testRepo ("org.spockframework:spock-core:0.7-groovy-2.0") {
+        transitive = false
+    }
+}
+
+ext {
+    testRepoDir = new File(buildDir,'tmp/test/repo' )
+}
+
+test {
+    doFirst {
+        copy {
+            from project.configurations.testRepo.files
+            into testRepoDir
+        }
+    }
+
+    if(gradle.startParameter.isOffline()) {
+        systemProperties 'TESTS_ARE_OFFLINE' : '1'
+    }
+
+    systemProperties TESTROOT : new File(buildDir,'tmp/test/unittests').absolutePath
+    systemProperties TESTREPO_LOCATION : testRepoDir.absolutePath
+    systemProperties 'logback.configurationFile' : new File(projectDir,'src/test/resources/logback-test.xml').absolutePath
+}
+
+
+groovydoc {
+    docTitle = "${archivesBaseName} ${version}"
+}
+
+task installGroovyDoc (type : Copy) {
+    from ({new File(buildDir,'docs/groovydoc')}) {
+        include '**'
+    }
+    into {new File(project.properties.jrubyGradleWebsiteInstallDir,"docs/api/${archivesBaseName}/${version}")}
+    onlyIf { project.hasProperty('jrubyGradleWebsiteInstallDir') }
+}
+
+
+bintray {
+    user = project.bintrayUser
+    key = project.bintrayKey
+    publish = true
+    dryRun = false
+    configurations = ['archives']
+
+    pkg {
+        userOrg = 'jruby-gradle'
+        repo = 'plugins'
+        name = 'jruby-gradle-rspec-plugin'
+        labels = ['jruby']
+
+        version {
+            name = project.version
+            vcsTag = "v${project.version}"
+            attributes = ['gradle-plugin' : 'com.github.jruby-gradle.rspec:com.github.jruby-gradle:jruby-gradle-jar-plugin']
+            desc = 'This plugin encapsulates rspec gem functionality for JRuby Gradle projects'
+
+        }
+    }
+}
+
+bintrayUpload.dependsOn assemble
+
+// vim: ft=groovy
