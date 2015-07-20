@@ -1,4 +1,4 @@
-# JRuby Gradle plugin
+= JRuby/Gradle plugin
 
 [![Build Status](https://travis-ci.org/jruby-gradle/jruby-gradle-plugin.svg?branch=master)](https://travis-ci.org/jruby-gradle/jruby-gradle-plugin) [ ![Download](https://api.bintray.com/packages/jruby-gradle/plugins/jruby-gradle-plugin/images/download.png) ](https://bintray.com/jruby-gradle/plugins/jruby-gradle-plugin/_latestVersion) [![Gitter chat](https://badges.gitter.im/jruby-gradle/jruby-gradle-plugin.png)](https://gitter.im/jruby-gradle/jruby-gradle-plugin)
 
@@ -10,24 +10,23 @@ functionality for JRuby projects. Use of this plugin replaces the need for both
 in JRuby projects.
 
 
-The Ruby gem dependency code for this project relies on the [Rubygems Maven
-proxy](http://rubygems-proxy.torquebox.org/) provided by the
-[Torquebox](http://torquebox.org) project.
-
-This is the base plugin. If you are interesting in doing the following then consult the pages for the appropriate
-plugins:
-
-* Building JRuby-based Java JARs, including making them executable - 
-[jruby-gradle-jar-plugin](http://github.com/jruby-gradle/jruby-gradle-jar-plugin)
-* Building JRuby-based Java Web Applications (WARs),  - 
-[jruby-gradle-war-plugin](http://github.com/jruby-gradle/jruby-gradle-war-plugin)
+The Ruby gem dependency code for this project relies on the link::http://rubygems.lasagna.io/proxy/releases[Rubygems Maven
+proxy] operated by link::https://github.com/rtyler[R. Tyler Croy]
 
 
-## Compatilibity
+This repository contains the:
+
+* `base` (in `jruby-gradle-base-plugin/`): dependency resolution, executing Ruby, etc.
+* `jar` (in `jruby-gradle-jar-plugin/`):  packaging JRuby-based `.jar` files
+* `war` (in `jruby-gradle-war-plugin/`): packaging JRuby-based `.war` files
+
+
+
+== Compatilibity
 
 This plugin requires Gradle 2.0 or better
 
-## Getting Started
+== Getting Started
 
 ```groovy
 buildscript {
@@ -41,7 +40,7 @@ buildscript {
 apply plugin: 'com.github.jruby-gradle.base'
 ```
 
-### Adding gems
+=== Adding gems
 
 You can also add Ruby gem dependencies in your `build.gradle` file under the
 `gem` configuration, e.g.:
@@ -53,16 +52,15 @@ dependencies {
 }
 ```
 
-## Default Tasks
+== Default Tasks
 
-The plugin provides the following tasks:
+The base plugin provides the following tasks:
 
- * `jrubyPrepareGems` - Extract GEMs declared as dependencies under `gems` to `jruby.gemInstallDir`. This is as instance
- of `JRubyPrepareGems`.
- * `jrubyPrepare` - Call `jrubyPrepareGems`. Also copies the
-   content of Java-based dependencies into `.jarcache/` for interpreted use
+* `jrubyPrepare` - Prepares the necessary `.gem` and `.jar` dependencies for
+  future use
 
-## JRubyExec - Task for Executing a Ruby Script 
+
+== JRubyExec - Task for Executing a Ruby Script 
 
 In a similar vein to ```JavaExec``` and ```RhinoShellExec```, the ```JRubyExec``` allows for Ruby scripts to be executed
 in a Gradle script using JRuby.
@@ -113,7 +111,7 @@ Additional ```JRubyExec``` methods for controlling the JVM instance
 * ```copyTo``` - ```JavaForkOptions```. See [copyTo](http://www.gradle.org/docs/current/dsl/org.gradle.api.tasks.JavaExec.html)
 * ```executable``` - ```Object``` (Usually ```File``` or ```String```). See [executable](http://www.gradle.org/docs/current/dsl/org.gradle.api.tasks.JavaExec.html#org.gradle.api.tasks.JavaExec:executable)
 
-## jrubyexec extension
+=== jrubyexec extension
 
 Similar to ```javaexec``` and ```exec``` it is possible to add the execution of a jruby script within another task
 
@@ -166,14 +164,14 @@ ext {
 }
 ```
  
-## JRubyPrepareGems - A task for unpacking GEMs
+== JRubyPrepare - A task for unpacking Gems
 
 Unpacking occurs using the default `jruby` version as set by `jruby.execVersion`.
 
 ```groovy
-import com.github.jrubygradle.JRubyPrepareGems
+import com.github.jrubygradle.JRubyPrepare
 
-task unpackMyGems( type : JRubyPrepareGems ) {
+task unpackMyGems( type : JRubyPrepare ) {
 
   // Parent directory for unpacking GEMs.
   // Gems will end up in a subdirectory 'gems/GemName-GemVersion'
@@ -187,9 +185,9 @@ task unpackMyGems( type : JRubyPrepareGems ) {
 ```
 
 
-## Advanced Usage
+== Advanced Usage
 
-### Using a custom Gem repository
+=== Using a custom Gem repository
 
 By default the jruby plugin will use
 [rubygems-proxy.torquebox.org](http://rubygems-proxy.torquebox.org) as its
@@ -217,7 +215,7 @@ dependencies {
 }
 ```
 
-## Using the Ruby interpreter
+== Using the Ruby interpreter
 
 There are still plenty of cases, such as for local development, when you might
 not want to create a full `.war` file to run some tests. In order to use the
