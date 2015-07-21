@@ -1,4 +1,6 @@
 
+image:https://travis-ci.org/jruby-gradle/jruby-gradle-plugin.svg?branch=master["Build Status", link="https://travis-ci.org/jruby-gradle/jruby-gradle-plugin"]
+image::https://api.bintray.com/packages/jruby-gradle/plugins/jruby-gradle-plugin/images/download.svg[link="https://bintray.com/jruby-gradle/plugins/jruby-gradle-plugin/_latestVersion"]
 
+== Tasks
 
-wooot
