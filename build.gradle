@@ -57,7 +57,7 @@ subprojects {
 
 task release(type: Exec) {
     description 'Create and upload a release'
-    dependsOn subprojects.collect { ":${it.name}:bintrayUpload" }
+    dependsOn subprojects.collect { ":${it.name}:bintrayUpload" }, 'docs:publishGhPages'
     commandLine 'git', 'tag', "v${project.version}"
 }
 
