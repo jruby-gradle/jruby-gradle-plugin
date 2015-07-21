@@ -59,7 +59,7 @@ task prepareGroovyDocs(type: Copy) {
     dependsOn rootProject.subprojects.collect { ":${it.name}:groovydoc" }
 }
 
-task assembleDocs(type: JRubyExec) {
+task compileAsciidoc(type: JRubyExec) {
     jrubyArgs '-S'
     script 'awestruct'
     scriptArgs "--generate", "--verbose",
@@ -68,7 +68,10 @@ task assembleDocs(type: JRubyExec) {
     /* without the --force option, awestruct is not smart enough to regenerate
      * files based on includes */
     configuration = 'asciidoctor'
-    dependsOn prepareGroovyDocs
+}
+
+task assembleDocs {
+    dependsOn compileAsciidoc, prepareGroovyDocs
 }
 
 githubPages {
@@ -76,7 +79,7 @@ githubPages {
     targetBranch = 'master'
     pages {
         from "${buildDir}/_site"
-        from '../CNAME'
+        from "${rootProject.projectDir}/CNAME"
     }
 }
 publishGhPages.dependsOn assembleDocs
