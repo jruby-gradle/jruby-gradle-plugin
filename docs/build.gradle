@@ -63,7 +63,10 @@ task assembleDocs(type: JRubyExec) {
     jrubyArgs '-S'
     script 'awestruct'
     scriptArgs "--generate", "--verbose",
-                "--output-dir", "${buildDir}/_site"
+                "--output-dir", "${buildDir}/_site",
+                '--force'
+    /* without the --force option, awestruct is not smart enough to regenerate
+     * files based on includes */
     configuration = 'asciidoctor'
     dependsOn prepareGroovyDocs
 }
