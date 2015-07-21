@@ -1,3 +1,4 @@
+base_url: http://jruby-gradle.org/
 local_tz: UTC
 haml:
   :ugly: true
