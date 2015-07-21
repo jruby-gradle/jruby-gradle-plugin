@@ -1,0 +1,9 @@
+= JRuby/Gradle API Documentation
+:page-layout: base
+
+== Groovydoc
+
+ * link:jruby-gradle-base-plugin/index.html[jruby-gradle-base-plugin]
+ * link:jruby-gradle-jar-plugin/index.html[jruby-gradle-jar-plugin]
+ * link:jruby-gradle-war-plugin/index.html[jruby-gradle-war-plugin]
+
