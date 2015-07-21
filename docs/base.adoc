@@ -1,0 +1,5 @@
+= Base plugin
+:page-layout: base
+:toc: right
+
+include::./../jruby-gradle-base-plugin/README.adoc[]
