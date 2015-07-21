@@ -55,23 +55,35 @@ dependencies {
     asciidoctor('rubygems:rest-client:1.6.7') { force = true }
 }
 
+task prepareGroovyDocs(type: Copy) {
+    description "Copy Groovydocs into our site directory for deploybment/publication"
+    into "${buildDir}/_site"
+
+    rootProject.subprojects.each {
+        def task = it.tasks.findByName('groovydoc')
+
+        if ((task) && (task.outputs.files)) {
+            into(it.name) { from task.outputs.files }
+        }
+    }
+    dependsOn rootProject.subprojects.collect { ":${it.name}:groovydoc" }
+}
+
 task assembleDocs(type: JRubyExec) {
     jrubyArgs '-S'
     script 'awestruct'
     scriptArgs "--generate", "--verbose",
                 "--output-dir", "${buildDir}/_site"
     configuration = 'asciidoctor'
+    dependsOn prepareGroovyDocs
 }
-
 
 githubPages {
     repoUri = 'git@github.com:jruby-gradle/jruby-gradle.github.io'
     targetBranch = 'master'
     pages {
-        from rootProject.subprojects.collect { ":${it.name}:groovydoc" }
         from "${buildDir}/_site"
         from '../CNAME'
     }
 }
-publishGhPages.dependsOn rootProject.subprojects.collect { ":${it.name}:groovydoc" }
 publishGhPages.dependsOn assembleDocs
