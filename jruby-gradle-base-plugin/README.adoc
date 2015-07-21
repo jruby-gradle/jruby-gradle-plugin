@@ -1,8 +1,242 @@
-:toc: right
-
 image::https://travis-ci.org/jruby-gradle/jruby-gradle-plugin.svg?branch=master["Build Status", link="https://travis-ci.org/jruby-gradle/jruby-gradle-plugin"]
 
 image::https://api.bintray.com/packages/jruby-gradle/plugins/jruby-gradle-plugin/images/download.svg[link="https://bintray.com/jruby-gradle/plugins/jruby-gradle-plugin/_latestVersion"]
 
+
+== Getting Started
+
+=== Compatibility
+
+This plugin requires link::http://gradle.org[Gradle] 2.0 or better
+
+
+=== Installing
+
+.build.gradle
+[source, groovy]
+----
+buildscript {
+    repositories { jcenter() }
+
+    dependencies {
+        /* check jruby-gradle.org for the latest release */
+        classpath "com.github.jruby-gradle:jruby-gradle-plugin:0.4.0"
+    }
+}
+
+apply plugin: 'com.github.jruby-gradle.base'
+----
+
+=== Adding gems
+
+You can also add Ruby gem dependencies in your `build.gradle` file under the
+`gems` link::https://docs.gradle.org/current/dsl/org.gradle.api.artifacts.Configuration.html[configuration] which is provided by plugin, e.g.:
+
+.build.gradle
+[source, groovy]
+----
+dependencies {
+    gems group: 'rubygems', name: 'sinatra', version: '1.4.5'
+    gems group: 'rubygems', name: 'rake', version: '10.3.+'
+}
+----
+
+NOTE: This functionality currently relies on a deployed version of the
+link::https://github.com/torquebox/rubygems-servlets[rubygems-servlets]
+software to help proxy a Rubygem repository into a Maven repository format.
+This ensures that Gradle can resolve gem-based dependencies. _Currently_ the
+plugin release on link::http://rubygems.lasagna.io/proxy/maven/releases[a
+Rubygems Maven proxy] operated by link::https://github.com/rtyler[R. Tyler
+Croy]
+
 == Tasks
 
+=== JRubyExec
+
+link:/groovydoc/jruby-gradle-base-plugin/com/github/jrubygradle/JRubyExec.html[API docs]
+
+In a similar vein to `JavaExec` and `RhinoShellExec`, the `JRubyExec` allows
+for Ruby scripts to be executed in a Gradle script using JRuby.
+
+.build.gradle
+[source, groovy]
+----
+import com.github.jrubygradle.JRubyExec
+
+dependencies {
+    jrubyExec 'rubygems:credit_card_validator:1.2.0'
+}
+
+task runMyScript( type: JRubyExec ) {
+    script 'scripts/runme.rb'
+    scriptArgs '-x', '-y'
+}
+----
+
+Common methods for `JRubyExec` for executing a script
+
+* `script` - `Object` (Usually File or String). Path to the script.
+* `scriptArgs` - `List`.  List of arguments to pass to script.
+* `workingDir` - `Object` (Usually File or String).  Working directory for script.
+* `environment` - `Map`.  Environment to be set. Do not set `GEM_HOME` or `GEM_PATH` with this method.
+* `standardInput` - `InputStream`.  Set an input stream to be read by the script.
+* `standardOutput` - `OutputStream`.  Capture the output of the script.
+* `errorOutput` - `OutputStream`.  Capture the error output of the script.
+* `ignoreExitValue` - `Boolean`.  Ignore the JVm exit value. Exit values are only effective if the exit value of the Ruby script is correctly communicated back to the JVM.
+* `configuration` - `String`.  Configuration to copy gems from. (*) 
+* `classpath` - `List`.  Additional Jars/Directories to place on classpath.
+* `jrubyVersion` - `String`.  JRuby version to use if not the same as ```project.jruby.execVersion```.
+* `gemWorkDir` - `File`. Provide a custom working directory for unpacking GEMs. By default each `JRubyExec` task
+  uses it's own work directory. Use this to set a common work directory for a number of tasks.
+
+(*) If `jRubyVersion` has not been set, `jrubyExec` will used as
+configuration. However, if `jRubyVersion` has been set, no gems will be used unless an explicit configuration has been provided
+
+Additional `JRubyExec` methods for controlling the JVM instance
+
+* `jvmArgs` - `List`. See link::http://www.gradle.org/docs/current/dsl/org.gradle.api.tasks.JavaExec.html#org.gradle.api.tasks.JavaExec:jvmArgs[jvmArgs]
+* `allJvmArgs` - `List`. See link::http://www.gradle.org/docs/current/dsl/org.gradle.api.tasks.JavaExec.html#org.gradle.api.tasks.JavaExec:allJvmArgs[allJvmArgs]
+* `systemProperties` - `Map`. See link::http://www.gradle.org/docs/current/dsl/org.gradle.api.tasks.JavaExec.html#org.gradle.api.tasks.JavaExec:systemProperties[systemProperties]
+* `bootstrapClassPath` - `FileCollection` or `List`. See link::http://www.gradle.org/docs/current/dsl/org.gradle.api.tasks.JavaExec.html#org.gradle.api.tasks.JavaExec:bootstrapClasspath[bootstrapClasspath]
+* `minHeapSize` - `String`. See link::http://www.gradle.org/docs/current/dsl/org.gradle.api.tasks.JavaExec.html:minHeapSize[minHeapSize]
+* `maxHeapSize` - `String`. See link::http://www.gradle.org/docs/current/dsl/org.gradle.api.tasks.JavaExec.html#org.gradle.api.tasks.JavaExec:maxHeapSize[maxHeapSize]
+* `defaultCharacterEncoding` - `String`. See link::http://www.gradle.org/docs/current/dsl/org.gradle.api.tasks.JavaExec.html:defaultCharacterEncoding[defaultCharacterEncoding]
+* `enableAssertions` - `Boolean`. See link::http://www.gradle.org/docs/current/dsl/org.gradle.api.tasks.JavaExec.html#org.gradle.api.tasks.JavaExec:enableAssertions[enableAssertions]
+* `debug` - `Boolean`. See link::http://www.gradle.org/docs/current/dsl/org.gradle.api.tasks.JavaExec.html#org.gradle.api.tasks.JavaExec:debug[debug]
+* `copyTo` - `JavaForkOptions`. See link::http://www.gradle.org/docs/current/dsl/org.gradle.api.tasks.JavaExec.html:copyTo[copyTo]
+* `executable` - `Object` (Usually `File` or `String`). See link::http://www.gradle.org/docs/current/dsl/org.gradle.api.tasks.JavaExec.html#org.gradle.api.tasks.JavaExec:executable[executable]
+
+==== jrubyexec extension
+
+Similar to `javaexec` and `exec` it is possible to add the execution of a jruby script within another task
+
+.build.gradle
+[source,gradle]
+----
+task needSomeRubyLove {
+  jrubyexec {
+    script 'scripts/runme.rb'
+    scriptArgs '-x', '-y'  
+  }
+}
+----
+
+The behaviour of `project.jrubyexec` is slightly different to that of `JRubyExec`.
+
+* The version of `jruby-complete` is strictly tied to the `jruby.execVersion`. Therefore trying to set `jrubyVersion`
+in the ```jrubyexec``` closure will cause a failure
+* GEMs and additional JARs are only taken from the `jrubyExec` configuration. 
+* It is not possible to supply a `configuration` parameter to the `jrubyexec` closure.
+* GEMs will be installed to `jruby.gemInstallDir`. Existing gems will not be overwritten.
+
+As with `JRubyExec`, `args`, `setArgs` and `main` are illegal within the `jrubyexec` closure.
+All other methods should work.
+
+### Running a Ruby PATH command
+
+Because `JRubyExec` checks for the existence of the script, it might look at first whether running Ruby commands from
+`PATH` could be difficult. However, this is totally possible by utilising `jrubyArgs` and passing `-S` as one would do
+ when using `ruby` or `jruby` on the command-line. Here is an example of running 
+`rake` as task.
+
+.build.gradle
+[source,gradle]
+----
+task rake( type : JRubyExec ) {
+    jrubyArgs '-S' 
+    script 'rake'
+    scriptArgs '/path/to/Rakefile', 'target1', 'target2'
+}
+----
+
+or even
+
+.build.gradle
+[source,gradle]
+----
+ext {
+    rake = { String target ->
+        jrubyexec {
+            jrubyArgs '-S' 
+            script 'rake'
+            scriptArgs '/path/to/Rakefile', target            
+        }
+    }
+}
+----
+ 
+== JRubyPrepare
+
+link:/groovydoc/jruby-gradle-base-plugin/com/github/jrubygradle/JRubyPrepare.html[API docs]
+
+Unpacking occurs using the default `jruby` version as set by `jruby.execVersion`.
+
+.build.gradle
+[source,gradle]
+----
+import com.github.jrubygradle.JRubyPrepare
+
+task unpackMyGems( type : JRubyPrepare ) {
+
+  // Parent directory for unpacking GEMs.
+  // Gems will end up in a subdirectory 'gems/GemName-GemVersion'
+  outputDir buildDir
+  
+  // Add one or more gems
+  // Can be String(s), File(s), FileCollection(s) or Configuration(s)
+  gems project.configuration.gems
+}
+----
+
+
+== Advanced Usage
+
+=== Using a custom Gem repository
+
+By default the jruby plugin will use
+[rubygems-proxy.torquebox.org](http://rubygems-proxy.torquebox.org) as its
+source of Ruby gems. This is a server operated by the Torquebox project which
+presents [rubygems.org](https://rubygems.org) as a Maven repository.
+
+If you **do not** wish to use this repository, you can run your own Maven
+proxy repository for either rubygems.org or your own gem repository by
+running the [rubygems-servlets](https://github.com/torquebox/rubygems-servlets)
+server.
+
+You can then use that custom Gem repository with:
+
+.build.gradle
+[source,gradle]
+----
+jruby {
+    defaultRepositories = false
+}
+
+repositories {
+    maven { url 'http://localhost:8989/releases' }
+}
+
+dependencies {
+    gems group: 'com.lookout', name: 'custom-gem', version: '1.0.+'
+}
+----
+
+=== Using the JRuby/Gradle without Gradle
+
+There are still plenty of cases, such as for local development, when you might
+not want to create a full `.war` file to run some tests. In order to use the
+same gems and `.jar` based dependencies, add the following to the entry point
+for your application:
+
+[source,ruby]
+----
+# Hack our GEM_HOME to make sure that the `rubygems` support can find our
+# unpacked gems in build/gems/
+vendored_gems = File.expand_path(File.dirname(__FILE__) + '/build/gems')
+if File.exists?(vendored_gems)
+  ENV['GEM_HOME'] = vendored_gems
+end
+----
+
+NOTE: The `.rb` file is assuming it's in the top level of the source tree, i.e.
+where `build.gradle` is located

@@ -1,6 +1,13 @@
 = JRuby/Gradle API Documentation
 :page-layout: base
 
+== Plugin docs
+
+* link:base.html[Base]
+* link:jar.html[Jar]
+* link:war.html[War]
+* link:storm.html[Storm]
+
 == Groovydoc
 
  * link:groovydoc/jruby-gradle-base-plugin/index.html[jruby-gradle-base-plugin]

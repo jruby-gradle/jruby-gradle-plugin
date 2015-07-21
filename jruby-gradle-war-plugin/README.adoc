@@ -1,24 +1,27 @@
-jruby-gradle-war-plugin
-=======================
+image::https://travis-ci.org/jruby-gradle/jruby-gradle-plugin.svg?branch=master["Build Status", link="https://travis-ci.org/jruby-gradle/jruby-gradle-plugin"]
 
-[![Build Status](https://buildhive.cloudbees.com/job/jruby-gradle/job/jruby-gradle-war-plugin/badge/icon)](https://buildhive.cloudbees.com/job/jruby-gradle/job/jruby-gradle-war-plugin/) [![Download](https://api.bintray.com/packages/jruby-gradle/plugins/jruby-gradle-war-plugin/images/download.png)](https://bintray.com/jruby-gradle/plugins/jruby-gradle-war-plugin) [![Gitter chat](https://badges.gitter.im/jruby-gradle/jruby-gradle-plugin.png)](https://gitter.im/jruby-gradle/jruby-gradle-plugin)
+image::https://api.bintray.com/packages/jruby-gradle/plugins/jruby-gradle-war-plugin/images/download.svg[link="https://bintray.com/jruby-gradle/plugins/jruby-gradle-war-plugin/_latestVersion"]
 
 Plugin for creating JRuby-based web archives
 
 In order to include Java-based dependencies in a `.war` file, declare those
 dependencies under the `jrubyWar` configuration, e.g.:
 
-```groovy
+
+.build.gradle
+[source,gradle]
+----
 dependencies {
     jrubyWar group: 'org.apache.kafka', name: 'kafka_2.9.2', version: '0.8.+'
     jrubyWar group: 'log4j', name: 'log4j', version: '1.2.+', transitive: true
 }
-```
+----
 
 Dependencies declared under the `jrubyWar` configuration will be copied into
 `.war/WEB-INF/libs` when the archive is created.
 
-## Default Tasks
+
+== Tasks
 
 The plugin provides the following tasks:
 
@@ -28,14 +31,16 @@ The plugin provides the following tasks:
    `jrubyWar`- Creates a `war` file
 
 
-## Creating a .war
+== Creating a .war
 
 A *full* example of this can be found in the
 [hellowarld](https://github.com/rtyler/hellowarld) repository.
 
 Configuring the war:
 
-```groovy
+.build.gradle
+[source,gradle]
+----
 buildscript {
     repositories { jcenter() }
 
@@ -59,14 +64,15 @@ jrubyWar {
         into('app') { from 'app' }
     }
 }
-```
+----
 
 The above configuration will copy the contents of `app/`, `Rakefile`, and
 `config.ru` into the `WEB-INF/` directory within the `.war` file
 
 Once your application is ready, you can create the `.war` by executing the `jrubyWar` task:
 
-```bash
+[source, bash]
+----
 $ ./gradlew jrubyWar
 :compileJava UP-TO-DATE
 :processResources UP-TO-DATE
@@ -89,8 +95,7 @@ BUILD SUCCESSFUL
 
 Total time: 20.342 secs
 %
-```
+----
 
-Once the `.war` has been created you can find it in `build/libs` and deploy that into a servlet container such as Tomcat or Jetty.
-
-
+Once the `.war` has been created you can find it in `build/libs` and deploy
+that into a servlet container such as Tomcat or Jetty.

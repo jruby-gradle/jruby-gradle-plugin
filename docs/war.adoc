@@ -2,4 +2,4 @@
 :page-layout: base
 :toc: right
 
-include::./../jruby-gradle-war-plugin/README.ad[]
+include::./../jruby-gradle-war-plugin/README.adoc[]
