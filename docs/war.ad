@@ -1,0 +1,5 @@
+= War plugin
+:page-layout: base
+:toc: right
+
+include::./../jruby-gradle-war-plugin/README.ad[]

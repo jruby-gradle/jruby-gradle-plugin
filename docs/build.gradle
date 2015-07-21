@@ -57,7 +57,7 @@ dependencies {
 
 task prepareGroovyDocs(type: Copy) {
     description "Copy Groovydocs into our site directory for deploybment/publication"
-    into "${buildDir}/_site"
+    into "${buildDir}/_site/groovydoc"
 
     rootProject.subprojects.each {
         def task = it.tasks.findByName('groovydoc')

@@ -1,0 +1,5 @@
+= Jar plugin
+:page-layout: base
+:toc: right
+
+include::./../jruby-gradle-jar-plugin/README.ad[]

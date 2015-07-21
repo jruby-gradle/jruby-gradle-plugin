@@ -1,6 +1,8 @@
 = JRuby/Gradle
 :page-layout: base
 
+image::images/jruby-gradle.png[role="right"]
+
 == About
 
 link:https://github.com/jruby-gradle/[JRuby/Gradle] is a collection of
@@ -10,10 +12,23 @@ link:http://jruby.org[JRuby] with Gradle's excellent task and dependency
 management functionality, JRuby/Gradle provides high quality build tooling for
 Ruby and Java developers alike.
 
+=== Plugins available:
+
+* link:base.html[Base]
+* link:jar.html[Jar]
+* link:war.html[War]
+* link:storm.html[Storm]
+
 == Quick Start
 
 
 === Running some Ruby
+
+.build.gradle
+[source, gradle]
+----
+include::../jruby-gradle-base-plugin/src/gradleTest/jrubyExec/build.gradle[]
+----
 
 
 === Packaging some Ruby
