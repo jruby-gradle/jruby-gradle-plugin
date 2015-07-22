@@ -22,11 +22,26 @@ Ruby and Java developers alike.
 
 === Running some Ruby
 
+The simplest example is a hello-world from Gradle, using JRuby/Gradle we can
+execute a Ruby script, which has Ruby-based dependencies:
+
 .build.gradle
 [source, gradle]
 ----
-include::../jruby-gradle-base-plugin/src/gradleTest/jrubyExec/build.gradle[]
+include::../examples/run-simple-ruby-script/build.gradle[lines=16..30]
 ----
+
+.print-script.rb
+[source, ruby]
+----
+include::../examples/run-simple-ruby-script/print-script.rb[]
+----
+
+
+Executing `./gradlew printSomePrettyOutputPlease` results in the following:
+
+image::images/print-script-output.png[]
+
 
 
 === Packaging some Ruby
