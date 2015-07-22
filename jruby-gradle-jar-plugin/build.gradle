@@ -25,6 +25,8 @@ dependencies {
     testRepo ("org.spockframework:spock-core:0.7-groovy-2.0") {
         transitive = false
     }
+
+    gradleTest project(':jruby-gradle-base-plugin')
 }
 
 ext {
@@ -83,6 +85,11 @@ bintray {
 
         }
     }
+}
+
+gradleTest {
+    versions '2.0','2.2','2.4'
+    dependsOn jar
 }
 
 bintrayUpload.dependsOn assemble
