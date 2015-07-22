@@ -10,7 +10,7 @@ link:http://jruby.org[JRuby] with Gradle's excellent task and dependency
 management, *JRuby/Gradle* provides high quality build tooling for
 Ruby and Java developers alike.
 
-=== Plugins available:
+*Plugins available:*
 
 * link:base.html[Base]
 * link:jar.html[Jar]

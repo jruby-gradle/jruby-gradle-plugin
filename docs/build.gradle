@@ -38,6 +38,7 @@ configurations {
 
 dependencies {
     asciidoctor('rubygems:awestruct:0.5.5')
+    asciidoctor('rubygems:coderay:1.1.0')
 
     /* later versions of 1.6.x have a dependency incompatibility with
      * mime-types 2.x

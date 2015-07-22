@@ -6,8 +6,6 @@ asciidoctor:
   :safe: unsafe
   :base_dir: null
   :attributes:
-    # TODO Awestruct should set env-awestruct
-    #env-awestruct: ''
     compat-mode: '@'
     attribute-missing: warn
     relfileprefix: '../'
@@ -17,6 +15,5 @@ asciidoctor:
     icons: font
     sectanchors: ''
     linkattrs: ''
-    #source-highlighter: highlight.js
     source-highlighter: coderay
     prewrap: null
