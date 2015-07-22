@@ -19,7 +19,6 @@ Ruby and Java developers alike.
 
 == Quick Start
 
-
 === Running some Ruby
 
 The simplest example is a hello-world from Gradle, using JRuby/Gradle we can
@@ -43,8 +42,27 @@ Executing `./gradlew printSomePrettyOutputPlease` results in the following:
 image::images/print-script-output.png[]
 
 
-
 === Packaging some Ruby
 
+.build.gradle
+[source, gradle]
+----
+include::../examples/self-executing-jar/build.gradle[lines=17..33]
+----
+
+.entrypoint.rb
+[source, ruby]
+----
+include::../examples/self-executing-jar/entrypoint.rb[]
+----
+.
+
+Executing `./gradlew jrubyJar` will build a `.jar` file inside of the
+`build/libs` directory which can then be invoked:
+
+`% java -jar build/libs/self-executing-jar-jruby.jar`
+
+
+image::images/self-executing-jar-output.png[]
 
 

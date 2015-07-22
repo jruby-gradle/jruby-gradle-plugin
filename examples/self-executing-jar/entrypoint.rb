@@ -3,6 +3,7 @@ require 'colorize'
 puts "-" * 20
 puts "Ruby version: #{RUBY_VERSION}"
 puts "Ruby platform: #{RUBY_PLATFORM}"
+puts "Current file: #{__FILE__}"
 puts "-" * 20
 
 puts "Roses are red".red
