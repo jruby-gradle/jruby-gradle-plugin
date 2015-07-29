@@ -1,8 +1,10 @@
 package com.github.jrubygradle.internal
 
+import com.github.jrubygradle.GemUtils
 import groovy.transform.CompileDynamic
 import groovy.transform.CompileStatic
 import org.gradle.api.Project
+import org.gradle.api.artifacts.Configuration
 import org.gradle.api.tasks.Input
 import org.gradle.api.tasks.Optional
 import org.gradle.internal.FileUtils
@@ -119,6 +121,28 @@ trait JRubyExecTraits {
      */
     void jrubyArgs(Object... args) {
         this.jrubyArgs.addAll(args as List)
+    }
+
+
+    void prepareDependencies(Project project, GemUtils.OverwriteAction overwrite) {
+        Configuration execConfiguration = project.configurations.findByName(configuration)
+
+        File gemDir = getGemWorkDir().absoluteFile
+
+        gemDir.mkdirs()
+
+        GemUtils.extractGems(
+                project,
+                execConfiguration,
+                execConfiguration,
+                gemDir,
+                overwrite
+        )
+        GemUtils.setupJars(
+                execConfiguration,
+                gemDir,
+                overwrite
+        )
     }
 
 

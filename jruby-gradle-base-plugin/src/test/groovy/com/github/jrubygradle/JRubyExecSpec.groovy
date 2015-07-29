@@ -1,5 +1,6 @@
 package com.github.jrubygradle
 
+import com.github.jrubygradle.internal.JRubyExecUtils
 import org.gradle.api.InvalidUserDataException
 import org.gradle.api.ProjectConfigurationException
 import org.gradle.api.tasks.TaskInstantiationException
@@ -57,27 +58,22 @@ class JRubyExecSpec extends Specification {
     }
 
     def "Check jruby defaults"() {
-
         expect: "Default jruby version should be same as project.ruby.execVersion"
-            execTask.jrubyVersion == project.jruby.execVersion
+        execTask.jrubyVersion == project.jruby.execVersion
 
         and: "Default configuration should be jrubyExec"
-            execTask.jrubyConfigurationName == 'jrubyExec'
+        execTask.configuration == JRubyExecUtils.DEFAULT_JRUBYEXEC_CONFIG
     }
 
     def "Check jruby defaults when jruby.execVersion is changed after the task is created"() {
-
         given:
-            final def String initialVersion= project.jruby.execVersion
+        final String initialVersion = project.jruby.execVersion
 
         when: "ExecVersion is changed later on, and JRubyExec.jrubyVersion was not called"
-            project.jruby.execVersion = '1.5.0'
+        project.jruby.execVersion = '1.5.0'
 
         then: "jruby defaults version should point to the earlier version"
-            execTask.jrubyVersion == '1.5.0'
-
-        and: "Default configuration should be jrubyExec"
-            execTask.jrubyConfigurationName == 'jrubyExec'
+        execTask.jrubyVersion == '1.5.0'
     }
 
     def "Changing the JRuby version with the default configuration"() {

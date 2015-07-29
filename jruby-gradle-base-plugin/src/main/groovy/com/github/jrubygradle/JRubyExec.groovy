@@ -29,9 +29,6 @@ class JRubyExec extends JavaExec implements JRubyExecTraits {
             throw new TaskInstantiationException('Cannot instantiate a JRubyExec instance before jruby plugin has been loaded')
         }
 
-        jrubyVersion = project.jruby.execVersion
-        jrubyConfigurationName = JRubyExecUtils.DEFAULT_JRUBYEXEC_CONFIG
-
         project.afterEvaluate { this.validateTaskConfiguration() }
     }
 
@@ -44,11 +41,17 @@ class JRubyExec extends JavaExec implements JRubyExecTraits {
         _convertScript()
     }
 
+    private String customJRubyVersion
     /** If it is required that a JRubyExec task needs to be executed with a different version of JRuby that the
      * globally configured one, it can be done by setting it here.
      */
     @Input
-    String jrubyVersion
+    String getJrubyVersion() {
+        if (customJRubyVersion == null) {
+            return project.jruby.execVersion
+        }
+        return customJRubyVersion
+    }
 
     /** Setting the {@code jruby-complete} version allows for tasks to be run using different versions of JRuby.
      * This is useful for comparing the results of different version or running with a gem that is only
@@ -70,7 +73,7 @@ class JRubyExec extends JavaExec implements JRubyExecTraits {
      * @param version String in the form '1.7.13'
      */
     void setJrubyVersion(final String version) {
-        jrubyVersion = version
+        customJRubyVersion = version
         JRubyExecUtils.updateJRubyDependenciesForConfiguration(project, configuration, version)
     }
 
@@ -92,34 +95,14 @@ class JRubyExec extends JavaExec implements JRubyExecTraits {
 
     @Override
     void exec() {
-        if (configuration == null && jrubyConfigurationName == JRubyExecUtils.DEFAULT_JRUBYEXEC_CONFIG) {
-            configuration = JRubyExecUtils.DEFAULT_JRUBYEXEC_CONFIG
-        }
-
+        Configuration execConfiguration = project.configurations.findByName(configuration)
+        logger.info("Executing with configuration: ${configuration}")
         GemUtils.OverwriteAction overwrite = project.gradle.startParameter.refreshDependencies ? \
                                                 GemUtils.OverwriteAction.OVERWRITE : GemUtils.OverwriteAction.SKIP
-        logger.info("Executing with configuration: ${configuration}")
-        Configuration execConfiguration = project.configurations.findByName(configuration)
+        logger.info("Gem overwrite action: ${overwrite}")
+        prepareDependencies(project, overwrite)
 
-        File gemDir = getGemWorkDir().absoluteFile
-        logger.info("Using the gem working dir of: ${getGemWorkDir()}")
-
-        gemDir.mkdirs()
         setEnvironment getPreparedEnvironment(environment)
-
-        GemUtils.extractGems(
-                project,
-                execConfiguration,
-                execConfiguration,
-                gemDir,
-                overwrite
-        )
-        GemUtils.setupJars(
-                execConfiguration,
-                gemDir,
-                overwrite
-        )
-
         super.classpath JRubyExecUtils.classpathFromConfiguration(execConfiguration)
         super.setArgs(getArgs())
         super.exec()
@@ -150,7 +133,7 @@ class JRubyExec extends JavaExec implements JRubyExecTraits {
         if (mainClassName == 'org.jruby.Main') {
             super.setMain(mainClassName)
         } else {
-            throw notAllowed("Setting main class for jruby to ${mainClassName} is not a valid operation")
+            throw notAllowed("Setting main class for JRuby to ${mainClassName} is not a valid operation")
         }
     }
 
@@ -169,13 +152,6 @@ class JRubyExec extends JavaExec implements JRubyExecTraits {
         throw notAllowed('Use jvmArgs / scriptArgs instead')
     }
 
-    /** Returns the {@code Configuration} object this task is tied to
-     */
-    String getJrubyConfigurationName() {
-        return this.jrubyConfigurationName
-    }
-
-
     /** Verify that we are in a good configuration for execution */
     void validateTaskConfiguration() {
         if ((jrubyVersion != project.jruby.execVersion) &&
@@ -193,6 +169,4 @@ Please see this page for more details: <http://jruby-gradle.org/errors/jrubyexec
     private static UnsupportedOperationException notAllowed(final String msg) {
         return new UnsupportedOperationException (msg)
     }
-
-    private String jrubyConfigurationName
 }
