@@ -72,7 +72,7 @@ class JRubyExecTraitsSpec extends Specification {
     def "setting gemWorkDir with traits"() {
         given:
         String workDir = 'customGemDir'
-        task = project.task('spock', type: SpockWithTraitsJRubyExec)
+        task = project.task('spock', type: SpockJRubyExecTraitsTask)
 
         when:
         project.configure(task) {

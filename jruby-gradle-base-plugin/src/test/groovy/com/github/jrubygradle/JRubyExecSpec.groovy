@@ -1,6 +1,7 @@
 package com.github.jrubygradle
 
 import org.gradle.api.InvalidUserDataException
+import org.gradle.api.ProjectConfigurationException
 import org.gradle.api.tasks.TaskInstantiationException
 import org.gradle.testfixtures.ProjectBuilder
 import spock.lang.*
@@ -79,24 +80,42 @@ class JRubyExecSpec extends Specification {
             execTask.jrubyConfigurationName == 'jrubyExec'
     }
 
+    def "Changing the JRuby version with the default configuration"() {
+        given:
+        final String newVersion = '1.7.11'
+        execTask.jrubyVersion = newVersion
+
+        when:
+        project.evaluate()
+
+        then:
+        project.jruby.execVersion != newVersion
+        thrown(ProjectConfigurationException)
+    }
+
     def "Changing the jruby version on a JRubyExec task"() {
         given:
-            final String cfgName = 'jrubyExec$$' + TASK_NAME
+        final String configurationName = 'spock-ruby'
+        final String newVersion = '1.7.11'
 
-        when: "Version is set on the task"
-            final String newVersion = '1.7.11'
-            assert project.jruby.execVersion != newVersion
-            execTask.jrubyVersion = newVersion
-            project.evaluate()
+        when:
+        project.configure(execTask) {
+            configuration configurationName
+            jrubyVersion newVersion
+        }
+        project.evaluate()
+
+        then:
+        execTask.jrubyVersion != project.jruby.execVersion
 
         then: "jrubyVersion must be updated"
-            execTask.jrubyVersion == newVersion
+        execTask.jrubyVersion == newVersion
 
         and: "jrubyConfigurationName must point to this new configuration"
-            cfgName == execTask.jrubyConfigurationName
+        execTask.configuration == configurationName
 
         and: "configuration must exist"
-            project.configurations.getByName(cfgName) != null
+        project.configurations.findByName(configurationName)
     }
 
     def "Checking the jruby main class"() {

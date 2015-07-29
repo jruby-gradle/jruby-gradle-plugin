@@ -51,6 +51,9 @@ trait JRubyExecTraits {
 
     @CompileDynamic
     void configuration(String newConfiguration) {
+        if (project instanceof Project) {
+            project.configurations.maybeCreate(newConfiguration)
+        }
         configuration = newConfiguration
     }
 
