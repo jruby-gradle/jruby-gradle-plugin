@@ -5,15 +5,13 @@ import com.github.jrubygradle.JRubyExec
 import groovy.transform.PackageScope
 import org.gradle.api.Project
 import org.gradle.api.artifacts.Configuration
-import org.gradle.internal.FileUtils
-import org.gradle.util.CollectionUtils
 
 /**
  * @author Schalk W. Cronjé
  */
 class JRubyExecDelegate implements JRubyExecTraits   {
 
-    static final String JRUBYEXEC_CONFIG = JRubyExec.JRUBYEXEC_CONFIG
+    static final String JRUBYEXEC_CONFIG = JRubyExecUtils.DEFAULT_JRUBYEXEC_CONFIG
 
     def methodMissing(String name, args) {
         if( name == 'args' || name == 'setArgs' ) {

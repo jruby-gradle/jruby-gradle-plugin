@@ -186,37 +186,4 @@ class JRubyExecSpec extends Specification {
         then:
             execTask.getComputedPATH(System.env.PATH).contains('foo')
     }
-
-
-    def "Prepare a basic environment"() {
-        when:
-        def envMap = execTask.getPreparedEnvironment([:])
-
-        then:
-        envMap.size() != 0
-    }
-
-    def "Filter out RVM environment values by default"() {
-        when:
-        def envMap = execTask.getPreparedEnvironment([
-            'GEM_HOME' : '/tmp/spock',
-            'RUBY_VERSION' : 'notaversion',
-            'rvm_ruby_string' : 'jruby-head',
-            ])
-
-        then:
-        envMap.get('GEM_HOME') != '/tmp/spock'
-        !envMap.containsKey('rvm_ruby_string')
-    }
-
-    def "Avoid filtering out the RVM environment if inheritRubyEnv == true"() {
-        when:
-        execTask.inheritRubyEnv = true
-        def envMap = execTask.getPreparedEnvironment([
-            'GEM_PATH' : '/tmp/spock/invalid',
-            ])
-
-        then:
-        envMap.containsKey('GEM_PATH')
-    }
 }

@@ -151,6 +151,7 @@ class GemUtils {
             GemUtils.OverwriteAction action ) {
 
         Set<File> cp = jRubyConfig.files
+        println cp
         File jRubyClasspath = cp.find { it.name.startsWith('jruby-complete-') }
         assert jRubyClasspath != null
         extractGems(project,jRubyClasspath,project.files(gemConfig.files),destDir,action)

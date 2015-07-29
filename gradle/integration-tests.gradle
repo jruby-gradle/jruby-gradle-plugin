@@ -11,6 +11,10 @@ configurations {
     integrationTestGems
 }
 
+dependencies {
+    integrationTestGems 'rubygems:jar-dependencies:0.1.15'
+}
+
 sourceSets {
     integrationTest {
         java.srcDir file("src/integTest/java")

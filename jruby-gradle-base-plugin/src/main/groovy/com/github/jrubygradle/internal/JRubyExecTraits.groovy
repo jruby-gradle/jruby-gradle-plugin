@@ -3,22 +3,56 @@ package com.github.jrubygradle.internal
 import groovy.transform.CompileDynamic
 import groovy.transform.CompileStatic
 import org.gradle.api.Project
+import org.gradle.api.tasks.Input
+import org.gradle.api.tasks.Optional
+import org.gradle.internal.FileUtils
 import org.gradle.util.CollectionUtils
 
 /** Provides common traits for JRuby script execution across the {@code JRubyExec}
  * task and {@project.jrubyexec} extension.
+ *
+ * This trait is primarily meant as a plugin-internal interface/implementation which allows
+ * for the asy set up and invocation of a JRuby environment unlike {@code JRubyExec}
+ * it is not meant to directly set up or execute a Ruby script.
+ *
+ * It's functions are primarily:
+ *   * Prepare Ruby gem dependencies
+ *   * Prepare JVm (jar) dependencies
+ *   * Set up the execution environment
+ *
+ * After that, it is up to the actual subclass extending JRubyExecAbstractTask to
+ * decide how it wants to execute JRuby
  *
  * @author Schalk W. Cronjé
  * @since 0.1.18
  */
 @CompileStatic
 trait JRubyExecTraits {
+    final List<String>  FILTER_ENV_KEYS = ['GEM_PATH', 'RUBY_VERSION', 'GEM_HOME']
 
     /** Allow JRubyExec to inherit a Ruby env from the shell (e.g. RVM)
      *
      * @since 0.1.10 (Moved from {@code JRubyExec})
      */
+    @Optional
+    @Input
     boolean inheritRubyEnv = false
+
+    /** Configuration to copy gems from. If {@code jRubyVersion} has not been set, {@code jRubyExec} will used as
+     * configuration. However, if {@code jRubyVersion} has been set, not gems will be used unless an explicit
+     * configuration has been provided
+     */
+    private String configuration = JRubyExecUtils.DEFAULT_JRUBYEXEC_CONFIG
+
+    @Input
+    String getConfiguration() {
+        return configuration
+    }
+
+    @CompileDynamic
+    void configuration(String newConfiguration) {
+        configuration = newConfiguration
+    }
 
     /** Set script to execute.
      *
@@ -38,18 +72,26 @@ trait JRubyExecTraits {
 
     /** Set alternative GEM unpack directory to use
      *
-     * @param wd New working directory (convertible to file)
+     * @param workingDir New working directory (convertible to file)
      */
-    void setGemWorkDir( Object wd ) {
-        this.gemWorkDir = wd
+    void gemWorkDir(Object workingDir) {
+        gemWorkDir = workingDir
     }
 
-    /** Set alternative GEM unpack directory to use
+    /**
+     * Returns the directory that will be used to unpack Gems into
      *
-     * @param wd New working directory (convertible to file)
+     * @return Target directory
+     * @since 0.1.9
      */
-    void gemWorkDir( Object wd ) {
-        this.gemWorkDir = wd
+    @Optional
+    @Input
+    @CompileDynamic
+    File getGemWorkDir() {
+        if (gemWorkDir) {
+            return project.file(gemWorkDir)
+        }
+        return tmpGemDir()
     }
 
     /** Add arguments for script
@@ -90,6 +132,25 @@ trait JRubyExecTraits {
         }
     }
 
+    Map getPreparedEnvironment(Map env) {
+        Map<String, Object> preparedEnv = [:]
+
+        preparedEnv.putAll(env.findAll { String key, Object value ->
+            inheritRubyEnv || !(key in FILTER_ENV_KEYS || key.matches(/rvm.*/))
+        })
+
+        preparedEnv.putAll([
+                'JBUNDLE_SKIP' : 'true',
+                'JARS_SKIP' : 'true',
+                'PATH' : getComputedPATH(System.getenv().get(JRubyExecUtils.pathVar())),
+                'GEM_HOME' : getGemWorkDir().absolutePath,
+                'GEM_PATH' : getGemWorkDir().absolutePath,
+                'JARS_HOME' : new File(getGemWorkDir().absolutePath, 'jars'),
+                'JARS_LOCK' : new File(getGemWorkDir().absolutePath, 'Jars.lock')
+        ])
+
+        return preparedEnv
+    }
 
     // Internal functions intended to be used by plugin itself.
 
@@ -117,6 +178,17 @@ trait JRubyExecTraits {
     @CompileDynamic
     List<String> _convertJrubyArgs() {
         CollectionUtils.stringize(this.jrubyArgs)
+    }
+
+    /** Return the computed `PATH` for the task */
+    String getComputedPATH(String originalPath) {
+        JRubyExecUtils.prepareWorkingPath(getGemWorkDir(), originalPath)
+    }
+
+    @CompileDynamic
+    private File tmpGemDir() {
+        String ext = FileUtils.toSafeFileName(configuration)
+        return new File(project.buildDir, "tmp/${ext}")
     }
 
     private Object script

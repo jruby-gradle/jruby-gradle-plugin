@@ -1,8 +1,10 @@
 package com.github.jrubygradle.internal
 
+import com.github.jrubygradle.JRubyExec
 import groovy.transform.CompileDynamic
 import groovy.transform.CompileStatic
 import org.gradle.api.InvalidUserDataException
+import org.gradle.api.Project
 import org.gradle.api.artifacts.Configuration
 import org.gradle.api.file.FileCollection
 
@@ -11,10 +13,10 @@ import java.util.regex.Matcher
 /**
  * @author Schalk W. Cronjé.
  */
-@CompileStatic
 class JRubyExecUtils {
-
+    static final String JAR_DEPENDENCIES_VERSION = '0.1.15'
     static final List FILTER_ENV_KEYS = ['GEM_PATH', 'RUBY_VERSION', 'GEM_HOME']
+    static final String DEFAULT_JRUBYEXEC_CONFIG = 'jrubyExec'
 
     /** Extract a list of files from a configuration that is suitable for a jruby classpath
      *
@@ -118,7 +120,9 @@ class JRubyExecUtils {
      * @param inheritRubyEnv Set to {@code true} is the global RUby environment should be inherited
      * @return Map of environmental variables
      * @since 0.1.11
+     * @deprecated As of 1.0.0 this method should no longer be called, instead your task should implement {@code JRubyExecTraits}
      */
+    @Deprecated
     static Map<String, Object> preparedEnvironment(Map<String, Object> env,boolean inheritRubyEnv) {
         Map<String, Object> newEnv = [
                 'JBUNDLE_SKIP' : 'true',
@@ -150,6 +154,43 @@ class JRubyExecUtils {
     static String prepareWorkingPath(File gemWorkDir, String originalPath) {
         File path = new File(gemWorkDir, 'bin')
         return path.absolutePath + File.pathSeparatorChar + originalPath
+    }
+
+    /**
+     * Ensure that our JRuby depedencies are updated properly for JRubyExec-style tasks
+     *
+     * This function also ensures that we have a proper version of jar-dependencies
+     * on older versions of JRuby so jar requires work properly on those version
+     *
+     * @param project
+     */
+    static void updateJRubyDependencies(Project project) {
+        updateJRubyDependenciesForConfiguration(project, DEFAULT_JRUBYEXEC_CONFIG, project.jruby.execVersion)
+
+        project.tasks.withType(JRubyExec) { JRubyExec task ->
+            /* Only update non-default configurations */
+            if (task.configuration != DEFAULT_JRUBYEXEC_CONFIG) {
+                updateJRubyDependenciesForConfiguration(project, task.configuration, project.jruby.execVersion)
+            }
+        }
+    }
+
+    /**
+     * Update the given configuration on the project with the appropriate versions
+     * of JRuby and supplemental dependencies to execute JRuby successfully
+     */
+    static void updateJRubyDependenciesForConfiguration(Project project, String configuration, String version) {
+        Configuration c = project.configurations.findByName(configuration)
+
+        /* Only define this dependency if we don't already have it */
+        if (!(c.dependencies.find { it.name == 'jruby-complete'})) {
+            project.dependencies.add(configuration, "org.jruby:jruby-complete:${version}")
+        }
+
+        if (version.startsWith("1.7.1")) {
+            project.dependencies.add(configuration,
+                    "rubygems:jar-dependencies:${JAR_DEPENDENCIES_VERSION}")
+        }
     }
 
 }
