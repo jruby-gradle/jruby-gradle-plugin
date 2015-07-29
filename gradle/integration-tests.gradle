@@ -12,7 +12,10 @@ configurations {
 }
 
 dependencies {
-    integrationTestGems 'rubygems:jar-dependencies:0.1.15'
+    /* We want to cache jruby-complete at this alternative version which we use
+     * in many places
+     */
+    integrationTestGems 'org.jruby:jruby-complete:1.7.11'
 }
 
 sourceSets {
@@ -38,5 +41,3 @@ task integrationTest(type: Test, dependsOn: jar) {
 }
 
 check.dependsOn integrationTest
-
-

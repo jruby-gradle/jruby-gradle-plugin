@@ -41,17 +41,34 @@ class JRubyExecIntegrationSpec extends Specification {
     def "Changing the jruby version will load the correct jruby"() {
         given: "Version is set on the task"
         Configuration config
+        final String configName = 'integ-exec-config'
         final String newVersion = '1.7.11'
-        assert project.jruby.execVersion != newVersion
-        execTask.jrubyVersion newVersion
+        final File mavenRepo = project.file("../../../../../src/integTest/mavenrepo")
         Pattern pattern = Pattern.compile(/.*(jruby-complete-.+.jar)/)
 
         when:
-        project.evaluate()
-        config = project.configurations.findByName('jrubyExec')
+        project.with {
+            jruby.defaultRepositories = false
+            repositories {
+                maven {
+                    url "file://" + mavenRepo.absolutePath
+                }
+            }
+        }
 
-        then: "jruby-complete-${newVersion}.jar must be selected"
-        config.files.find { it.name.matches(pattern) && it.name.matches(/${newVersion}/) }
+        project.configure(execTask) {
+            configuration configName
+            jrubyVersion newVersion
+        }
+
+        project.evaluate()
+        config = project.configurations.findByName(configName)
+
+        then: "the project config should be unaffected"
+        project.jruby.execVersion != newVersion
+
+        and: "jruby-complete-${newVersion}.jar must be selected"
+        config.files.find { it.name.matches(pattern) && it.name.matches(/(.*)${newVersion}.jar/) }
     }
 
     def "Running a Hello World script"() {
