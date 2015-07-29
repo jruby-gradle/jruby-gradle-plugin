@@ -15,7 +15,6 @@ import java.util.regex.Matcher
  */
 class JRubyExecUtils {
     static final String JAR_DEPENDENCIES_VERSION = '0.1.15'
-    static final List FILTER_ENV_KEYS = ['GEM_PATH', 'RUBY_VERSION', 'GEM_HOME']
     static final String DEFAULT_JRUBYEXEC_CONFIG = 'jrubyExec'
 
     /** Extract a list of files from a configuration that is suitable for a jruby classpath
@@ -112,27 +111,6 @@ class JRubyExecUtils {
 
         cmdArgs.addAll(scriptArgs as List<String>)
         return cmdArgs
-    }
-
-    /** Prepare a basic environment for usage with an external JRuby environment
-     *
-     * @param env Environment to start from
-     * @param inheritRubyEnv Set to {@code true} is the global RUby environment should be inherited
-     * @return Map of environmental variables
-     * @since 0.1.11
-     * @deprecated As of 1.0.0 this method should no longer be called, instead your task should implement {@code JRubyExecTraits}
-     */
-    @Deprecated
-    static Map<String, Object> preparedEnvironment(Map<String, Object> env,boolean inheritRubyEnv) {
-        Map<String, Object> newEnv = [
-                'JBUNDLE_SKIP' : 'true',
-                'JARS_SKIP' : 'true',
-        ] as Map<String, Object>
-
-        env.findAll { String key,Object value ->
-            inheritRubyEnv || !(key in JRubyExecTraits.FILTER_ENV_KEYS || key.toLowerCase().startsWith('rvm'))
-        } + newEnv
-
     }
 
     /** Get the name of the system search path environmental variable
