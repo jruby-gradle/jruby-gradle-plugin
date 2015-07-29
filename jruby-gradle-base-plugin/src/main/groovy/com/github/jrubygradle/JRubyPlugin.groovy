@@ -7,6 +7,9 @@ import org.gradle.api.Plugin
 import org.gradle.api.Project
 import org.gradle.api.Task
 
+/**
+ *
+ */
 class JRubyPlugin implements Plugin<Project> {
     static final String TASK_GROUP_NAME = 'JRuby'
 
@@ -34,18 +37,7 @@ class JRubyPlugin implements Plugin<Project> {
                 }
             }
             GemVersionResolver.setup(project)
-            JRubyExecUtils.updateJRubyDependencies(project)
-        }
-
-        Task jrpg = project.tasks.create 'jrubyPrepareGems'
-        jrpg.dependsOn 'jrubyPrepare'
-        jrpg << { logger.info "'jrubyPrepareGems' is deprecated and will be removed in a future version. Use 'jrubyPrepare' instead." }
-        jrpg.group 'Deprecated'
-        jrpg.description "Prepare the gems/jars from the `gem` dependencies, extracts the gems into jruby.installGemDir and sets up the jars in jruby.installGemDir/jars"
-
-        project.task('jrubyPrepareJars', type: JRubyPrepareJars) {
-            logger.info 'Obsolete tasks - does nothing anymore.'
-            outputDir project.jruby.gemInstallDir
+            JRubyExec.updateJRubyDependencies(project)
         }
 
         project.task('jrubyPrepare', type: JRubyPrepare) {
@@ -55,7 +47,7 @@ class JRubyPlugin implements Plugin<Project> {
             outputDir project.jruby.gemInstallDir
         }
 
-        project.task('jrubyGenerateGradleRb', type: GenerateGradleRb) {
+        project.task('generateGradleRb', type: GenerateGradleRb) {
             group TASK_GROUP_NAME
             description 'Generate a gradle.rb stub for executing Ruby binstubs'
             dependsOn project.tasks.jrubyPrepare

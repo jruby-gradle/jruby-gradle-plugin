@@ -2,6 +2,7 @@ package com.github.jrubygradle
 
 import com.github.jrubygradle.internal.JRubyExecTraits
 import com.github.jrubygradle.internal.JRubyExecUtils
+import org.gradle.api.Project
 import org.gradle.api.ProjectConfigurationException
 import org.gradle.api.artifacts.Configuration
 import org.gradle.api.tasks.Input
@@ -17,6 +18,31 @@ import org.gradle.process.JavaExecSpec
 class JRubyExec extends JavaExec implements JRubyExecTraits {
     static String jarDependenciesGemLibPath(File gemDir) {
         new File(gemDir, "gems/jar-dependencies-${JRubyExecUtils.JAR_DEPENDENCIES_VERSION}/lib").absolutePath
+    }
+
+    /**
+     * Ensure that our JRuby depedencies are updated properly for the default jrubyExec configuration
+     * and all other JRubyExec tasks
+     *
+     * This function also ensures that we have a proper version of jar-dependencies
+     * on older versions of JRuby so jar requires work properly on those version
+     *
+     * @param project
+     * @since 1.0.0
+     */
+    static void updateJRubyDependencies(Project project) {
+        JRubyExecUtils.updateJRubyDependenciesForConfiguration(project,
+                JRubyExecUtils.DEFAULT_JRUBYEXEC_CONFIG,
+                project.jruby.execVersion)
+
+        project.tasks.withType(JRubyExec) { JRubyExec task ->
+            /* Only update non-default configurations */
+            if (task.configuration != JRubyExecUtils.DEFAULT_JRUBYEXEC_CONFIG) {
+                JRubyExecUtils.updateJRubyDependenciesForConfiguration(project,
+                        task.configuration,
+                        task.jrubyVersion)
+            }
+        }
     }
 
     JRubyExec() {

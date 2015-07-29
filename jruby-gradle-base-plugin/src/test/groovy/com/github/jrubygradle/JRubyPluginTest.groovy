@@ -30,11 +30,6 @@ class JRubyPluginTest {
     }
 
     @Test
-    public void jrubyPluginAddsGemTasks() {
-        assertTrue(project.tasks.jrubyPrepareGems != null)
-    }
-
-    @Test
     public void jrubyPluginSetsRepositoriesCorrectly() {
         project.evaluate()
         assertTrue(hasRepositoryUrl(project, 'http://rubygems.lasagna.io/proxy/maven/releases'))

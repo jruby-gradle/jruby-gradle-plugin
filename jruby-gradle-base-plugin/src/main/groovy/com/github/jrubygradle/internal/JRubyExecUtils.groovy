@@ -130,7 +130,7 @@ class JRubyExecUtils {
         ] as Map<String, Object>
 
         env.findAll { String key,Object value ->
-            inheritRubyEnv || !(key in FILTER_ENV_KEYS || key.toLowerCase().startsWith('rvm'))
+            inheritRubyEnv || !(key in JRubyExecTraits.FILTER_ENV_KEYS || key.toLowerCase().startsWith('rvm'))
         } + newEnv
 
     }
@@ -154,25 +154,6 @@ class JRubyExecUtils {
     static String prepareWorkingPath(File gemWorkDir, String originalPath) {
         File path = new File(gemWorkDir, 'bin')
         return path.absolutePath + File.pathSeparatorChar + originalPath
-    }
-
-    /**
-     * Ensure that our JRuby depedencies are updated properly for JRubyExec-style tasks
-     *
-     * This function also ensures that we have a proper version of jar-dependencies
-     * on older versions of JRuby so jar requires work properly on those version
-     *
-     * @param project
-     */
-    static void updateJRubyDependencies(Project project) {
-        updateJRubyDependenciesForConfiguration(project, DEFAULT_JRUBYEXEC_CONFIG, project.jruby.execVersion)
-
-        project.tasks.withType(JRubyExec) { JRubyExec task ->
-            /* Only update non-default configurations */
-            if (task.configuration != DEFAULT_JRUBYEXEC_CONFIG) {
-                updateJRubyDependenciesForConfiguration(project, task.configuration, project.jruby.execVersion)
-            }
-        }
     }
 
     /**
