@@ -234,5 +234,13 @@ class GemUtilsSpec extends Specification {
         then: 
             thrown(DuplicateFileCopyingException)
     }
-  
+
+    def "gemFullNameFromFile() should prune .gem"() {
+        given:
+        String filename = "rake-10.3.2.gem"
+        String gem_name = "rake-10.3.2"
+
+        expect:
+        gem_name == GemUtils.gemFullNameFromFile(filename)
+    }
 }
