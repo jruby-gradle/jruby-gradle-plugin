@@ -29,24 +29,27 @@ class JRubyJar extends Jar {
 
     @Input
     String jrubyVersion = project.jruby.defaultVersion
+
     @Input
     String jrubyMainsVersion = '0.3.0'
+
     @Input
     String mainClass
     
     /** Adds a GEM installation directory
      */
     @InputDirectory
-    void gemDir(def properties=[:],File f) {
+    void gemDir(Map properties=[:], File f) {
         gemDir(properties,f.absolutePath)
     }
+
 
     /** Adds a GEM installation directory
      * @param Properties that affect how the GEM is packaged in the JAR. Currently only {@code fullGem} is
      * supported. If set the full GEM content will be packed, otherwise only a subset will be packed.
      * @param dir Source folder. Will be handled by {@code project.files(dir)}
     */
-    void gemDir(def properties=[:],Object dir) {
+    void gemDir(Map properties=[:], Object dir) {
         CopySpec spec = GemUtils.gemCopySpec(properties,project,dir)
         spec.exclude '.jrubydir'
         with spec
