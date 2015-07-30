@@ -53,6 +53,22 @@ subprojects {
     artifacts {
         archives sourcesJar
     }
+
+    plugins.withType(JavaPlugin) {
+        sourceCompatibility = 1.7
+        targetCompatibility = 1.7
+
+
+        project.tasks.withType(JavaCompile) { task ->
+            task.sourceCompatibility = project.sourceCompatibility
+            task.targetCompatibility = project.targetCompatibility
+        }
+
+        project.tasks.withType(GroovyCompile) { task ->
+            task.sourceCompatibility = project.sourceCompatibility
+            task.targetCompatibility = project.targetCompatibility
+        }
+    }
 }
 
 task release(type: Exec) {
