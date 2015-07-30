@@ -24,6 +24,7 @@ class JRubyExecIntegrationSpec extends Specification {
     Project project
     JRubyExec execTask
     ByteArrayOutputStream output = new ByteArrayOutputStream()
+    File mavenRepo
 
     String getOutputBuffer() {
         return output.toString()
@@ -35,6 +36,7 @@ class JRubyExecIntegrationSpec extends Specification {
         }
         TESTROOT.mkdirs()
         project = BasicProjectBuilder.buildWithLocalRepo(TESTROOT, FLATREPO, CACHEDIR)
+        mavenRepo = project.file("../../../../../src/integTest/mavenrepo")
         execTask = project.task(TASK_NAME, type: JRubyExec)
     }
 
@@ -43,7 +45,6 @@ class JRubyExecIntegrationSpec extends Specification {
         Configuration config
         final String configName = 'integ-exec-config'
         final String newVersion = '1.7.11'
-        final File mavenRepo = project.file("../../../../../src/integTest/mavenrepo")
         Pattern pattern = Pattern.compile(/.*(jruby-complete-.+.jar)/)
 
         when:
@@ -132,16 +133,21 @@ class JRubyExecIntegrationSpec extends Specification {
     @Issue('https://github.com/jruby-gradle/jruby-gradle-plugin/issues/77')
     def "Running rspec from a script should not cause a gemWorkDir failure" () {
         given:
-        def jrubyVersions = FLATREPO.listFiles(
-                [ accept : { File dir,String name ->
-                    name ==~ /^jruby-complete.+\.jar/
-                }] as FilenameFilter
-        )
-
-        assert jrubyVersions.size()
-
         project.with {
-            jruby.execVersion = JRubyExecUtils.jrubyJarVersion(jrubyVersions[0])
+            /* see integration-tests.gradle, we're ensuring that we always have at
+             * least one version of JRuby installed
+             */
+            jruby {
+                execVersion '1.7.11'
+                defaultRepositories false
+            }
+
+            /* adding our fixtured mavenRepo so we can resolve jar-dependencies properly */
+            repositories {
+                maven {
+                    url "file://" + mavenRepo.absolutePath
+                }
+            }
 
             dependencies {
                 jrubyExec VersionFinder.findDependency(FLATREPO,'','rspec','gem')
