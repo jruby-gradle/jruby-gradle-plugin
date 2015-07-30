@@ -4,8 +4,8 @@ import org.gradle.api.InvalidUserDataException
 import spock.lang.*
 
 class JRubyExecUtilsSpec extends Specification {
-  static final boolean IS_WINDOWS = System.getProperty('os.name').toLowerCase().startsWith('windows')
-  
+    static final boolean IS_WINDOWS = System.getProperty('os.name').toLowerCase().startsWith('windows')
+
     def "The version string in a jruby jar filename must be extracted correctly"() {
 
         expect:
