@@ -1,0 +1,40 @@
+/*
+ * This project is intended to be used as an acceptance test *and* a
+ * documentation example. If you change this file, please be sure that it
+ * renders appropriately in the generated documentation
+ */
+buildscript {
+    repositories { jcenter() }
+
+    dependencies {
+        /* Replace "%%VERSION%%" with the version of JRuby/Gradle you wish to
+         * use if you want to use this build.gradle outside of gradleTest
+         */
+        classpath 'com.github.jruby-gradle:jruby-gradle-plugin:%%VERSION%%'
+    }
+}
+apply plugin: "com.github.jruby-gradle.base"
+
+import com.github.jrubygradle.JRubyExec
+
+dependencies {
+    /* Using the built-in `jrubyExec` configuration to describe the
+     * dependencies our JRubyExec-based tasks will need
+     */
+    jrubyExec "rubygems:asciidoctor:1.5.2+"
+}
+
+task verifyAsciidoctorWorks(type: JRubyExec) {
+    description "Verify that we can execute the `asciidoctor` command line tool"
+    jrubyArgs '-S'
+    script "asciidoctor"
+    scriptArgs "--version"
+}
+
+
+/*
+ * This task is only here for the execution of the gradleTest
+ */
+task runGradleTest {
+    dependsOn verifyAsciidoctorWorks
+}
