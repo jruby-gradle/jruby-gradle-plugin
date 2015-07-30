@@ -17,29 +17,12 @@ import org.gradle.api.tasks.testing.Test
  * @author Christian Meier
  */
 class JRubyJarPlugin implements Plugin<Project> {
-
     void apply(Project project) {
-
-        project.apply plugin : 'com.github.jruby-gradle.base'
-        project.apply plugin : 'java-base'
-        project.configurations.maybeCreate('jrubyEmbeds')
-        project.configurations.maybeCreate('jrubyJar')
-        project.tasks.create( 'jrubyJar',JRubyJar)
+        project.apply plugin: 'com.github.jruby-gradle.base'
+        project.apply plugin: 'java-base'
+        project.tasks.create('jrubyJar', JRubyJar)
 
         updateTestTask(project)
-        addAfterEvaluateHooks(project)
-    }
-
-    @PackageScope
-    void addAfterEvaluateHooks(Project project) {
-        project.afterEvaluate {
-            project.tasks.withType(JRubyJar) { Task task ->
-                project.configurations.maybeCreate(task.name)
-                project.dependencies.add(task.name, "org.jruby:jruby-complete:${task.jrubyVersion}")
-                project.dependencies.add(task.name, "de.saumya.mojo:jruby-mains:${task.jrubyMainsVersion}")
-                task.applyConfig()
-            }
-        }
     }
 
     @PackageScope

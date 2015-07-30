@@ -31,4 +31,30 @@ class JRubyJarSpec extends Specification {
         expect:
         task.jrubyVersion == version
     }
+
+    def "configuration should default to 'jrubyJar'"() {
+        given:
+        JRubyJar task = project.task('spock-jar', type: JRubyJar)
+
+        when:
+        project.evaluate()
+
+        then:
+        task.configuration == 'jrubyJar'
+    }
+
+    def "configuration should be configurable in a Gradle conventional way"() {
+        given:
+        final String customConfig = 'spockConfig'
+
+        JRubyJar task = project.task('spock-jar', type: JRubyJar) {
+            configuration customConfig
+        }
+
+        when:
+        project.evaluate()
+
+        then:
+        task.configuration == customConfig
+    }
 }

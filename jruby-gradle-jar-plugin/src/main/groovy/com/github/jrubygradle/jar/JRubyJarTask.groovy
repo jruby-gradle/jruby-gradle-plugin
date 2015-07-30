@@ -5,6 +5,7 @@ import com.github.jrubygradle.jar.internal.JRubyDirInfo
 import groovy.transform.PackageScope
 import org.gradle.api.Incubating
 import org.gradle.api.InvalidUserDataException
+import org.gradle.api.artifacts.Configuration
 import org.gradle.api.file.CopySpec
 import org.gradle.api.Project
 import org.gradle.api.Task
@@ -13,6 +14,7 @@ import org.gradle.api.execution.TaskExecutionGraph
 import org.gradle.api.file.DuplicatesStrategy
 import org.gradle.api.tasks.Input
 import org.gradle.api.tasks.InputDirectory
+import org.gradle.api.tasks.Optional
 import org.gradle.api.tasks.TaskState
 import org.gradle.api.tasks.bundling.Jar
 import org.gradle.api.tasks.StopExecutionException
@@ -21,9 +23,9 @@ import org.gradle.api.tasks.StopExecutionException
  * @author Christian Meier
  */
 class JRubyJar extends Jar {
-
     enum Type { RUNNABLE, LIBRARY }
 
+    static final String DEFAULT_JRUBYJAR_CONFIG = 'jrubyJar'
     static final String DEFAULT_MAIN_CLASS = 'de.saumya.mojo.mains.JarMain'
     static final String EXTRACTING_MAIN_CLASS = 'de.saumya.mojo.mains.ExtractingMain'
 
@@ -35,7 +37,11 @@ class JRubyJar extends Jar {
 
     @Input
     String mainClass
-    
+
+    @Input
+    @Optional
+    String configuration
+
     /** Adds a GEM installation directory
      */
     @InputDirectory
@@ -133,6 +139,8 @@ class JRubyJar extends Jar {
 
     @PackageScope
     void applyConfig() {
+        updateDepencenies()
+
         if (scriptName == null) {
             scriptName = runnable()
         }
@@ -149,8 +157,8 @@ class JRubyJar extends Jar {
         if (mainClass != null && scriptName != Type.LIBRARY) {
             with project.copySpec {
                 from {
-                    project.configurations.getByName( name ).collect {
-                       project.zipTree( it )
+                    project.configurations.findByName(configuration).collect {
+                       project.zipTree(it)
                     }
                 }
                 include '**'
@@ -159,10 +167,12 @@ class JRubyJar extends Jar {
                 // with zipTree on second run
                 exclude 'META-INF/maven/**/pom.xml'
             }
+
             manifest = project.manifest {
                 attributes 'Main-Class': mainClass
             }
         }
+
         if (scriptName != Type.RUNNABLE && scriptName != Type.LIBRARY) {
             File script = project.file(scriptName)
             if (!script.exists()) {
@@ -187,7 +197,7 @@ class JRubyJar extends Jar {
 
     JRubyJar() {
         appendix = 'jruby'
-        
+
         File dir = project.file("${project.buildDir}/dirinfo/${name}")
         JRubyDirInfo dirInfo = new JRubyDirInfo(dir)
 
@@ -219,6 +229,19 @@ class JRubyJar extends Jar {
                 }
             }
         )
+
+        project.afterEvaluate {
+            applyConfig()
+        }
+    }
+
+    void updateDepencenies() {
+        if (configuration == null) {
+            configuration = DEFAULT_JRUBYJAR_CONFIG
+        }
+        project.configurations.maybeCreate(configuration)
+        project.dependencies.add(configuration, "org.jruby:jruby-complete:${jrubyVersion}")
+        project.dependencies.add(configuration, "de.saumya.mojo:jruby-mains:${jrubyMainsVersion}")
     }
 
     private Object scriptName
