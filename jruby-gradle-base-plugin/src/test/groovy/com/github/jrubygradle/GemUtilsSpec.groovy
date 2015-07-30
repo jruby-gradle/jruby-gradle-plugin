@@ -1,4 +1,4 @@
-package com.github.jrubygradle
+  package com.github.jrubygradle
 
 import org.gradle.api.file.DuplicateFileCopyingException
 import org.gradle.testfixtures.ProjectBuilder
@@ -122,16 +122,16 @@ class GemUtilsSpec extends Specification {
 
     def "write Jars.lock"() {
         when:
-            GemUtils.OverwriteAction.values().each { 
+            GemUtils.OverwriteAction.values().each {
                 File jarsLock = new File(dest, "jars-${it}.lock")
                 jarsLock.delete()
                 GemUtils.writeJarsLock(jarsLock, [ 'something' ], it)
             }
 
         then:
-            new File(dest, "jars-FAIL.lock").length() == 10
-            new File(dest, "jars-SKIP.lock").length() == 10
-            new File(dest, "jars-OVERWRITE.lock").length() == 10
+            new File(dest, "jars-FAIL.lock").text =~ /something/
+            new File(dest, "jars-SKIP.lock").text =~ /something/
+            new File(dest, "jars-OVERWRITE.lock").text =~ /something/
     }
 
     def "skip write Jars.lock"() {
@@ -151,23 +151,23 @@ class GemUtilsSpec extends Specification {
             GemUtils.writeJarsLock(jarsLock, [ 'something' ], GemUtils.OverwriteAction.OVERWRITE)
 
         then:
-            new File(dest, "jars.lock").length() == 10
+            new File(dest, "jars.lock").text =~ /something/
     }
-  
+
     def "fail write Jars.lock"() {
         when:
             File jarsLock = new File(dest, "jars.lock")
             jarsLock << ''
             GemUtils.writeJarsLock(jarsLock, [ 'something' ], GemUtils.OverwriteAction.FAIL)
 
-        then: 
+        then:
             thrown(DuplicateFileCopyingException)
     }
-  
+
     def "rewrite jar dependency"() {
         when:
             File jars = new File(dest, 'jars')
-            GemUtils.OverwriteAction.values().each { 
+            GemUtils.OverwriteAction.values().each {
                 File jar = new File(dest, "${it}.jar")
                 jar << 'something'
                 GemUtils.rewriteJarDependencies(jars, [jar], ['FAIL.jar':'fail.jar', 'SKIP.jar':'skip.jar', 'OVERWRITE.jar':'over.jar'], it)
@@ -199,7 +199,7 @@ class GemUtilsSpec extends Specification {
             target1.length() == 0
             target2.length() == 9
     }
-  
+
     def "overwrite rewrite jars dependency"() {
         when:
             File jars = new File(dest, 'jars')
@@ -231,7 +231,7 @@ class GemUtilsSpec extends Specification {
             target << ''
             GemUtils.rewriteJarDependencies(jars, [jar], ['jar.jar':'jar.jar'], GemUtils.OverwriteAction.FAIL)
 
-        then: 
+        then:
             thrown(DuplicateFileCopyingException)
     }
 
