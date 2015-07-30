@@ -4,6 +4,8 @@ import org.gradle.api.InvalidUserDataException
 import spock.lang.*
 
 class JRubyExecUtilsSpec extends Specification {
+  static final boolean IS_WINDOWS = System.getProperty('os.name').toLowerCase().startsWith('windows')
+  
     def "The version string in a jruby jar filename must be extracted correctly"() {
 
         expect:
@@ -49,8 +51,11 @@ class JRubyExecUtilsSpec extends Specification {
     }
 
     def "buildArgs() should raise if script looks absolute but doesn't exist"() {
+        given:
+        String filename = (IS_WINDOWS ? 'K:' : '') + '/tmp/the-most-unlikely-file-ever'
+
         when:
-        JRubyExecUtils.buildArgs([], [], new File('/tmp/the-most-unlikely-file-ever'), [])
+        JRubyExecUtils.buildArgs([], [], new File(filename), [])
 
         then:
         thrown(InvalidUserDataException)
