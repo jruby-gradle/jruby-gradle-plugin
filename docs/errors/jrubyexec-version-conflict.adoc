@@ -1,0 +1,54 @@
+= JRubyExec conflict on jrubyVersion
+:page-layout: base
+:toc: right
+
+== What's going on?
+
+The
+link:/groovydoc/jruby-gradle-base-plugin/com/github/jrubygradle/JRubyExec.html[JRubyExec]
+task allows the user to define a specific version of
+link:http://jruby.org[JRuby] via the `jrubyVersion` property. This requires the
+requested version of JRuby to be added to a dependency graph. In order to
+prevent unintentional conflicts in the dependency graph, the link:/base/[base]
+plugin will prevent a `JRubyExec` task from adding a different JRuby version to
+the _default_ `jrubyExec`
+link:https://docs.gradle.org/current/dsl/org.gradle.api.artifacts.Configuration.html[configuration].
+
+
+== How to fix it
+
+Fixing this behavior is relatively easy, the `JRubyExec` task which requires
+its own custom version of JRuby to be installed should _also_ use a custom,
+user-defined, link:https://docs.gradle.org/current/dsl/org.gradle.api.artifacts.Configuration.html[configuration]. E.g.
+
+.build.gradle
+[source, gradle]
+----
+configurations {
+    backwardsCompat
+}
+
+dependencies {
+    backwardsCompat 'rubygems:sinatra:1.0.0'
+}
+
+task checkBackwardsCompatibility(type: JRubyExec) {
+    configuration backwardsCompat
+    script 'smoke-test.rb'
+    jrubyVersion '1.7.19'
+}
+----
+
+
+=== Okay, that didn't work
+
+If that work-around didn't help fix the issue, then you may have encountered an
+unknown **bug!**. Please
+link:https://github.com/jruby-gradle/jruby-gradle-plugin/issues[file an issue]
+so we can correct the broken behavior!
+
+== Links
+
+* link:https://github.com/jruby-gradle/jruby-gradle-plugin/issues/157[issue #157]
+  captures the first reported side-effect of the previous behavior which
+  led to the restriction behind defined in the link:/base/[base] plugin

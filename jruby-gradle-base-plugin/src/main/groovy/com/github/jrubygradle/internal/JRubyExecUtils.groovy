@@ -1,8 +1,8 @@
 package com.github.jrubygradle.internal
 
 import groovy.transform.CompileDynamic
-import groovy.transform.CompileStatic
 import org.gradle.api.InvalidUserDataException
+import org.gradle.api.Project
 import org.gradle.api.artifacts.Configuration
 import org.gradle.api.file.FileCollection
 
@@ -11,10 +11,9 @@ import java.util.regex.Matcher
 /**
  * @author Schalk W. Cronjé.
  */
-@CompileStatic
 class JRubyExecUtils {
-
-    static final List FILTER_ENV_KEYS = ['GEM_PATH', 'RUBY_VERSION', 'GEM_HOME']
+    static final String JAR_DEPENDENCIES_VERSION = '0.1.15'
+    static final String DEFAULT_JRUBYEXEC_CONFIG = 'jrubyExec'
 
     /** Extract a list of files from a configuration that is suitable for a jruby classpath
      *
@@ -81,54 +80,50 @@ class JRubyExecUtils {
         buildArgs([], jrubyArgs, script, scriptArgs)
     }
 
+    /**
+     * Construct the correct set of arguments based on the parameters to invoke jruby-complete.jar with
+     *
+     * @param extra
+     * @param jrubyArgs
+     * @param script
+     * @param scriptArgs
+     * @return sequential list of arguments to pass jruby-complete.jar
+     */
     static List<String> buildArgs(List<Object> extra, List<Object> jrubyArgs, File script, List<Object> scriptArgs) {
         def cmdArgs = extra
         // load Jars.lock on startup
         cmdArgs.add('-rjars/setup')
-        boolean useBinPath = jrubyArgs.contains('-S')
         boolean hasInlineScript = jrubyArgs.contains('-e')
+        boolean useBinPath = jrubyArgs.contains('-S')
+
+        /* Fefault to adding the -S option if we don't have an expression to evaluate
+         * <https://github.com/jruby-gradle/jruby-gradle-plugin/issues/152>
+         */
+        if (!hasInlineScript && script && !jrubyArgs.contains('-S')) {
+            jrubyArgs.add('-S')
+            useBinPath = true
+        }
+
         cmdArgs.addAll(jrubyArgs)
 
-        if ((script != null) && (!useBinPath)) {
-            if (!script.exists()) {
-                throw new InvalidUserDataException("${script} does not exist")
-            }
-            cmdArgs.add(script.absolutePath)
-        }
-        else if ((script != null) && useBinPath) {
+        if (useBinPath && (script instanceof File)) {
             if (script.isAbsolute() && (!script.exists())) {
                 throw new InvalidUserDataException("${script} does not exist")
             }
             cmdArgs.add(script.toString())
         }
-        else if ((script == null) && !(hasInlineScript || useBinPath)) {
-            throw new InvalidUserDataException("no `script` property or inline script via `-e` specified.")
-        }
-        else if ((script == null) && (jrubyArgs.size() == 0)) {
-            throw new InvalidUserDataException('Cannot instantiate a JRubyExec instance without either `script` or `jrubyArgs` or noset')
+        else if (script == null) {
+            if (useBinPath && (jrubyArgs.size() <= 1)) {
+                throw new InvalidUserDataException("No `script` property defined and no inline script provided")
+            }
+
+            if (jrubyArgs.isEmpty()) {
+                throw new InvalidUserDataException('Cannot build JRuby execution arguments with either `script` or `jrubyArgs` set')
+            }
         }
 
         cmdArgs.addAll(scriptArgs as List<String>)
         return cmdArgs
-    }
-
-    /** Prepare a basic environment for usage with an external JRuby environment
-     *
-     * @param env Environment to start from
-     * @param inheritRubyEnv Set to {@code true} is the global RUby environment should be inherited
-     * @return Map of environmental variables
-     * @since 0.1.11
-     */
-    static Map<String, Object> preparedEnvironment(Map<String, Object> env,boolean inheritRubyEnv) {
-        Map<String, Object> newEnv = [
-                'JBUNDLE_SKIP' : 'true',
-                'JARS_SKIP' : 'true',
-        ] as Map<String, Object>
-
-        env.findAll { String key,Object value ->
-            inheritRubyEnv || !(key in FILTER_ENV_KEYS || key.toLowerCase().startsWith('rvm'))
-        } + newEnv
-
     }
 
     /** Get the name of the system search path environmental variable
@@ -150,6 +145,24 @@ class JRubyExecUtils {
     static String prepareWorkingPath(File gemWorkDir, String originalPath) {
         File path = new File(gemWorkDir, 'bin')
         return path.absolutePath + File.pathSeparatorChar + originalPath
+    }
+
+    /**
+     * Update the given configuration on the project with the appropriate versions
+     * of JRuby and supplemental dependencies to execute JRuby successfully
+     */
+    static void updateJRubyDependenciesForConfiguration(Project project, String configuration, String version) {
+        Configuration c = project.configurations.findByName(configuration)
+
+        /* Only define this dependency if we don't already have it */
+        if (!(c.dependencies.find { it.name == 'jruby-complete'})) {
+            project.dependencies.add(configuration, "org.jruby:jruby-complete:${version}")
+        }
+
+        if (version.startsWith("1.7.1")) {
+            project.dependencies.add(configuration,
+                    "rubygems:jar-dependencies:${JAR_DEPENDENCIES_VERSION}")
+        }
     }
 
 }

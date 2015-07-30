@@ -1,6 +1,8 @@
 package com.github.jrubygradle
 
+import com.github.jrubygradle.internal.JRubyExecUtils
 import org.gradle.api.InvalidUserDataException
+import org.gradle.api.ProjectConfigurationException
 import org.gradle.api.tasks.TaskInstantiationException
 import org.gradle.testfixtures.ProjectBuilder
 import spock.lang.*
@@ -56,47 +58,60 @@ class JRubyExecSpec extends Specification {
     }
 
     def "Check jruby defaults"() {
-
         expect: "Default jruby version should be same as project.ruby.execVersion"
-            execTask.jrubyVersion == project.jruby.execVersion
+        execTask.jrubyVersion == project.jruby.execVersion
 
         and: "Default configuration should be jrubyExec"
-            execTask.jrubyConfigurationName == 'jrubyExec'
+        execTask.configuration == JRubyExecUtils.DEFAULT_JRUBYEXEC_CONFIG
     }
 
     def "Check jruby defaults when jruby.execVersion is changed after the task is created"() {
-
         given:
-            final def String initialVersion= project.jruby.execVersion
+        final String initialVersion = project.jruby.execVersion
 
         when: "ExecVersion is changed later on, and JRubyExec.jrubyVersion was not called"
-            project.jruby.execVersion = '1.5.0'
+        project.jruby.execVersion = '1.5.0'
 
         then: "jruby defaults version should point to the earlier version"
-            execTask.jrubyVersion == '1.5.0'
+        execTask.jrubyVersion == '1.5.0'
+    }
 
-        and: "Default configuration should be jrubyExec"
-            execTask.jrubyConfigurationName == 'jrubyExec'
+    def "Changing the JRuby version with the default configuration"() {
+        given:
+        final String newVersion = '1.7.11'
+        execTask.jrubyVersion = newVersion
+
+        when:
+        project.evaluate()
+
+        then:
+        project.jruby.execVersion != newVersion
+        thrown(ProjectConfigurationException)
     }
 
     def "Changing the jruby version on a JRubyExec task"() {
         given:
-            final String cfgName = 'jrubyExec$$' + TASK_NAME
+        final String configurationName = 'spock-ruby'
+        final String newVersion = '1.7.11'
 
-        when: "Version is set on the task"
-            final String newVersion = '1.7.11'
-            assert project.jruby.execVersion != newVersion
-            execTask.jrubyVersion = newVersion
-            project.evaluate()
+        when:
+        project.configure(execTask) {
+            configuration configurationName
+            jrubyVersion newVersion
+        }
+        project.evaluate()
+
+        then:
+        execTask.jrubyVersion != project.jruby.execVersion
 
         then: "jrubyVersion must be updated"
-            execTask.jrubyVersion == newVersion
+        execTask.jrubyVersion == newVersion
 
         and: "jrubyConfigurationName must point to this new configuration"
-            cfgName == execTask.jrubyConfigurationName
+        execTask.configuration == configurationName
 
         and: "configuration must exist"
-            project.configurations.getByName(cfgName) != null
+        project.configurations.findByName(configurationName)
     }
 
     def "Checking the jruby main class"() {
@@ -185,38 +200,5 @@ class JRubyExecSpec extends Specification {
 
         then:
             execTask.getComputedPATH(System.env.PATH).contains('foo')
-    }
-
-
-    def "Prepare a basic environment"() {
-        when:
-        def envMap = execTask.getPreparedEnvironment([:])
-
-        then:
-        envMap.size() != 0
-    }
-
-    def "Filter out RVM environment values by default"() {
-        when:
-        def envMap = execTask.getPreparedEnvironment([
-            'GEM_HOME' : '/tmp/spock',
-            'RUBY_VERSION' : 'notaversion',
-            'rvm_ruby_string' : 'jruby-head',
-            ])
-
-        then:
-        envMap.get('GEM_HOME') != '/tmp/spock'
-        !envMap.containsKey('rvm_ruby_string')
-    }
-
-    def "Avoid filtering out the RVM environment if inheritRubyEnv == true"() {
-        when:
-        execTask.inheritRubyEnv = true
-        def envMap = execTask.getPreparedEnvironment([
-            'GEM_PATH' : '/tmp/spock/invalid',
-            ])
-
-        then:
-        envMap.containsKey('GEM_PATH')
     }
 }

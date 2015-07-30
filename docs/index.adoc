@@ -12,10 +12,10 @@ Ruby and Java developers alike.
 
 *Plugins available:*
 
-* link:base.html[Base]
-* link:jar.html[Jar]
-* link:war.html[War]
-* link:storm.html[Storm]
+* link:base/[Base]
+* link:jar/[Jar]
+* link:war/[War]
+* link:storm/[Storm]
 
 == Quick Start
 

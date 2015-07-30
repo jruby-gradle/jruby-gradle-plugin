@@ -2,6 +2,7 @@ package com.github.jrubygradle
 
 import com.github.jrubygradle.testhelper.BasicProjectBuilder
 import com.github.jrubygradle.testhelper.VersionFinder
+import org.gradle.api.Project
 import spock.lang.*
 
 import static org.gradle.api.logging.LogLevel.LIFECYCLE
@@ -16,136 +17,126 @@ class JRubyExecExtensionIntegrationSpec extends Specification {
     static final boolean TESTS_ARE_OFFLINE = System.getProperty('TESTS_ARE_OFFLINE') != null
     static final File TEST_SCRIPT_DIR = new File( System.getProperty('TEST_SCRIPT_DIR') ?: 'src/integTest/resources/scripts').absoluteFile
     static final File TESTROOT = new File("${System.getProperty('TESTROOT') ?: 'build/tmp/test/integration-tests'}/jreeis").absoluteFile
-    static final File TEST_JARS_DIR = new File(TESTROOT, "build/gems/jars")
+    static final File TEST_JARS_DIR = new File(TESTROOT, "build/tmp/jrubyExec/jars")
 
-    def project
+    Project project
+    ByteArrayOutputStream output = new ByteArrayOutputStream()
+
+    String getOutputBuffer() {
+        return output.toString()
+    }
 
     void setup() {
-        if(TESTROOT.exists()) {
+        if (TESTROOT.exists()) {
             TESTROOT.deleteDir()
         }
         TESTROOT.mkdirs()
-        project= BasicProjectBuilder.buildWithLocalRepo(TESTROOT,FLATREPO,CACHEDIR)
+        project = BasicProjectBuilder.buildWithLocalRepo(TESTROOT,FLATREPO,CACHEDIR)
 
         project.evaluate()
     }
 
     def "Run a script with minimum parameters"() {
-        given:
-            def output = new ByteArrayOutputStream()
-
         when: "I call jrubyexec with only a script name"
-            project.jrubyexec {
-                script        "${TEST_SCRIPT_DIR}/helloWorld.rb"
-                standardOutput output
-            }
+        project.jrubyexec {
+            script        "${TEST_SCRIPT_DIR}/helloWorld.rb"
+            standardOutput output
+        }
 
         then: "I expect the Ruby script to be executed"
-            output.toString() == "Hello, World\n"
+        outputBuffer =~ /Hello, World/
     }
 
     def "Run an inline script"() {
-        given:
-            def output = new ByteArrayOutputStream()
-
         when: "I call jrubyexec with only a script name"
-            project.jrubyexec {
-                jrubyArgs      "-e", "puts 'Hello, World'"
-                standardOutput output
-            }
+        project.jrubyexec {
+            jrubyArgs      "-e", "puts 'Hello, World'"
+            standardOutput output
+        }
 
         then: "I expect the Ruby script to be executed"
-            output.toString() == "Hello, World\n"
+        outputBuffer =~ /Hello, World/
     }
 
     def "Run a script containing a conditional"() {
-        given:
-            def output = new ByteArrayOutputStream()
-
         when: "we have an 'if' clause"
-            project.jrubyexec {
-                script        "${TEST_SCRIPT_DIR}/helloName.rb"
-                if(input == 0) {
-                    scriptArgs 'Stan'
-                } else {
-                    scriptArgs 'man'
-                }
-                standardOutput output
+        project.jrubyexec {
+            script        "${TEST_SCRIPT_DIR}/helloName.rb"
+            if(input == 0) {
+                scriptArgs 'Stan'
+            } else {
+                scriptArgs 'man'
             }
+            standardOutput output
+        }
 
         then: "only the appropriate parameters should be passed"
-            output.toString() == expected
+        outputBuffer == expected
 
         where:
-            input | expected
-            0     | "Hello, Stan\n"
-            1     | "Hello, man\n"
+        input | expected
+        0     | "Hello, Stan\n"
+        1     | "Hello, man\n"
 
     }
 
     def "Running a script that requires a jar"() {
-        given:
-            def output = new ByteArrayOutputStream()
-
         when:
-            project.with {
-                dependencies {
-                    jrubyExec VersionFinder.findDependency(FLATREPO,'org.bouncycastle','bcprov-jdk15on','jar')
+        project.with {
+            dependencies {
+                jrubyExec VersionFinder.findDependency(FLATREPO,'org.bouncycastle','bcprov-jdk15on','jar')
 
-                }
-                jrubyexec {
-                    jrubyArgs '-e'
-                    jrubyArgs 'print $CLASSPATH'
-                    standardOutput output
-                }
             }
+            jrubyexec {
+                jrubyArgs '-e'
+                jrubyArgs 'print $CLASSPATH'
+                standardOutput output
+            }
+        }
 
         then:
-            output.toString() == "[\"${new File(TEST_JARS_DIR, 'org/bouncycastle/bcprov-jdk15on/1.50/bcprov-jdk15on-1.50.jar').toURL()}\"]"
+        outputBuffer == "[\"${new File(TEST_JARS_DIR, 'org/bouncycastle/bcprov-jdk15on/1.50/bcprov-jdk15on-1.50.jar').toURL()}\"]"
     }
 
     def "Running a script that requires a gem, a separate jRuby and a separate configuration"() {
-        given:
-            def output = new ByteArrayOutputStream()
-
         when:
-            project.with {
-                dependencies {
-                    jrubyExec VersionFinder.findDependency(FLATREPO,'','credit_card_validator','gem')
+        project.with {
+            dependencies {
+                jrubyExec VersionFinder.findDependency(FLATREPO,'','credit_card_validator','gem')
 
-                }
-                jrubyexec {
-                    script        "${TEST_SCRIPT_DIR}/requiresGem.rb"
-                    standardOutput output
-                    jrubyArgs '-T1'
-                }
             }
+            jrubyexec {
+                script        "${TEST_SCRIPT_DIR}/requiresGem.rb"
+                standardOutput output
+                jrubyArgs '-T1'
+            }
+        }
 
         then:
-            output.toString() == "Not valid\n"
+        outputBuffer =~ /Not valid/
     }
 
     def "Running a script that requires a gem, a separate jRuby, a separate configuration and a custom gemWorkDir"() {
         given:
-            def output = new ByteArrayOutputStream()
+        final String customGemDir = 'customGemDir'
 
         when:
-            project.with {
-                dependencies {
-                    jrubyExec VersionFinder.findDependency(FLATREPO,'','credit_card_validator','gem')
+        project.with {
+            dependencies {
+                jrubyExec VersionFinder.findDependency(FLATREPO,'','credit_card_validator','gem')
 
-                }
-                jrubyexec {
-                    script        "${TEST_SCRIPT_DIR}/requiresGem.rb"
-                    standardOutput output
-                    jrubyArgs '-T1'
-                    gemWorkDir  new File(buildDir,'customGemDir')
-                }
             }
+            jrubyexec {
+                script        "${TEST_SCRIPT_DIR}/requiresGem.rb"
+                standardOutput output
+                jrubyArgs '-T1'
+                gemWorkDir  "${buildDir}/${customGemDir}"
+            }
+        }
 
         then:
-            output.toString() == "Not valid\n"
-            new File(project.buildDir,'customGemDir').exists()
+        outputBuffer =~ /Not valid/
+        new File(project.buildDir, customGemDir).exists()
 
     }
 }

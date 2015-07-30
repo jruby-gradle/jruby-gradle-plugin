@@ -5,15 +5,14 @@ import com.github.jrubygradle.JRubyExec
 import groovy.transform.PackageScope
 import org.gradle.api.Project
 import org.gradle.api.artifacts.Configuration
-import org.gradle.internal.FileUtils
-import org.gradle.util.CollectionUtils
 
 /**
  * @author Schalk W. Cronjé
  */
 class JRubyExecDelegate implements JRubyExecTraits   {
+    static final String JRUBYEXEC_CONFIG = JRubyExecUtils.DEFAULT_JRUBYEXEC_CONFIG
 
-    static final String JRUBYEXEC_CONFIG = JRubyExec.JRUBYEXEC_CONFIG
+    Project project
 
     def methodMissing(String name, args) {
         if( name == 'args' || name == 'setArgs' ) {
@@ -36,18 +35,6 @@ class JRubyExecDelegate implements JRubyExecTraits   {
      */
     File getScript() { _convertScript() }
 
-    /** Directory to use for unpacking GEMs.
-     * This is optional. If not set, then an internal generated folder will be used. In general the latter behaviour
-     * is preferred as it allows for isolating different {@code JRubyExec} tasks. However, this functionality is made
-     * available for script authors for would like to control this behaviour and potentially share GEMs between
-     * various {@code JRubyExec} tasks.
-     *
-     * @since 0.1.9
-     */
-    File getGemWorkDir() {
-        _convertGemWorkDir(project)
-    }
-
     /** buildArgs creates a list of arguments to pass to the JVM
      */
     List<String> buildArgs() {
@@ -68,18 +55,13 @@ class JRubyExecDelegate implements JRubyExecTraits   {
 
     static def jrubyexecDelegatingClosure = { Project project, Closure cl ->
         def proxy =  new JRubyExecDelegate()
+        proxy.project = project
         Closure cl2 = cl.clone()
         cl2.delegate = proxy
         cl2.call()
 
-        File gemDir= proxy._convertGemWorkDir(project) ?: project.file(project.jruby.gemInstallDir)
-
         Configuration config = project.configurations.getByName(JRUBYEXEC_CONFIG)
-        GemUtils.OverwriteAction overwrite = project.gradle.startParameter.refreshDependencies ?  GemUtils.OverwriteAction.OVERWRITE : GemUtils.OverwriteAction.SKIP
-        project.mkdir gemDir
-        GemUtils.extractGems(project,config,config,gemDir,overwrite)
-        GemUtils.setupJars(config,gemDir,overwrite)
-        String pathVar = JRubyExecUtils.pathVar()
+        proxy.prepareDependencies(project)
 
         project.javaexec {
             classpath JRubyExecUtils.classpathFromConfiguration(config)
@@ -90,19 +72,14 @@ class JRubyExecDelegate implements JRubyExecTraits   {
             }
             main 'org.jruby.Main'
             // just keep this even if it does not exists
-            args '-I' + JRubyExec.jarDependenciesGemLibPath(gemDir)
+            args '-I' + JRubyExec.jarDependenciesGemLibPath(proxy.getGemWorkDir())
             // load Jars.lock on startup
             args '-rjars/setup'
             proxy.buildArgs().each { item ->
                 args item.toString()
             }
 
-            setEnvironment JRubyExecUtils.preparedEnvironment(getEnvironment(),proxy.inheritRubyEnv)
-            environment 'PATH' : JRubyExecUtils.prepareWorkingPath(gemDir,System.env."${pathVar}")
-            environment 'GEM_HOME' : gemDir.absolutePath
-            environment 'GEM_PATH' : gemDir.absolutePath
-            environment 'JARS_HOME' : new File(gemDir.absolutePath, 'jars')
-            environment 'JARS_LOCK' : new File(gemDir.absolutePath, 'Jars.lock')
+            setEnvironment proxy.getPreparedEnvironment(System.env)
         }
     }
 
