@@ -5,7 +5,7 @@ import org.gradle.api.Project
 import org.gradle.api.Task
 import org.gradle.api.file.FileCollection
 import org.gradle.testfixtures.ProjectBuilder
-import spock.lang.Specification
+import spock.lang.*
 
 import static org.gradle.api.logging.LogLevel.LIFECYCLE
 
@@ -18,7 +18,6 @@ import static org.gradle.api.logging.LogLevel.LIFECYCLE
 class JRubyJarPluginSpec extends Specification {
     static final File TESTROOT = new File("${System.getProperty('TESTROOT') ?: 'build/tmp/test/unittests'}/jrjps")
     static final File TESTREPO_LOCATION = new File("${System.getProperty('TESTREPO_LOCATION') ?: 'build/tmp/test/repo'}")
-    static final String jrubyTestVersion = '1.7.21'
 
     def project
     def jarTask
@@ -233,13 +232,6 @@ class JRubyJarPluginSpec extends Specification {
         new File(project.jruby.gemInstallDir,'gems').mkdirs()
         new File(project.jruby.gemInstallDir,'gems/fake.txt').text = 'fake.content'
 
-        project.with {
-            jruby {
-                defaultRepositories = false
-                defaultVersion = jrubyTestVersion
-            }
-        }
-
         when: "I set the main class"
         project.configure(jrubyJar) {
             destinationDir = expectedDir
@@ -313,5 +305,23 @@ class JRubyJarPluginSpec extends Specification {
         then:
         Exception e = thrown()
         e.message == 'can not have mainClass for library'
+    }
+
+    @Issue('https://github.com/jruby-gradle/jruby-gradle-plugin/issues/115')
+    def "jrubyVersion is lazily evaluated"() {
+        given:
+        final String version = '1.7.20'
+        Project project = ProjectBuilder.builder().build()
+        project.apply plugin: 'com.github.jruby-gradle.base'
+        project.apply plugin: 'com.github.jruby-gradle.jar'
+
+        when:
+        project.jruby {
+            defaultVersion version
+        }
+        project.evaluate()
+
+        then:
+        project.tasks.findByName('jrubyJar').jrubyVersion == version
     }
 }

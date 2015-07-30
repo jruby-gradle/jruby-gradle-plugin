@@ -29,11 +29,28 @@ class JRubyJar extends Jar {
     static final String DEFAULT_MAIN_CLASS = 'de.saumya.mojo.mains.JarMain'
     static final String EXTRACTING_MAIN_CLASS = 'de.saumya.mojo.mains.ExtractingMain'
 
+    protected String jrubyVersion
+
+    /** Return the project default unless set */
+    String getJrubyVersion() {
+        if (jrubyVersion == null) {
+            return project.jruby.defaultVersion
+        }
+        return jrubyVersion
+    }
+
     @Input
-    String jrubyVersion = project.jruby.defaultVersion
+    void jrubyVersion(String version) {
+        this.jrubyVersion = version
+    }
 
     @Input
     String jrubyMainsVersion = '0.3.0'
+
+    void jrubyMainsVersion(String version) {
+        this.jrubyMainsVersion = version
+    }
+
 
     @Input
     String mainClass
@@ -119,14 +136,6 @@ class JRubyJar extends Jar {
     @Incubating
     void extractingMainClass() {
         mainClass(EXTRACTING_MAIN_CLASS)
-    }
-
-    void jrubyVersion(String version) {
-      this.jrubyVersion = version
-    }
-
-    void jrubyMainsVersion(String version) {
-      this.jrubyMainsVersion = version
     }
 
     @Deprecated
@@ -240,8 +249,8 @@ class JRubyJar extends Jar {
             configuration = DEFAULT_JRUBYJAR_CONFIG
         }
         project.configurations.maybeCreate(configuration)
-        project.dependencies.add(configuration, "org.jruby:jruby-complete:${jrubyVersion}")
-        project.dependencies.add(configuration, "de.saumya.mojo:jruby-mains:${jrubyMainsVersion}")
+        project.dependencies.add(configuration, "org.jruby:jruby-complete:${getJrubyVersion()}")
+        project.dependencies.add(configuration, "de.saumya.mojo:jruby-mains:${getJrubyMainsVersion()}")
     }
 
     private Object scriptName
