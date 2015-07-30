@@ -123,7 +123,26 @@ trait JRubyExecTraits {
         this.jrubyArgs.addAll(args as List)
     }
 
+    /**
+     * Prepare the Ruby and Java dependencies for the configured configuration
+     *
+     * This method will determine the appropriate dependency overwrite behavior
+     * from the Gradle invocation. In effect, if the --refresh-dependencies flag
+     * is used, already installed gems will be overwritten.
+     *
+     * @param project The currently executing project
+     */
+    void prepareDependencies(Project project) {
+        GemUtils.OverwriteAction overwrite = GemUtils.OverwriteAction.SKIP
 
+        if (project.gradle.startParameter.refreshDependencies) {
+            overwrite = GemUtils.OverwriteAction.OVERWRITE
+        }
+
+        prepareDependencies(project, overwrite)
+    }
+
+    /** Prepare dependencies with a custom overwrite behavior */
     void prepareDependencies(Project project, GemUtils.OverwriteAction overwrite) {
         Configuration execConfiguration = project.configurations.findByName(configuration)
 

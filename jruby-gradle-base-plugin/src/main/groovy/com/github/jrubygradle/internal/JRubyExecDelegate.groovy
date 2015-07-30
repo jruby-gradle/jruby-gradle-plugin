@@ -61,8 +61,7 @@ class JRubyExecDelegate implements JRubyExecTraits   {
         cl2.call()
 
         Configuration config = project.configurations.getByName(JRUBYEXEC_CONFIG)
-        GemUtils.OverwriteAction overwrite = project.gradle.startParameter.refreshDependencies ?  GemUtils.OverwriteAction.OVERWRITE : GemUtils.OverwriteAction.SKIP
-        proxy.prepareDependencies(project, overwrite)
+        proxy.prepareDependencies(project)
 
         project.javaexec {
             classpath JRubyExecUtils.classpathFromConfiguration(config)

@@ -123,10 +123,7 @@ class JRubyExec extends JavaExec implements JRubyExecTraits {
     void exec() {
         Configuration execConfiguration = project.configurations.findByName(configuration)
         logger.info("Executing with configuration: ${configuration}")
-        GemUtils.OverwriteAction overwrite = project.gradle.startParameter.refreshDependencies ? \
-                                                GemUtils.OverwriteAction.OVERWRITE : GemUtils.OverwriteAction.SKIP
-        logger.info("Gem overwrite action: ${overwrite}")
-        prepareDependencies(project, overwrite)
+        prepareDependencies(project)
 
         setEnvironment getPreparedEnvironment(environment)
         super.classpath JRubyExecUtils.classpathFromConfiguration(execConfiguration)
