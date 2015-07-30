@@ -26,7 +26,6 @@ dependencies {
 
 task verifyAsciidoctorWorks(type: JRubyExec) {
     description "Verify that we can execute the `asciidoctor` command line tool"
-    jrubyArgs '-S'
     script "asciidoctor"
     scriptArgs "--version"
 }

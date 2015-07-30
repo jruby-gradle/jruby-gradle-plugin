@@ -1,8 +1,6 @@
 package com.github.jrubygradle.internal
 
-import com.github.jrubygradle.JRubyExec
 import groovy.transform.CompileDynamic
-import groovy.transform.CompileStatic
 import org.gradle.api.InvalidUserDataException
 import org.gradle.api.Project
 import org.gradle.api.artifacts.Configuration
@@ -82,31 +80,46 @@ class JRubyExecUtils {
         buildArgs([], jrubyArgs, script, scriptArgs)
     }
 
+    /**
+     * Construct the correct set of arguments based on the parameters to invoke jruby-complete.jar with
+     *
+     * @param extra
+     * @param jrubyArgs
+     * @param script
+     * @param scriptArgs
+     * @return sequential list of arguments to pass jruby-complete.jar
+     */
     static List<String> buildArgs(List<Object> extra, List<Object> jrubyArgs, File script, List<Object> scriptArgs) {
         def cmdArgs = extra
         // load Jars.lock on startup
         cmdArgs.add('-rjars/setup')
-        boolean useBinPath = jrubyArgs.contains('-S')
         boolean hasInlineScript = jrubyArgs.contains('-e')
+        boolean useBinPath = jrubyArgs.contains('-S')
+
+        /* Fefault to adding the -S option if we don't have an expression to evaluate
+         * <https://github.com/jruby-gradle/jruby-gradle-plugin/issues/152>
+         */
+        if (!hasInlineScript && script && !jrubyArgs.contains('-S')) {
+            jrubyArgs.add('-S')
+            useBinPath = true
+        }
+
         cmdArgs.addAll(jrubyArgs)
 
-        if ((script != null) && (!useBinPath)) {
-            if (!script.exists()) {
-                throw new InvalidUserDataException("${script} does not exist")
-            }
-            cmdArgs.add(script.absolutePath)
-        }
-        else if ((script != null) && useBinPath) {
+        if (useBinPath && (script instanceof File)) {
             if (script.isAbsolute() && (!script.exists())) {
                 throw new InvalidUserDataException("${script} does not exist")
             }
             cmdArgs.add(script.toString())
         }
-        else if ((script == null) && !(hasInlineScript || useBinPath)) {
-            throw new InvalidUserDataException("no `script` property or inline script via `-e` specified.")
-        }
-        else if ((script == null) && (jrubyArgs.size() == 0)) {
-            throw new InvalidUserDataException('Cannot instantiate a JRubyExec instance without either `script` or `jrubyArgs` or noset')
+        else if (script == null) {
+            if (useBinPath && (jrubyArgs.size() <= 1)) {
+                throw new InvalidUserDataException("No `script` property defined and no inline script provided")
+            }
+
+            if (jrubyArgs.isEmpty()) {
+                throw new InvalidUserDataException('Cannot build JRuby execution arguments with either `script` or `jrubyArgs` set')
+            }
         }
 
         cmdArgs.addAll(scriptArgs as List<String>)
