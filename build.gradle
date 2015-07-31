@@ -37,11 +37,16 @@ subprojects {
 
     dependencies {
         compile new GradleDist(project, '2.0').asFileTree
+
+        codenarc(
+            "org.codenarc:CodeNarc:0.24",
+            "org.codehaus.groovy:groovy-all:2.4.0+"
+        )
     }
 
     codenarc {
         sourceSets = [sourceSets.main]
-        configFile = file("${rootProject.projectDir}/gradle/codenarc.xml")
+        configFile = file("${rootProject.projectDir}/gradle/codenarc.rules")
     }
 
     test {

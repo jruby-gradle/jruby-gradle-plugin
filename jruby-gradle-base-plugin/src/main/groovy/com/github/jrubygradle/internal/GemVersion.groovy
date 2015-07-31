@@ -31,29 +31,33 @@ import java.util.regex.Pattern
  */
 class GemVersion {
 
-    private static LOW_EX = '('
-    private static LOW_IN = '['
-    private static UP_EX = ')'
-    private static UP_IN = ']'
-    private static Pattern DOT_PLUS = Pattern.compile('\\.\\+')
-    private static Pattern PLUS = Pattern.compile('\\+')
-    private static Pattern DIGITS_PLUS = Pattern.compile('[0-9]+\\+')
-    private static Pattern HEAD = Pattern.compile('^.*,\\s*')
-    private static Pattern TAIL = Pattern.compile(',.*$')
-    private static Pattern FIRST = Pattern.compile('^[\\[\\(]')
-    private static Pattern LAST = Pattern.compile('[\\]\\)]$')
-    private static Pattern ZEROS = Pattern.compile('(\\.0)+$')
+    private static final MAX_VERSION = '99999'
 
-    private String low
-    private String high
-    private prefix = LOW_IN
-    private postfix = UP_IN
+    private static final LOW_EX = '('
+    private static final LOW_IN = '['
+    private static final UP_EX = ')'
+    private static final UP_IN = ']'
+    private static final Pattern DOT_PLUS = Pattern.compile('\\.\\+')
+    private static final Pattern PLUS = Pattern.compile('\\+')
+    private static final Pattern DIGITS_PLUS = Pattern.compile('[0-9]+\\+')
+    private static final Pattern HEAD = Pattern.compile('^.*,\\s*')
+    private static final Pattern TAIL = Pattern.compile(',.*$')
+    private static final Pattern FIRST = Pattern.compile('^[\\[\\(]')
+    private static final Pattern LAST = Pattern.compile('[\\]\\)]$')
+    private static final Pattern ZEROS = Pattern.compile('(\\.0)+$')
+
+    private static final VERSION_SPLIT = '[.]'
+
+    final String low
+    final String high
+    final prefix = LOW_IN
+    final postfix = UP_IN
 
     private GemVersion(String pre, String low, String high, String post) {
-        prefix = pre
+        this.prefix = pre
         this.low = low
         this.high = high
-        postfix = post
+        this.postfix = post
     }
 
     /**
@@ -63,18 +67,19 @@ class GemVersion {
      * @param String version
      */
     GemVersion(String version) {
-        if (version.contains( '+' ) ) {
+        if (version.contains('+')) {
             low = ZEROS.matcher(PLUS.matcher(DOT_PLUS.matcher(version).replaceFirst('.0')).replaceFirst('')).replaceFirst('')
-            high = DIGITS_PLUS.matcher(DOT_PLUS.matcher(version).replaceFirst('.99999')).replaceFirst('99999')
+            high = DIGITS_PLUS.matcher(DOT_PLUS.matcher(version).replaceFirst('.99999')).replaceFirst(MAX_VERSION)
         }
-        else if (version.contains( LOW_IN ) || version.contains( LOW_EX ) ||
-                 version.contains( UP_IN ) || version.contains( UP_EX ) ) {
-            prefix = version.charAt( 0 ).toString()
-            postfix = version.charAt( version.size() - 1 ).toString()
+        else if (version.contains(LOW_IN) || version.contains(LOW_EX) ||
+                 version.contains(UP_IN) || version.contains(UP_EX)) {
+            prefix = version.charAt(0).toString()
+            postfix = version.charAt(version.size() - 1).toString()
             low = ZEROS.matcher(FIRST.matcher(TAIL.matcher(version).replaceFirst('')).replaceFirst('')).replaceFirst('')
             high = LAST.matcher(HEAD.matcher(version).replaceFirst('')).replaceFirst('')
-            if (high == '' ){
-              high = '99999'
+
+            if (high == '') {
+              high = MAX_VERSION
             }
         }
         else {
@@ -93,38 +98,39 @@ class GemVersion {
      * @return GemVersion the intersected version range
      */
     GemVersion intersect(String otherVersion) {
-        def other = new GemVersion( otherVersion )
-        def newPrefix
-        def newLow
-        switch( compare(low, other.low) ) {
-        case -1:
-            newLow = other.low
-            newPrefix = other.prefix
-            break
-        case 0:
-            newPrefix = prefix == LOW_EX || other.prefix == LOW_EX ? LOW_EX : LOW_IN
-            newLow = low
-            break
-        case 1:
-            newLow = low
-            newPrefix = prefix
+        GemVersion other = new GemVersion(otherVersion)
+        String newPrefix
+        String newLow
+        switch (compare(low, other.low)) {
+            case -1:
+                newLow = other.low
+                newPrefix = other.prefix
+                break
+            case 0:
+                newPrefix = prefix == LOW_EX || other.prefix == LOW_EX ? LOW_EX : LOW_IN
+                newLow = low
+                break
+            case 1:
+                newLow = low
+                newPrefix = prefix
         }
-        def newPostfix
-        def newHigh
-        switch( compare(high, other.high) ) {
-        case 1:
-            newHigh = other.high
-            newPostfix = other.postfix
-            break
-        case 0:
-            newPostfix = postfix == UP_EX || other.postfix == UP_EX ? UP_EX : UP_IN
-            newHigh = high
-            break
-        case -1:
-            newHigh = high
-            newPostfix = postfix
+        String newPostfix
+        String newHigh
+
+        switch (compare(high, other.high)) {
+            case 1:
+                newHigh = other.high
+                newPostfix = other.postfix
+                break
+            case 0:
+                newPostfix = postfix == UP_EX || other.postfix == UP_EX ? UP_EX : UP_IN
+                newHigh = high
+                break
+            case -1:
+                newHigh = high
+                newPostfix = postfix
         }
-        new GemVersion( newPrefix, newLow, newHigh, newPostfix )
+        return new GemVersion(newPrefix, newLow, newHigh, newPostfix)
     }
 
     /**
@@ -140,39 +146,41 @@ class GemVersion {
      * @param String bObject second version
      * @return int -1 if aObject < bObject, 0 if both are equal and 1 if aObject > bObject
      */
-    private int compare( String aObject, String bObject ) {
-        def aDigits = aObject.split('[.]')
-        def bDigits = bObject.split('[.]')
-        def index
-        for( int i = 0; i < aDigits.length && i < bDigits.length; i++ ) {
-            if (aDigits[ i ] != bDigits[ i ] ) {
+    private int compare(String aObject, String bObject) {
+        String[] aDigits = aObject.split(VERSION_SPLIT)
+        String[] bDigits = bObject.split(VERSION_SPLIT)
+        int index = -1
+
+        for (int i = 0; i < aDigits.length && i < bDigits.length; i++) {
+            if (aDigits[i] != bDigits[i] ) {
                 index = i
                 break
             }
         }
-        if (index == null) {
+
+        if (index == -1) {
             // one contains the other - so look at the length
-            if ( aDigits.length < bDigits.length ) {
+            if (aDigits.length < bDigits.length) {
                 return -1
             }
-            else if ( aDigits.length == bDigits.length ) {
+            if (aDigits.length == bDigits.length) {
                 return 0
             }
-            else {
-                return 1
-            }
+            return 1
         }
-        def aaObject
-        def bbObject
-        if (aDigits[ index ].isInteger() && bDigits[ index ].isInteger()) {
+
+        int aaObject
+        int bbObject
+
+        if (aDigits[index].isInteger() && bDigits[index].isInteger()) {
             // compare them as number
-            aaObject = aDigits[ index ] as int
-            bbObject = bDigits[ index ] as int
+            aaObject = aDigits[index] as int
+            bbObject = bDigits[index] as int
         }
         else {
             // compare them as string
-            aaObject = aDigits[ index ]
-            bbObject = bDigits[ index ]
+            aaObject = aDigits[index]
+            bbObject = bDigits[index]
         }
         if (aaObject < bbObject) {
             -1
@@ -191,7 +199,7 @@ class GemVersion {
      * @return boolean true if lower bound bigger then upper bound
      */
     boolean conflict() {
-        compare(low, high) == 1
+        return (compare(low, high) == 1)
     }
 
     /**
@@ -201,12 +209,10 @@ class GemVersion {
      *
      * @return String maven version range
      */
-    String toString(){
-        if (prefix == '[' && postfix == ']' && low == high && low =~ /[a-zA-Z]/ ) {
-            low
+    String toString() {
+        if (prefix == LOW_IN && postfix == UP_IN && low == high && low =~ /[a-zA-Z]/) {
+            return low
         }
-        else {
-            "${prefix}${low},${high}${postfix}"
-        }
+        return "${prefix}${low},${high}${postfix}"
     }
 }

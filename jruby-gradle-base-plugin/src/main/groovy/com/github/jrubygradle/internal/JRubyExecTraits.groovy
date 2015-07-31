@@ -29,8 +29,9 @@ import org.gradle.util.CollectionUtils
  * @since 0.1.18
  */
 @CompileStatic
+@SuppressWarnings(['MethodName', 'UnnecessaryGetter'])
 trait JRubyExecTraits {
-    final List<String>  FILTER_ENV_KEYS = ['GEM_PATH', 'RUBY_VERSION', 'GEM_HOME']
+    final List<String> filterEnvKeys = ['GEM_PATH', 'RUBY_VERSION', 'GEM_HOME']
 
     /** Allow JRubyExec to inherit a Ruby env from the shell (e.g. RVM)
      *
@@ -67,7 +68,7 @@ trait JRubyExecTraits {
      *
      * @param scr Path to script. Can be any object that is convertible to File.
      */
-    void script(def scr) {
+    void script(Object scr) {
         setScript(scr)
     }
 
@@ -75,7 +76,7 @@ trait JRubyExecTraits {
      *
      * @param scr Path to script. Can be any object that is convertible to File.
      */
-    void setScript(def scr) {
+    void setScript(Object scr) {
         this.script = scr
     }
 
@@ -168,7 +169,6 @@ trait JRubyExecTraits {
         )
     }
 
-
     File _convertScript() {
         switch (this.script) {
             case null:
@@ -186,12 +186,12 @@ trait JRubyExecTraits {
         Map<String, Object> preparedEnv = [:]
 
         preparedEnv.putAll(env.findAll { String key, Object value ->
-            inheritRubyEnv || !(key in FILTER_ENV_KEYS || key.matches(/rvm.*/))
+            inheritRubyEnv || !(key in filterEnvKeys || key.matches(/rvm.*/))
         })
 
         preparedEnv.putAll([
-                'JBUNDLE_SKIP' : 'true',
-                'JARS_SKIP' : 'true',
+                'JBUNDLE_SKIP' : true,
+                'JARS_SKIP' : true,
                 'PATH' : getComputedPATH(System.getenv().get(JRubyExecUtils.pathVar())),
                 'GEM_HOME' : getGemWorkDir().absolutePath,
                 'GEM_PATH' : getGemWorkDir().absolutePath,
@@ -205,12 +205,14 @@ trait JRubyExecTraits {
     // Internal functions intended to be used by plugin itself.
 
     File _convertGemWorkDir(Project project) {
-        this.gemWorkDir ? project.file(this.gemWorkDir) : null
+        return this.gemWorkDir ? project.file(this.gemWorkDir) : null
     }
 
     @CompileDynamic
+    /* collectMany is literally wrong here, stupid codenarc */
+    @SuppressWarnings('UseCollectMany')
     List<String> _convertScriptArgs() {
-        CollectionUtils.stringize(
+        return CollectionUtils.stringize(
             this.scriptArgs.collect { arg ->
                 /* In order to support closures in scriptArgs for lazy
                  * evaluation, we need to evaluate the closure if it is present
@@ -221,18 +223,18 @@ trait JRubyExecTraits {
                 else {
                     arg
                 }
-            } .flatten()
+            }.flatten()
         )
     }
 
     @CompileDynamic
     List<String> _convertJrubyArgs() {
-        CollectionUtils.stringize(this.jrubyArgs)
+        return CollectionUtils.stringize(this.jrubyArgs)
     }
 
     /** Return the computed `PATH` for the task */
     String getComputedPATH(String originalPath) {
-        JRubyExecUtils.prepareWorkingPath(getGemWorkDir(), originalPath)
+        return JRubyExecUtils.prepareWorkingPath(getGemWorkDir(), originalPath)
     }
 
     @CompileDynamic
@@ -243,7 +245,7 @@ trait JRubyExecTraits {
 
     private Object script
     private Object gemWorkDir
-    private List<Object> scriptArgs = []
-    private List<Object> jrubyArgs = []
+    private final List<Object> scriptArgs = []
+    private final List<Object> jrubyArgs = []
 }
 

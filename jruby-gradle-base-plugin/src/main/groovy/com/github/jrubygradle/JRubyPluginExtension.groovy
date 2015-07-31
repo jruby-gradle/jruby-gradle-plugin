@@ -3,6 +3,9 @@ package com.github.jrubygradle
 import org.gradle.api.Incubating
 import org.gradle.api.Project
 
+/**
+ * Class providing the jruby{} DSL extension to the Gradle build script
+ */
 class JRubyPluginExtension {
     static final String DEFAULT_JRUBY_VERSION = '9.0.1.0'
 
@@ -145,7 +148,7 @@ class JRubyPluginExtension {
         execVersionCallbacks.add(callback)
     }
 
-    private Project project
+    private final Project project
 
     /** Directory for jrubyPrepare to install GEM dependencies into */
     private Object gemInstallDir
@@ -154,10 +157,10 @@ class JRubyPluginExtension {
     private Object jarInstallDir
 
     /** List of callbacks to invoke when jruby.defaultVersion is modified */
-    private List<Closure> defaultVersionCallbacks = []
+    private final List<Closure> defaultVersionCallbacks = []
 
     /** List of callbacks to invoke when jruby.execVersion is modified */
-    private List<Closure> execVersionCallbacks = []
+    private final List<Closure> execVersionCallbacks = []
 
     private Boolean isExecVersionModified = false
 }

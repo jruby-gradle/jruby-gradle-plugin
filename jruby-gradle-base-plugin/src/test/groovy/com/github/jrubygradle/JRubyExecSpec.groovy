@@ -150,7 +150,7 @@ class JRubyExecSpec extends Specification {
     }
 
     def "Setting script arguments with Closures"() {
-        when: "caling scriptArgs with a Closure in the array"
+        when: "calling scriptArgs with a Closure in the array"
         project.configure(execTask) {
             scriptArgs 'a', { 'b' }, 'c'
         }

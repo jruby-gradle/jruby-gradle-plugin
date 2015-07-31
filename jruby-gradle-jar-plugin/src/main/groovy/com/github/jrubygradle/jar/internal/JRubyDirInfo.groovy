@@ -2,12 +2,17 @@ package com.github.jrubygradle.jar.internal
 
 import org.gradle.api.file.RelativePath
 
+/**
+ * JRubyDirInfo is responsible for generation of .jrubydir files.
+ *
+ * The .jrubydir files help the JRuby runtime navigate using {@code Dir.glob}
+ * type patterns from within the packed JRubyJar context
+ */
 class JRubyDirInfo {
-
-    private static final String NEW_LINE = System.getProperty("line.separator")
+    private static final String NEW_LINE = System.getProperty('line.separator')
     private static final File OMIT = new File('')
-    private static final List<String> omissionDirs = ['META-INF', 'gems', 'specifications',
-                                                      'build_info', 'cache', 'doc' ,'bin']
+    private static final List<String> OMISSION_DIRS = ['META-INF', 'gems', 'specifications',
+                                                      'build_info', 'cache', 'doc', 'bin']
 
     private final Map dirsCache = [:]
 
@@ -19,17 +24,16 @@ class JRubyDirInfo {
 
     File toFile(File path, String subdir) {
         if (path == null) {
-          if (omissionDirs.contains(subdir)) {
-              path = OMIT
-          }
-          else {
-              path = new File(subdir)                        
-          }
+            if (OMISSION_DIRS.contains(subdir)) {
+                return OMIT
+            }
+            return new File(subdir)
         }
-        else if (path != OMIT) {
-            path = new File(path, subdir)
+
+        if (path != OMIT) {
+            return  new File(path, subdir)
         }
-        path
+        return path
     }
 
     void process(File path) {
@@ -38,7 +42,8 @@ class JRubyDirInfo {
                              isRoot ? '.jrubydir' : "${path.parent}/.jrubydir")
         String name = path.name
         File dir = file.parentFile
-        def dirs = dirsCache[dir]
+        List dirs = dirsCache[dir]
+
         if (dirs == null) {
             dirs = dirsCache[dir] = []
         }
@@ -61,7 +66,7 @@ class JRubyDirInfo {
     }
 
     void add( RelativePath relativePath ) {
-        if (!['jar-bootstrap.rb', 'MANIFEST.MF','.jrubydir'].contains(relativePath.lastName)) {
+        if (!['jar-bootstrap.rb', 'MANIFEST.MF', '.jrubydir'].contains(relativePath.lastName)) {
             File path = null
             relativePath.segments.each {
                 path = toFile(path, it.toString())

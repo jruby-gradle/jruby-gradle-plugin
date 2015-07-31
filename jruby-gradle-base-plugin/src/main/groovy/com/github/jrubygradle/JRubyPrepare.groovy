@@ -22,8 +22,8 @@ class JRubyPrepare extends DefaultTask {
     File outputDir
 
     @InputFiles
-    private FileCollection getGems() {
-        GemUtils.getGems(project.files(this.dependencies))
+    private FileCollection gemsAsFileCollection() {
+        return GemUtils.getGems(project.files(this.dependencies))
     }
 
     /** Sets the output directory
@@ -51,7 +51,7 @@ class JRubyPrepare extends DefaultTask {
          * is not a guarantee (pretty close though)
          */
         File jrubyJar = JRubyExecUtils.jrubyJar(project.configurations.findByName(JRubyExecUtils.DEFAULT_JRUBYEXEC_CONFIG))
-        GemUtils.extractGems(project, jrubyJar, getGems(), outputDir, GemUtils.OverwriteAction.SKIP)
+        GemUtils.extractGems(project, jrubyJar, gemsAsFileCollection(), outputDir, GemUtils.OverwriteAction.SKIP)
 
         if (!dependencies.isEmpty()) {
             dependencies.each {

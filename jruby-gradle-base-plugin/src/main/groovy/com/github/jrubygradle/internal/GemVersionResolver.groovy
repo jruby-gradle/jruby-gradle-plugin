@@ -1,13 +1,16 @@
 package com.github.jrubygradle.internal
 
+import org.gradle.api.GradleException
 import org.gradle.api.Project
 import org.gradle.api.artifacts.DependencyResolveDetails
 import org.gradle.api.artifacts.Configuration
 import org.gradle.api.logging.Logger
+import org.gradle.api.logging.Logging
 
-
+/**
+ * Resolved to compute gem versions
+ */
 class GemVersionResolver {
-
     Map versions
     private final Configuration configuration
     private final Logger logger
@@ -28,59 +31,65 @@ class GemVersionResolver {
 
     // for testing and it needs to override firstRun and log methods
     GemVersionResolver() {
+        this.logger = Logging.getLogger(GemVersionResolver)
     }
 
     // keep it not private for testing
     void firstRun() {
-        log({"${configuration.name}\n" +
-             "                       --------------------------\n" +
-             "                       collect version range info\n" +
-             "                       --------------------------"})
-        Object config = this.configuration.copyRecursive()
-        this.versions = [:]
+        logger.debug("${configuration.name}\n" +
+             '                       --------------------------\n' +
+             '                       collect version range info\n' +
+             '                       --------------------------')
+        Object config = configuration.copyRecursive()
+        versions = [:]
+
         config.resolutionStrategy {
             eachDependency { this.resolve(it) }
         }
+
         config.resolvedConfiguration
-        log({"${configuration.name}\n" +
-             "                       ------------------------\n" +
-             "                       apply version range info\n" +
-             "                       ------------------------"})
+
+        logger.debug("${configuration.name}\n" +
+             '                       ------------------------\n' +
+             '                       apply version range info\n' +
+             '                       ------------------------')
     }
 
     void resolve(DependencyResolveDetails details) {
-        if (details.requested.group == 'rubygems') {
-            if (versions == null) {
-                firstRun()
+        if (details.requested.group != 'rubygems') {
+            return
+        }
+
+        if (versions == null) {
+            firstRun()
+        }
+
+        logger.debug("${configuration}: gem ${details.requested.name} ${details.requested.version}")
+
+        GemVersion version = versions[details.requested.name]
+
+        if (version != null) {
+            GemVersion next = version.intersect(details.requested.version)
+
+            if (next.conflict()) {
+                throw new GradleException( "there is no overlap for ${versions[details.requested.name]} and ${details.requested.version}" )
             }
-            log( { "${configuration.name}: gem ${details.requested.name} ${details.requested.version}" } )
-            def version = versions[details.requested.name]
-            if (version != null) {
-                def next = version.intersect( details.requested.version )
-                if (next.conflict()) {
-                    throw new RuntimeException( "there is no overlap for ${versions[details.requested.name]} and ${details.requested.version}" )
-                }
-                versions[details.requested.name] = next
-                log( { "${configuration.name}      collected ${version}" } )
-                log( { "${configuration.name}      resolved  ${next}" } )
-                details.useVersion next.toString()
-            }
-            else {
-                def next = new GemVersion(details.requested.version)
-                versions[details.requested.name] = next
-                log( { "${configuration.name}      nothing collected" } )
-                log( { "${configuration.name}      resolved  ${next}" } )
-            }
+            versions[details.requested.name] = next
+
+            logger.debug("${configuration}      collected ${version}")
+            logger.debug("${configuration}      resolved  ${next}")
+
+            details.useVersion(next.toString())
+        }
+        else {
+            GemVersion next = new GemVersion(details.requested.version)
+            versions[details.requested.name] = next
+            logger.debug("${configuration}      nothing collected")
+            logger.debug("${configuration}      resolved  ${next}")
         }
     }
 
-    void log(Closure message) {
-        if (this.logger.isDebugEnabled()) {
-            this.logger.debug(message.call())
-        }
-    }
-
-    String toString(){
-        "GemVersionResolver${versions}"
+    String toString() {
+        return "GemVersionResolver${versions}"
     }
 }

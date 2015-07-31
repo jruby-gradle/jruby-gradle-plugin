@@ -17,6 +17,7 @@ import org.gradle.process.JavaExecSpec
  */
 class JRubyExec extends JavaExec implements JRubyExecTraits {
     static final String MAIN_CLASS = 'org.jruby.Main'
+    private static final String USE_JVM_ARGS = 'Use jvmArgs / scriptArgs instead'
 
     static String jarDependenciesGemLibPath(File gemDir) {
         new File(gemDir, "gems/jar-dependencies-${JRubyExecUtils.JAR_DEPENDENCIES_VERSION}/lib").absolutePath
@@ -53,7 +54,8 @@ class JRubyExec extends JavaExec implements JRubyExecTraits {
 
         try {
             project.configurations.getByName(JRubyExecUtils.DEFAULT_JRUBYEXEC_CONFIG)
-        } catch(UnknownConfigurationException ) {
+        }
+        catch (UnknownConfigurationException) {
             throw new TaskInstantiationException('Cannot instantiate a JRubyExec instance before jruby plugin has been loaded')
         }
 
@@ -122,6 +124,7 @@ class JRubyExec extends JavaExec implements JRubyExecTraits {
     }
 
     @Override
+    @SuppressWarnings('UnnecessaryGetter')
     void exec() {
         Configuration execConfiguration = project.configurations.findByName(configuration)
         logger.info("Executing with configuration: ${configuration}")
@@ -147,6 +150,7 @@ class JRubyExec extends JavaExec implements JRubyExecTraits {
      * @throw {@code org.gradle.api.InvalidUserDataException} if mode of behaviour cannot be determined.
      */
     @Override
+    @SuppressWarnings('UnnecessaryGetter')
     List<String> getArgs() {
         // just add the extra load-path even if it does not exists
         List<String> extra = ['-I', jarDependenciesGemLibPath(getGemWorkDir())]
@@ -155,7 +159,7 @@ class JRubyExec extends JavaExec implements JRubyExecTraits {
 
     @Override
     JavaExec setMain(final String mainClassName) {
-        if (mainClassName == 'org.jruby.Main') {
+        if (mainClassName == MAIN_CLASS) {
             super.setMain(mainClassName)
         } else {
             throw notAllowed("Setting main class for JRuby to ${mainClassName} is not a valid operation")
@@ -164,17 +168,17 @@ class JRubyExec extends JavaExec implements JRubyExecTraits {
 
     @Override
     JavaExec setArgs(Iterable<?> applicationArgs) {
-        throw notAllowed('Use jvmArgs / scriptArgs instead')
+        throw notAllowed(USE_JVM_ARGS)
     }
 
     @Override
     JavaExec args(Object... args) {
-        throw notAllowed('Use jvmArgs / scriptArgs instead')
+        throw notAllowed(USE_JVM_ARGS)
     }
 
     @Override
     JavaExecSpec args(Iterable<?> args) {
-        throw notAllowed('Use jvmArgs / scriptArgs instead')
+        throw notAllowed(USE_JVM_ARGS)
     }
 
     /** Verify that we are in a good configuration for execution */

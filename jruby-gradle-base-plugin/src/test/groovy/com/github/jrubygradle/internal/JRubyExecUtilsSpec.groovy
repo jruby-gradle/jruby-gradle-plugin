@@ -31,7 +31,7 @@ class JRubyExecUtilsSpec extends Specification {
             'jruby-complete-9.0.0.0.rc2.jar' || [ major : 9, minor : 0, patchlevel : 0 ]
             'jruby-complete-9.0.0.0.jar' || [ major : 9, minor : 0, patchlevel : 0 ]
             'jruby-complete-22.999.888.jar' || [ major : 22, minor : 999, patchlevel : 888 ]
-            'jruby-complete.jar'            || null
+            'jruby-complete.jar'            || [:]
     }
 
     def "buildArgs() should raise with no script or jrubyArgs"() {
