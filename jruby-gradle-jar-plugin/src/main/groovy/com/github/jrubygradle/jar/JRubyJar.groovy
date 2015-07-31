@@ -133,8 +133,6 @@ class JRubyJar extends Jar {
                 /* We nede to extract the class files from jruby-mains in order to properly run */
                 from { project.zipTree(jrubyMains) }
                 from { project.zipTree(jruby) }
-                /* TEMPORARY HACK: https://github.com/jruby-gradle/jruby-gradle-plugin/issues/165 */
-                //from { c.findAll { it.name.matches(/(.*).jar/) }.collect { project.zipTree(it) } }
                 include '**'
                 exclude 'META-INF/MANIFEST.MF'
                 // some pom.xml are readonly which creates problems
