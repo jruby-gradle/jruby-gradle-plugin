@@ -1,9 +1,7 @@
 package com.github.jrubygradle
 
-import groovy.transform.CompileStatic
 import org.gradle.api.DefaultTask
 import org.gradle.api.GradleException
-import org.gradle.api.Incubating
 import org.gradle.api.file.FileCopyDetails
 import org.gradle.api.file.RelativePath
 import org.gradle.api.tasks.Input
@@ -16,7 +14,6 @@ import org.gradle.api.tasks.TaskAction
  * @author Schalk W. Cronjé
  * @since 0.1.15
  */
-@Incubating
 class GenerateGradleRb extends DefaultTask {
 
     private Object baseName = 'gradle.rb'

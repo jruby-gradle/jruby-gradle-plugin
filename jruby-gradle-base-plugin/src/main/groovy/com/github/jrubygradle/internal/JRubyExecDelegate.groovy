@@ -1,6 +1,5 @@
 package com.github.jrubygradle.internal
 
-import com.github.jrubygradle.GemUtils
 import com.github.jrubygradle.JRubyExec
 import groovy.transform.PackageScope
 import org.gradle.api.Project

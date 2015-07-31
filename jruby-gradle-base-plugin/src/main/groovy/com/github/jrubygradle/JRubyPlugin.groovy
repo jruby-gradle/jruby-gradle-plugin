@@ -5,7 +5,6 @@ import com.github.jrubygradle.internal.GemVersionResolver
 import com.github.jrubygradle.internal.JRubyExecUtils
 import org.gradle.api.Plugin
 import org.gradle.api.Project
-import org.gradle.api.Task
 
 /**
  *

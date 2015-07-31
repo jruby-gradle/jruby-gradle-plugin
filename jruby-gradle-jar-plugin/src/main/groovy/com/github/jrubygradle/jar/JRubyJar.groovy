@@ -1,20 +1,14 @@
 package com.github.jrubygradle.jar
 
-import com.github.jrubygradle.GemUtils
 import com.github.jrubygradle.JRubyPrepare
 import com.github.jrubygradle.jar.internal.JRubyDirInfo
 import groovy.transform.PackageScope
-import org.gradle.api.Incubating
 import org.gradle.api.InvalidUserDataException
 import org.gradle.api.artifacts.Configuration
-import org.gradle.api.file.CopySpec
-import org.gradle.api.Project
 import org.gradle.api.Task
 import org.gradle.api.execution.TaskExecutionListener
-import org.gradle.api.execution.TaskExecutionGraph
 import org.gradle.api.file.DuplicatesStrategy
 import org.gradle.api.tasks.Input
-import org.gradle.api.tasks.InputDirectory
 import org.gradle.api.tasks.Optional
 import org.gradle.api.tasks.TaskState
 import org.gradle.api.tasks.bundling.Jar
@@ -217,6 +211,8 @@ class JRubyJar extends Jar {
         project.gradle.taskGraph.addTaskExecutionListener(
             new TaskExecutionListener() {
                 void afterExecute(Task task, TaskState state) {
+                    /* no op */
+                    return
                 }
 
                 void beforeExecute(Task task) {

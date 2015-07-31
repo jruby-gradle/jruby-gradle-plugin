@@ -2,9 +2,6 @@ package com.github.jrubygradle.war
 
 import org.gradle.api.Plugin
 import org.gradle.api.Project
-import org.gradle.api.tasks.bundling.War
-import org.gradle.api.tasks.Copy
-import org.gradle.api.tasks.Delete
 
 import com.github.jrubygradle.JRubyPlugin
 
