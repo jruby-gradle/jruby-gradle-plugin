@@ -2,3 +2,106 @@ image::https://travis-ci.org/jruby-gradle/jruby-gradle-plugin.svg?branch=master[
 
 image::https://api.bintray.com/packages/jruby-gradle/plugins/jruby-gradle-jar-plugin/images/download.svg[link="https://bintray.com/jruby-gradle/plugins/jruby-gradle-jar-plugin/_latestVersion"]
 
+
+== Getting Started
+
+=== Compatibility
+
+This plugin requires link::http://gradle.org[Gradle] 2.0 or better
+
+=== Installing
+
+.build.gradle
+[source, groovy]
+----
+buildscript {
+    repositories { jcenter() }
+
+    dependencies {
+        /* check jruby-gradle.org for the latest release */
+        classpath "com.github.jruby-gradle:jruby-gradle-jar-plugin:1.0.0"
+    }
+}
+
+apply plugin: 'com.github.jruby-gradle.jar'
+----
+
+==== Implicitly loaded plugins
+
+Currently, the `jar` plugin only depends on the link:/base/[base] plugin of the
+same version as the jar plugin and the `java-base` plugin included with your
+version of Gradle.
+
+
+== Tasks
+
+=== JRubyJar
+
+.build.gradle
+[source, gradle]
+----
+jrubyJar {
+    // Use the default GEM installation directory
+    defaultGems()
+
+    // Add this GEM installation directory to the JAR.
+    // Can be called more than once for additional directories
+    gemDir '/path/to/my/gemDir'
+
+    // Equivalent to calling defaultGems()
+    defaults 'gem'
+
+    // All methods and properties from `Jar`
+}
+----
+
+==== Types of jars
+
+* <<library>>
+* <<runnable>>
+
+
+[[runnable]]
+== Runnable Jars
+
+.build.gradle
+[source, gradle]
+----
+jrubyJar {
+    // tell the plugin to pack a runnable jar
+    initScript runnable()
+
+    // Use the default bootstrap class (can be omitted)
+    defaultMainClass()
+
+    // Includes the default gems to the jar (can be omitted)
+    defaultGems()
+
+    // Make the JAR executable by supplying your own main class
+    mainClass 'my.own.main'
+
+    // Equivalent to calling defaultMainClass() and defaultGems()
+    defaults 'gems', 'mainClass'
+}
+----
+
+[[library]]
+== Library Jars
+
+A library jar isn't really much more than a container which includes the
+configured gems and jar dependencies inside of the packaged `.jar` file.
+
+.build.gradle
+[source, gradle]
+----
+jrubyJar {
+    // tell the plugin to pack a runnable jar (no bootstrap script)
+    initScript library()
+
+    // Includes the default gems to the jar (can be omitted)
+    defaultGems()
+
+    // Equivalent to calling defaultGems()
+    defaults 'gems'
+}
+----

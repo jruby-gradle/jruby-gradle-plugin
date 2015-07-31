@@ -43,7 +43,7 @@ class JRubyPlugin implements Plugin<Project> {
         project.task('jrubyPrepare', type: JRubyPrepare) {
             group TASK_GROUP_NAME
             description 'Prepare the gems/jars from the `gem` dependencies, extracts the gems into jruby.installGemDir and sets up the jars in jruby.installGemDir/jars'
-            gems project.configurations.gems
+            dependencies project.configurations.gems
             outputDir project.jruby.gemInstallDir
         }
 

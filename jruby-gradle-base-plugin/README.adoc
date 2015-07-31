@@ -20,7 +20,7 @@ buildscript {
 
     dependencies {
         /* check jruby-gradle.org for the latest release */
-        classpath "com.github.jruby-gradle:jruby-gradle-plugin:0.4.0"
+        classpath "com.github.jruby-gradle:jruby-gradle-plugin:1.0.0"
     }
 }
 
@@ -37,7 +37,8 @@ You can also add Ruby gem dependencies in your `build.gradle` file under the
 ----
 dependencies {
     gems group: 'rubygems', name: 'sinatra', version: '1.4.5'
-    gems group: 'rubygems', name: 'rake', version: '10.3.+'
+    /* alternatively */
+    gems 'rubygems:rake:10.3.+'
 }
 ----
 
@@ -67,7 +68,7 @@ dependencies {
     jrubyExec 'rubygems:credit_card_validator:1.2.0'
 }
 
-task runMyScript( type: JRubyExec ) {
+task runMyScript(type: JRubyExec) {
     script 'scripts/runme.rb'
     scriptArgs '-x', '-y'
 }
@@ -89,8 +90,10 @@ Common methods for `JRubyExec` for executing a script
 * `gemWorkDir` - `File`. Provide a custom working directory for unpacking GEMs. By default each `JRubyExec` task
   uses it's own work directory. Use this to set a common work directory for a number of tasks.
 
-(*) If `jRubyVersion` has not been set, `jrubyExec` will used as
-configuration. However, if `jRubyVersion` has been set, no gems will be used unless an explicit configuration has been provided
+(*) If `jrubyVersion` has not been set, `jrubyExec` will used as configuration.
+However, if `jrubyVersion` has been set, a configuration must also be provded
+to maintain dependency isolation, see
+link:http://jruby-gradle.org/errors/jrubyexec-version-conflict/[this page] for more details.
 
 Additional `JRubyExec` methods for controlling the JVM instance
 
@@ -108,7 +111,11 @@ Additional `JRubyExec` methods for controlling the JVM instance
 
 ==== jrubyexec extension
 
-Similar to `javaexec` and `exec` it is possible to add the execution of a jruby script within another task
+Similar to
+link:https://docs.gradle.org/current/dsl/org.gradle.api.Project.html#org.gradle.api.Project:javaexec(groovy.lang.Closure)[javaexec]
+and
+link:https://docs.gradle.org/current/dsl/org.gradle.api.Project.html#org.gradle.api.Project:exec(org.gradle.api.Action)[exec]
+it is possible to add the execution of a JRuby script to another task:
 
 .build.gradle
 [source,gradle]
@@ -142,8 +149,7 @@ Because `JRubyExec` checks for the existence of the script, it might look at fir
 .build.gradle
 [source,gradle]
 ----
-task rake( type : JRubyExec ) {
-    jrubyArgs '-S' 
+task rake(type : JRubyExec) {
     script 'rake'
     scriptArgs '/path/to/Rakefile', 'target1', 'target2'
 }
@@ -176,12 +182,12 @@ Unpacking occurs using the default `jruby` version as set by `jruby.execVersion`
 ----
 import com.github.jrubygradle.JRubyPrepare
 
-task unpackMyGems( type : JRubyPrepare ) {
+task unpackMyGems(type : JRubyPrepare) {
 
   // Parent directory for unpacking GEMs.
   // Gems will end up in a subdirectory 'gems/GemName-GemVersion'
   outputDir buildDir
-  
+
   // Add one or more gems
   // Can be String(s), File(s), FileCollection(s) or Configuration(s)
   gems project.configuration.gems
