@@ -5,8 +5,6 @@ import com.github.jrubygradle.testhelper.VersionFinder
 import org.gradle.api.Project
 import spock.lang.*
 
-import static org.gradle.api.logging.LogLevel.LIFECYCLE
-
 /**
  * @author Schalk W. Cronjé
  */
