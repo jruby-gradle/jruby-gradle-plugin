@@ -52,6 +52,10 @@ class JRubyJar extends Jar {
         this.jrubyMainsVersion = version
     }
 
+    /** Return the directory that the dependencies for this project will be staged into */
+    File getGemDir() {
+        return prepareTask.outputDir
+    }
 
     @Input
     String mainClass
@@ -60,6 +64,10 @@ class JRubyJar extends Jar {
     @Optional
     String configuration
 
+    void setConfiguration(String newConfiguration) {
+        configuration = newConfiguration
+        addJRubyDependencies(project.configurations.maybeCreate(configuration))
+    }
 
     /** Makes the JAR executable by setting a custom main class
      *
@@ -170,7 +178,7 @@ class JRubyJar extends Jar {
     JRubyJar() {
         appendix = 'jruby'
         /* Make sure our default configuration is present regardless of whether we use it or not */
-        project.configurations.maybeCreate(DEFAULT_JRUBYJAR_CONFIG)
+        addJRubyDependencies(project.configurations.maybeCreate(DEFAULT_JRUBYJAR_CONFIG))
         prepareTask = project.task("prepare${prepareNameForSuffix(name)}", type: JRubyPrepare)
         dependsOn prepareTask
 
@@ -184,13 +192,16 @@ class JRubyJar extends Jar {
         }
     }
 
+    void addJRubyDependencies(Configuration config) {
+        project.dependencies.add(config.name, "org.jruby:jruby-complete:${getJrubyVersion()}")
+        project.dependencies.add(config.name, "de.saumya.mojo:jruby-mains:${getJrubyMainsVersion()}")
+    }
+
     void updateDependencies() {
         if (configuration == null) {
             configuration = DEFAULT_JRUBYJAR_CONFIG
         }
         Configuration taskConfiguration = project.configurations.maybeCreate(configuration)
-        project.dependencies.add(configuration, "org.jruby:jruby-complete:${getJrubyVersion()}")
-        project.dependencies.add(configuration, "de.saumya.mojo:jruby-mains:${getJrubyMainsVersion()}")
 
         File dir = project.file("${project.buildDir}/dirinfo/${configuration}")
         dirInfo = new JRubyDirInfo(dir)
