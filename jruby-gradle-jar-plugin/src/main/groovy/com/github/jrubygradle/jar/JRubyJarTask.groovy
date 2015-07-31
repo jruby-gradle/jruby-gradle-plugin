@@ -1,6 +1,7 @@
 package com.github.jrubygradle.jar
 
 import com.github.jrubygradle.GemUtils
+import com.github.jrubygradle.JRubyPrepare
 import com.github.jrubygradle.jar.internal.JRubyDirInfo
 import groovy.transform.PackageScope
 import org.gradle.api.Incubating
@@ -59,33 +60,11 @@ class JRubyJar extends Jar {
     @Optional
     String configuration
 
-    /** Adds a GEM installation directory
-     */
-    @InputDirectory
-    void gemDir(Map properties=[:], File f) {
-        gemDir(properties,f.absolutePath)
-    }
-
-
-    /** Adds a GEM installation directory
-     * @param Properties that affect how the GEM is packaged in the JAR. Currently only {@code fullGem} is
-     * supported. If set the full GEM content will be packed, otherwise only a subset will be packed.
-     * @param dir Source folder. Will be handled by {@code project.files(dir)}
-    */
-    void gemDir(Map properties=[:], Object dir) {
-        CopySpec spec = GemUtils.gemCopySpec(properties,project,dir)
-        spec.exclude '.jrubydir'
-        with spec
-        // TODO change base plugin to store jars in
-        // project.jruby.gemInstallDir + '/jars' since they belong together
-        with GemUtils.jarCopySpec(project, {project.jruby.jarInstallDir})
-    }
 
     /** Makes the JAR executable by setting a custom main class
      *
      * @param className Name of main class
      */
-    @Incubating
     void mainClass(final String className) {
         this.mainClass = className
         if (this.scriptName == null) {
@@ -93,7 +72,6 @@ class JRubyJar extends Jar {
         }
     }
 
-    @Incubating
     void initScript(final Object scriptName) {
         this.scriptName = scriptName
     }
@@ -106,70 +84,53 @@ class JRubyJar extends Jar {
     void defaults(final String... defs ) {
         defs.each { String it ->
             switch(it) {
-                case 'gems':
                 case 'mainClass':
                     "default${it.capitalize()}"()
             }
         }
     }
 
-    /** Loads the default GEM installation directory and
-     * JAR installation directory
-     *
-     */
-    void defaultGems() {
-        gemDir({project.jruby.gemInstallDir})
-    }
-
     /** Makes the executable by adding a default main class
-     *
      */
-    @Incubating
     void defaultMainClass() {
         mainClass(DEFAULT_MAIN_CLASS)
     }
 
     /** Makes the executable by adding a default main class
      * which extracts the jar to temporary directory
-     *
      */
-    @Incubating
     void extractingMainClass() {
         mainClass(EXTRACTING_MAIN_CLASS)
     }
 
-    @Deprecated
-    void jruby(Closure cfg) {
-        project.logger.info 'It is no longer necessary to use the jruby closure on a JRubyJar task.' 
-        def cl = cfg.clone()
-        cl.delegate = this
-        cl.call()
-    }
-
     @PackageScope
     void applyConfig() {
-        updateDepencenies()
+        updateDependencies()
 
         if (scriptName == null) {
             scriptName = runnable()
         }
+
         if (scriptName == Type.LIBRARY) {
             if (mainClass != null) {
                 throw new StopExecutionException('can not have mainClass for library')
             }
         }
-        else {
-            if (mainClass == null) {
-                defaultMainClass()
-            }
+        else if (mainClass == null) {
+            defaultMainClass()
         }
+
         if (mainClass != null && scriptName != Type.LIBRARY) {
+            /* NOTE: this should go away or be reafactored, GemUtils.setupJars excludes jruby */
+            Configuration c = project.configurations.findByName(configuration)
+            File jruby = c.find { it.name.matches(/jruby-complete-(.*).jar/) }
+            File jrubyMains = c.find { it.name.matches(/jruby-mains-(.*).jar/) }
+            logger.info("unzipping ${jrubyMains} in the jar")
+
             with project.copySpec {
-                from {
-                    project.configurations.findByName(configuration).collect {
-                       project.zipTree(it)
-                    }
-                }
+                /* We nede to extract the class files from jruby-mains in order to properly run */
+                from { project.zipTree(jrubyMains) }
+                from { project.zipTree(jruby) }
                 include '**'
                 exclude 'META-INF/MANIFEST.MF'
                 // some pom.xml are readonly which creates problems
@@ -206,23 +167,39 @@ class JRubyJar extends Jar {
 
     JRubyJar() {
         appendix = 'jruby'
-
-        File dir = project.file("${project.buildDir}/dirinfo/${name}")
-        JRubyDirInfo dirInfo = new JRubyDirInfo(dir)
-
-        from(dir) {
-            include '**'
-        }
-        // TODO we should provide proper sourceSet instead !?
-        from("${project.projectDir}/src/main/ruby")
-
-        // TODO currently this picks ONLY the 'gems' configuration
-        dependsOn 'jrubyPrepare'
+        /* Make sure our default configuration is present regardless of whether we use it or not */
+        project.configurations.maybeCreate(DEFAULT_JRUBYJAR_CONFIG)
+        prepareTask = project.task("prepare${prepareNameForSuffix(name)}", type: JRubyPrepare)
+        dependsOn prepareTask
 
         // TODO get rid of this and try to adjust the CopySpec for the gems
         // to exclude '.jrubydir'
         // there are other duplicates as well :(
         setDuplicatesStrategy(DuplicatesStrategy.EXCLUDE)
+
+        project.afterEvaluate {
+            applyConfig()
+        }
+    }
+
+    void updateDependencies() {
+        if (configuration == null) {
+            configuration = DEFAULT_JRUBYJAR_CONFIG
+        }
+        Configuration taskConfiguration = project.configurations.maybeCreate(configuration)
+        project.dependencies.add(configuration, "org.jruby:jruby-complete:${getJrubyVersion()}")
+        project.dependencies.add(configuration, "de.saumya.mojo:jruby-mains:${getJrubyMainsVersion()}")
+
+        File dir = project.file("${project.buildDir}/dirinfo/${configuration}")
+        dirInfo = new JRubyDirInfo(dir)
+
+        prepareTask.dependencies taskConfiguration
+        prepareTask.outputDir dir
+
+        logger.info("${this} including files in ${dir}")
+        from(dir) {
+            include '**'
+        }
 
         project.gradle.taskGraph.addTaskExecutionListener(
             new TaskExecutionListener() {
@@ -239,19 +216,21 @@ class JRubyJar extends Jar {
             }
         )
 
-        project.afterEvaluate {
-            applyConfig()
-        }
     }
 
-    void updateDepencenies() {
-        if (configuration == null) {
-            configuration = DEFAULT_JRUBYJAR_CONFIG
-        }
-        project.configurations.maybeCreate(configuration)
-        project.dependencies.add(configuration, "org.jruby:jruby-complete:${getJrubyVersion()}")
-        project.dependencies.add(configuration, "de.saumya.mojo:jruby-mains:${getJrubyMainsVersion()}")
+    /**
+     * Prepare a name for suffixing to a task name, i.e. with a baseName of
+     * "foo" if I need a task to prepare foo, this will return 'Foo' so I can
+     * make a "prepareFoo" task and it cases properly
+     *
+     * This method has a special handling for the string 'jruby' where it will
+     * case it properly like "JRuby" instead of "Jruby"
+     */
+    private String prepareNameForSuffix(String baseName) {
+        return baseName.replaceAll("(?i)jruby", 'JRuby').capitalize()
     }
 
-    private Object scriptName
+    protected Object scriptName
+    protected JRubyDirInfo dirInfo
+    protected JRubyPrepare prepareTask
 }

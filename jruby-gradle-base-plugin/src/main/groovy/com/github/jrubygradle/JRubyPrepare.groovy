@@ -4,7 +4,9 @@ import com.github.jrubygradle.internal.JRubyExecUtils
 import org.gradle.api.DefaultTask
 import org.gradle.api.artifacts.Configuration
 import org.gradle.api.file.FileCollection
+import org.gradle.api.tasks.Input
 import org.gradle.api.tasks.InputFiles
+import org.gradle.api.tasks.Optional
 import org.gradle.api.tasks.OutputDirectory
 import org.gradle.api.tasks.TaskAction
 
@@ -20,10 +22,9 @@ class JRubyPrepare extends DefaultTask {
     @OutputDirectory
     File outputDir
 
-
     @InputFiles
-    FileCollection getGems() {
-        GemUtils.getGems(project.files(this.gems))
+    private FileCollection getGems() {
+        GemUtils.getGems(project.files(this.dependencies))
     }
 
     /** Sets the output directory
@@ -31,34 +32,35 @@ class JRubyPrepare extends DefaultTask {
      * @param f Output directory
      */
     void outputDir(Object f) {
-        this.outputDir = project.file(f)
+        outputDir = project.file(f)
     }
 
-    /** Adds gems to be prepared
+    List<Object> dependencies = []
+
+    @Optional
+    /** Adds dependencies from the given configuration to be prepared
      *
      * @param f A file, directory, configuration or list of gems
      */
-    void gems(Object f) {
-        if (this.gems == null) {
-            this.gems = []
-        }
-        this.gems.add(f)
+    void dependencies(Object f) {
+        dependencies.add(f)
     }
 
     @TaskAction
     void copy() {
-        File jrubyJar = JRubyExecUtils.jrubyJar(project.configurations.getByName(JRubyExecUtils.DEFAULT_JRUBYEXEC_CONFIG))
+        /* XXX: This is a bad idea, relying on the fact that 'jrubyExec' has JRuby inside
+         * is not a guarantee (pretty close though)
+         */
+        File jrubyJar = JRubyExecUtils.jrubyJar(project.configurations.findByName(JRubyExecUtils.DEFAULT_JRUBYEXEC_CONFIG))
         GemUtils.extractGems(project, jrubyJar, getGems(), outputDir, GemUtils.OverwriteAction.SKIP)
 
-        if (gems != null) {
-            gems.each {
+        if (!dependencies.isEmpty()) {
+            dependencies.each {
                 if (it instanceof Configuration) {
                     GemUtils.setupJars(it, outputDir, GemUtils.OverwriteAction.SKIP)
                 }
             }
         }
     }
-
-    private List<Object> gems
 }
 

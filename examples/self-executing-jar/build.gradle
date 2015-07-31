@@ -18,21 +18,18 @@ buildscript {
 apply plugin: "com.github.jruby-gradle.jar"
 
 dependencies {
-    /* Using the built-in `gems` configuration to describe the
+    /* Using the built-in `jrubyJar` configuration to describe the
      * dependencies our jrubyJar task will need, so the gem is properly
      * included in the resulting .jar file
      */
-    gems "rubygems:colorize:0.7.7+"
+    jrubyJar "rubygems:colorize:0.7.7+"
 }
 
 jrubyJar {
     /* We want to use this Ruby script as our start point when the jar executes
      */
     initScript "${projectDir}/entrypoint.rb"
-    /* make sure we use our gems from the default "gems" configuration! */
-    defaultGems()
 }
-
 
 
 /*

@@ -2,6 +2,10 @@ image::https://travis-ci.org/jruby-gradle/jruby-gradle-plugin.svg?branch=master[
 
 image::https://api.bintray.com/packages/jruby-gradle/plugins/jruby-gradle-war-plugin/images/download.svg[link="https://bintray.com/jruby-gradle/plugins/jruby-gradle-war-plugin/_latestVersion"]
 
+WARNING: This plugin is still under active development and can be considered
+"alpha" quality software
+
+
 Plugin for creating JRuby-based web archives
 
 In order to include Java-based dependencies in a `.war` file, declare those
