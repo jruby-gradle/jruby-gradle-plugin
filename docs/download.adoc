@@ -13,10 +13,10 @@ snippets below to incorporate the latest plugins into your own link::http://grad
 [source, gradle]
 ----
 buildscript {
-    jcenter()
+    repositories { jcenter() }
 
     dependencies {
-        classpath "com.github.jruby-gradle:jruby-gradle-plugin:0.4.0"
+        classpath "com.github.jruby-gradle:jruby-gradle-plugin:1.0.0"
     }
 }
 apply plugin: "com.github.jruby-gradle.base"
@@ -29,10 +29,10 @@ apply plugin: "com.github.jruby-gradle.base"
 [source, gradle]
 ----
 buildscript {
-    jcenter()
+    repositories { jcenter() }
 
     dependencies {
-        classpath "com.github.jruby-gradle:jruby-gradle-jar-plugin:0.4.0"
+        classpath "com.github.jruby-gradle:jruby-gradle-jar-plugin:1.0.0"
     }
 }
 apply plugin: "com.github.jruby-gradle.jar"
@@ -44,10 +44,10 @@ apply plugin: "com.github.jruby-gradle.jar"
 [source, gradle]
 ----
 buildscript {
-    jcenter()
+    repositories { jcenter() }
 
     dependencies {
-        classpath "com.github.jruby-gradle:jruby-gradle-war-plugin:0.4.0"
+        classpath "com.github.jruby-gradle:jruby-gradle-war-plugin:1.0.0"
     }
 }
 apply plugin: "com.github.jruby-gradle.war"
@@ -59,7 +59,7 @@ apply plugin: "com.github.jruby-gradle.war"
 [source, gradle]
 ----
 buildscript {
-    jcenter()
+    repositories { jcenter() }
 
     dependencies {
         classpath "com.github.jruby-gradle:jruby-gradle-storm-plugin:0.1.6"
