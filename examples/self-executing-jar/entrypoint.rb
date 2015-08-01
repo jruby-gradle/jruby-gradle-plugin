@@ -1,6 +1,3 @@
-# Required until this issue is fixed:
-# <https://github.com/mkristian/jruby-mains/issues/5>
-require 'jars/setup'
 require 'colorize'
 
 java_import 'org.slf4j.Logger'
