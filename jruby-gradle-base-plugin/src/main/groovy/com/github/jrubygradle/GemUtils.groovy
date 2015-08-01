@@ -1,7 +1,6 @@
 package com.github.jrubygradle
 
 import com.github.jrubygradle.internal.JRubyExecUtils
-import com.github.jrubygradle.internal.GemVersionResolver
 import org.gradle.api.Project
 import org.gradle.api.artifacts.Configuration
 import org.gradle.api.file.CopySpec

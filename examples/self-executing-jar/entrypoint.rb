@@ -1,9 +1,17 @@
+# Required until this issue is fixed:
+# <https://github.com/mkristian/jruby-mains/issues/5>
+require 'jars/setup'
 require 'colorize'
 
+java_import 'org.slf4j.Logger'
+java_import 'org.slf4j.LoggerFactory'
+
+logger = LoggerFactory.getLogger('demo')
+
 puts "-" * 20
-puts "Ruby version: #{RUBY_VERSION}"
-puts "Ruby platform: #{RUBY_PLATFORM}"
-puts "Current file: #{__FILE__}"
+logger.info "Ruby version: #{RUBY_VERSION}"
+logger.info "Ruby platform: #{RUBY_PLATFORM}"
+logger.info "Current file: #{__FILE__}"
 puts "-" * 20
 
 puts "Roses are red".red

@@ -1,20 +1,14 @@
 package com.github.jrubygradle.jar
 
-import com.github.jrubygradle.GemUtils
 import com.github.jrubygradle.JRubyPrepare
 import com.github.jrubygradle.jar.internal.JRubyDirInfo
 import groovy.transform.PackageScope
-import org.gradle.api.Incubating
 import org.gradle.api.InvalidUserDataException
 import org.gradle.api.artifacts.Configuration
-import org.gradle.api.file.CopySpec
-import org.gradle.api.Project
 import org.gradle.api.Task
 import org.gradle.api.execution.TaskExecutionListener
-import org.gradle.api.execution.TaskExecutionGraph
 import org.gradle.api.file.DuplicatesStrategy
 import org.gradle.api.tasks.Input
-import org.gradle.api.tasks.InputDirectory
 import org.gradle.api.tasks.Optional
 import org.gradle.api.tasks.TaskState
 import org.gradle.api.tasks.bundling.Jar
@@ -46,7 +40,7 @@ class JRubyJar extends Jar {
     }
 
     @Input
-    String jrubyMainsVersion = '0.3.0'
+    String jrubyMainsVersion = '0.3.1'
 
     void jrubyMainsVersion(String version) {
         this.jrubyMainsVersion = version
@@ -137,10 +131,8 @@ class JRubyJar extends Jar {
 
             with project.copySpec {
                 /* We nede to extract the class files from jruby-mains in order to properly run */
-                //from { project.zipTree(jrubyMains) }
-                //from { project.zipTree(jruby) }
-                /* TEMPORARY HACK: https://github.com/jruby-gradle/jruby-gradle-plugin/issues/165 */
-                from { c.findAll { it.name.matches(/(.*).jar/) }.collect { project.zipTree(it) } }
+                from { project.zipTree(jrubyMains) }
+                from { project.zipTree(jruby) }
                 include '**'
                 exclude 'META-INF/MANIFEST.MF'
                 // some pom.xml are readonly which creates problems
@@ -217,6 +209,8 @@ class JRubyJar extends Jar {
         project.gradle.taskGraph.addTaskExecutionListener(
             new TaskExecutionListener() {
                 void afterExecute(Task task, TaskState state) {
+                    /* no op */
+                    return
                 }
 
                 void beforeExecute(Task task) {

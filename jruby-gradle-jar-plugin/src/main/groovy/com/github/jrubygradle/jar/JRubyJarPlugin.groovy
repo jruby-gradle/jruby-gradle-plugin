@@ -1,15 +1,9 @@
 package com.github.jrubygradle.jar
 
-import com.github.jrubygradle.JRubyPlugin
 import groovy.transform.PackageScope
 import org.gradle.api.Plugin
 import org.gradle.api.Project
 import org.gradle.api.Task
-import org.gradle.api.file.FileCopyDetails
-import org.gradle.api.tasks.Copy
-import org.gradle.api.tasks.bundling.Jar
-import org.gradle.api.tasks.bundling.Zip
-import org.gradle.api.tasks.compile.JavaCompile
 import org.gradle.api.tasks.testing.Test
 
 /**

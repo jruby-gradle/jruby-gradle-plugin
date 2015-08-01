@@ -14,7 +14,7 @@ buildscript {
 }
 
 group = 'com.github.jruby-gradle'
-version = '1.0.0'
+version = '1.0.1'
 defaultTasks 'check', 'assemble'
 
 if (!releaseBuild) {
@@ -23,6 +23,7 @@ if (!releaseBuild) {
 
 subprojects {
     apply plugin: 'groovy'
+    apply plugin: 'codenarc'
     apply plugin: 'maven'
     apply plugin: 'com.jfrog.bintray'
     apply plugin: 'org.ysb33r.gradletest'
@@ -36,6 +37,11 @@ subprojects {
     dependencies {
         compile gradleApi()
         compile localGroovy()
+    }
+
+    codenarc {
+        sourceSets = [sourceSets.main]
+        configFile = file("${rootProject.projectDir}/gradle/codenarc.xml")
     }
 
     test {
