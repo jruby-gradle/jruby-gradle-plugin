@@ -1,0 +1,58 @@
+= JRubyJar JRubyExec conflict on jrubyVersion/jrubyMainsVersion
+:page-layout: base
+:toc: right
+
+== What's going on?
+
+The
+link:/groovydoc/jruby-gradle-jar-plugin/com/github/jrubygradle/jar/JRubyJar.html[JRubyJar]
+task allows the user to define a specific version of
+link:http://jruby.org[JRuby] via the `jrubyVersion` property and a specific
+version of the library `jruby-mains` via the `jrubyMainsVersion` property.
+Changing these versions requires requested version to be added to a dependency
+graph. In order to prevent unintentional conflicts in the dependency graph, the
+link:/jar/[jar] plugin will prevent a `JRubyJar` task from adding a different
+JRuby/jruby-mains version to the _default_ `jrubyJar`
+link:https://docs.gradle.org/current/dsl/org.gradle.api.artifacts.Configuration.html[configuration].
+
+NOTE: This is effectively the same link:/errors/jrubyexec-version-conflict/[behavior that JRubyExec exhibits]
+
+== How to fix it
+
+Fixing this behavior is relatively easy, the `JRubyJar` task which requires its
+own custom version of JRuby or jruby-mains to be installed should _also_ use a
+custom, user-defined,
+link:https://docs.gradle.org/current/dsl/org.gradle.api.artifacts.Configuration.html[configuration].
+E.g.
+
+.build.gradle
+[source, gradle]
+----
+configurations {
+    backwardsCompat
+}
+
+dependencies {
+    backwardsCompat 'rubygems:sinatra:1.0.0'
+}
+
+task buildLegacyJar(type: JRubyJar) {
+    configuration backwardsCompat
+    jrubyVersion '1.7.19'
+    jrubyMainsVersion '0.2.0'
+}
+----
+
+
+=== Okay, that didn't work
+
+If that work-around didn't help fix the issue, then you may have encountered an
+unknown **bug!**. Please
+link:https://github.com/jruby-gradle/jruby-gradle-plugin/issues[file an issue]
+so we can correct the broken behavior!
+
+== Links
+
+* link:https://github.com/jruby-gradle/jruby-gradle-plugin/issues/168[issue
+  #168] contains a reported side-effect of this behavior prior to an error
+  being generated

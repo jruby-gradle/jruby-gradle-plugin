@@ -2,8 +2,8 @@ package com.github.jrubygradle
 
 import com.github.jrubygradle.internal.JRubyExecTraits
 import com.github.jrubygradle.internal.JRubyExecUtils
+import org.gradle.api.InvalidUserDataException
 import org.gradle.api.Project
-import org.gradle.api.ProjectConfigurationException
 import org.gradle.api.artifacts.Configuration
 import org.gradle.api.tasks.Input
 import org.gradle.api.tasks.JavaExec
@@ -183,9 +183,9 @@ class JRubyExec extends JavaExec implements JRubyExecTraits {
 The \"${name}\" task cannot be configured wth a custom JRuby (${jrubyVersion})
 and still use the default \"${JRubyExecUtils.DEFAULT_JRUBYEXEC_CONFIG}\" configuration
 
-Please see this page for more details: <http://jruby-gradle.org/errors/jrubyexec-version-conflict/>"""
-
-            throw new ProjectConfigurationException(message)
+Please see this page for more details: <http://jruby-gradle.org/errors/jrubyexec-version-conflict/>
+"""
+            throw new InvalidUserDataException(message)
         }
     }
 

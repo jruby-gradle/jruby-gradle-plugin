@@ -4,6 +4,7 @@ import com.github.jrubygradle.JRubyPrepare
 import com.github.jrubygradle.jar.internal.JRubyDirInfo
 import groovy.transform.PackageScope
 import org.gradle.api.InvalidUserDataException
+import org.gradle.api.ProjectConfigurationException
 import org.gradle.api.artifacts.Configuration
 import org.gradle.api.Task
 import org.gradle.api.execution.TaskExecutionListener
@@ -23,10 +24,18 @@ class JRubyJar extends Jar {
     static final String DEFAULT_JRUBYJAR_CONFIG = 'jrubyJar'
     static final String DEFAULT_MAIN_CLASS = 'org.jruby.mains.JarMain'
     static final String EXTRACTING_MAIN_CLASS = 'org.jruby.mains.ExtractingMain'
+    static final String DEFAULT_JRUBY_MAINS = '0.4.0'
 
     protected String jrubyVersion
 
-    /** Return the project default unless set */
+    /**
+     * Return the project default unless set
+     *
+     * The reason that this is defined as a getter instead of just setting
+     * {@code jrubyVersion} at task construction-time is to ensure that if a user
+     * modifies the jrubyVersion on the project after we have instantiated, that we still
+     * respect this setting
+     * */
     String getJrubyVersion() {
         if (jrubyVersion == null) {
             return project.jruby.defaultVersion
@@ -36,14 +45,17 @@ class JRubyJar extends Jar {
 
     @Input
     void jrubyVersion(String version) {
+        logger.info("setting jrubyVersion to ${version} from ${jrubyVersion}")
         this.jrubyVersion = version
     }
 
     @Input
-    String jrubyMainsVersion = '0.4.0'
+    @Optional
+    String jrubyMainsVersion = DEFAULT_JRUBY_MAINS
 
     void jrubyMainsVersion(String version) {
-        this.jrubyMainsVersion = version
+        logger.info("setting jrubyMainsVersion to ${version} from ${jrubyMainsVersion}")
+        jrubyMainsVersion = version
     }
 
     /** Return the directory that the dependencies for this project will be staged into */
@@ -56,11 +68,11 @@ class JRubyJar extends Jar {
 
     @Input
     @Optional
-    String configuration
+    String configuration = DEFAULT_JRUBYJAR_CONFIG
 
     void setConfiguration(String newConfiguration) {
+        logger.info("using the ${newConfiguration} configuration for the ${name} task")
         configuration = newConfiguration
-        addJRubyDependencies(project.configurations.maybeCreate(configuration))
     }
 
     /** Makes the JAR executable by setting a custom main class
@@ -156,7 +168,6 @@ class JRubyJar extends Jar {
                 rename(script.name, 'jar-bootstrap.rb')
             }
         }
-        
     }
 
     Type library() {
@@ -169,8 +180,8 @@ class JRubyJar extends Jar {
 
     JRubyJar() {
         appendix = 'jruby'
-        /* Make sure our default configuration is present regardless of whether we use it or not */
         addJRubyDependencies(project.configurations.maybeCreate(DEFAULT_JRUBYJAR_CONFIG))
+        /* Make sure our default configuration is present regardless of whether we use it or not */
         prepareTask = project.task("prepare${prepareNameForSuffix(name)}", type: JRubyPrepare)
         dependsOn prepareTask
 
@@ -180,19 +191,20 @@ class JRubyJar extends Jar {
         setDuplicatesStrategy(DuplicatesStrategy.EXCLUDE)
 
         project.afterEvaluate {
+            validateTaskConfiguration()
+            addJRubyDependencies(project.configurations.maybeCreate(configuration))
             applyConfig()
         }
     }
 
     void addJRubyDependencies(Configuration config) {
+        logger.info("adding the dependency jruby-complete ${getJrubyVersion()} to jar")
+        logger.info("adding the dependency jruby-mains ${getJrubyMainsVersion()} to jar")
         project.dependencies.add(config.name, "org.jruby:jruby-complete:${getJrubyVersion()}")
         project.dependencies.add(config.name, "org.jruby.mains:jruby-mains:${getJrubyMainsVersion()}")
     }
 
     void updateDependencies() {
-        if (configuration == null) {
-            configuration = DEFAULT_JRUBYJAR_CONFIG
-        }
         Configuration taskConfiguration = project.configurations.maybeCreate(configuration)
 
         File dir = project.file("${project.buildDir}/dirinfo/${configuration}")
@@ -235,6 +247,24 @@ class JRubyJar extends Jar {
      */
     private String prepareNameForSuffix(String baseName) {
         return baseName.replaceAll("(?i)jruby", 'JRuby').capitalize()
+    }
+
+    /** Verify that we are in a good configuration for execution */
+    void validateTaskConfiguration() {
+        /* Exit early if we have definde our own configuration */
+        if (getConfiguration() != DEFAULT_JRUBYJAR_CONFIG) {
+            return
+        }
+
+        if ((getJrubyVersion() != project.jruby.defaultVersion) ||(getJrubyMainsVersion() != DEFAULT_JRUBY_MAINS)) {
+            String message = """\
+The \"${name}\" task cannot be configured wth a custom JRuby (${jrubyVersion}) or jruby-mains (${jrubyMainsVersion})
+and still use the default \"${DEFAULT_JRUBYJAR_CONFIG}\" configuration
+
+Please see this page for more details: <http://jruby-gradle.org/errors/jrubyjar-version-conflict/>
+"""
+            throw new InvalidUserDataException(message)
+        }
     }
 
     protected Object scriptName
