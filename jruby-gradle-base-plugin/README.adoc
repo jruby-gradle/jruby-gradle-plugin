@@ -7,7 +7,7 @@ image::https://api.bintray.com/packages/jruby-gradle/plugins/jruby-gradle-plugin
 
 === Compatibility
 
-This plugin requires link::http://gradle.org[Gradle] 2.0 or better
+This plugin requires link:http://gradle.org[Gradle] 2.0 or better
 
 
 === Installing
@@ -30,7 +30,7 @@ apply plugin: 'com.github.jruby-gradle.base'
 === Adding gems
 
 You can also add Ruby gem dependencies in your `build.gradle` file under the
-`gems` link::https://docs.gradle.org/current/dsl/org.gradle.api.artifacts.Configuration.html[configuration] which is provided by plugin, e.g.:
+`gems` link:https://docs.gradle.org/current/dsl/org.gradle.api.artifacts.Configuration.html[configuration] which is provided by plugin, e.g.:
 
 .build.gradle
 [source, groovy]
@@ -43,11 +43,11 @@ dependencies {
 ----
 
 NOTE: This functionality currently relies on a deployed version of the
-link::https://github.com/torquebox/rubygems-servlets[rubygems-servlets]
+link:https://github.com/torquebox/rubygems-servlets[rubygems-servlets]
 software to help proxy a Rubygem repository into a Maven repository format.
 This ensures that Gradle can resolve gem-based dependencies. _Currently_ the
-plugin release on link::http://rubygems.lasagna.io/proxy/maven/releases[a
-Rubygems Maven proxy] operated by link::https://github.com/rtyler[R. Tyler
+plugin release on link:http://rubygems.lasagna.io/proxy/maven/releases[a
+Rubygems Maven proxy] operated by link:https://github.com/rtyler[R. Tyler
 Croy]
 
 == Tasks
@@ -97,17 +97,17 @@ link:http://jruby-gradle.org/errors/jrubyexec-version-conflict/[this page] for m
 
 Additional `JRubyExec` methods for controlling the JVM instance
 
-* `jvmArgs` - `List`. See link::http://www.gradle.org/docs/current/dsl/org.gradle.api.tasks.JavaExec.html#org.gradle.api.tasks.JavaExec:jvmArgs[jvmArgs]
-* `allJvmArgs` - `List`. See link::http://www.gradle.org/docs/current/dsl/org.gradle.api.tasks.JavaExec.html#org.gradle.api.tasks.JavaExec:allJvmArgs[allJvmArgs]
-* `systemProperties` - `Map`. See link::http://www.gradle.org/docs/current/dsl/org.gradle.api.tasks.JavaExec.html#org.gradle.api.tasks.JavaExec:systemProperties[systemProperties]
-* `bootstrapClassPath` - `FileCollection` or `List`. See link::http://www.gradle.org/docs/current/dsl/org.gradle.api.tasks.JavaExec.html#org.gradle.api.tasks.JavaExec:bootstrapClasspath[bootstrapClasspath]
-* `minHeapSize` - `String`. See link::http://www.gradle.org/docs/current/dsl/org.gradle.api.tasks.JavaExec.html:minHeapSize[minHeapSize]
-* `maxHeapSize` - `String`. See link::http://www.gradle.org/docs/current/dsl/org.gradle.api.tasks.JavaExec.html#org.gradle.api.tasks.JavaExec:maxHeapSize[maxHeapSize]
-* `defaultCharacterEncoding` - `String`. See link::http://www.gradle.org/docs/current/dsl/org.gradle.api.tasks.JavaExec.html:defaultCharacterEncoding[defaultCharacterEncoding]
-* `enableAssertions` - `Boolean`. See link::http://www.gradle.org/docs/current/dsl/org.gradle.api.tasks.JavaExec.html#org.gradle.api.tasks.JavaExec:enableAssertions[enableAssertions]
-* `debug` - `Boolean`. See link::http://www.gradle.org/docs/current/dsl/org.gradle.api.tasks.JavaExec.html#org.gradle.api.tasks.JavaExec:debug[debug]
-* `copyTo` - `JavaForkOptions`. See link::http://www.gradle.org/docs/current/dsl/org.gradle.api.tasks.JavaExec.html:copyTo[copyTo]
-* `executable` - `Object` (Usually `File` or `String`). See link::http://www.gradle.org/docs/current/dsl/org.gradle.api.tasks.JavaExec.html#org.gradle.api.tasks.JavaExec:executable[executable]
+* `jvmArgs` - `List`. See link:http://www.gradle.org/docs/current/dsl/org.gradle.api.tasks.JavaExec.html#org.gradle.api.tasks.JavaExec:jvmArgs[jvmArgs]
+* `allJvmArgs` - `List`. See link:http://www.gradle.org/docs/current/dsl/org.gradle.api.tasks.JavaExec.html#org.gradle.api.tasks.JavaExec:allJvmArgs[allJvmArgs]
+* `systemProperties` - `Map`. See link:http://www.gradle.org/docs/current/dsl/org.gradle.api.tasks.JavaExec.html#org.gradle.api.tasks.JavaExec:systemProperties[systemProperties]
+* `bootstrapClassPath` - `FileCollection` or `List`. See link:http://www.gradle.org/docs/current/dsl/org.gradle.api.tasks.JavaExec.html#org.gradle.api.tasks.JavaExec:bootstrapClasspath[bootstrapClasspath]
+* `minHeapSize` - `String`. See link:http://www.gradle.org/docs/current/dsl/org.gradle.api.tasks.JavaExec.html:minHeapSize[minHeapSize]
+* `maxHeapSize` - `String`. See link:http://www.gradle.org/docs/current/dsl/org.gradle.api.tasks.JavaExec.html#org.gradle.api.tasks.JavaExec:maxHeapSize[maxHeapSize]
+* `defaultCharacterEncoding` - `String`. See link:http://www.gradle.org/docs/current/dsl/org.gradle.api.tasks.JavaExec.html:defaultCharacterEncoding[defaultCharacterEncoding]
+* `enableAssertions` - `Boolean`. See link:http://www.gradle.org/docs/current/dsl/org.gradle.api.tasks.JavaExec.html#org.gradle.api.tasks.JavaExec:enableAssertions[enableAssertions]
+* `debug` - `Boolean`. See link:http://www.gradle.org/docs/current/dsl/org.gradle.api.tasks.JavaExec.html#org.gradle.api.tasks.JavaExec:debug[debug]
+* `copyTo` - `JavaForkOptions`. See link:http://www.gradle.org/docs/current/dsl/org.gradle.api.tasks.JavaExec.html:copyTo[copyTo]
+* `executable` - `Object` (Usually `File` or `String`). See link:http://www.gradle.org/docs/current/dsl/org.gradle.api.tasks.JavaExec.html#org.gradle.api.tasks.JavaExec:executable[executable]
 
 ==== jrubyexec extension
 

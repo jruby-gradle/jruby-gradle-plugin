@@ -1,0 +1,50 @@
+= JRuby/Gradle 1.0 Announced
+:page-layout: base
+
+Less than one year after the link:http://github.com/jruby-gradle[JRuby/Gradle]
+project was founded, we are pleased to announce the release of *1.0* for the
+core plugins, which includes link:/base/[the base plugin], link:/jar/[the jar
+plugin] and an alpha version of the link:/war/[war plugin]. This release marks
+the stability of the core task and configuration APIs for the lifetime of the
+`1.x` branch of development.
+
+
+== Notable Features
+
+This release includes a number of notable features which can help developers
+build high quality Ruby projects, based on link:http://jruby.org[JRuby].
+
+* Defaulted to the major milestone release: link:jruby.org/2015/07/22/jruby-9-0-0-0.html[JRuby 9.0.0.0]
+* Native Java dependency resolution via Gradle's built-in support of Maven
+  repositories and with Gem dependency resolution via a
+  link:http://rubygems.org[rubygems.org] link:http://rubygems.lasagna.io/proxy/maven/releases[proxy].
+* Execution of local Ruby script via the link:/base/#jrubyexec[JRubyExec task]
+* Execution of scripts provided by a gem dependency, e.g. `rspec` via
+  link:/base/#jrubyexec[JRubyExec task]
+* Support for distinct
+  link:https://docs.gradle.org/current/dsl/org.gradle.api.artifacts.Configuration.html[configurations]
+  to isolate dependencies, even JRuby versions, between link:/base/#jrubyexec[JRubyExec tasks].
+* Similar support for different configurations between link:/jar/#jrubyjar[JRubyJar
+  tasks]
+
+
+== Project History
+
+The JRuby/Gradle project was originally started to address the challenges faced
+when attempting to build complex Ruby applications based on
+link:http://jruby.org[JRuby]. With such applications it is desirable to leverage
+the vast libraries available to JVM-based languages, as well as many of the
+user-friendly gems built by Ruby developers
+
+After trying to make multiple tools, which weren't designed to support non-Java
+projects, work with Ruby link:https://github.com/rtyler[R. Tyler Croy] started
+building a prototype with Gradle to package up a JRuby application as a jar.
+Shortly after publishing the prototype, link:https://github.com/ysb33r[Schalke
+W. Cronje] discovered the fledgling project and with his Gradle development
+experience helped bring it from a weekend hack project to a well-tested,
+well-structured set of Gradle plugins. Eventually
+link:https://github.com/mkristian[Christian Meier], whose
+link:https://github.com/torquebox/rubygems-servlets] code helped make the
+project originally possible, joined the team to help improve support in JRuby
+itself for the different embedded operating modes that the JRuby/Gradle
+toolchain makes use of.
