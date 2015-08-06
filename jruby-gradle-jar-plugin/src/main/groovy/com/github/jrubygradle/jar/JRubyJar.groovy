@@ -21,8 +21,8 @@ class JRubyJar extends Jar {
     enum Type { RUNNABLE, LIBRARY }
 
     static final String DEFAULT_JRUBYJAR_CONFIG = 'jrubyJar'
-    static final String DEFAULT_MAIN_CLASS = 'de.saumya.mojo.mains.JarMain'
-    static final String EXTRACTING_MAIN_CLASS = 'de.saumya.mojo.mains.ExtractingMain'
+    static final String DEFAULT_MAIN_CLASS = 'org.jruby.mains.JarMain'
+    static final String EXTRACTING_MAIN_CLASS = 'org.jruby.mains.ExtractingMain'
 
     protected String jrubyVersion
 
@@ -40,7 +40,7 @@ class JRubyJar extends Jar {
     }
 
     @Input
-    String jrubyMainsVersion = '0.3.1'
+    String jrubyMainsVersion = '0.4.0'
 
     void jrubyMainsVersion(String version) {
         this.jrubyMainsVersion = version
@@ -186,7 +186,7 @@ class JRubyJar extends Jar {
 
     void addJRubyDependencies(Configuration config) {
         project.dependencies.add(config.name, "org.jruby:jruby-complete:${getJrubyVersion()}")
-        project.dependencies.add(config.name, "de.saumya.mojo:jruby-mains:${getJrubyMainsVersion()}")
+        project.dependencies.add(config.name, "org.jruby.mains:jruby-mains:${getJrubyMainsVersion()}")
     }
 
     void updateDependencies() {
