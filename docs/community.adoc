@@ -5,11 +5,17 @@
 == Chat
 
 
-The JRuby/Gradle community can be found primarily on link::https://gitter.im/jruby-gradle/jruby-gradle-plugin[the jruby-gradle-plugin Gitter] chat hosted on link::http://gitter.im[gitter.im].
+The JRuby/Gradle community can be found primarily on
+link:https://gitter.im/jruby-gradle/jruby-gradle-plugin[the jruby-gradle-plugin
+Gitter] chat hosted on link:http://gitter.im[gitter.im].
 
-You can join the chat with your existing link::https://github.com[GitHub] account.
+You can join the chat with your existing link:https://github.com[GitHub]
+account.
 
 == Mailing List
 
-For more asynchronous communications, the link::https://groups.google.com/forum/#!forum/jruby-gradle[jruby-gradle mailing list] can be used. If you wish to subscribe to the mailing list, email `jruby-gradle+subscribe@googlegroups.com`
+For more asynchronous communications, the
+link:https://groups.google.com/forum/#!forum/jruby-gradle[jruby-gradle mailing
+list] can be used. If you wish to subscribe to the mailing list, email
+`jruby-gradle+subscribe@googlegroups.com`
 
