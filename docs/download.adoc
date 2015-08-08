@@ -4,8 +4,8 @@
 
 
 You can find historical versions of all the released plugins
-on link::https://bintray.com/jruby-gradle/plugins[Bintray], or use the code
-snippets below to incorporate the latest plugins into your own link::http://gradle.org[Gradle] file.
+on link:https://bintray.com/jruby-gradle/plugins[Bintray], or use the code
+snippets below to incorporate the latest plugins into your own link:http://gradle.org[Gradle] file.
 
 == Base plugin
 

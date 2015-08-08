@@ -1,8 +1,8 @@
 package com.github.jrubygradle
 
 import com.github.jrubygradle.internal.JRubyExecUtils
-import org.gradle.api.InvalidUserDataException
 import org.gradle.api.ProjectConfigurationException
+import org.gradle.api.InvalidUserDataException
 import org.gradle.api.tasks.TaskInstantiationException
 import org.gradle.testfixtures.ProjectBuilder
 import spock.lang.*

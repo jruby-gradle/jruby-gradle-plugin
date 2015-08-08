@@ -4,6 +4,8 @@ version = rootProject.version
 
 configurations {
     testRepo
+    /* this configuration is to dump old versions of things into the flatrepo */
+    testRepoOldFiles
 }
 
 dependencies {
@@ -19,9 +21,23 @@ dependencies {
     testRepo ("org.jruby:jruby-complete:${jrubyVersion}") {
         transitive = false
     }
+
+    testRepo ('rubygems:jar-dependencies:0.1.15') {
+        transitive = false
+    }
+
     testRepo ('org.jruby.mains:jruby-mains:0.4.0') {
         transitive = false
     }
+
+    testRepoOldFiles ('de.saumya.mojo:jruby-mains:0.3.0') {
+        transitive = false
+    }
+
+    testRepoOldFiles ("org.jruby:jruby-complete:1.7.11") {
+        transitive = false
+    }
+
     testRepo ("org.spockframework:spock-core:0.7-groovy-2.0") {
         transitive = false
     }
@@ -37,6 +53,10 @@ test {
     doFirst {
         copy {
             from project.configurations.testRepo.files
+            into testRepoDir
+        }
+        copy {
+            from project.configurations.testRepoOldFiles.files
             into testRepoDir
         }
     }

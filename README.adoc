@@ -7,14 +7,14 @@ image::https://api.bintray.com/packages/jruby-gradle/plugins/jruby-gradle-plugin
 image::https://badges.gitter.im/Join%20Chat.svg[link="https://gitter.im/jruby-gradle/jruby-gradle-plugin", title="Gitter"]
 
 
-You can also join us on the link::https://groups.google.com/forum/#!forum/jruby-gradle[JRuby/Gradle mailing list]
+You can also join us on the link:https://groups.google.com/forum/#!forum/jruby-gradle[JRuby/Gradle mailing list]
 
-The purpose of these plugins is to bundle useful [Gradle](http://www.gradle.org/)
-functionality for JRuby projects. Use of this plugin replaces the need for both link::http://bundler.io[Bundler] and link::https://github.com/jruby/warbler[Warbler].
+The purpose of these plugins is to bundle useful link:http://gradle.org[Gradle]
+functionality for JRuby projects. Use of this plugin replaces the need for both link:http://bundler.io[Bundler] and link:https://github.com/jruby/warbler[Warbler].
 
 
-The Ruby gem dependency code for this project relies on the link::http://rubygems.lasagna.io/proxy/maven/releases[Rubygems Maven
-proxy] operated by link::https://github.com/rtyler[R. Tyler Croy]
+The Ruby gem dependency code for this project relies on the link:http://rubygems.lasagna.io/proxy/maven/releases[Rubygems Maven
+proxy] operated by link:https://github.com/rtyler[R. Tyler Croy]
 
 
 This repository contains the:
@@ -25,4 +25,4 @@ This repository contains the:
 
 
 
-*More documentation can be found on link::http://jruby-gradle.org[jruby-gradle.org]*
+NOTE: More documentation can be found on link:http://jruby-gradle.org[jruby-gradle.org]
