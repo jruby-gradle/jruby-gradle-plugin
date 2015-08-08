@@ -221,9 +221,6 @@ class JRubyJarPluginSpec extends Specification {
     def "jrubyVersion is lazily evaluated"() {
         given:
         final String version = '1.7.20'
-        Project project = ProjectBuilder.builder().build()
-        project.apply plugin: 'com.github.jruby-gradle.base'
-        project.apply plugin: 'com.github.jruby-gradle.jar'
 
         when:
         project.jruby {
