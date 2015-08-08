@@ -34,10 +34,7 @@ class JRubyJarSpec extends Specification {
         given:
         JRubyJar task = project.task('spock-jar', type: JRubyJar)
 
-        when:
-        project.evaluate()
-
-        then:
+        expect:
         task.configuration == 'jrubyJar'
     }
 
@@ -49,10 +46,7 @@ class JRubyJarSpec extends Specification {
             configuration customConfig
         }
 
-        when:
-        project.evaluate()
-
-        then:
+        expect:
         task.configuration == customConfig
     }
 
