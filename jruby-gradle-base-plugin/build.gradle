@@ -22,18 +22,14 @@ project.afterEvaluate {
 
 // --- up to here
 
-dependencies {
-    testJRubyPrepare "org.jruby:jruby-complete:${jrubyVersion}"
-}
-
-
 repositories {
-    mavenLocal()
     maven { url rubygemsProxy }
 }
 
 dependencies {
     String spockVersion = "org.spockframework:spock-core:1.0-groovy-2.3"
+
+    testJRubyPrepare "org.jruby:jruby-complete:${jrubyVersion}"
 
     testCompile (spockVersion) {
         exclude module : 'groovy-all'

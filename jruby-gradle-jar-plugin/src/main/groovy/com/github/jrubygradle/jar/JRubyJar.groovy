@@ -1,10 +1,10 @@
 package com.github.jrubygradle.jar
 
 import com.github.jrubygradle.JRubyPrepare
+import com.github.jrubygradle.internal.JRubyExecUtils
 import com.github.jrubygradle.jar.internal.JRubyDirInfo
 import groovy.transform.PackageScope
 import org.gradle.api.InvalidUserDataException
-import org.gradle.api.ProjectConfigurationException
 import org.gradle.api.artifacts.Configuration
 import org.gradle.api.Task
 import org.gradle.api.execution.TaskExecutionListener
@@ -200,8 +200,8 @@ class JRubyJar extends Jar {
     void addJRubyDependencies(Configuration config) {
         logger.info("adding the dependency jruby-complete ${getJrubyVersion()} to jar")
         logger.info("adding the dependency jruby-mains ${getJrubyMainsVersion()} to jar")
-        project.dependencies.add(config.name, "org.jruby:jruby-complete:${getJrubyVersion()}")
         project.dependencies.add(config.name, "org.jruby.mains:jruby-mains:${getJrubyMainsVersion()}")
+        JRubyExecUtils.updateJRubyDependenciesForConfiguration(project, config.name, getJrubyVersion())
     }
 
     void updateDependencies() {
