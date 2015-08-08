@@ -20,7 +20,7 @@ buildscript {
 
     dependencies {
         /* check jruby-gradle.org for the latest release */
-        classpath "com.github.jruby-gradle:jruby-gradle-plugin:1.0.0"
+        classpath "com.github.jruby-gradle:jruby-gradle-plugin:1.0.1"
     }
 }
 
@@ -84,7 +84,7 @@ Common methods for `JRubyExec` for executing a script
 * `standardOutput` - `OutputStream`.  Capture the output of the script.
 * `errorOutput` - `OutputStream`.  Capture the error output of the script.
 * `ignoreExitValue` - `Boolean`.  Ignore the JVm exit value. Exit values are only effective if the exit value of the Ruby script is correctly communicated back to the JVM.
-* `configuration` - `String`.  Configuration to copy gems from. (*) 
+* `configuration` - `String`.  Configuration to copy gems from. (*)
 * `classpath` - `List`.  Additional Jars/Directories to place on classpath.
 * `jrubyVersion` - `String`.  JRuby version to use if not the same as ```project.jruby.execVersion```.
 * `gemWorkDir` - `File`. Provide a custom working directory for unpacking GEMs. By default each `JRubyExec` task
@@ -123,7 +123,7 @@ it is possible to add the execution of a JRuby script to another task:
 task needSomeRubyLove {
   jrubyexec {
     script 'scripts/runme.rb'
-    scriptArgs '-x', '-y'  
+    scriptArgs '-x', '-y'
   }
 }
 ----
@@ -132,7 +132,7 @@ The behaviour of `project.jrubyexec` is slightly different to that of `JRubyExec
 
 * The version of `jruby-complete` is strictly tied to the `jruby.execVersion`. Therefore trying to set `jrubyVersion`
 in the ```jrubyexec``` closure will cause a failure
-* GEMs and additional JARs are only taken from the `jrubyExec` configuration. 
+* GEMs and additional JARs are only taken from the `jrubyExec` configuration.
 * It is not possible to supply a `configuration` parameter to the `jrubyexec` closure.
 * GEMs will be installed to `jruby.gemInstallDir`. Existing gems will not be overwritten.
 
@@ -143,7 +143,7 @@ All other methods should work.
 
 Because `JRubyExec` checks for the existence of the script, it might look at first whether running Ruby commands from
 `PATH` could be difficult. However, this is totally possible by utilising `jrubyArgs` and passing `-S` as one would do
- when using `ruby` or `jruby` on the command-line. Here is an example of running 
+ when using `ruby` or `jruby` on the command-line. Here is an example of running
 `rake` as task.
 
 .build.gradle
@@ -163,14 +163,14 @@ or even
 ext {
     rake = { String target ->
         jrubyexec {
-            jrubyArgs '-S' 
+            jrubyArgs '-S'
             script 'rake'
-            scriptArgs '/path/to/Rakefile', target            
+            scriptArgs '/path/to/Rakefile', target
         }
     }
 }
 ----
- 
+
 == JRubyPrepare
 
 link:/groovydoc/jruby-gradle-base-plugin/com/github/jrubygradle/JRubyPrepare.html[API docs]

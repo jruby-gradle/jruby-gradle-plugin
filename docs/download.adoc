@@ -16,7 +16,7 @@ buildscript {
     repositories { jcenter() }
 
     dependencies {
-        classpath "com.github.jruby-gradle:jruby-gradle-plugin:1.0.0"
+        classpath "com.github.jruby-gradle:jruby-gradle-plugin:1.0.1"
     }
 }
 apply plugin: "com.github.jruby-gradle.base"
@@ -32,7 +32,7 @@ buildscript {
     repositories { jcenter() }
 
     dependencies {
-        classpath "com.github.jruby-gradle:jruby-gradle-jar-plugin:1.0.0"
+        classpath "com.github.jruby-gradle:jruby-gradle-jar-plugin:1.0.1"
     }
 }
 apply plugin: "com.github.jruby-gradle.jar"
@@ -47,7 +47,7 @@ buildscript {
     repositories { jcenter() }
 
     dependencies {
-        classpath "com.github.jruby-gradle:jruby-gradle-war-plugin:1.0.0"
+        classpath "com.github.jruby-gradle:jruby-gradle-war-plugin:1.0.1"
     }
 }
 apply plugin: "com.github.jruby-gradle.war"
