@@ -1,0 +1,60 @@
+import groovy.json.JsonOutput
+
+apply plugin: 'org.ysb33r.gradletest'
+
+configurations {
+    integrationTestCompile.extendsFrom testCompile
+    integrationTestRuntime.extendsFrom testRuntime, integrationTestCompile
+}
+
+sourceSets {
+    integrationTest {
+        groovy {
+            srcDir file("${projectDir}/src/integTest/groovy")
+        }
+        compileClasspath = sourceSets.main.output +  configurations.integrationTestCompile
+        runtimeClasspath = output + compileClasspath + configurations.integrationTestRuntime
+    }
+}
+
+task prepareGradleTestKitClasspath {
+    group 'Build Setup'
+    description 'Prepare the plugin classpath until TestKit supports it more natively'
+    File outputDir = file("$buildDir/$name")
+
+    inputs.files sourceSets.main.runtimeClasspath
+    outputs.dir outputDir
+
+    doLast {
+        outputDir.mkdirs()
+        List<String> files = sourceSets.main.runtimeClasspath.files.collect { File f -> f.absolutePath }
+        file("$outputDir/plugin-classpath.json").text = JsonOutput.toJson(files)
+    }
+}
+
+task integrationTest(type: Test) {
+    group 'Verification'
+    description 'Run the TestKit-based integration tests'
+    dependsOn prepareGradleTestKitClasspath, test, jar
+    classpath = sourceSets.integrationTest.runtimeClasspath
+    testClassesDir = sourceSets.integrationTest.output.classesDir
+
+    testLogging {
+        showStandardStreams = true
+        exceptionFormat "full"
+    }
+}
+check.dependsOn integrationTest
+
+gradleTest {
+    versions '2.0', '2.2', '2.4', '2.6'
+    dependsOn test, integrationTest, jar
+}
+
+dependencies {
+    integrationTestCompile gradleTestKit()
+    /* add our TestKit classpath to our test runtime so we can find it again */
+    integrationTestRuntime files(prepareGradleTestKitClasspath)
+
+    gradleTest project(':jruby-gradle-base-plugin')
+}

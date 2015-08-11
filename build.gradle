@@ -28,7 +28,6 @@ subprojects {
     apply plugin: 'com.jfrog.bintray'
     apply plugin: 'org.ysb33r.gradletest'
     apply plugin: 'provided-base'
-    apply from: "${rootProject.projectDir}/gradle/integration-tests.gradle"
 
     repositories {
         jcenter()
