@@ -194,10 +194,18 @@ class GemVersion {
     }
 
     /**
-     * string of the underlying data as maven version range.
+     * string of the underlying data as maven version range. for prereleased
+     * versions with ranges like [1.pre, 1.pre] the to range will be replaced
+     * by the single boundary of the range.
+     *
      * @return String maven version range
      */
     String toString(){
-        "${prefix}${low},${high}${postfix}"
+        if (prefix == '[' && postfix == ']' && low == high && low =~ /[a-zA-Z]/ ) {
+            low
+        }
+        else {
+            "${prefix}${low},${high}${postfix}"
+        }
     }
 }

@@ -39,8 +39,12 @@ dependencies {
     gems group: 'rubygems', name: 'sinatra', version: '1.4.5'
     /* alternatively */
     gems 'rubygems:rake:10.3.+'
+    /* prereleased gems needs to pick a specific version */
+    gems 'rubygems:rails:4.2.3.rc1'
 }
 ----
+
+IMPORTANT: Prereleased gems can only be a specific version due to limitations of mapping a rubygems repository to a maven repository.
 
 NOTE: This functionality currently relies on a deployed version of the
 link:https://github.com/torquebox/rubygems-servlets[rubygems-servlets]

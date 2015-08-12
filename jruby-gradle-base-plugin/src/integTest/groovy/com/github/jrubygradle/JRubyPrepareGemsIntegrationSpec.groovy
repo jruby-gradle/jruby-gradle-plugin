@@ -66,6 +66,24 @@ class JRubyPrepareGemsIntegrationSpec extends Specification {
             new File(jrpg.outputDir,"gems/rack-1.5.5").exists()
     }
   
+    def "Check if prerelease gem gets resolved"() {
+        given:
+            def root= new File(TESTROOT, "prerelease")
+            def project = BasicProjectBuilder.buildWithStdRepo(root,CACHEDIR)
+            def task = project.tasks.jrubyPrepare
+            project.jruby.gemInstallDir = root.absolutePath
+
+            project.dependencies {
+                gems "rubygems:jar-dependencies:0.1.16.pre"
+            }
+            project.evaluate()
+            task.copy()
+
+        expect:
+            // since we need a version range in the setup the
+            // resolved version here can vary over time
+            new File(task.outputDir,"gems/jar-dependencies-0.1.16.pre").exists()
+    }
 
 //    @IgnoreIf({TESTS_ARE_OFFLINE})
     @Ignore
