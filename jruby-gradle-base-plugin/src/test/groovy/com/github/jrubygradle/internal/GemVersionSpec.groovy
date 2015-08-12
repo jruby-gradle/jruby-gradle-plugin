@@ -11,6 +11,14 @@ class GemVersionSpec extends Specification {
         subject.toString() == '[1.2.3,1.2.3]'
     }
 
+    def "parses single prerelease version"() {
+        given:
+        GemVersion subject = new GemVersion('1.2.pre')
+
+        expect:
+        subject.toString() == '1.2.pre'
+    }
+
     def "parses gradle sematic version first sample"() {
         given:
         GemVersion subject = new GemVersion('1.2.3+')
