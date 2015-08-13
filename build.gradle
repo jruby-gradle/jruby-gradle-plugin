@@ -28,15 +28,13 @@ subprojects {
     apply plugin: 'com.jfrog.bintray'
     apply plugin: 'org.ysb33r.gradletest'
     apply plugin: 'provided-base'
-    apply from: "${rootProject.projectDir}/gradle/integration-tests.gradle"
 
     repositories {
         jcenter()
     }
 
     dependencies {
-        compile gradleApi()
-        compile localGroovy()
+        compile new GradleDist(project, '2.0').asFileTree
     }
 
     codenarc {
@@ -82,4 +80,3 @@ task release(type: Exec) {
     dependsOn subprojects.collect { ":${it.name}:bintrayUpload" }, 'docs:publishGhPages'
     commandLine 'git', 'tag', "v${project.version}"
 }
-

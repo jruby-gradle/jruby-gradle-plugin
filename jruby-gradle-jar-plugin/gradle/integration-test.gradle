@@ -1,0 +1,71 @@
+import groovy.json.JsonOutput
+
+apply plugin: 'org.ysb33r.gradletest'
+
+configurations {
+    integrationTestCompile.extendsFrom testCompile
+    integrationTestRuntime.extendsFrom testRuntime, integrationTestCompile
+}
+
+sourceSets {
+    integrationTest {
+        groovy {
+            srcDir file("${projectDir}/src/integTest/groovy")
+        }
+        compileClasspath = sourceSets.main.output +  configurations.integrationTestCompile
+        runtimeClasspath = output + compileClasspath + configurations.integrationTestRuntime
+    }
+}
+
+task prepareGradleTestKitClasspath {
+    group 'Build Setup'
+    description 'Prepare the plugin classpath until TestKit supports it more natively'
+    File outputDir = file("$buildDir/$name")
+
+    inputs.files sourceSets.main.runtimeClasspath
+    outputs.dir outputDir
+
+    doLast {
+        outputDir.mkdirs()
+        List<String> files = sourceSets.main.runtimeClasspath.files.collect { File f -> f.absolutePath }
+        file("$outputDir/plugin-classpath.json").text = JsonOutput.toJson(files)
+    }
+}
+
+task integrationTest(type: Test) {
+    group 'Verification'
+    description 'Run the TestKit-based integration tests'
+    dependsOn prepareGradleTestKitClasspath, test, jar
+    classpath = sourceSets.integrationTest.runtimeClasspath
+    testClassesDir = sourceSets.integrationTest.output.classesDir
+
+    testLogging {
+        showStandardStreams = true
+        exceptionFormat "full"
+    }
+}
+check.dependsOn integrationTest
+
+gradleTest {
+    versions '2.0', '2.2', '2.4', '2.6'
+    dependsOn test, integrationTest, jar
+}
+
+dependencies {
+    /* Without pruning the groovy-all dependency from this file list, we end up
+     * with two groovys running around and this exception at runtime:
+     *  groovy.lang.GroovyRuntimeException: Conflicting module versions. Module [groovy-all is loaded in version 2.3.10 and you are trying to load version 2.3.3
+                at org.codehaus.groovy.runtime.metaclass.MetaClassRegistryImpl$DefaultModuleListener.onModule(MetaClassRegistryImpl.java:509)
+                at org.codehaus.groovy.runtime.m12n.ExtensionModuleScanner.scanExtensionModuleFromProperties(ExtensionModuleScanner.java:77)
+                at org.codehaus.groovy.runtime.m12n.ExtensionModuleScanner.scanExtensionModuleFromMetaInf(ExtensionModuleScanner.java:71)
+                at org.codehaus.groovy.runtime.m12n.ExtensionModuleScanner.scanClasspathModules(ExtensionModuleScanner.java:53)
+                at org.codehaus.groovy.runtime.metaclass.MetaClassRegistryImpl.<init>(MetaClassRegistryImpl.java:110)
+                at org.codehaus.groovy.runtime.metaclass.MetaClassRegistryImpl.<init>(MetaClassRegistryImpl.java:71)
+                at groovy.lang.GroovySystem.<clinit>(GroovySystem.java:33)
+     */
+    integrationTestCompile files(gradleTestKit().resolve().findAll { File f -> !f.name.matches(/groovy-all-(.*).jar/) } )
+    /* add our TestKit classpath to our test runtime so we can find it again */
+    integrationTestRuntime files(prepareGradleTestKitClasspath)
+
+    gradleTest project(':jruby-gradle-base-plugin')
+}
