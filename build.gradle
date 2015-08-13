@@ -34,8 +34,7 @@ subprojects {
     }
 
     dependencies {
-        compile gradleApi()
-        compile localGroovy()
+        compile new GradleDist(project, '2.0').asFileTree
     }
 
     codenarc {
@@ -81,4 +80,3 @@ task release(type: Exec) {
     dependsOn subprojects.collect { ":${it.name}:bintrayUpload" }, 'docs:publishGhPages'
     commandLine 'git', 'tag', "v${project.version}"
 }
-
