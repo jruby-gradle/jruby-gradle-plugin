@@ -6,6 +6,8 @@ class JRubyDirInfo {
 
     private static final String NEW_LINE = System.getProperty("line.separator")
     private static final File OMIT = new File('')
+    private static final List<String> omissionDirs = ['META-INF', 'gems', 'specifications',
+                                                      'build_info', 'cache', 'doc' ,'bin']
 
     private final Map dirsCache = [:]
 
@@ -18,7 +20,7 @@ class JRubyDirInfo {
 
     File toFile(File path, String subdir) {
         if (path == null) {
-          if (['META-INF', 'gems', 'specifications', 'build_info', 'cache', 'doc' ,'bin'].contains(subdir)) {
+          if (omissionDirs.contains(subdir)) {
               path = OMIT
           }
           else {

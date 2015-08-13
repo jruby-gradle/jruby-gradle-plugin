@@ -34,21 +34,22 @@ class JRubyJarPluginSpec extends Specification {
 
     static Project setupProject() {
         Project project = ProjectBuilder.builder().build()
-
         project.gradle.startParameter.offline = true
+        File repo = project.file("${TESTREPO_LOCATION}/../../../../../jruby-gradle-base-plugin/src/integTest/mavenrepo")
 
-        project.buildscript {
+        project.buildDir = TESTROOT
+
+        project.with {
+            apply plugin: 'com.github.jruby-gradle.jar'
+            jruby.defaultRepositories = false
+            logging.level = LIFECYCLE
+
             repositories {
                 flatDir dirs : TESTREPO_LOCATION.absolutePath
+                maven {
+                    url "file://" + repo.absolutePath
+                }
             }
-        }
-        project.buildDir = TESTROOT
-        project.logging.level = LIFECYCLE
-        project.apply plugin: 'com.github.jruby-gradle.jar'
-        project.jruby.defaultRepositories = false
-
-        project.repositories {
-            flatDir dirs : TESTREPO_LOCATION.absolutePath
         }
 
         return project
@@ -96,6 +97,7 @@ class JRubyJarPluginSpec extends Specification {
         project.configure(jarTask) {
             defaultMainClass()
         }
+        jarTask.addJRubyDependency()
         jarTask.applyConfig()
 
         then: "Then the attribute should be set to the default in the manifest"
@@ -142,31 +144,6 @@ class JRubyJarPluginSpec extends Specification {
         jar.taskDependencies.getDependencies(jar).contains(project.tasks.getByName('prepareJRubyJar'))
     }
 
-    def "Building a Jar with a custom configuration and 'java' plugin is applied"() {
-        given: "Java plugin applied before JRuby Jar plugin"
-        project = setupProject()
-        project.apply plugin : 'java'
-        Task jrubyJar = project.tasks.getByName('jrubyJar')
-        File expectedDir = new File(TESTROOT, 'libs/')
-        File expectedJar = new File(expectedDir, 'test-jruby.jar')
-
-        when: "I set the main class"
-        project.configure(jrubyJar) {
-            mainClass 'bogus.does.not.exist'
-        }
-        project.evaluate()
-
-        and: "I actually build the JAR"
-        jrubyJar.execute()
-        def builtJar = fileNames(project.zipTree(expectedJar))
-
-        then: "I expect to see jruby.home unpacked "
-        builtJar.contains("META-INF/jruby.home/lib/ruby".toString())
-
-        and: "I expect the new main class to be listed in the manifest"
-        jrubyJar.manifest.effectiveManifest.attributes['Main-Class']?.contains('bogus.does.not.exist')
-    }
-  
     def 'Checking setting no mainClass'() {
         when:
         project.file( 'app.rb') << ''
@@ -217,10 +194,11 @@ class JRubyJarPluginSpec extends Specification {
         e.message == 'can not have mainClass for library'
     }
 
+    @Ignore('should be an integration test since we add jar-dependencies')
     @Issue('https://github.com/jruby-gradle/jruby-gradle-plugin/issues/115')
     def "jrubyVersion is lazily evaluated"() {
         given:
-        final String version = '1.7.20'
+        final String version = '1.7.11'
 
         when:
         project.jruby {
@@ -237,6 +215,7 @@ class JRubyJarPluginSpec extends Specification {
         jarTask.dependsOn.find { (it instanceof JRubyPrepare) && (it.name == 'prepareJRubyJar') }
     }
 
+    @Ignore('should be an integration test since we add jar-dependencies')
     def "prepareTask should have its configuration lazily set"() {
         given:
         Task prepareTask = jarTask.dependsOn.find { it instanceof JRubyPrepare }

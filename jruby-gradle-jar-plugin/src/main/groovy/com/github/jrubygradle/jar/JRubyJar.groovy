@@ -1,7 +1,6 @@
 package com.github.jrubygradle.jar
 
 import com.github.jrubygradle.JRubyPrepare
-import com.github.jrubygradle.internal.JRubyExecUtils
 import com.github.jrubygradle.jar.internal.JRubyDirInfo
 import groovy.transform.PackageScope
 import org.gradle.api.InvalidUserDataException
@@ -47,7 +46,7 @@ class JRubyJar extends Jar {
     void jrubyVersion(String version) {
         logger.info("setting jrubyVersion to ${version} from ${jrubyVersion}")
         this.jrubyVersion = version
-        addJRubyDependencies(project.configurations.maybeCreate(configuration))
+        addEmbeddedDependencies(project.configurations.maybeCreate(configuration))
     }
 
     @Input
@@ -57,7 +56,7 @@ class JRubyJar extends Jar {
     void jrubyMainsVersion(String version) {
         logger.info("setting jrubyMainsVersion to ${version} from ${jrubyMainsVersion}")
         jrubyMainsVersion = version
-        addJRubyDependencies(project.configurations.maybeCreate(configuration))
+        addEmbeddedDependencies(project.configurations.maybeCreate(configuration))
     }
 
     /** Return the directory that the dependencies for this project will be staged into */
@@ -121,8 +120,6 @@ class JRubyJar extends Jar {
 
     @PackageScope
     void applyConfig() {
-        updateStageDirectory()
-
         if (scriptName == null) {
             scriptName = runnable()
         }
@@ -139,8 +136,10 @@ class JRubyJar extends Jar {
         if (mainClass != null && scriptName != Type.LIBRARY) {
             /* NOTE: this should go away or be reafactored, GemUtils.setupJars excludes jruby */
             Configuration c = project.configurations.findByName(configuration)
-            File jruby = c.find { it.name.matches(/jruby-complete-(.*).jar/) }
             File jrubyMains = c.find { it.name.matches(/jruby-mains-(.*).jar/) }
+            File jruby = project.configurations.findByName(customConfigName).find { it.name.matches(/jruby-complete-(.*).jar/) }
+
+            logger.info("unzipping ${jruby} in the jar")
             logger.info("unzipping ${jrubyMains} in the jar")
 
             with project.copySpec {
@@ -170,6 +169,8 @@ class JRubyJar extends Jar {
                 rename(script.name, 'jar-bootstrap.rb')
             }
         }
+        updateStageDirectory()
+
     }
 
     Type library() {
@@ -182,7 +183,7 @@ class JRubyJar extends Jar {
 
     JRubyJar() {
         appendix = 'jruby'
-        addJRubyDependencies(project.configurations.maybeCreate(DEFAULT_JRUBYJAR_CONFIG))
+        addEmbeddedDependencies(project.configurations.maybeCreate(DEFAULT_JRUBYJAR_CONFIG))
         /* Make sure our default configuration is present regardless of whether we use it or not */
         prepareTask = project.task("prepare${prepareNameForSuffix(name)}", type: JRubyPrepare)
         dependsOn prepareTask
@@ -191,19 +192,32 @@ class JRubyJar extends Jar {
         // to exclude '.jrubydir'
         // there are other duplicates as well :(
         setDuplicatesStrategy(DuplicatesStrategy.EXCLUDE)
+        customConfigName = "jrubyJar-${hashCode()}"
 
         project.afterEvaluate {
             validateTaskConfiguration()
+            addJRubyDependency()
             applyConfig()
         }
     }
 
-    /** Add the necessary JRuby dependencies to the specified {@code org.gradle.api.artifacts.Configuration} */
-    void addJRubyDependencies(Configuration config) {
+    /**
+     * Adds our jruby-complete to a custom configuration only so it can be
+     * safely unzipped later when we build the jar
+     */
+    void addJRubyDependency() {
+        project.configurations.maybeCreate(customConfigName)
         logger.info("adding the dependency jruby-complete ${getJrubyVersion()} to jar")
+        project.dependencies.add(customConfigName, "org.jruby:jruby-complete:${getJrubyVersion()}")
+    }
+
+    /** Add the necessary JRuby dependencies to the specified {@code org.gradle.api.artifacts.Configuration} */
+    void addEmbeddedDependencies(Configuration config) {
         logger.info("adding the dependency jruby-mains ${getJrubyMainsVersion()} to jar")
         project.dependencies.add(config.name, "org.jruby.mains:jruby-mains:${getJrubyMainsVersion()}")
-        JRubyExecUtils.updateJRubyDependenciesForConfiguration(project, config.name, getJrubyVersion())
+        /* To ensure that we can load our jars properly, we should always have
+         * jar-dependencies in our resolution graph */
+        project.dependencies.add(config.name, 'rubygems:jar-dependencies:0.1.15')
     }
 
     /** Update the staging directory and tasks responsible for setting it up */
@@ -271,4 +285,5 @@ Please see this page for more details: <http://jruby-gradle.org/errors/jrubyjar-
     protected Object scriptName
     protected JRubyDirInfo dirInfo
     protected JRubyPrepare prepareTask
+    protected String customConfigName
 }
