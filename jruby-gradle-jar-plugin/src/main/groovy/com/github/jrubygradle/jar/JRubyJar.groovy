@@ -47,6 +47,7 @@ class JRubyJar extends Jar {
     void jrubyVersion(String version) {
         logger.info("setting jrubyVersion to ${version} from ${jrubyVersion}")
         this.jrubyVersion = version
+        addJRubyDependencies(project.configurations.maybeCreate(configuration))
     }
 
     @Input
@@ -56,6 +57,7 @@ class JRubyJar extends Jar {
     void jrubyMainsVersion(String version) {
         logger.info("setting jrubyMainsVersion to ${version} from ${jrubyMainsVersion}")
         jrubyMainsVersion = version
+        addJRubyDependencies(project.configurations.maybeCreate(configuration))
     }
 
     /** Return the directory that the dependencies for this project will be staged into */
@@ -119,7 +121,7 @@ class JRubyJar extends Jar {
 
     @PackageScope
     void applyConfig() {
-        updateDependencies()
+        updateStageDirectory()
 
         if (scriptName == null) {
             scriptName = runnable()
@@ -192,11 +194,11 @@ class JRubyJar extends Jar {
 
         project.afterEvaluate {
             validateTaskConfiguration()
-            addJRubyDependencies(project.configurations.maybeCreate(configuration))
             applyConfig()
         }
     }
 
+    /** Add the necessary JRuby dependencies to the specified {@code org.gradle.api.artifacts.Configuration} */
     void addJRubyDependencies(Configuration config) {
         logger.info("adding the dependency jruby-complete ${getJrubyVersion()} to jar")
         logger.info("adding the dependency jruby-mains ${getJrubyMainsVersion()} to jar")
@@ -204,13 +206,12 @@ class JRubyJar extends Jar {
         JRubyExecUtils.updateJRubyDependenciesForConfiguration(project, config.name, getJrubyVersion())
     }
 
-    void updateDependencies() {
-        Configuration taskConfiguration = project.configurations.maybeCreate(configuration)
-
+    /** Update the staging directory and tasks responsible for setting it up */
+    void updateStageDirectory() {
         File dir = project.file("${project.buildDir}/dirinfo/${configuration}")
         dirInfo = new JRubyDirInfo(dir)
 
-        prepareTask.dependencies taskConfiguration
+        prepareTask.dependencies project.configurations.maybeCreate(configuration)
         prepareTask.outputDir dir
 
         logger.info("${this} including files in ${dir}")
