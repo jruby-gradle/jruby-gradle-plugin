@@ -8,7 +8,6 @@ import org.gradle.testkit.runner.TaskOutcome
 
 import spock.lang.*
 
-@Ignore('raises a groovy version conflict at runtime')
 class JRubyJarIntegrationSpec extends Specification {
     @Rule
     final TemporaryFolder testProjectDir = new TemporaryFolder()
@@ -51,6 +50,8 @@ jrubyJar {
         then:
         File[] artifacts = (new File(testProjectDir.root, ['build', 'libs'].join(File.separator))).listFiles()
         artifacts && artifacts.size() == 1
+
+        and:
         result.task(":jrubyJar").outcome == TaskOutcome.SUCCESS
     }
 }

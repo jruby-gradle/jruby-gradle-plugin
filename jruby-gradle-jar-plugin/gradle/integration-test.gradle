@@ -52,7 +52,18 @@ gradleTest {
 }
 
 dependencies {
-    integrationTestCompile gradleTestKit()
+    /* Without pruning the groovy-all dependency from this file list, we end up
+     * with two groovys running around and this exception at runtime:
+     *  groovy.lang.GroovyRuntimeException: Conflicting module versions. Module [groovy-all is loaded in version 2.3.10 and you are trying to load version 2.3.3
+                at org.codehaus.groovy.runtime.metaclass.MetaClassRegistryImpl$DefaultModuleListener.onModule(MetaClassRegistryImpl.java:509)
+                at org.codehaus.groovy.runtime.m12n.ExtensionModuleScanner.scanExtensionModuleFromProperties(ExtensionModuleScanner.java:77)
+                at org.codehaus.groovy.runtime.m12n.ExtensionModuleScanner.scanExtensionModuleFromMetaInf(ExtensionModuleScanner.java:71)
+                at org.codehaus.groovy.runtime.m12n.ExtensionModuleScanner.scanClasspathModules(ExtensionModuleScanner.java:53)
+                at org.codehaus.groovy.runtime.metaclass.MetaClassRegistryImpl.<init>(MetaClassRegistryImpl.java:110)
+                at org.codehaus.groovy.runtime.metaclass.MetaClassRegistryImpl.<init>(MetaClassRegistryImpl.java:71)
+                at groovy.lang.GroovySystem.<clinit>(GroovySystem.java:33)
+     */
+    integrationTestCompile files(gradleTestKit().resolve().findAll { File f -> !f.name.matches(/groovy-all-(.*).jar/) } )
     /* add our TestKit classpath to our test runtime so we can find it again */
     integrationTestRuntime files(prepareGradleTestKitClasspath)
 
