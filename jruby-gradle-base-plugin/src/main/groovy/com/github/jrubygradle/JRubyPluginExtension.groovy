@@ -9,7 +9,12 @@ class JRubyPluginExtension {
     /** The default version of jruby that will be used by jrubyWar */
     String defaultVersion = DEFAULT_JRUBY_VERSION
 
-    /** The version of jruby used by jrubyexec as well as default version of jruby that will be used by JRubyExec */
+    /**
+     * The version of jruby used by jrubyexec as well as default version of jruby that will be used by JRubyExec
+     * @deprecated Setting execVersion is not very often done and should probably
+     *  be avoided. Set jrubyVersion on your JRubyExec tasks instead
+     */
+    @Deprecated
     String execVersion = DEFAULT_JRUBY_VERSION
 
     /** Set this to false if you do not want the default set of repositories to be loaded.
@@ -88,7 +93,10 @@ class JRubyPluginExtension {
     /** Change the version of jruby for jrubyexec and JRubyExec
      *
      * @param newVersion
+     * @deprecated Setting execVersion is not very often done and should probably
+     *  be avoided. Set jrubyVersion on your JRubyExec tasks instead
      */
+    @Deprecated
     void setExecVersion(final String newVersion) {
         execVersion = newVersion
         isExecVersionModified = true
