@@ -4,15 +4,13 @@ import org.gradle.api.Incubating
 import org.gradle.api.Project
 
 class JRubyPluginExtension {
-    /** The default version of jruby that will be used by jrubyWar
-     *
-     */
-    String defaultVersion = '9.0.0.0'
+    static final String DEFAULT_JRUBY_VERSION = '9.0.0.0'
 
-    /** The version of jruby used by jrubyexec as well as default version of jruby that will be used by JRubyExec
-     *
-     */
-    String execVersion = defaultVersion
+    /** The default version of jruby that will be used by jrubyWar */
+    String defaultVersion = DEFAULT_JRUBY_VERSION
+
+    /** The version of jruby used by jrubyexec as well as default version of jruby that will be used by JRubyExec */
+    String execVersion = DEFAULT_JRUBY_VERSION
 
     /** Set this to false if you do not want the default set of repositories to be loaded.
      *
@@ -20,6 +18,26 @@ class JRubyPluginExtension {
      */
     @Incubating
     boolean defaultRepositories = true
+
+    void setDefaultVersion(String newDefaultVersion) {
+        defaultVersion = newDefaultVersion
+        defaultVersionCallbacks.each { Closure callback -> callback.call(defaultVersion) }
+        execVersionCallbacks.each { Closure callback ->
+            if (!isExecVersionModified) {
+                callback.call(defaultVersion)
+            }
+        }
+    }
+
+    /**
+     * Set the default version of JRuby to be used by all JRuby/Gradle code
+     *
+     * @param newDefaultVersion
+     * @since 1.1.0
+     */
+    void defaultVersion(String newDefaultVersion) {
+        setDefaultVersion(newDefaultVersion)
+    }
 
     /** Resolves the currently configured GEM installation directory.
      *
@@ -73,20 +91,58 @@ class JRubyPluginExtension {
      */
     void setExecVersion(final String newVersion) {
         execVersion = newVersion
+        isExecVersionModified = true
 
-        project.tasks.withType(JRubyExec).each { t ->
+        project.tasks.withType(JRubyExec).each { JRubyExec t ->
             t.jrubyVersion = newVersion
         }
+
+        execVersionCallbacks.each { Closure callback ->
+            callback.call(execVersion)
+        }
+    }
+
+    /**
+     * Register a callback to be invoked when defaultVersion is updated
+     *
+     * NOTE: This is primarily meant for JRuby/Gradle plugin developers
+     *
+     * @param callback
+     * @since 1.1.0
+     */
+    @Incubating
+    void registerDefaultVersionCallback(Closure callback) {
+        defaultVersionCallbacks.add(callback)
+    }
+
+    /**
+     * Register a callback to be invoked when execVersion is updated
+    *
+    * This is primarily meant for JRuby/Gradle plugin developers. You can expect
+    * that this callback will be executed if defaultVersion is changed but
+    * execVersion is not changed.
+    *
+    * @param callback
+    * @since 1.1.0
+    */
+    @Incubating
+    void registerExecVersionCallback(Closure callback) {
+        execVersionCallbacks.add(callback)
     }
 
     private Project project
 
-    /** Directory for jrubyPrepare to install GEM dependencies into
-     */
+    /** Directory for jrubyPrepare to install GEM dependencies into */
     private Object gemInstallDir
 
-    /** Directory for jrubyPrepare to install JAR dependencies into
-     */
+    /** Directory for jrubyPrepare to install JAR dependencies into */
     private Object jarInstallDir
 
+    /** List of callbacks to invoke when jruby.defaultVersion is modified */
+    private List<Closure> defaultVersionCallbacks = []
+
+    /** List of callbacks to invoke when jruby.execVersion is modified */
+    private List<Closure> execVersionCallbacks = []
+
+    private Boolean isExecVersionModified = false
 }

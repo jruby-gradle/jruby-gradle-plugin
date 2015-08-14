@@ -3,6 +3,7 @@ import groovy.json.JsonOutput
 apply plugin: 'org.ysb33r.gradletest'
 
 configurations {
+    testJRubyPrepare
     integrationTestCompile.extendsFrom testCompile
     integrationTestRuntime.extendsFrom testRuntime, integrationTestCompile
 }
@@ -32,10 +33,15 @@ task prepareGradleTestKitClasspath {
     }
 }
 
+task copyIntegrationTestJRuby (type:Copy) {
+    from ({configurations.testJRubyPrepare.files})
+    into new File(buildDir,'tmp/test/repo')
+}
+
 task integrationTest(type: Test) {
     group 'Verification'
     description 'Run the TestKit-based integration tests'
-    dependsOn prepareGradleTestKitClasspath, test, jar
+    dependsOn prepareGradleTestKitClasspath, copyIntegrationTestJRuby, test
     classpath = sourceSets.integrationTest.runtimeClasspath
     testClassesDir = sourceSets.integrationTest.output.classesDir
 
@@ -68,4 +74,6 @@ dependencies {
     integrationTestRuntime files(prepareGradleTestKitClasspath)
 
     gradleTest project(':jruby-gradle-base-plugin')
+
+    testJRubyPrepare "org.jruby:jruby-complete:1.7.19"
 }
