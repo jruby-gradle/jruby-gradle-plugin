@@ -12,7 +12,7 @@ import org.gradle.api.Project
 class JRubyPlugin implements Plugin<Project> {
     static final String TASK_GROUP_NAME = 'JRuby'
 
-    static final String RUBYGEMS_RELEASE_URL = 'http://rubygems-jrubygradle.rhcloud.com/proxy/maven/releases'
+    static final String RUBYGEMS_RELEASE_URL = 'http://rubygems.lasagna.io/proxy/maven/releases'
 
     void apply(Project project) {
         project.extensions.create('jruby', JRubyPluginExtension, project)

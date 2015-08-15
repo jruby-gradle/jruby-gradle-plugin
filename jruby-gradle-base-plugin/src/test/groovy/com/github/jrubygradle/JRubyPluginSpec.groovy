@@ -25,7 +25,7 @@ class JRubyPluginSpec extends Specification {
         project.evaluate()
 
         then:
-        hasRepositoryUrl(project, 'http://rubygems-jrubygradle.rhcloud.com/proxy/maven/releases')
+        hasRepositoryUrl(project, 'http://rubygems.lasagna.io/proxy/maven/releases')
     }
 
     def "setting the default repository via rubygemsRelease()"() {
@@ -36,7 +36,7 @@ class JRubyPluginSpec extends Specification {
         project.repositories.metaClass.respondsTo(project.repositories,'rubygemsRelease')
 
         and:
-        hasRepositoryUrl(project, 'http://rubygems-jrubygradle.rhcloud.com/proxy/maven/releases')
+        hasRepositoryUrl(project, 'http://rubygems.lasagna.io/proxy/maven/releases')
     }
 
     private boolean hasRepositoryUrl(Project p, String url) {
