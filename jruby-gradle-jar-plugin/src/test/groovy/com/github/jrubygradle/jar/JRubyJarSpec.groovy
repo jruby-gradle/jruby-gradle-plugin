@@ -36,6 +36,18 @@ class JRubyJarSpec extends Specification {
         task.jrubyVersion == version
     }
 
+    def "jrubyMainsVersion should be configurable in a Gradle conventional way"() {
+        given:
+        final String version = '0.4.1.'
+
+        JRubyJar task = project.task('spock-jar', type: JRubyJar) {
+            jrubyMainsVersion version
+        }
+
+        expect:
+        task.jrubyMainsVersion == version
+    }
+
     def "configuration should default to 'jrubyJar'"() {
         given:
         JRubyJar task = project.task('spock-jar', type: JRubyJar)
@@ -54,34 +66,5 @@ class JRubyJarSpec extends Specification {
 
         expect:
         task.configuration == customConfig
-    }
-
-    @Issue("https://github.com/jruby-gradle/jruby-gradle-plugin/issues/168")
-    def "configuring a new version of JRuby requires a non-default configuration"() {
-        given:
-        final String version = '1.7.11'
-        JRubyJar task = project.task('spock-jar', type: JRubyJar) {
-            jrubyVersion version
-        }
-
-        when:
-        project.evaluate()
-
-        then: "a configuration error should be thrown"
-        thrown(ProjectConfigurationException)
-    }
-
-    @Issue("https://github.com/jruby-gradle/jruby-gradle-plugin/issues/168")
-    def "configuring a new version of jruby-mains requires a non-default configuration"() {
-        final String version = '0.3.0'
-        JRubyJar task = project.task('spock-jar', type: JRubyJar) {
-            jrubyMainsVersion version
-        }
-
-        when:
-        project.evaluate()
-
-        then: "a configuration error should be thrown"
-        thrown(ProjectConfigurationException)
     }
 }

@@ -134,18 +134,14 @@ class JRubyJar extends Jar {
         }
 
         if (mainClass != null && scriptName != Type.LIBRARY) {
-            /* NOTE: this should go away or be reafactored, GemUtils.setupJars excludes jruby */
-            Configuration c = project.configurations.findByName(configuration)
-            File jrubyMains = c.find { it.name.matches(/jruby-mains-(.*).jar/) }
-            File jruby = project.configurations.findByName(customConfigName).find { it.name.matches(/jruby-complete-(.*).jar/) }
-
-            logger.info("unzipping ${jruby} in the jar")
-            logger.info("unzipping ${jrubyMains} in the jar")
+            Configuration embeds = project.configurations.findByName(customConfigName)
 
             with project.copySpec {
-                /* We nede to extract the class files from jruby-mains in order to properly run */
-                from { project.zipTree(jrubyMains) }
-                from { project.zipTree(jruby) }
+                embeds.each { File embed ->
+                    logger.info("unzipping ${embed} in the jar")
+                    /* We nede to extract the class files from jruby-mains in order to properly run */
+                    from { project.zipTree(embed) }
+                }
                 include '**'
                 exclude 'META-INF/MANIFEST.MF'
                 // some pom.xml are readonly which creates problems
@@ -192,10 +188,9 @@ class JRubyJar extends Jar {
         // to exclude '.jrubydir'
         // there are other duplicates as well :(
         setDuplicatesStrategy(DuplicatesStrategy.EXCLUDE)
-        customConfigName = "jrubyJar-${hashCode()}"
+        customConfigName = "jrubyJarEmbeds-${hashCode()}"
 
         project.afterEvaluate {
-            validateTaskConfiguration()
             addJRubyDependency()
             applyConfig()
         }
@@ -209,12 +204,12 @@ class JRubyJar extends Jar {
         project.configurations.maybeCreate(customConfigName)
         logger.info("adding the dependency jruby-complete ${getJrubyVersion()} to jar")
         project.dependencies.add(customConfigName, "org.jruby:jruby-complete:${getJrubyVersion()}")
+        logger.info("adding the dependency jruby-mains ${getJrubyMainsVersion()} to jar")
+        project.dependencies.add(customConfigName, "org.jruby.mains:jruby-mains:${getJrubyMainsVersion()}")
     }
 
     /** Add the necessary JRuby dependencies to the specified {@code org.gradle.api.artifacts.Configuration} */
     void addEmbeddedDependencies(Configuration config) {
-        logger.info("adding the dependency jruby-mains ${getJrubyMainsVersion()} to jar")
-        project.dependencies.add(config.name, "org.jruby.mains:jruby-mains:${getJrubyMainsVersion()}")
         /* To ensure that we can load our jars properly, we should always have
          * jar-dependencies in our resolution graph */
         project.dependencies.add(config.name, 'rubygems:jar-dependencies:0.1.15')
@@ -262,24 +257,6 @@ class JRubyJar extends Jar {
      */
     private String prepareNameForSuffix(String baseName) {
         return baseName.replaceAll("(?i)jruby", 'JRuby').capitalize()
-    }
-
-    /** Verify that we are in a good configuration for execution */
-    void validateTaskConfiguration() {
-        /* Exit early if we have definde our own configuration */
-        if (getConfiguration() != DEFAULT_JRUBYJAR_CONFIG) {
-            return
-        }
-
-        if ((getJrubyVersion() != project.jruby.defaultVersion) ||(getJrubyMainsVersion() != DEFAULT_JRUBY_MAINS)) {
-            String message = """\
-The \"${name}\" task cannot be configured wth a custom JRuby (${jrubyVersion}) or jruby-mains (${jrubyMainsVersion})
-and still use the default \"${DEFAULT_JRUBYJAR_CONFIG}\" configuration
-
-Please see this page for more details: <http://jruby-gradle.org/errors/jrubyjar-version-conflict/>
-"""
-            throw new InvalidUserDataException(message)
-        }
     }
 
     protected Object scriptName
