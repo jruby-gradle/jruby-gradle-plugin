@@ -1,0 +1,31 @@
+= JRuby/Gradle at JRubyConf EU 2015
+:page-layout: base
+
+A couple weeks ago, link:https://github.com/ysb33r[Schalk],
+link:https://github.com/mkristian[Christian] and
+link:https://github.com/rtyler[I] were fortunate enough to participate in the
+wonderful link:http://2015.jrubyconf.eu[JRubyConf EU 2015] in Potsdam Germany.
+In the days that preceeded the conference we pulled together and finished up
+what would become the link:/news/2015/08/04/jrubygradle-one-point-oh/[1.0
+release] of the core plugins. Just in time for my presentation to introduce the
+JRuby/Gradle toolchain to the audience.
+
+Below is a video recoded by link:http://confreaks.tv[Confreaks.tv] of the talk
+titled **JRuby/Gradle: Bringing Java Powertools to Ruby**:
+
+++++
+<center><iframe width="560" height="315" src="https://www.youtube.com/embed/kZt6Ga20lD0" frameborder="0" allowfullscreen></iframe></center>
+++++
+
+
+The link:http://confreaks.tv/events/jrubyconf2015[other sessions] are also
+worth checking out as there was a lot of great, in-depth, technical content
+presented at the single-track one-day conference.
+
+
+On behalf of the
+link:https://www.flickr.com/photos/agentdero/20372579815/[JRuby/Gradle core
+team], I'd like to thank the conference organizers (especially
+link:https://github.com/pragtob[Tobi]) for hosting such a wonderful event and
+allowing us the opportunity to participate. Hopefully we'll be back next year
+with more to talk about!
