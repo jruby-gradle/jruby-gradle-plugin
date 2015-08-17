@@ -11,6 +11,9 @@ import org.gradle.testkit.runner.TaskOutcome
 
 import spock.lang.*
 
+import java.util.zip.ZipEntry
+import java.util.zip.ZipFile
+
 /*
  * A series of tests which expect to use the JRubyJar task in more of an integration
  * test fashion, i.e. evaluating the Project, etc
@@ -188,6 +191,14 @@ task validateJar(type: Exec) {
         builtArtifacts && builtArtifacts.size() == 1
         result.task(":jrubyJar").outcome == TaskOutcome.SUCCESS
         result.task(":validateJar").outcome == TaskOutcome.SUCCESS
+
+        and: "the should not be a jruby-mains.jar or jruby-complete.jar inside the archive"
+        ZipFile zip = new ZipFile(builtArtifacts.getAt(0))
+        !zip.entries().findAll { ZipEntry entry ->
+            entry.name.matches(/(.*)jruby-complete-(.*).jar/) || entry.name.matches(/(.*)jruby-mains-(.*).jar/)
+        }
+
+        and:
         result.standardOutput.contains('Hello from JRuby')
     }
 
