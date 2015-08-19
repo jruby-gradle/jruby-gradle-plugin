@@ -136,9 +136,9 @@ buildscript {
 apply plugin: 'com.github.jruby-gradle.jar'
 jruby.defaultRepositories = false
 repositories {
-    flatDir dirs: "${TESTREPO_LOCATION.absolutePath}"
+    flatDir dirs: "${TESTREPO_LOCATION.absoluteFile.toURI().toURL()}"
     maven {
-        url "file://" + "${MAVENREPO_LOCATION.absolutePath}"
+        url "${MAVENREPO_LOCATION.absoluteFile.toURI().toURL()}"
     }
 }
 """
