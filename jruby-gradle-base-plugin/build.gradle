@@ -28,6 +28,15 @@ repositories {
 }
 
 dependencies {
+
+    compile "org.eclipse.jetty:jetty-server:${jettyVersion}"
+    compile "org.eclipse.jetty:jetty-webapp:${jettyVersion}"
+    compile( 'de.saumya.mojo:rubygems:0.2@war' ) {
+        // we just want the war file on the classloader for the application
+        // to find it and use the war-file from filesystem
+        exclude group: 'org.sonatype.nexus.plugins', module: 'nexus-ruby-tools'
+    }
+
     String spockVersion = "org.spockframework:spock-core:1.0-groovy-2.3"
 
     testJRubyPrepare "org.jruby:jruby-complete:${jrubyVersion}"
@@ -39,11 +48,6 @@ dependencies {
     integrationTestCompile (spockVersion) {
         exclude module : 'groovy-all'
     }
-
-    provided "org.jruby:jruby-complete:${jrubyVersion}"
-
-    // This needs to be here as JRubyExec will add it as a dependency
-    integrationTestGems 'org.bouncycastle:bcprov-jdk15on:1.50'
 
     // NOTE: If you change this, you will also need to update JRubyPrepareGemsIntegrationSpec
     integrationTestGems 'rubygems:slim:2.0.2'
@@ -63,6 +67,9 @@ dependencies {
 
     // NOTE: older jruby versions needs this for exec to work properly
     integrationTestGems "rubygems:jar-dependencies:0.1.15"
+
+    // NOTE: If you change this, you will also need to update JRubyExecExtensionIntegrationSpec
+    integrationTestGems 'org.bouncycastle:bcprov-jdk15on:1.46'
 
     gradleTest "org.jruby:jruby-complete:${jrubyVersion}"
     gradleTest 'rubygems:credit_card_validator:1.1.0'

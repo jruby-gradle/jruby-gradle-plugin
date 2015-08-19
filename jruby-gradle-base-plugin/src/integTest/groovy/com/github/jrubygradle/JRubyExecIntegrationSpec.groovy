@@ -105,6 +105,59 @@ class JRubyExecIntegrationSpec extends Specification {
         outputBuffer =~ /Not valid/
     }
 
+    def "Running a script that requires a gem using default embedded rubygems-servlets maven repo"() {
+        // java-1.7 runs int o perm-space problems
+        if (System.getProperty('java.version').startsWith('1.7.') ) {
+            println 'skipping extra rubygems-servlet test for jdk-1.7'
+            return
+        }
+        given:
+        String version = '0.1.1'
+        project.configure(execTask) {
+            setEnvironment [:]
+            script        "${TEST_SCRIPT_DIR}/require-a-gem.rb"
+            standardOutput output
+        }
+        project.repositories {
+            rubygems()
+        }
+        project.dependencies {
+            jrubyExec "rubygems:a:${version}"
+        }
+
+        when:
+        project.evaluate()
+        execTask.exec()
+
+        then:
+        // note this test has some error output not sure where this comes from. but the actual test passes
+        outputBuffer =~ /loaded 'a' gem with version ${version}/
+    }
+
+    def "Running a script that requires a gem using custom embedded rubygems-servlets maven repo"() {
+        given:
+        String version = '0.1.0'
+        project.configure(execTask) {
+            setEnvironment [:]
+            script        "${TEST_SCRIPT_DIR}/require-a-gem.rb"
+            standardOutput output
+        }
+        project.repositories {
+            rubygems('http://rubygems.lasagna.io/proxy')
+        }
+        project.dependencies {
+            jrubyExec "rubygems:a:${version}"
+        }
+
+        when:
+        project.evaluate()
+        execTask.exec()
+
+        then:
+        // note this test has some error output not sure where this comes from. but the actual test passes
+        outputBuffer =~ /loaded 'a' gem with version ${version}/
+    }
+
     def "Running a script that requires a gem, a separate JRuby and a separate configuration"() {
         given:
         final String newVersion = '1.7.11'
