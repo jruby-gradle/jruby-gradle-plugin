@@ -1,9 +1,11 @@
 #!/bin/sh
 
 ## Hack our GEM_HOME to make sure that the `rubygems` support can find our
-# unpacked gems in the given GEMFOLDER
+# jars and unpacked gems in the given GEMFOLDER
 export GEM_HOME="%%GEMFOLDER%%"
 export GEM_PATH="%%GEMFOLDER%%"
+export JARS_HOME=$GEM_HOME/jars
+export JARS_LOCK=$GEM_HOME/Jars.lock
 
-exec java -cp %%JRUBYEXEC_CLASSPATH%% org.jruby.Main -S $@
+exec java -cp %%JRUBYEXEC_CLASSPATH%% org.jruby.Main -rjars/setup -S $@
 

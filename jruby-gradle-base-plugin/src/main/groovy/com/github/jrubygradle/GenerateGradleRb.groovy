@@ -1,5 +1,7 @@
 package com.github.jrubygradle
 
+import com.github.jrubygradle.internal.JRubyExecUtils
+
 import org.gradle.api.DefaultTask
 import org.gradle.api.GradleException
 import org.gradle.api.file.FileCopyDetails
@@ -87,9 +89,11 @@ class GenerateGradleRb extends DefaultTask {
             eachFile { FileCopyDetails details ->
                 details.relativePath = new RelativePath(true, [details.getName()] as String[])
             }
+
+            Set<String> path = JRubyExecUtils.classpathFromConfiguration(project.configurations.jrubyExec)
             filter { String line ->
                 line.replaceAll('%%GEMFOLDER%%', gemInstallDir.absolutePath).
-                        replaceAll('%%JRUBYEXEC_CLASSPATH%%', project.configurations.jrubyExec.asPath)
+                     replaceAll('%%JRUBYEXEC_CLASSPATH%%', path.join(File.pathSeparator))
             }
         }
     }
