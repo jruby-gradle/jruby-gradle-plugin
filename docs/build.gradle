@@ -12,7 +12,7 @@ buildscript {
         classpath "org.ajoberstar:gradle-git:1.2.0"
 
         /* wow. so recursion */
-        classpath "com.github.jruby-gradle:jruby-gradle-plugin:0.4.0"
+        classpath "com.github.jruby-gradle:jruby-gradle-plugin:1.0.3"
     }
 }
 apply plugin: 'org.ajoberstar.github-pages'
@@ -61,14 +61,14 @@ task prepareGroovyDocs(type: Copy) {
 }
 
 task compileAsciidoc(type: JRubyExec) {
-    jrubyArgs '-S'
     script 'awestruct'
     scriptArgs "--generate", "--verbose",
                 "--output-dir", "${buildDir}/_site",
                 '--force'
     /* without the --force option, awestruct is not smart enough to regenerate
      * files based on includes */
-    configuration = 'asciidoctor'
+    configuration 'asciidoctor'
+    inputs.source fileTree(projectDir).include('**/*.adoc')
 }
 
 task assembleDocs {
