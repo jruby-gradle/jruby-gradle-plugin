@@ -80,8 +80,6 @@ class JRubyPrepareGemsIntegrationSpec extends Specification {
             task.copy()
 
         expect:
-            // since we need a version range in the setup the
-            // resolved version here can vary over time
             new File(task.outputDir,"gems/jar-dependencies-0.1.16.pre").exists()
     }
 
