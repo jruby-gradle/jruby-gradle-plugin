@@ -1,7 +1,5 @@
 package com.github.jrubygradle
 
-import java.net.URL
-
 import com.github.jrubygradle.internal.JRubyExecDelegate
 import com.github.jrubygradle.internal.GemVersionResolver
 import com.github.jrubygradle.internal.JRubyExecUtils
