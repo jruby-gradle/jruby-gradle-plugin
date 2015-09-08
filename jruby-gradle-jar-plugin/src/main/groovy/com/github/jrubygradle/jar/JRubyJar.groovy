@@ -225,7 +225,7 @@ class JRubyJar extends Jar {
 
         logger.info("${this} including files in ${dir}")
         from(dir) {
-            include '**'
+            include 'specifications/**', 'gems/**', 'jars/**', 'Jars.lock'
         }
 
         project.gradle.taskGraph.addTaskExecutionListener(
