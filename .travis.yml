@@ -15,7 +15,8 @@ jdk:
 
 os:
  - linux
- - osx
+# some travis issue - currently
+# - osx
 
 env: TERM=dumb
 
