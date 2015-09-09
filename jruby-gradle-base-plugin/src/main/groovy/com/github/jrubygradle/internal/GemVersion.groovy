@@ -42,6 +42,7 @@ class GemVersion {
     private static Pattern TAIL = Pattern.compile(',.*$')
     private static Pattern FIRST = Pattern.compile('^[\\[\\(]')
     private static Pattern LAST = Pattern.compile('[\\]\\)]$')
+    private static Pattern ZEROS = Pattern.compile('(\\.0)+$')
 
     private String low
     private String high
@@ -63,14 +64,14 @@ class GemVersion {
      */
     GemVersion(String version) {
         if (version.contains( '+' ) ) {
-            low = PLUS.matcher(DOT_PLUS.matcher(version).replaceFirst('.0')).replaceFirst('')
+            low = ZEROS.matcher(PLUS.matcher(DOT_PLUS.matcher(version).replaceFirst('.0')).replaceFirst('')).replaceFirst('')
             high = DIGITS_PLUS.matcher(DOT_PLUS.matcher(version).replaceFirst('.99999')).replaceFirst('99999')
         }
-        else if (version.contains( LOW_IN ) || version.contains( UP_EX ) ||
+        else if (version.contains( LOW_IN ) || version.contains( LOW_EX ) ||
                  version.contains( UP_IN ) || version.contains( UP_EX ) ) {
             prefix = version.charAt( 0 ).toString()
             postfix = version.charAt( version.size() - 1 ).toString()
-            low = FIRST.matcher(TAIL.matcher(version).replaceFirst('')).replaceFirst('')
+            low = ZEROS.matcher(FIRST.matcher(TAIL.matcher(version).replaceFirst('')).replaceFirst('')).replaceFirst('')
             high = LAST.matcher(HEAD.matcher(version).replaceFirst('')).replaceFirst('')
             if (high == '' ){
               high = '99999'

@@ -32,12 +32,12 @@ class GemVersionSpec extends Specification {
         GemVersion subject = new GemVersion('1.2.+')
 
         expect:
-        subject.toString() == '[1.2.0,1.2.99999]'
+        subject.toString() == '[1.2,1.2.99999]'
     }
 
     def "parses maven open version range"() {
         given:
-        GemVersion subject = new GemVersion('[1.2,)')
+        GemVersion subject = new GemVersion('[1.2.0,)')
 
         expect:
         subject.toString() == '[1.2,99999)'
@@ -45,10 +45,10 @@ class GemVersionSpec extends Specification {
 
     def "parses maven version range first sample"() {
         given:
-        GemVersion subject = new GemVersion('(1.2.0, 1.2.4)')
+        GemVersion subject = new GemVersion('(1.2.0.0, 1.2.4)')
 
         expect:
-        subject.toString() == '(1.2.0,1.2.4)'
+        subject.toString() == '(1.2,1.2.4)'
     }
 
     def "parses maven version range second sample"() {
@@ -56,7 +56,7 @@ class GemVersionSpec extends Specification {
         GemVersion subject = new GemVersion('(1.2.0, 1.2.4]')
 
         expect:
-        subject.toString() == '(1.2.0,1.2.4]'
+        subject.toString() == '(1.2,1.2.4]'
     }
 
     def "parses maven version range third sample"() {
@@ -64,23 +64,39 @@ class GemVersionSpec extends Specification {
         GemVersion subject = new GemVersion('[1.2.0, 1.2.4)')
 
         expect:
-        subject.toString() == '[1.2.0,1.2.4)'
+        subject.toString() == '[1.2,1.2.4)'
     }
 
     def "parses maven version range forth sample"() {
         given:
-        GemVersion subject = new GemVersion('[1.2.0, 1.2.4]')
+        GemVersion subject = new GemVersion('[1.2.1, 1.2.4]')
 
         expect:
-        subject.toString() == '[1.2.0,1.2.4]'
+        subject.toString() == '[1.2.1,1.2.4]'
+    }
+
+    def "parses maven version range trailing zeros"() {
+        given:
+        GemVersion subject = new GemVersion('[1.2.1.0.0.0, 1.2.4]')
+
+        expect:
+        subject.toString() == '[1.2.1,1.2.4]'
+    }
+
+    def "parses maven version range trailing zeros as prereleased version"() {
+        given:
+        GemVersion subject = new GemVersion('[1.2.1.0.pre.0, 1.2.4]')
+
+        expect:
+        subject.toString() == '[1.2.1.0.pre,1.2.4]'
     }
 
     def "intersects two versions first sample"() {
         given:
-        GemVersion subject = new GemVersion('[1.2.0, 1.2.4]')
+        GemVersion subject = new GemVersion('[1.2.1, 1.2.4]')
 
         expect:
-        subject.intersect('(1.2.0, 1.2.4)').toString() == '(1.2.0,1.2.4)'
+        subject.intersect('(1.2.1, 1.2.4)').toString() == '(1.2.1,1.2.4)'
     }
 
     def "intersects two versions second sample"() {
@@ -104,7 +120,7 @@ class GemVersionSpec extends Specification {
         GemVersion subject = new GemVersion('(1.2.0, 1.2.4)')
 
         expect:
-        subject.intersect('[1.2.0, 1.2.4]').toString() == '(1.2.0,1.2.4)'
+        subject.intersect('[1.2.0, 1.2.4]').toString() == '(1.2,1.2.4)'
     }
 
     def "intersects two versions second sample reversed"() {
@@ -144,7 +160,7 @@ class GemVersionSpec extends Specification {
         GemVersion subject = new GemVersion('[0.9.0,0.9.99999]')
 
         expect:
-        subject.intersect('[0,)').toString() == '[0.9.0,0.9.99999]'
+        subject.intersect('[0,)').toString() == '[0.9,0.9.99999]'
     }
 
     def "intersects two versions special one"() {
@@ -152,7 +168,7 @@ class GemVersionSpec extends Specification {
         GemVersion subject = new GemVersion('[0,)')
 
         expect:
-        subject.intersect('[0.9.0,0.9.99999]').toString() == '[0.9.0,0.9.99999]'
+        subject.intersect('[0.9.0,0.9.99999]').toString() == '[0.9,0.9.99999]'
     }
 
     def "intersects with conflict"() {
