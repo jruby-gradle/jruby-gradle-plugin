@@ -228,7 +228,7 @@ task validateJar(type: Exec) {
         then:
         builtArtifacts && builtArtifacts.size() == 1
         result.task(":validateJar").outcome == TaskOutcome.SUCCESS
-        result.standardOutput.contains("Hello from JRuby: 9.0.0.0")
+        result.standardOutput.contains("Hello from JRuby")
     }
 
     @Issue("https://github.com/jruby-gradle/jruby-gradle-plugin/issues/183")
