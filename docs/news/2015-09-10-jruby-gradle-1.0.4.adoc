@@ -1,0 +1,52 @@
+= "v1.0.4 and a few squashed bugs"
+:page-layout: base
+
+We've just released a minor bug fix release of the
+link:https://github.com/jruby-gradle/jruby-gradle-plugin/tree/release-1.0.x[1.0.x
+branch] of the JRuby/Gradle core plugins. We wanted to get a few bug fixes out
+to users before we release
+link:https://github.com/jruby-gradle/jruby-gradle-plugin/milestones/1.1.0%20-%20Dresden[1.1.0
+- Dresden], a release which contains some great new features which are still
+baking in the oven.
+
+
+Upgrading to this release is as easy as editing your `build.gradle` files:
+
+.build.gradle
+[source,gradle]
+----
+buildscript {
+    repositories { jcenter() }
+    dependencies {
+        classpath "com.github.jruby-gradle:jruby-gradle-plugin:1.0.4"
+    }
+}
+apply plugin: 'com.github.jruby-gradle.base'
+----
+
+The full diff from
+link:https://github.com/jruby-gradle/jruby-gradle-plugin/compare/v1.0.3...v1.0.4[1.0.3
+to 1.0.4 can be found here].
+
+== Improvements
+
+* link:https://github.com/jruby-gradle/jruby-gradle-plugin/issues/211[#211]:
+  Upgrade to use JRuby link:http://jruby.org/2015/09/02/jruby-9-0-1-0.html[9.0.1.0]
+  by default
+* link:https://github.com/jruby-gradle/jruby-gradle-plugin/issues/193[#193]:
+  Avoid packing a redundant copy of
+  link:https://github.com/jruby/jruby-mains[jruby-mains] inside packed jars
+
+
+== Bug fixes
+
+* link:https://github.com/jruby-gradle/jruby-gradle-plugin/issues/190[#190]: generated
+  gradle.rb needs to follow the jars/gems setup we have everywhere else
+* link:https://github.com/jruby-gradle/jruby-gradle-plugin/issues/213[#213]:
+  cannot resolve gems with `~> 0.10.4.0` to `0.10.4` the way bundler does
+* link:https://github.com/jruby-gradle/jruby-gradle-storm-plugin/issues/21[jruby-gradle-storm-plugin#21]:
+  enable easier subclassing of `JRubyJar` so subclasses can override
+  properties cleanly.
+* link:https://github.com/jruby-gradle/jruby-gradle-plugin/issues/220[#220]:
+  prepareJRubyJar doesn't cache results and reinstalls gems every single run
+
