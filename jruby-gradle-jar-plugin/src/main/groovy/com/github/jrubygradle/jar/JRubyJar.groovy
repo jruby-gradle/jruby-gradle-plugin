@@ -25,8 +25,6 @@ class JRubyJar extends Jar {
     static final String EXTRACTING_MAIN_CLASS = 'org.jruby.mains.ExtractingMain'
     static final String DEFAULT_JRUBY_MAINS = '0.4.0'
 
-    protected String jrubyVersion
-
     /**
      * Return the project default unless set
      *
@@ -36,26 +34,28 @@ class JRubyJar extends Jar {
      * respect this setting
      * */
     String getJrubyVersion() {
-        if (jrubyVersion == null) {
+        if (embeddedJRubyVersion == null) {
             return project.jruby.defaultVersion
         }
-        return jrubyVersion
+        return embeddedJRubyVersion
     }
 
     @Input
     void jrubyVersion(String version) {
-        logger.info("setting jrubyVersion to ${version} from ${jrubyVersion}")
-        this.jrubyVersion = version
+        logger.info("setting jrubyVersion to ${version} from ${embeddedJRubyVersion}")
+        embeddedJRubyVersion = version
         addEmbeddedDependencies(project.configurations.maybeCreate(configuration))
     }
 
     @Input
     @Optional
-    String jrubyMainsVersion = DEFAULT_JRUBY_MAINS
+    String getJrubyMainsVersion() {
+        return embeddedJRubyMainsVersion
+    }
 
     void jrubyMainsVersion(String version) {
-        logger.info("setting jrubyMainsVersion to ${version} from ${jrubyMainsVersion}")
-        jrubyMainsVersion = version
+        logger.info("setting jrubyMainsVersion to ${version} from ${embeddedJRubyMainsVersion}")
+        embeddedJRubyMainsVersion = version
         addEmbeddedDependencies(project.configurations.maybeCreate(configuration))
     }
 
@@ -65,15 +65,8 @@ class JRubyJar extends Jar {
     }
 
     @Input
-    String mainClass
-
-    @Input
-    @Optional
-    String configuration = DEFAULT_JRUBYJAR_CONFIG
-
-    void setConfiguration(String newConfiguration) {
-        logger.info("using the ${newConfiguration} configuration for the ${name} task")
-        configuration = newConfiguration
+    String getMainClass() {
+        return jarMainClass
     }
 
     /** Makes the JAR executable by setting a custom main class
@@ -81,10 +74,21 @@ class JRubyJar extends Jar {
      * @param className Name of main class
      */
     void mainClass(final String className) {
-        this.mainClass = className
+        jarMainClass = className
         if (this.scriptName == null) {
             this.scriptName = runnable()
         }
+    }
+
+    @Input
+    @Optional
+    String getConfiguration() {
+        return jarConfiguration
+    }
+
+    void setConfiguration(String newConfiguration) {
+        logger.info("using the ${newConfiguration} configuration for the ${name} task")
+        jarConfiguration = newConfiguration
     }
 
     void initScript(final Object scriptName) {
@@ -263,4 +267,8 @@ class JRubyJar extends Jar {
     protected JRubyDirInfo dirInfo
     protected JRubyPrepare prepareTask
     protected String customConfigName
+    protected String embeddedJRubyVersion
+    protected String embeddedJRubyMainsVersion = DEFAULT_JRUBY_MAINS
+    protected String jarConfiguration = DEFAULT_JRUBYJAR_CONFIG
+    protected String jarMainClass
 }
