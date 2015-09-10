@@ -148,7 +148,7 @@ gradleLocations {
 }
 
 gradleTest {
-    versions '2.0','2.2','2.4'
+    versions '2.0','2.2','2.6'
     dependsOn jar
 }
 // vim: ft=groovy
