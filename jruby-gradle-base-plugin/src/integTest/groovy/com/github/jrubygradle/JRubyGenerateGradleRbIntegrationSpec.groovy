@@ -41,7 +41,11 @@ class JRubyGenerateGradleRbIntegrationSpec extends Specification {
         and: "The GEM_HOME to include gemInstallDir"
             expected.text.contains('export GEM_HOME="' + project.jruby.gemInstallDir + '"')
 
+        and: "The JARS_HOME is set"
+            expected.text.contains('export JARS_HOME=')
+
         and: "The java command invoked with the -cp flag"
+            // with this test setup it is just jrubyExec.asPath
             expected.text.find(project.configurations.jrubyExec.asPath)
 
     }
