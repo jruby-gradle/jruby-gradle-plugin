@@ -15,7 +15,6 @@ class JRubyDirInfo {
 
     JRubyDirInfo(File dir) {
         dirInfo = dir
-        dirInfo.deleteDir();
     }
 
     File toFile(File path, String subdir) {
