@@ -5,18 +5,14 @@ install:
  - ./gradlew clean
 
 script:
- - ./gradlew -S -i
- - ./gradlew -S -i gradleTest
+ - ./gradlew -S -i check gradleTest assemble
 
 jdk:
- - oraclejdk7
  - oraclejdk8
  - openjdk7
 
 os:
  - linux
-# some travis issue - currently
-# - osx
 
 env: TERM=dumb
 
