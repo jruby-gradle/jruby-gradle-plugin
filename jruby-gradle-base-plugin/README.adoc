@@ -201,17 +201,42 @@ task unpackMyGems(type : JRubyPrepare) {
 
 == Advanced Usage
 
+=== Using the built-in Gem proxy
+
+As of version 1.1.0, the JRuby/Gradle base plugin supports embedding a
+link:https://github.com/torquebox/rubygems-servlets[rubygems-servlets] process
+*inside* the Gradle process itself. This obviates the need for a third-party
+proxy to present the Maven-compatible dependency information that JRuby/Gradle
+relies on.
+
+.build.gradle
+[source,gradle]
+----
+apply plugin: 'com.github.jruby-gradle.base'
+
+/* Disable our default repositories */
+jruby.defaultRepositories false
+
+repositories {
+    rubygems('https://rubygems.org')
+}
+
+dependencies {
+    gems 'rubygems:sinatra:1.4.5'
+}
+----
+
 === Using a custom Gem repository
 
 By default the jruby plugin will use
-[rubygems-proxy.torquebox.org](http://rubygems-proxy.torquebox.org) as its
-source of Ruby gems. This is a server operated by the Torquebox project which
-presents [rubygems.org](https://rubygems.org) as a Maven repository.
+link:http://rubygems.lasanga.io[rubygems.lasanga.io] as its source of Ruby
+gems. This is a server operated by link:https://github.com/rtyler[R. Tyler
+Croy] and it presents a Maven repository of the data from
+link:https://rubygems.org[rubygems.org].
 
-If you **do not** wish to use this repository, you can run your own Maven
-proxy repository for either rubygems.org or your own gem repository by
-running the [rubygems-servlets](https://github.com/torquebox/rubygems-servlets)
-server.
+If you **do not** wish to use this repository, you can run your own Maven proxy
+repository for either rubygems.org or your own gem repository by running the
+link:https://github.com/torquebox/rubygems-servlets[rubygems-servlets] server.
 
 You can then use that custom Gem repository with:
 
@@ -219,7 +244,7 @@ You can then use that custom Gem repository with:
 [source,gradle]
 ----
 jruby {
-    defaultRepositories = false
+    defaultRepositories false
 }
 
 repositories {
@@ -227,7 +252,7 @@ repositories {
 }
 
 dependencies {
-    gems group: 'com.lookout', name: 'custom-gem', version: '1.0.+'
+    gems 'rubygems:my-custom-gem:1.0.1'
 }
 ----
 
