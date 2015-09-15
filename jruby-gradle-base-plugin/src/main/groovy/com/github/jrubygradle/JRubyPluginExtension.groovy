@@ -6,7 +6,7 @@ import org.gradle.api.Project
 class JRubyPluginExtension {
     static final String DEFAULT_JRUBY_VERSION = '9.0.1.0'
 
-    /** The default version of jruby that will be used by jrubyWar */
+    /** The default version of jruby that will be used  */
     String defaultVersion = DEFAULT_JRUBY_VERSION
 
     /**
@@ -15,7 +15,7 @@ class JRubyPluginExtension {
      *  be avoided. Set jrubyVersion on your JRubyExec tasks instead
      */
     @Deprecated
-    String execVersion = DEFAULT_JRUBY_VERSION
+    String execVersion = defaultVersion
 
     /** Set this to false if you do not want the default set of repositories to be loaded.
      *
