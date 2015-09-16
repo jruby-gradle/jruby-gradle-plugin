@@ -17,6 +17,38 @@ class JRubyJarPlugin implements Plugin<Project> {
         project.tasks.create('jrubyJar', JRubyJar)
 
         updateTestTask(project)
+
+        project.afterEvaluate {
+            checkJRubyVersions(project)
+        }
+    }
+
+    /**
+     * Check our configured jruby versions to see if any of them are old enough
+     * to cause problems with a packed jar
+     * <https://github.com/jruby-gradle/jruby-gradle-plugin/issues/191>
+     */
+    void checkJRubyVersions(Project project) {
+        project.tasks.each { Task task ->
+            if ((task instanceof JRubyJar) && (task.scriptName != JRubyJar.Type.LIBRARY)) {
+                if (isJRubyVersionDeprecated(task.jrubyVersion)) {
+                    project.logger.warn("The task `{}` is using JRuby {} which may cause unexpected behavior, see <http://jruby-gradle.org/errors/jar-deprecated-jrubyversion> for more",
+                        task.name, task.jrubyVersion)
+                }
+            }
+        }
+    }
+
+    /**
+     * Determine whether the version of the JRuby provided is deprecated as far
+     * as the jar plugin is concerned. Deprecated means that the version is unlikely
+     * to produce a useful artifact due to missing functionality in JRuby core
+     *
+     * @param version
+     * @return True if we consider this version deprecated/problematic for the jar plugin
+     */
+    boolean isJRubyVersionDeprecated(String version) {
+        return (version.matches(/1.7.1(\d+)/)) as boolean
     }
 
     @PackageScope
