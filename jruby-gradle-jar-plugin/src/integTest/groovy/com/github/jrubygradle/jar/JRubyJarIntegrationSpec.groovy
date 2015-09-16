@@ -258,5 +258,9 @@ task validateJar(type: Exec) {
         and:
         result.task(":validateJar").outcome == TaskOutcome.SUCCESS
         result.standardOutput.contains("Hello from JRuby: 1.7.19")
+
+        and: 'there should be a warning about using an older JRuby'
+        /* see: https://github.com/jruby-gradle/jruby-gradle-plugin/issues/191 */
+        result.standardOutput.contains('unexpected behavior')
     }
 }

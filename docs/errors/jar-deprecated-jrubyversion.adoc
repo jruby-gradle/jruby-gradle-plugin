@@ -1,0 +1,62 @@
+= Deprecated version of JRuby for JRubyJar
+:page-layout: base
+:toc: right
+
+== What's going on?
+
+Starting with JRuby link:http://jruby.org/2015/05/05/jruby-1-7-20.html[1.7.20]
+there were substantial improvements introduced to JRuby core which make running
+JRuby in an "embedded" scenario more reliable. Packing a `JRubyJar` being a
+fairly typical "embedded JRuby" use-case, there is certain functionality that
+relies on these improvements.
+
+This does **not** mean older versions of JRuby won't work in `JRubyJar`
+archives but rather: you are _likely_ going to experience problems with a more
+complex use-case on an older JRuby. For example, Rails applications will not
+function properly if embedded in a `.jar` with JRuby 1.7.19.
+
+== How to fix it
+
+Since JRuby/Gradle 1.0 and later default to
+link:http://jruby.org/2015/07/22/jruby-9-0-0-0.html[9.0.0.0] and later, the
+easiest fix is to stop overriding the default (read: latest stable) JRuby
+version enummerated by the plugin.
+
+If the latest is viable for the project you're working with, at least update
+the version to something later than
+link:http://jruby.org/2015/08/20/jruby-1-7-22.html[1.7.22] via:
+
+.build.gradle
+[source, gradle]
+----
+jruby {
+    defaultVersion '1.7.22'
+}
+----
+
+
+=== Okay that didn't work
+
+If for whatever reason you cannot upgrade your version of JRuby, you can try to
+disable the embedded behavior in the `JRubyJar` and switch Jar's Main-Class to
+a "self-extracting" main provided by
+link:https://github.com/jruby/jruby-mains[jruby-mains].
+
+This is **untested as of this document's writing** but the basic idea is that
+instead of trying to execute the Ruby code from a fully embedded scenario, the
+self-extracting Main will first unzip the jar file into `/tmp` before setting
+up the JRuby environment.
+
+.build.gradle
+[source, gradle]
+----
+jrubyJar {
+    mainClass 'org.jruby.mains.ExtractingMain'
+}
+----
+
+
+== Links
+
+* link:https://github.com/jruby-gradle/jruby-gradle-plugin/issues/191[issue
+  #191] outlines the feature request that led to this behavior being introduced

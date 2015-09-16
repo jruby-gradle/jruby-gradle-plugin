@@ -1,5 +1,6 @@
 package com.github.jrubygradle.jar
 
+import com.github.jrubygradle.JRubyPlugin
 import com.github.jrubygradle.JRubyPrepare
 import org.gradle.api.InvalidUserDataException
 import org.gradle.api.Project
@@ -70,7 +71,6 @@ class JRubyJarPluginSpec extends Specification {
         project.tasks.getByName('jrubyJar')
     }
 
-  
     def 'Checking appendix'() {
         expect:
         project.tasks.getByName('jrubyJar').appendix == 'jruby'
@@ -225,5 +225,26 @@ class JRubyJarPluginSpec extends Specification {
 
         then:
         prepareTask.dependencies.find { (it instanceof Configuration) && (it.name == jarTask.configuration) }
+    }
+}
+
+
+class JRubyPluginInstanceSpec extends Specification {
+    JRubyJarPlugin plugin
+
+    def setup() {
+        plugin = new JRubyJarPlugin()
+    }
+
+    def "isJRubyVersionDeprecated()"() {
+        expect:
+        plugin.isJRubyVersionDeprecated(version) == expected
+
+        where:
+        version   | expected
+        '9.0.0.0' | false
+        '1.7.20'  | false
+        '1.7.11'  | true
+        '1.7.19'  | true
     }
 }
