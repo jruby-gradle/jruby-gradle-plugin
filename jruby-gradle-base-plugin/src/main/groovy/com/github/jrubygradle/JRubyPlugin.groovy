@@ -18,6 +18,11 @@ class JRubyPlugin implements Plugin<Project> {
 
     void apply(Project project) {
         project.extensions.create('jruby', JRubyPluginExtension, project)
+
+        if (project.hasProperty('jrubyVersion')) {
+            project.jruby.defaultVersion project.properties.get('jrubyVersion')
+        }
+
         setupRubygemsRepositories(project)
         setupRubygemsRelease(project)
 

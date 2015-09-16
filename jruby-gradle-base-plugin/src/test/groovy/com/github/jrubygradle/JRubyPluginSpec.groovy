@@ -39,6 +39,30 @@ class JRubyPluginSpec extends Specification {
         hasRepositoryUrl(project, 'http://rubygems.lasagna.io/proxy/maven/releases')
     }
 
+    def "applying the plugin with no properties should have jruby.defaultVersion defaulted"() {
+        when:
+        project.evaluate()
+
+        then:
+        project.jruby.defaultVersion == JRubyPluginExtension.DEFAULT_JRUBY_VERSION
+    }
+
+    def "applying the plugin with -PjrubyVersion= set should changej jruby.defaultVersion"() {
+        given:
+        final String version = '1.7.11'
+        project = ProjectBuilder.builder().build()
+        project.with {
+            ext.jrubyVersion = version
+        }
+        project.apply plugin: 'com.github.jruby-gradle.base'
+
+        when:
+        project.evaluate()
+
+        then:
+        project.jruby.defaultVersion == version
+    }
+
     private boolean hasRepositoryUrl(Project p, String url) {
         boolean result = false
         p.repositories.each { ArtifactRepository r ->

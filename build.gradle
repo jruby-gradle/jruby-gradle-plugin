@@ -73,6 +73,7 @@ subprojects {
             task.targetCompatibility = project.targetCompatibility
         }
     }
+    install.dependsOn check
 }
 
 task release(type: Exec) {
