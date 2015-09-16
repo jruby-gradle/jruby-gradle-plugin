@@ -82,6 +82,9 @@ task installGroovyDoc (type : Copy) {
     onlyIf { project.hasProperty('jrubyGradleWebsiteInstallDir') }
 }
 
+artifacts {
+    archives sourcesJar
+}
 
 bintray {
     user = project.bintrayUser

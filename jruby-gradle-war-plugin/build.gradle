@@ -12,6 +12,10 @@ dependencies {
     }
 }
 
+artifacts {
+    archives sourcesJar
+}
+
 bintray {
     user = project.bintrayUser
     key = project.bintrayKey

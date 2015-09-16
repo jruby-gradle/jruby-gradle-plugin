@@ -54,10 +54,6 @@ subprojects {
         from sourceSets.main.allSource
     }
 
-    artifacts {
-        archives sourcesJar
-    }
-
     plugins.withType(JavaPlugin) {
         sourceCompatibility = 1.7
         targetCompatibility = 1.7

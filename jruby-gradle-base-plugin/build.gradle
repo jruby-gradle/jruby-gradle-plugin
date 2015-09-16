@@ -125,6 +125,10 @@ publishing {
             artifactId project.archivesBaseName
             version project.version
 
+            artifact sourcesJar {
+                classifier "sources"
+            }
+
             from components.java
         }
     }
