@@ -16,7 +16,7 @@ buildscript {
     repositories { jcenter() }
 
     dependencies {
-        classpath "com.github.jruby-gradle:jruby-gradle-plugin:1.0.4"
+        classpath "com.github.jruby-gradle:jruby-gradle-plugin:[1.1.2,1.2)"
     }
 }
 apply plugin: "com.github.jruby-gradle.base"
@@ -32,7 +32,7 @@ buildscript {
     repositories { jcenter() }
 
     dependencies {
-        classpath "com.github.jruby-gradle:jruby-gradle-jar-plugin:1.0.4"
+        classpath "com.github.jruby-gradle:jruby-gradle-jar-plugin:[1.1.2,1.2)"
     }
 }
 apply plugin: "com.github.jruby-gradle.jar"
@@ -47,7 +47,7 @@ buildscript {
     repositories { jcenter() }
 
     dependencies {
-        classpath "com.github.jruby-gradle:jruby-gradle-war-plugin:1.0.4-alpha"
+        classpath "com.github.jruby-gradle:jruby-gradle-war-plugin:[1.1.2,1.2)-alpha"
     }
 }
 apply plugin: "com.github.jruby-gradle.war"
@@ -62,7 +62,7 @@ buildscript {
     repositories { jcenter() }
 
     dependencies {
-        classpath "com.github.jruby-gradle:jruby-gradle-storm-plugin:0.1.6"
+        classpath "com.github.jruby-gradle:jruby-gradle-storm-plugin:[0.4.2,0.5)"
     }
 }
 apply plugin: "com.github.jruby-gradle.storm"
