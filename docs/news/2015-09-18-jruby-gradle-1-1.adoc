@@ -1,0 +1,92 @@
+= "JRuby/Gradle 1.1 'Dresden' released"
+:page-layout: base
+
+
+Since our link:/news/2015/08/04/jrubygradle-one-point-oh/[major 1.0
+announcement] at this past year's link:http://2015.jrubyconf.eu[JRubyConf EU]
+we've had a pretty steady stream of improvements and bug fixes in a total
+of four patch releases (1.0.0 - 1.0.4), so we're due for a big meaty
+feature release! The most impactful feature, sponsored in part by
+link:https://lookout.com[Lookout, Inc.], is the support for **dependency
+resolution without a 3rd party proxy.**
+
+By default, JRuby/Gradle relies on a third party instance of the
+link:https://github.com/torquebox/rubygems-servlets[rubygems-servlets] proxy
+which represents a Rubygem repository in a Maven-compatible format, allowing
+tools like Gradle or Maven to prepare a dependency graph using Ruby gems. With
+1.1, codenamed "link:https://en.wikipedia.org/wiki/Dresden[Dresden]", release
+we've _embedded_ the proxy software directly into the Gradle process. With the
+`rubygems()` function, users can use gem dependencies from
+*any* repository, whether it's a public repository like
+link:https://rubygems.org[rubygems.org] or an internal Ruby gem repository.
+
+Currently this behavior is **defaulted to off** so users must explicitly
+enable it, e.g.:
+
+
+.build.gradle
+[source, gradle]
+----
+/* add the latest jruby/gradle plugin */
+buildscript {
+    repositories { jcenter() }
+    dependencies {
+        /* allow Gradle to resolve anything between 1.1.2 and 1.2.0 (exclusive) */
+        classpath "com.github.jruby-gradle:jruby-gradle-plugin:[1.1.2,1.2)"
+    }
+}
+apply plugin: 'com.github.jruby-gradle.base'
+
+/* Disable the default repositories so we can add our own */
+jruby {
+    defaultRepositories false
+}
+
+repositories {
+    /* use our new rubygems() function to add a rubygems repo */
+    rubygems('https://rubygems.org')
+}
+
+dependncies {
+    gems 'rubygems:sinatra:1.4.5'
+}
+----
+
+WARNING: In our beta testing of this feature, users on JDK7 may need to
+increase their available "PermGen" space for more complex projects via the
+`gradle.properties` setting of: `org.gradle.jvmargs="-XX:MaxPermSize=512m"`
+
+
+Once this functionality has been deemed stable, it will be enabled *by
+default* so please try it out, and as per usual, please report any bugs to the
+link:https://github.com/jruby-gradle/jruby-gradle-plugin/issues[GitHub Issues]
+page.
+
+== Other Notable Features
+
+The
+link:https://github.com/jruby-gradle/jruby-gradle-plugin/issues?q=milestone%3A%221.1.0+-+Dresden%22[full
+list of changes/fixes] is rather long, so below is a summary of what we thing
+are nifty and notable features in 1.1:
+
+* link:https://github.com/jruby-gradle/jruby-gradle-plugin/issues/131[#131]:
+  Provide a command-line property to change the version of JRuby at runtime
+  (`./gradlew -PjrubyVersion=9.0.1.0`)
+* link:https://github.com/jruby-gradle/jruby-gradle-plugin/issues/211[#211]:
+  Default to link:http://jruby.org/2015/09/02/jruby-9-0-1-0.html[JRuby 9.0.1.0]
+* link:https://github.com/jruby-gradle/jruby-gradle-plugin/issues/200[#200]:
+  Reduced `.jar` file size by not packing `cache/*.gem` inside the archive.
+* link:https://github.com/jruby-gradle/jruby-gradle-plugin/pull/208[#208]:
+  Ensure `gradle.rb` scripts use the same classpath, gems and jars as their
+j `JRubyExec` counterparts
+
+== Bug fixes
+
+And of course some bug fixes, most of which were backported and released as
+part of link:/news/2015/09/10/jruby-gradle-1/[JRuby/Gradle 1.0.4].
+
+* link:https://github.com/jruby-gradle/jruby-gradle-plugin/issues/195[#195]:
+  Ensure released versions of the plugin are laid out in the Maven repository
+  correctly (allows specifying a version range dependency on the plugin itself
+  properly like in the above example)
+
