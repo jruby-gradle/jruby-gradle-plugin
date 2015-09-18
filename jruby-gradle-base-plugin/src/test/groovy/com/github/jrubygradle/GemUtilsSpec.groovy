@@ -122,46 +122,34 @@ class GemUtilsSpec extends Specification {
 
     def "write Jars.lock"() {
         when:
-            GemUtils.OverwriteAction.values().each {
-                File jarsLock = new File(dest, "jars-${it}.lock")
-                jarsLock.delete()
-                GemUtils.writeJarsLock(jarsLock, [ 'something' ], it)
-            }
+            File jarsLock = new File(dest, "jars.lock")
+            jarsLock.delete()
+            GemUtils.writeJarsLock(jarsLock, [ 'something' ])
 
         then:
-            new File(dest, "jars-FAIL.lock").text =~ /something/
-            new File(dest, "jars-SKIP.lock").text =~ /something/
-            new File(dest, "jars-OVERWRITE.lock").text =~ /something/
+            jarsLock.text =~ /something/
     }
 
     def "skip write Jars.lock"() {
         when:
             File jarsLock = new File(dest, "jars.lock")
-            jarsLock << ''
-            GemUtils.writeJarsLock(jarsLock, [ 'something' ], GemUtils.OverwriteAction.SKIP)
+            jarsLock << 'something' << System.getProperty("line.separator")
+            jarsLock.setLastModified(0)
+            GemUtils.writeJarsLock(jarsLock, [ 'something' ])
 
         then:
-            new File(dest, "jars.lock").length() == 0
+            jarsLock.text =~ /something/
+            jarsLock.lastModified() == 0
     }
 
     def "overwrite write Jars.lock"() {
         when:
             File jarsLock = new File(dest, "jars.lock")
             jarsLock << ''
-            GemUtils.writeJarsLock(jarsLock, [ 'something' ], GemUtils.OverwriteAction.OVERWRITE)
+            GemUtils.writeJarsLock(jarsLock, [ 'something' ])
 
         then:
             new File(dest, "jars.lock").text =~ /something/
-    }
-
-    def "fail write Jars.lock"() {
-        when:
-            File jarsLock = new File(dest, "jars.lock")
-            jarsLock << ''
-            GemUtils.writeJarsLock(jarsLock, [ 'something' ], GemUtils.OverwriteAction.FAIL)
-
-        then:
-            thrown(DuplicateFileCopyingException)
     }
 
     def "rewrite jar dependency"() {
