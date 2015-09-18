@@ -155,22 +155,20 @@ class GemUtils {
         extractGems(project,jRubyClasspath,project.files(gemConfig.files),destDir,action)
     }
 
-    static void writeJarsLock(File jarsLock, List<String> coordinates,
-                              GemUtils.OverwriteAction overwrite) {
-        switch(overwrite) {
-            case OverwriteAction.FAIL:
-                if (jarsLock.exists()) {
-                    throw new DuplicateFileCopyingException("${jarsLock.name} already exists")
-                }
-            case OverwriteAction.SKIP:
-                if (jarsLock.exists()) {
-                    break
-                }
-            case OverwriteAction.OVERWRITE:
-                jarsLock.parentFile.mkdirs()
-                jarsLock.withWriter { writer ->
-                    coordinates.each { writer.println it }
-                }
+    static void writeJarsLock(File jarsLock, List<String> coordinates) {
+        // just write out the file when it changed or none-existing
+        String content;
+        if (jarsLock.exists()) {
+            content = jarsLock.text
+        }
+        else {
+            jarsLock.parentFile.mkdirs()
+            content = ''
+        }
+        StringWriter newContent = new StringWriter()
+        coordinates.each { newContent.println it }
+        if (content != newContent.toString()) {
+            jarsLock.text = newContent
         }
     }
 
@@ -224,7 +222,7 @@ class GemUtils {
         }
 
         // create Jars.lock file used by jar-dependencies
-        writeJarsLock(new File(destDir, 'Jars.lock'), coordinates, overwrite)
+        writeJarsLock(new File(destDir, 'Jars.lock'), coordinates)
 
         rewriteJarDependencies(new File(destDir, 'jars'), files, fileRenameMap, overwrite)
     }
