@@ -12,9 +12,10 @@ buildscript {
         classpath "org.ajoberstar:gradle-git:1.2.0"
     }
 }
+apply plugin: 'idea'
 
 group = 'com.github.jruby-gradle'
-version = '1.1.2'
+version = '1.2.0'
 defaultTasks 'check', 'assemble'
 
 if (!releaseBuild) {
@@ -24,6 +25,7 @@ if (!releaseBuild) {
 subprojects {
     apply plugin: 'groovy'
     apply plugin: 'codenarc'
+    apply plugin: 'idea'
     apply plugin: 'maven'
     apply plugin: 'com.jfrog.bintray'
     apply plugin: 'org.ysb33r.gradletest'
@@ -70,6 +72,13 @@ subprojects {
         }
     }
     install.dependsOn check
+
+    idea {
+        module {
+            downloadJavadoc = true
+            downloadSources = true
+        }
+    }
 }
 
 task release(type: Exec) {
