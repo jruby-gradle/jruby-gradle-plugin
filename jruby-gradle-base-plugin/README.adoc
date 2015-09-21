@@ -218,6 +218,7 @@ apply plugin: 'com.github.jruby-gradle.base'
 jruby.defaultRepositories false
 
 repositories {
+    jcenter()
     rubygems('https://rubygems.org')
 }
 

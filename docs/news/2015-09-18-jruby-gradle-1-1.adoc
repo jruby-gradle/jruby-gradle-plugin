@@ -43,6 +43,8 @@ jruby {
 }
 
 repositories {
+    /* use jcenter() so we can get JRuby itself */
+    jcenter()
     /* use our new rubygems() function to add a rubygems repo */
     rubygems('https://rubygems.org')
 }
