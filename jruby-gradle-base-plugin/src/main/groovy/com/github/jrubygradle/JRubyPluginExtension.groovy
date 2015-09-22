@@ -59,7 +59,10 @@ class JRubyPluginExtension {
      * @param dir Directory (String, GString, File, Closure etc.)
      * @return The passed object.
      * @since 0.1.12
+     * @deprecated Setting a custom gemInstallDir can cause dependencies to
+     *  overlap and unexpected behavior. Please use Configurations instead
      */
+    @Deprecated
     Object setGemInstallDir(Object dir) {
         this.gemInstallDir = dir
     }
@@ -69,6 +72,7 @@ class JRubyPluginExtension {
      * @return Install directory as an absolute path
      * @since 0.1.16
      */
+    @Deprecated
     File getJarInstallDir() {
         project.file(this.jarInstallDir).absoluteFile
     }
@@ -79,7 +83,10 @@ class JRubyPluginExtension {
      * @param dir Directory (String, GString, File, Closure etc.)
      * @return The passed object.
      * @since 0.1.16
+     * @deprecated Setting a custom jarInstallDir can cause dependencies to
+     *  overlap and unexpected behavior. Please use Configurations instead
      */
+    @Deprecated
     Object setJarInstallDir(Object dir) {
         this.jarInstallDir = dir
     }

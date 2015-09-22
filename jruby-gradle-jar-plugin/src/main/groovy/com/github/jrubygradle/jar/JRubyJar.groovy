@@ -26,6 +26,13 @@ class JRubyJar extends Jar {
     static final String DEFAULT_JRUBY_MAINS = '0.4.0'
 
     /**
+     * @return Directory that the dependencies for this project will be staged into
+     */
+    File getGemDir() {
+        return prepareTask.outputDir
+    }
+
+    /**
      * Return the project default unless set
      *
      * The reason that this is defined as a getter instead of just setting
@@ -40,6 +47,11 @@ class JRubyJar extends Jar {
         return embeddedJRubyVersion
     }
 
+    /**
+     * Set a custom version of JRuby to embed within the JRubyJar.
+     *
+     * @param version String representing a valid JRuby version
+     */
     @Input
     void jrubyVersion(String version) {
         logger.info("setting jrubyVersion to ${version} from ${embeddedJRubyVersion}")
@@ -47,23 +59,35 @@ class JRubyJar extends Jar {
         addEmbeddedDependencies(project.configurations.maybeCreate(configuration))
     }
 
+    /**
+     * Retrieve the version of <a
+     * href="3https://github.com/jruby/jruby-mains">jruby-mains</a> configured
+     * for this JRubyJar
+     *
+     * @return String representation of the version defaulted
+     */
     @Input
     @Optional
     String getJrubyMainsVersion() {
         return embeddedJRubyMainsVersion
     }
 
+    /**
+     * Set the version of <a
+     * href="3https://github.com/jruby/jruby-mains">jruby-mains</a>
+     * to embed into the JRubyJar
+     *
+     * @param version a valid version of the jruby-mains library
+     */
     void jrubyMainsVersion(String version) {
         logger.info("setting jrubyMainsVersion to ${version} from ${embeddedJRubyMainsVersion}")
         embeddedJRubyMainsVersion = version
         addEmbeddedDependencies(project.configurations.maybeCreate(configuration))
     }
 
-    /** Return the directory that the dependencies for this project will be staged into */
-    File getGemDir() {
-        return prepareTask.outputDir
-    }
-
+    /**
+     * @return configured 'Main-Class' attribute for the JRubyJar
+     */
     @Input
     String getMainClass() {
         return jarMainClass
@@ -80,15 +104,33 @@ class JRubyJar extends Jar {
         }
     }
 
+    /**
+     * @return String representing the name of the {@code Configuration} which
+     *  will be used by this task
+     */
     @Input
     @Optional
     String getConfiguration() {
         return jarConfiguration
     }
 
+    /**
+     * Set the configuration for this task to use for embedding dependencies
+     * within the JRubyJar
+     *
+     * @param newConfiguration String name of an existing configuration
+     */
     void setConfiguration(String newConfiguration) {
         logger.info("using the ${newConfiguration} configuration for the ${name} task")
         jarConfiguration = newConfiguration
+    }
+
+    /**
+     * @param newConfiguration {@code Configuration} object to use for
+     *  embedding dependencies
+     */
+    void setConfiguration(Configuration newConfiguration) {
+        setConfiguration(newConfiguration.name)
     }
 
     void initScript(final Object scriptName) {
