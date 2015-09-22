@@ -9,7 +9,7 @@ import spock.lang.*
 import static org.gradle.api.logging.LogLevel.LIFECYCLE
 
 /**
- * JRubyJar tas unit tests
+ * JRubyJar task's unit tests
  */
 class JRubyJarSpec extends Specification {
     Project project
@@ -66,5 +66,24 @@ class JRubyJarSpec extends Specification {
 
         expect:
         task.configuration == customConfig
+    }
+
+    @Issue('https://github.com/jruby-gradle/jruby-gradle-plugin/issues/169')
+    def "configuration should be configurable with a Configuration object"() {
+        given: 'a configuration'
+        project.with {
+            configurations {
+                spockConfig
+            }
+        }
+        final Configuration customConfig = project.configurations.findByName('spockConfig')
+
+        when: 'the configuration is set'
+        JRubyJar task = project.task('spock-jar', type: JRubyJar) {
+            configuration customConfig
+        }
+
+        then:
+        task.configuration == customConfig.name
     }
 }
