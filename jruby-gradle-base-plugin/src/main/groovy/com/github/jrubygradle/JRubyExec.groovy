@@ -16,6 +16,8 @@ import org.gradle.process.JavaExecSpec
  * @author Schalk W. Cronjé
  */
 class JRubyExec extends JavaExec implements JRubyExecTraits {
+    static final String MAIN_CLASS = 'org.jruby.Main'
+
     static String jarDependenciesGemLibPath(File gemDir) {
         new File(gemDir, "gems/jar-dependencies-${JRubyExecUtils.JAR_DEPENDENCIES_VERSION}/lib").absolutePath
     }
@@ -47,7 +49,7 @@ class JRubyExec extends JavaExec implements JRubyExecTraits {
 
     JRubyExec() {
         super()
-        super.setMain 'org.jruby.Main'
+        super.setMain MAIN_CLASS
 
         try {
             project.configurations.getByName(JRubyExecUtils.DEFAULT_JRUBYEXEC_CONFIG)
