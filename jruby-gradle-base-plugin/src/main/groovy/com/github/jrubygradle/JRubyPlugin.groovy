@@ -3,9 +3,10 @@ package com.github.jrubygradle
 import com.github.jrubygradle.internal.JRubyExecDelegate
 import com.github.jrubygradle.internal.GemVersionResolver
 import com.github.jrubygradle.internal.JRubyExecUtils
-import com.github.jrubygradle.internal.RubygemsServlet
 import org.gradle.api.Plugin
 import org.gradle.api.Project
+import org.gradle.api.artifacts.Configuration
+import org.gradle.api.artifacts.Dependency
 
 /**
  *
@@ -62,14 +63,12 @@ class JRubyPlugin implements Plugin<Project> {
             project.logger.debug 'Adding rubygems(String?) method to project RepositoryHandler'
             project.repositories.metaClass.rubygems << { String repoUrl = null ->
                 repoUrl = repoUrl ?: RUBYGEMS_ORG_URL
-                // can not cast
-                Object embedded = embeddedServer(project)
-                String path = embedded.addRepository(repoUrl)
+                setupMavenGemProtocol(project)
                 project.logger.info 'Adding remote rubygems repo: ' + repoUrl
                 maven {
                     url {
-                        startEmbeddedServer(project)
-                        embedded.getURL(path)
+                        // TODO put the postfix into static final String
+                        "mavengem:" + repoUrl + "/maven/releases"
                     }
                 }
             }
@@ -85,57 +84,28 @@ class JRubyPlugin implements Plugin<Project> {
         }
     }
 
-    // can not cast same object from different classloaders
-    private Object server;
-    private Object embeddedServer(Project project) {
-        if (server == null) {
-            // TODO maybe things will work now without cloning
-            // clone the current classloader without its parent
-            
-            // assume we run inside an URLClassLoader which might
-            // not always be the case (OSGi, J2EE, etc)
-            List<URL> urls = new LinkedList<URL>()
-            URL warFileURL
-            RubygemsServlet.class.getClassLoader().getURLs().each {
-                if (it.file.endsWith(".war") ) {
-                    warFileURL = it
-                }
-                // for integTest we need to filter some jars here
-                else if (!it.file.contains('bcprov-jdk15')) {
-                    urls.add(it)
-                }
-            }
-            ClassLoader extClassLoader = getClass().getClassLoader().getSystemClassLoader().parent
-            ClassLoader cl = new URLClassLoader(urls.toArray(new URL[urls.size()]), extClassLoader)
-            // can not cast
-            Object servlet = cl.loadClass(RubygemsServlet.class.getName())
-            server = servlet.create(warFileURL)
-        }
-        server
-    }
+    private void setupMavenGemProtocol(Project project) {
+        if (! System.getProperties().contains("com.github.jrubygradle.internal")) {
+            // TODO put version into private static final
+            // load the mavengem protocol jars and puts them all into their
+            // dedicated classloader separated from this plugin.
+            Dependency dep = project.dependencies.create("org.sonatype.nexus.plugins:nexus-ruby-tools:2.11.4-01")
 
-    private boolean serverStarted = false
-    private void startEmbeddedServer(Project project) {
-        if (server != null && !serverStarted) {
-            // we need to set the current thread context class loader
-            // for starting up the webapps
-            ClassLoader current = Thread.currentThread().contextClassLoader
-            try {
-                Thread.currentThread().setContextClassLoader(server.class.classLoader)
-                if (project.logger.isDebugEnabled()) {
-                    server.enableLogging()
-                }
-                server.start()
-                serverStarted = true
-                project.gradle.buildFinished {
-                    server.stop()
-                    server.class.classLoader.close()
-                    server = null
-                }
-            }
-            finally {
-                Thread.currentThread().setContextClassLoader(current)
-            }
+            // use a detached configuration since it is just for resolving
+            // the jars and not needed any time later
+            Configuration config = project.configurations.detachedConfiguration(dep)
+            Set<File> urls = config.resolve()
+            urls << new File(this.getClass().getClassLoader().getURLs().find {
+                                 it.toString().contains('jruby-gradle-plugin')
+                             }.path)
+
+            // use the extension classloader as parent for our mavengem code
+            ClassLoader extClassLoader = ClassLoader.getSystemClassLoader().parent
+            ClassLoader cl = new URLClassLoader(urls.collect { it.toURL() }.toArray(new URL[urls.size()]), extClassLoader)
+
+            // can not cast between different classloaders
+            Object handler = cl.loadClass("com.github.jrubygradle.internal.mavengem.Handler")
+            handler.registerMavenGemProtocol()
         }
     }
 }
