@@ -42,9 +42,8 @@ class JRubyPrepareGemsIntegrationSpec extends Specification {
 
         expect:
             new File(jrpg.outputDir,"gems/slim-${SLIM_VERSION}").exists()
-            new File(jrpg.outputDir,"specifications/.jrubydir").exists()
     }
-  
+
     def "Check if rack version gets resolved"() {
         given:
             def root= new File(TESTROOT, "rack-resolve")
@@ -65,7 +64,7 @@ class JRubyPrepareGemsIntegrationSpec extends Specification {
             // resolved version here can vary over time
             new File(jrpg.outputDir,"gems/rack-1.5.5").exists()
     }
-  
+
     def "Check if prerelease gem gets resolved"() {
         given:
             def root= new File(TESTROOT, "prerelease")
