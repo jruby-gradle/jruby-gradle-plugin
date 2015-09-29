@@ -11,6 +11,7 @@ configurations {
 
 dependencies {
     compile project(':jruby-gradle-base-plugin')
+    compile 'com.github.jengelman.gradle.plugins:shadow:[1.2.2,2.0)'
 
     testCompile ("org.spockframework:spock-core:0.7-groovy-${gradle.gradleVersion.startsWith('1.')?'1.8':'2.0'}") {
         exclude module : 'groovy-all'
