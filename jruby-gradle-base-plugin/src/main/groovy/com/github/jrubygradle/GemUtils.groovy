@@ -120,17 +120,6 @@ class GemUtils {
 
                 systemProperties 'file.encoding' : 'utf-8'
             }
-
-            if(jrubyVersion.major == 1 && jrubyVersion.minor <= 7 && jrubyVersion.patchlevel < 19) {
-                project.logger.warn "Not generating JRuby directory info information as current JRuby version < 1.7.19"
-            } else {
-                project.javaexec {
-                    main 'org.jruby.Main'
-                    classpath jRubyClasspath
-                    args '-r', 'jruby/commands', '-e', "JRuby::Commands.generate_dir_info( '${destDir.absolutePath}' )"
-
-                }
-            }
         }
     }
 
