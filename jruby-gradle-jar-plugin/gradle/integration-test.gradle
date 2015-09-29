@@ -74,6 +74,7 @@ dependencies {
     integrationTestRuntime files(prepareGradleTestKitClasspath)
 
     gradleTest project(':jruby-gradle-base-plugin')
+    gradleTest 'com.github.jengelman.gradle.plugins:shadow:[1.2.2,2.0)'
 
     testJRubyPrepare "org.jruby:jruby-complete:1.7.19"
 }
