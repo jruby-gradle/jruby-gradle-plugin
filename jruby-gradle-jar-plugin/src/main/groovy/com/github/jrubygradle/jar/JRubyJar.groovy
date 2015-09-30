@@ -280,7 +280,7 @@ class JRubyJar extends Jar {
 
         logger.info("${this} including files in ${dir}")
         from(dir) {
-            include 'specifications/**', 'gems/**', 'jars/**', 'Jars.lock'
+            include 'specifications/**', 'gems/**', 'jars/**', 'bin/**', 'Jars.lock'
         }
     }
 
