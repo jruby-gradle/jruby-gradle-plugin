@@ -1,20 +1,30 @@
 package com.github.jrubygradle.jar
 
 import com.github.jrubygradle.JRubyPrepare
-import com.github.jrubygradle.jar.internal.JRubyDirInfo
+import com.github.jrubygradle.jar.internal.JRubyDirInfoTransformer
+import com.github.jrubygradle.jar.internal.JRubyJarCopyAction
 import groovy.transform.PackageScope
 import org.gradle.api.InvalidUserDataException
 import org.gradle.api.artifacts.Configuration
-import org.gradle.api.Task
-import org.gradle.api.execution.TaskExecutionListener
 import org.gradle.api.file.DuplicatesStrategy
 import org.gradle.api.tasks.Input
 import org.gradle.api.tasks.Optional
-import org.gradle.api.tasks.TaskState
 import org.gradle.api.tasks.bundling.Jar
+import org.gradle.api.tasks.bundling.ZipEntryCompression
 import org.gradle.api.tasks.StopExecutionException
+import org.gradle.api.internal.file.copy.CopyAction
+
+import org.apache.tools.zip.ZipOutputStream
+import com.github.jengelman.gradle.plugins.shadow.internal.ZipCompressor
+import com.github.jengelman.gradle.plugins.shadow.internal.DefaultZipCompressor
 
 /**
+ * JRubyJar creates a Java ARchive with Ruby code packed inside of it.
+ *
+ * The most common use-case is when packing a self-contained executable jar
+ * which would contain your application code, the JRuby runtime and a launcher
+ * library to set up the runtime when the jar is executed.
+ *
  * @author Christian Meier
  */
 class JRubyJar extends Jar {
@@ -264,7 +274,6 @@ class JRubyJar extends Jar {
     /** Update the staging directory and tasks responsible for setting it up */
     void updateStageDirectory() {
         File dir = project.file("${project.buildDir}/dirinfo/${configuration}")
-        dirInfo = new JRubyDirInfo(dir)
 
         prepareTask.dependencies project.configurations.maybeCreate(configuration)
         prepareTask.outputDir dir
@@ -273,24 +282,35 @@ class JRubyJar extends Jar {
         from(dir) {
             include 'specifications/**', 'gems/**', 'jars/**', 'Jars.lock'
         }
+    }
 
-        project.gradle.taskGraph.addTaskExecutionListener(
-            new TaskExecutionListener() {
-                void afterExecute(Task task, TaskState state) {
-                    /* no op */
-                    return
-                }
+    /**
+     * Provide a custom {@link CopyAction} to insert .jrubydir files into the archive.
+     *
+     * This is currently relying on lots of shadow plugin internals, be very
+     * careful modifying this function :)
+     *
+     * @return instance of a CopyAction to perform the copy into the archive
+     */
+    @Override
+    protected CopyAction createCopyAction() {
+        return new JRubyJarCopyAction(getArchivePath(),
+                                    getInternalCompressor(),
+                                    null, /* DocumentationRegistry */
+                                    [new JRubyDirInfoTransformer()], /* transformers */
+                                    [], /* relocators */
+                                    mainSpec.buildRootResolver().getPatternSet())
+    }
 
-                void beforeExecute(Task task) {
-                    if (task.name == this.name) {
-                        task.getSource().visit {
-                            dirInfo.add(it.relativePath)
-                        }
-                    }
-                }
+    protected ZipCompressor getInternalCompressor() {
+        switch (entryCompression) {
+            case ZipEntryCompression.DEFLATED:
+                return new DefaultZipCompressor(this.zip64, ZipOutputStream.DEFLATED);
+            case ZipEntryCompression.STORED:
+                return new DefaultZipCompressor(this.zip64, ZipOutputStream.STORED);
+            default:
+                throw new IllegalArgumentException(String.format("Unknown Compression type %s", entryCompression));
             }
-        )
-
     }
 
     /**
@@ -306,7 +326,6 @@ class JRubyJar extends Jar {
     }
 
     protected Object scriptName
-    protected JRubyDirInfo dirInfo
     protected JRubyPrepare prepareTask
     protected String customConfigName
     protected String embeddedJRubyVersion
