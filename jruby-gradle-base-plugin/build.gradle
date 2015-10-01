@@ -33,6 +33,7 @@ dependencies {
 
     compile "org.eclipse.jetty:jetty-server:${jettyVersion}"
     compile "org.eclipse.jetty:jetty-webapp:${jettyVersion}"
+    compile gradleApi()
     provided "org.sonatype.nexus.plugins:nexus-ruby-tools:2.11.4-01"
 
     String spockVersion = "org.spockframework:spock-core:1.0-groovy-2.3"
