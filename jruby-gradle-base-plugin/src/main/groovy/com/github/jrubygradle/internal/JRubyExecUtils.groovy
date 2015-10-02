@@ -15,13 +15,16 @@ class JRubyExecUtils {
     static final String JAR_DEPENDENCIES_VERSION = '0.1.15'
     static final String DEFAULT_JRUBYEXEC_CONFIG = 'jrubyExec'
 
+    private static final String JRUBY_COMPLETE = 'jruby-complete'
+    private static final String BINPATH_FLAG = '-S'
+
     /** Extract a list of files from a configuration that is suitable for a jruby classpath
      *
      * @param cfg Configuration to use
      * @return
      */
-    static def classpathFromConfiguration(Configuration cfg) {
-        cfg.files.findAll { File f -> f.name.startsWith('jruby-complete-') }
+    static Set classpathFromConfiguration(Configuration cfg) {
+        return cfg.files.findAll { File f -> f.name.startsWith(JRUBY_COMPLETE) }
     }
 
     /** Extract the jruby-complete-XXX.jar classpath
@@ -30,7 +33,7 @@ class JRubyExecUtils {
      * @return Returns the classpath as a File or null if the jar was not found
      */
     static File jrubyJar(Configuration cfg) {
-        cfg.files.find { it.name.startsWith('jruby-complete-') }
+        return cfg.files.find { it.name.startsWith(JRUBY_COMPLETE) }
     }
 
     /** Extracts the JRuby version number from a jruby-complete-XXX.jar filename
@@ -42,8 +45,11 @@ class JRubyExecUtils {
      */
     @CompileDynamic
     static String jrubyJarVersion(final File jar) {
-        Matcher matches = jar.name =~ /jruby-complete-(.+)\.jar/
-        !matches ? null : matches[0][1]
+        Matcher matches = jar.name =~ /${JRUBY_COMPLETE}-(.+)\.jar/
+        if (matches) {
+            return matches[0][1]
+        }
+        return null
     }
 
     /** Extracts the JRuby version number as a triplet from a jruby-complete-XXX.jar filename
@@ -52,15 +58,24 @@ class JRubyExecUtils {
      * @return Version string map [major,minor,patchlevel] or null
      *
      * @since 0.1.16
+     * @deprecated This method is no longer used and will be removed in a later
+     *  version
      */
     @CompileDynamic
+    @Deprecated
     static Map jrubyJarVersionTriple(final File jar) {
         String version = jrubyJarVersion(jar)
-        if(!version) {return null}
+        if (!version) {
+            return [:]
+        }
 
         Matcher matches = version =~ /(\d{1,2})\.(\d{1,3})\.(\d{1,3}).*/
 
-        (!matches.matches() || matches[0].size() != 4) ? null : [
+        if (!matches.matches() || (matches[0].size() != 4)) {
+            return [:]
+        }
+
+        return [
             major : matches[0][1].toInteger(),
             minor : matches[0][2].toInteger(),
             patchlevel : matches[0][3].toInteger()
@@ -73,7 +88,7 @@ class JRubyExecUtils {
      * @return Returns the classpath as a File or null if the jar was not found
      */
     static FileCollection jrubyJar(FileCollection fc) {
-        fc.filter { File f -> f.name.startsWith('jruby-complete-') }
+        fc.filter { File f -> f.name.startsWith(JRUBY_COMPLETE) }
     }
 
     static List<String> buildArgs(List<Object> jrubyArgs, File script, List<Object> scriptArgs) {
@@ -89,18 +104,21 @@ class JRubyExecUtils {
      * @param scriptArgs
      * @return sequential list of arguments to pass jruby-complete.jar
      */
-    static List<String> buildArgs(List<Object> extra, List<Object> jrubyArgs, File script, List<Object> scriptArgs) {
-        def cmdArgs = extra
+    static List<String> buildArgs(List<Object> extra,
+                                    List<Object> jrubyArgs,
+                                    File script,
+                                    List<Object> scriptArgs) {
+        List<Object> cmdArgs = extra
         // load Jars.lock on startup
         cmdArgs.add('-rjars/setup')
         boolean hasInlineScript = jrubyArgs.contains('-e')
-        boolean useBinPath = jrubyArgs.contains('-S')
+        boolean useBinPath = jrubyArgs.contains(BINPATH_FLAG)
 
         /* Fefault to adding the -S option if we don't have an expression to evaluate
          * <https://github.com/jruby-gradle/jruby-gradle-plugin/issues/152>
          */
-        if (!hasInlineScript && script && !jrubyArgs.contains('-S')) {
-            jrubyArgs.add('-S')
+        if (!hasInlineScript && script && !jrubyArgs.contains(BINPATH_FLAG)) {
+            jrubyArgs.add(BINPATH_FLAG)
             useBinPath = true
         }
 
@@ -114,7 +132,7 @@ class JRubyExecUtils {
         }
         else if (script == null) {
             if (useBinPath && (jrubyArgs.size() <= 1)) {
-                throw new InvalidUserDataException("No `script` property defined and no inline script provided")
+                throw new InvalidUserDataException('No `script` property defined and no inline script provided')
             }
 
             if (jrubyArgs.isEmpty()) {
@@ -155,11 +173,11 @@ class JRubyExecUtils {
         Configuration c = project.configurations.findByName(configuration)
 
         /* Only define this dependency if we don't already have it */
-        if (!(c.dependencies.find { it.name == 'jruby-complete'})) {
+        if (!(c.dependencies.find { it.name == JRUBY_COMPLETE })) {
             project.dependencies.add(configuration, "org.jruby:jruby-complete:${version}")
         }
 
-        if (version.startsWith("1.7.1")) {
+        if (version.startsWith('1.7.1')) {
             project.dependencies.add(configuration,
                     "rubygems:jar-dependencies:${JAR_DEPENDENCIES_VERSION}")
         }

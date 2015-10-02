@@ -13,18 +13,19 @@ class JRubyExecDelegate implements JRubyExecTraits   {
 
     Project project
 
-    def methodMissing(String name, args) {
-        if( name == 'args' || name == 'setArgs' ) {
-            throw new UnsupportedOperationException("Use jrubyArgs/scriptArgs instead")
+    Object methodMissing(String name, args) {
+        if (name == 'args' || name == 'setArgs') {
+            throw new UnsupportedOperationException('Use jrubyArgs/scriptArgs instead')
         }
-        if( name == 'main' ) {
-            throw new UnsupportedOperationException("Setting main class for jruby is not a valid operation")
+        if (name == 'main') {
+            throw new UnsupportedOperationException('Setting main class for jruby is not a valid operation')
         }
 
-        if(args.size() == 1) {
-            passthrough.add( [ "${name}" : args[0] ] )
-        } else {
-            passthrough.add( [ "${name}" : args ] )
+        if (args.size() == 1) {
+            passthrough.add([(name.toString()) : args[0]])
+        }
+        else {
+            passthrough.add([(name.toString()) : args])
         }
     }
 
@@ -32,28 +33,30 @@ class JRubyExecDelegate implements JRubyExecTraits   {
      *
      * @return Get the script to use. Can be null.
      */
-    File getScript() { _convertScript() }
+    File getScript() {
+        return _convertScript()
+    }
 
     /** buildArgs creates a list of arguments to pass to the JVM
      */
     List<String> buildArgs() {
-        JRubyExecUtils.buildArgs(_convertJrubyArgs(),script,_convertScriptArgs())
+        return JRubyExecUtils.buildArgs(_convertJrubyArgs(), script, _convertScriptArgs())
     }
 
     @PackageScope
-    def keyAt(Integer index) {
-        passthrough[index].keySet()[0]
+    Object keyAt(Integer index) {
+        return passthrough[index].keySet()[0]
     }
 
     @PackageScope
-    def valuesAt(Integer index) {
-        passthrough[index].values()[0]
+    Object valuesAt(Integer index) {
+        return passthrough[index].values()[0]
     }
 
-    private def passthrough = []
+    private final List passthrough = []
 
-    static def jrubyexecDelegatingClosure = { Project project, Closure cl ->
-        def proxy =  new JRubyExecDelegate()
+    static Object jrubyexecDelegatingClosure = { Project project, Closure cl ->
+        JRubyExecDelegate proxy =  new JRubyExecDelegate()
         proxy.project = project
         Closure cl2 = cl.clone()
         cl2.delegate = proxy
@@ -65,13 +68,13 @@ class JRubyExecDelegate implements JRubyExecTraits   {
         project.javaexec {
             classpath JRubyExecUtils.classpathFromConfiguration(config)
             proxy.passthrough.each { item ->
-                def k = item.keySet()[0]
-                def v = item.values()[0]
+                Object k = item.keySet()[0]
+                Object v = item.values()[0]
                 "${k}" v
             }
             main 'org.jruby.Main'
             // just keep this even if it does not exists
-            args '-I' + JRubyExec.jarDependenciesGemLibPath(proxy.getGemWorkDir())
+            args '-I' + JRubyExec.jarDependenciesGemLibPath(proxy.gemWorkDir)
             // load Jars.lock on startup
             args '-rjars/setup'
             proxy.buildArgs().each { item ->

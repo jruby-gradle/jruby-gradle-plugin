@@ -13,14 +13,14 @@ import org.gradle.api.Project
 class JRubyPlugin implements Plugin<Project> {
     static final String TASK_GROUP_NAME = 'JRuby'
     static final String RUBYGEMS_ORG_URL = 'https://rubygems.org'
-
     static final String RUBYGEMS_RELEASE_URL = 'http://rubygems.lasagna.io/proxy/maven/releases'
+    static final String VERSION_PROPERTY = 'jrubyVersion'
 
     void apply(Project project) {
         project.extensions.create('jruby', JRubyPluginExtension, project)
 
-        if (project.hasProperty('jrubyVersion')) {
-            project.jruby.defaultVersion project.properties.get('jrubyVersion')
+        if (project.hasProperty(VERSION_PROPERTY)) {
+            project.jruby.defaultVersion project.properties.get(VERSION_PROPERTY)
         }
 
         setupRubygemsRepositories(project)
@@ -61,11 +61,11 @@ class JRubyPlugin implements Plugin<Project> {
         if (!project.repositories.metaClass.respondsTo(project.repositories, 'rubygems', String, Object)) {
             project.logger.debug 'Adding rubygems(String?) method to project RepositoryHandler'
             project.repositories.metaClass.rubygems << { String repoUrl = null ->
-                repoUrl = repoUrl ?: RUBYGEMS_ORG_URL
+                String localUrl = repoUrl ?: RUBYGEMS_ORG_URL
                 // can not cast
-                Object embedded = embeddedServer(project)
-                String path = embedded.addRepository(repoUrl)
-                project.logger.info 'Adding remote rubygems repo: ' + repoUrl
+                Object embedded = embeddedServer()
+                String path = embedded.addRepository(localUrl)
+                project.logger.info( 'Adding remote rubygems repo: {}', localUrl)
                 maven {
                     url {
                         startEmbeddedServer(project)
@@ -86,18 +86,18 @@ class JRubyPlugin implements Plugin<Project> {
     }
 
     // can not cast same object from different classloaders
-    private Object server;
-    private Object embeddedServer(Project project) {
+    private Object server
+    private Object embeddedServer() {
         if (server == null) {
             // TODO maybe things will work now without cloning
             // clone the current classloader without its parent
-            
+            //
             // assume we run inside an URLClassLoader which might
             // not always be the case (OSGi, J2EE, etc)
-            List<URL> urls = new LinkedList<URL>()
+            List<URL> urls = [] as Queue
             URL warFileURL
-            RubygemsServlet.class.getClassLoader().getURLs().each {
-                if (it.file.endsWith(".war") ) {
+            RubygemsServlet.classLoader.URLs.each {
+                if (it.file.endsWith('.war') ) {
                     warFileURL = it
                 }
                 // for integTest we need to filter some jars here
@@ -105,10 +105,10 @@ class JRubyPlugin implements Plugin<Project> {
                     urls.add(it)
                 }
             }
-            ClassLoader extClassLoader = getClass().getClassLoader().getSystemClassLoader().parent
+            ClassLoader extClassLoader = this.class.classLoader.systemClassLoader.parent
             ClassLoader cl = new URLClassLoader(urls.toArray(new URL[urls.size()]), extClassLoader)
             // can not cast
-            Object servlet = cl.loadClass(RubygemsServlet.class.getName())
+            Object servlet = cl.loadClass(RubygemsServlet.name)
             server = servlet.create(warFileURL)
         }
         server

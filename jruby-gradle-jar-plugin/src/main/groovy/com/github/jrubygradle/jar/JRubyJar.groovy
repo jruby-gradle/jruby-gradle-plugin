@@ -27,6 +27,7 @@ import com.github.jengelman.gradle.plugins.shadow.internal.DefaultZipCompressor
  *
  * @author Christian Meier
  */
+@SuppressWarnings('UnnecessaryGetter')
 class JRubyJar extends Jar {
     enum Type { RUNNABLE, LIBRARY }
 
@@ -154,7 +155,7 @@ class JRubyJar extends Jar {
      */
     void defaults(final String... defs ) {
         defs.each { String it ->
-            switch(it) {
+            switch (it) {
                 case 'mainClass':
                     "default${it.capitalize()}"()
             }
@@ -213,7 +214,7 @@ class JRubyJar extends Jar {
         if (scriptName != Type.RUNNABLE && scriptName != Type.LIBRARY) {
             File script = project.file(scriptName)
             if (!script.exists()) {
-                throw new InvalidUserDataException("initScript ${script} does not exists");
+                throw new InvalidUserDataException("initScript ${script} does not exists")
             }
             with project.copySpec {
                 from script.parent
@@ -305,11 +306,11 @@ class JRubyJar extends Jar {
     protected ZipCompressor getInternalCompressor() {
         switch (entryCompression) {
             case ZipEntryCompression.DEFLATED:
-                return new DefaultZipCompressor(this.zip64, ZipOutputStream.DEFLATED);
+                return new DefaultZipCompressor(this.zip64, ZipOutputStream.DEFLATED)
             case ZipEntryCompression.STORED:
-                return new DefaultZipCompressor(this.zip64, ZipOutputStream.STORED);
+                return new DefaultZipCompressor(this.zip64, ZipOutputStream.STORED)
             default:
-                throw new IllegalArgumentException(String.format("Unknown Compression type %s", entryCompression));
+                throw new IllegalArgumentException(String.format('Unknown Compression type %s', entryCompression))
             }
     }
 
@@ -322,7 +323,7 @@ class JRubyJar extends Jar {
      * case it properly like "JRuby" instead of "Jruby"
      */
     private String prepareNameForSuffix(String baseName) {
-        return baseName.replaceAll("(?i)jruby", 'JRuby').capitalize()
+        return baseName.replaceAll('(?i)jruby', 'JRuby').capitalize()
     }
 
     protected Object scriptName

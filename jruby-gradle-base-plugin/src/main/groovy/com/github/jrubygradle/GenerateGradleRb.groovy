@@ -16,6 +16,7 @@ import org.gradle.api.tasks.TaskAction
  * @author Schalk W. Cronjé
  * @since 0.1.15
  */
+@SuppressWarnings('UnnecessaryGetter')
 class GenerateGradleRb extends DefaultTask {
 
     private Object baseName = 'gradle.rb'
@@ -62,13 +63,11 @@ class GenerateGradleRb extends DefaultTask {
         return this.configuration
     }
 
-
     @TaskAction
     void generate() {
-        File gemInstallDir = project.file(this.gemInstallDir)
-        Object source = this.getSourceFromResource()
-        File destination = this.destinationFile().parentFile
-        String baseName = this.getBaseName()
+        File gemInstallDir = project.file(gemInstallDir)
+        Object source = getSourceFromResource()
+        File destination = destinationFile().parentFile
         logger.info("GenerateGradleRb - source: ${source}, destination: ${destination}, baseName: ${baseName}")
         project.copy {
             from(source) {
@@ -82,12 +81,12 @@ class GenerateGradleRb extends DefaultTask {
             /* Make sure we can execute our stub */
             fileMode 0755
             includeEmptyDirs false
-            rename 'rubystub.template', baseName
+            rename BOOTSTRAP_TEMPLATE, baseName
             /* Flatten the file into the destination directory so we don't copy
              * the file into: ${destination}/META-INF/gradle-plugins/gradle.rb
              */
             eachFile { FileCopyDetails details ->
-                details.relativePath = new RelativePath(true, [details.getName()] as String[])
+                details.relativePath = new RelativePath(true, [details.name] as String[])
             }
 
             Set<String> path = JRubyExecUtils.classpathFromConfiguration(project.configurations.jrubyExec)
@@ -102,12 +101,10 @@ class GenerateGradleRb extends DefaultTask {
         Object source
         Enumeration<URL> enumResources
         enumResources = this.class.classLoader.getResources(BOOTSTRAP_TEMPLATE_PATH)
-        if (!enumResources.hasMoreElements()) {
-            throw new GradleException ("Cannot find ${BOOTSTRAP_TEMPLATE_PATH} in classpath")
-        }
-        else {
+
+        if (enumResources.hasMoreElements()) {
             URI uri = enumResources.nextElement().toURI()
-            String location = uri.getSchemeSpecificPart().replace('!/' + BOOTSTRAP_TEMPLATE_PATH, '')
+            String location = uri.schemeSpecificPart.replace('!/' + BOOTSTRAP_TEMPLATE_PATH, '')
 
             if (uri.scheme.startsWith('jar')) {
                 location = location.replace('jar:file:', '')
@@ -119,6 +116,9 @@ class GenerateGradleRb extends DefaultTask {
             else {
                 throw new GradleException("Cannot extract ${uri}")
             }
+        }
+        else {
+            throw new GradleException ("Cannot find ${BOOTSTRAP_TEMPLATE_PATH} in classpath")
         }
         return source
     }

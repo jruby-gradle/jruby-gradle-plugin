@@ -19,6 +19,7 @@ import com.github.jengelman.gradle.plugins.shadow.transformers.Transformer
  * transformer interface inside of the shadow plugin, which will hopefully go
  * away at some point in the future
  */
+@SuppressWarnings('UnusedMethodParameter')
 class JRubyDirInfoTransformer implements Transformer {
     protected File tmpDir
     protected JRubyDirInfo info
@@ -35,7 +36,7 @@ class JRubyDirInfoTransformer implements Transformer {
      * to avoid telling the machinery in shadow to transform the actual file
      * being visited and jarred up
      *
-     * @return false 
+     * @return false
      */
     boolean canTransformResource(FileTreeElement element) {
         info.add(element.relativePath)
