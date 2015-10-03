@@ -148,16 +148,22 @@ class JRubyJar extends Jar {
         this.scriptName = scriptName
     }
 
-    /** Sets the defaults
+    /**
+     * Sets the defaults.
+     *
+     * Unrecognised values are silently discarded
      *
      * @param defs A list of defaults. Currently {@code gems} and {@code mainClass} are the only recognised values.
-     * Unrecognised values are silently discarded
+     * @deprecated This method is no longer very useful, just use {@link defaultMainClass} instead
      */
+    @Deprecated
     void defaults(final String... defs ) {
         defs.each { String it ->
             switch (it) {
                 case 'mainClass':
-                    "default${it.capitalize()}"()
+                    return "default${it.capitalize()}"()
+                default:
+                    logger.error("${this} { defaults '${it}' } is a no-op")
             }
         }
     }
