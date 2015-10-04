@@ -19,7 +19,7 @@ buildscript {
 
     dependencies {
         /* check jruby-gradle.org for the latest release */
-        classpath "com.github.jruby-gradle:jruby-gradle-jar-plugin:1.0.1"
+        classpath "com.github.jruby-gradle:jruby-gradle-jar-plugin:[1.1.4,2.0)"
     }
 }
 
@@ -41,17 +41,8 @@ version of Gradle.
 [source, gradle]
 ----
 jrubyJar {
-    // Use the default GEM installation directory
-    defaultGems()
-
-    // Add this GEM installation directory to the JAR.
-    // Can be called more than once for additional directories
-    gemDir '/path/to/my/gemDir'
-
-    // Equivalent to calling defaultGems()
-    defaults 'gem'
-
-    // All methods and properties from `Jar`
+    /* All methods and properties from `Jar` */
+    from 'app'
 }
 ----
 
@@ -74,14 +65,8 @@ jrubyJar {
     // Use the default bootstrap class (can be omitted)
     defaultMainClass()
 
-    // Includes the default gems to the jar (can be omitted)
-    defaultGems()
-
     // Make the JAR executable by supplying your own main class
     mainClass 'my.own.main'
-
-    // Equivalent to calling defaultMainClass() and defaultGems()
-    defaults 'gems', 'mainClass'
 }
 ----
 
@@ -97,11 +82,5 @@ configured gems and jar dependencies inside of the packaged `.jar` file.
 jrubyJar {
     // tell the plugin to pack a runnable jar (no bootstrap script)
     initScript library()
-
-    // Includes the default gems to the jar (can be omitted)
-    defaultGems()
-
-    // Equivalent to calling defaultGems()
-    defaults 'gems'
 }
 ----

@@ -68,6 +68,23 @@ class JRubyJarSpec extends Specification {
         task.configuration == customConfig
     }
 
+    @Issue('https://github.com/jruby-gradle/jruby-gradle-plugin/issues/202')
+    def "defaults 'gems' should log an error"() {
+        given:
+        boolean evaluated = false
+        JRubyJar task = project.task('spock-jar', type: JRubyJar)
+
+        when:
+        task.configure {
+            evaluated = true
+            defaults 'gems'
+        }
+
+        then:
+        evaluated
+    }
+
+
     @Issue('https://github.com/jruby-gradle/jruby-gradle-plugin/issues/169')
     def "configuration should be configurable with a Configuration object"() {
         given: 'a configuration'
