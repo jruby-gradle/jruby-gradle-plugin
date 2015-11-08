@@ -26,3 +26,11 @@
 #main_nav .on a {
   color: #FFF;
 }
+
+#improve {
+  margin-right: 5px;
+  margin-bottom: 15px;
+  font-weight: bold;
+  font-size: 0.8em;
+  float: right;
+}
