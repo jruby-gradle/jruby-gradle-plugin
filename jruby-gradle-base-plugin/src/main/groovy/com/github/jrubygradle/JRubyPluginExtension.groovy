@@ -4,7 +4,7 @@ import org.gradle.api.Incubating
 import org.gradle.api.Project
 
 class JRubyPluginExtension {
-    static final String DEFAULT_JRUBY_VERSION = '9.0.3.0'
+    static final String DEFAULT_JRUBY_VERSION = '9.0.4.0'
 
     /** The default version of jruby that will be used  */
     String defaultVersion = DEFAULT_JRUBY_VERSION
