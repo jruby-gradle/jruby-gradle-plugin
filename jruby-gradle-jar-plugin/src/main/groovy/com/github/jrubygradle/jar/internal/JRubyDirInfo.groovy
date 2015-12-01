@@ -11,8 +11,7 @@ import org.gradle.api.file.RelativePath
 class JRubyDirInfo {
     private static final String NEW_LINE = System.getProperty('line.separator')
     private static final File OMIT = new File('')
-    private static final List<String> OMISSION_DIRS = ['META-INF', 'gems', 'specifications',
-                                                      'build_info', 'cache', 'doc', 'bin']
+    private static final List<String> OMISSION_DIRS = ['META-INF', 'bin', 'jars']
 
     private final Map dirsCache = [:]
 

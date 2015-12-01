@@ -100,6 +100,7 @@ class JRubyJar extends Jar {
      * @return configured 'Main-Class' attribute for the JRubyJar
      */
     @Input
+    @Optional
     String getMainClass() {
         return jarMainClass
     }
