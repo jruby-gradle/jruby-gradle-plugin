@@ -103,4 +103,19 @@ class JRubyJarSpec extends Specification {
         then:
         task.configuration == customConfig.name
     }
+
+    def "configure library()"() {
+        given: 'a task with initScript library()'
+        boolean evaluated = false
+        JRubyJar task = project.task('library-jar', type: JRubyJar)
+
+        when:
+        task.configure {
+            evaluated = true
+            initScript library()
+        }
+
+        then:
+        evaluated
+    }
 }
