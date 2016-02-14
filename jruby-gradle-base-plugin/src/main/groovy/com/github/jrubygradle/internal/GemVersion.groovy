@@ -169,8 +169,8 @@ class GemVersion {
             return 1
         }
 
-        int aaObject
-        int bbObject
+        def aaObject
+        def bbObject
 
         if (aDigits[index].isInteger() && bDigits[index].isInteger()) {
             // compare them as number
