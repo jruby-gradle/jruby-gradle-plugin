@@ -1,6 +1,9 @@
 language: groovy
 sudo: false
-dist: trusty
+addons:
+  apt:
+    packages:
+      - oracle-java8-installer
 
 install:
  - ./gradlew clean
