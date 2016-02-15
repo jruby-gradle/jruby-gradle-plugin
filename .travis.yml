@@ -1,5 +1,6 @@
 language: groovy
 sudo: false
+dist: trusty
 
 install:
  - ./gradlew clean
