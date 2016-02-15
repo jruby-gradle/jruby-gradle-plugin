@@ -169,27 +169,13 @@ class GemVersion {
             return 1
         }
 
-        int aaObject
-        int bbObject
-
         if (aDigits[index].isInteger() && bDigits[index].isInteger()) {
             // compare them as number
-            aaObject = aDigits[index] as int
-            bbObject = bDigits[index] as int
+            aDigits[index] as int <=> bDigits[index] as int
         }
         else {
             // compare them as string
-            aaObject = aDigits[index]
-            bbObject = bDigits[index]
-        }
-        if (aaObject < bbObject) {
-            -1
-        }
-        else if (aaObject > bbObject) {
-            1
-        }
-        else {
-            0
+            aDigits[index] <=> bDigits[index]
         }
     }
 

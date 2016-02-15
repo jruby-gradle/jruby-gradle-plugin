@@ -178,4 +178,28 @@ class GemVersionSpec extends Specification {
         expect:
         subject.intersect('[1.2.4, 1.2.4]').conflict() == true
     }
+
+    def "finds no conflicts in non-integer version ranges"() {
+        given:
+        GemVersion subject = new GemVersion('[1.2.bar, 1.2.foo]')
+
+        expect:
+        !subject.conflict()
+    }
+
+    def "finds conflicts in non-integer version ranges"() {
+        given:
+        GemVersion subject = new GemVersion('[1.2.foo, 1.2.bar]')
+
+        expect:
+        subject.conflict()
+    }
+
+    def "does not throw an exception for a '+' version"() {
+        when:
+        new GemVersion('+').conflict()
+
+        then:
+        notThrown(Exception)
+    }
 }
