@@ -107,7 +107,7 @@ class JRubyExecIntegrationSpec extends Specification {
 
     def "Running a script that requires a gem using default embedded rubygems-servlets maven repo"() {
         // java-1.7 runs int o perm-space problems
-        if (System.getProperty('java.version').startsWith('1.7.') ) {
+        if (System.getProperty('java.version').startsWith('1.') ) {
             println 'skipping extra rubygems-servlet test for jdk-1.7'
             return
         }
