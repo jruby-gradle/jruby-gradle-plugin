@@ -50,6 +50,14 @@ class GemUtils {
         extractGems(project, jRubyClasspath, project.files(gem), destDir, overwrite)
     }
 
+    /** Extract Gems from a given configuration.
+     *
+     * @param project Project instance
+     * @param jRubyClasspath Full path to the jruby-complete jar
+     * @param gemConfig Configuration containing GEMs
+     * @param destDir Directory to extract to
+     * @param action Allow overwrite of an existing gem folder
+     */
     static void extractGems(Project project,
                            File jRubyClasspath,
                            FileCollection gems,
@@ -127,7 +135,7 @@ class GemUtils {
     /** Extract Gems from a given configuration.
      *
      * @param project Project instance
-     * @param jRubyClasspath Where to find the jruby-complete jar
+     * @param jRubyConfig Configuration which should contain the the jruby-complete jar
      * @param gemConfig Configuration containing GEMs
      * @param destDir Directory to extract to
      * @param action Allow overwrite of an existing gem folder
