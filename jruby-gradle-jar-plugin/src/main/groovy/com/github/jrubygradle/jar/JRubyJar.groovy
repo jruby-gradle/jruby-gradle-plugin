@@ -213,9 +213,7 @@ class JRubyJar extends Jar {
                 exclude 'META-INF/maven/**/pom.xml'
             }
 
-            manifest = project.manifest {
-                attributes 'Main-Class': mainClass
-            }
+            manifest.attributes 'Main-Class': mainClass
         }
 
         if (scriptName != Type.RUNNABLE && scriptName != Type.LIBRARY) {
