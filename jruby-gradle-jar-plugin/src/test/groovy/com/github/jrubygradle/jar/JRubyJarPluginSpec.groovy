@@ -126,6 +126,18 @@ class JRubyJarPluginSpec extends Specification {
         jarTask.manifest.attributes.'Main-Class' == 'org.scooby.doo.snackMain'
     }
 
+    def "Adding a main class and additional manifest attributes"() {
+        when: "Setting a main class"
+        project.configure(jarTask) {
+            mainClass 'org.scooby.doo.snackMain'
+            manifest.attributes('Class-Path': 'gangway.jar zoinks.jar')
+        }
+        jarTask.applyConfig()
+
+        then: "Then the Main-Class attribute does not erase other attributes"
+        jarTask.manifest.attributes.'Class-Path' == 'gangway.jar zoinks.jar'
+    }
+
     def "Setting up a java project"() {
         given: "All jar, java plugins have been applied"
         project = setupProject()
