@@ -263,4 +263,39 @@ task validateJar(type: Exec) {
         /* see: https://github.com/jruby-gradle/jruby-gradle-plugin/issues/191 */
         result.standardOutput.contains('unexpected behavior')
     }
+
+
+    @Issue('https://github.com/jruby-gradle/jruby-gradle-plugin/pull/271')
+    def 'using a more recent jar-dependencies should work'() {
+        given:
+        buildFile << """
+repositories {
+    maven { url 'http://rubygems.lasagna.io/proxy/maven/releases' }
+}
+dependencies {
+    jrubyJar 'rubygems:jar-dependencies:0.2.3'
+}
+jrubyJar { initScript 'main.rb' }
+
+task validateJar(type: Exec) {
+    dependsOn jrubyJar
+    environment [:]
+    workingDir "\${buildDir}/libs"
+    commandLine 'java', '-jar', jrubyJar.outputs.files.singleFile.absolutePath
+}
+    """
+
+        when:
+        BuildResult result = GradleRunner.create()
+                .withProjectDir(testProjectDir.root)
+                .withArguments('validateJar', '--info')
+                .build()
+
+        then:
+        builtArtifacts && builtArtifacts.size() == 1
+
+        and:
+        result.task(":validateJar").outcome == TaskOutcome.SUCCESS
+        result.standardOutput.contains("Hello from JRuby")
+    }
 }
