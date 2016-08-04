@@ -21,8 +21,8 @@ node {
                             sh "./gradlew -Si ${plugin}:check ${plugin}:gradleTest ${plugin}:assemble"
                         }
                     }
-                    junit 'build/test-results/**/*.xml'
-                    archiveArtifacts artifacts: 'build/libs/*.jar,build/*.zip', fingerprint: true
+                    junit '**/build/test-results/**/*.xml'
+                    archiveArtifacts artifacts: '**/build/libs/*.jar,build/*.zip', fingerprint: true
                 }
             }
         }
