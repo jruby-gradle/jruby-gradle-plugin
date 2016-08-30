@@ -27,7 +27,7 @@ execute a Ruby script, which has Ruby-based dependencies:
 .build.gradle (link:https://github.com/jruby-gradle/jruby-gradle-plugin/blob/master/examples/run-simple-ruby-script/build.gradle[full source])
 [source, gradle]
 ----
-include::../examples/run-simple-ruby-script/build.gradle[lines=16..30]
+include::../examples/run-simple-ruby-script/build.gradle[lines=6..30]
 ----
 
 .print-script.rb (link:https://github.com/jruby-gradle/jruby-gradle-plugin/blob/master/examples/run-simple-ruby-script/print-script[full source])
@@ -47,7 +47,7 @@ image::images/print-script-output.png[]
 .build.gradle (link:https://github.com/jruby-gradle/jruby-gradle-plugin/blob/master/examples/self-executing-jar/build.gradle[full source])
 [source, gradle]
 ----
-include::../examples/self-executing-jar/build.gradle[lines=17..33]
+include::../examples/self-executing-jar/build.gradle[lines=6..40]
 ----
 
 .entrypoint.rb (link:https://github.com/jruby-gradle/jruby-gradle-plugin/blob/master/examples/self-executing-jar/entrypoint.rb[full source])
