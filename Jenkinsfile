@@ -16,8 +16,8 @@ node('docker') {
             parallelSteps["${javaVersion}-${plugin}"] = {
                 node('docker') {
                     checkout scm
-                    docker.image("java:${javaVersion}").inside {
-                        timeout(30) {
+                    docker.image("openjdk:${javaVersion}").inside {
+                        timeout(45) {
                             sh "./gradlew -Si ${plugin}:check ${plugin}:gradleTest ${plugin}:assemble"
                         }
                     }
