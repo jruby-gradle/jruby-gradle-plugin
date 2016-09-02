@@ -93,7 +93,8 @@ class JRubyExecExtensionIntegrationSpec extends Specification {
         }
 
         then:
-        outputBuffer == "[\"${new File(TEST_JARS_DIR, 'org/bouncycastle/bcprov-jdk15on/1.46/bcprov-jdk15on-1.46.jar').toURL()}\"]"
+        def outputFile = new File(TEST_JARS_DIR, 'org/bouncycastle/bcprov-jdk15on/1.46/bcprov-jdk15on-1.46.jar')
+        outputBuffer == "[\"${outputFile.toURI().toURL()}\"]"
     }
 
     def "Running a script that requires a gem, a separate jRuby and a separate configuration"() {
