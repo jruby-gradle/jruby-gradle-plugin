@@ -16,13 +16,17 @@ node('docker') {
             parallelSteps["${javaVersion}-${plugin}"] = {
                 node('docker') {
                     checkout scm
-                    docker.image("openjdk:${javaVersion}").inside {
-                        timeout(45) {
-                            sh "./gradlew -Si ${plugin}:check ${plugin}:gradleTest ${plugin}:assemble"
+                    try {
+                        docker.image("openjdk:${javaVersion}").inside {
+                            timeout(45) {
+                                sh "./gradlew -Si ${plugin}:check ${plugin}:gradleTest ${plugin}:assemble"
+                            }
                         }
                     }
-                    junit '**/build/test-results/**/*.xml'
-                    archiveArtifacts artifacts: '**/build/libs/*.jar,build/*.zip', fingerprint: true
+                    finally {
+                        junit '**/build/test-results/**/*.xml'
+                        archiveArtifacts artifacts: '**/build/libs/*.jar,build/*.zip', fingerprint: true
+                    }
                 }
             }
         }
