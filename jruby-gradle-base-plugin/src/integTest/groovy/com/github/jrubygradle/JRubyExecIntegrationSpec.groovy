@@ -44,7 +44,7 @@ class JRubyExecIntegrationSpec extends Specification {
         given: "Version is set on the task"
         Configuration config
         final String configName = 'integ-exec-config'
-        final String newVersion = '1.7.11'
+        final String newVersion = '1.7.19'
         Pattern pattern = Pattern.compile(/.*(jruby-complete-.+.jar)/)
 
         when:
@@ -160,7 +160,7 @@ class JRubyExecIntegrationSpec extends Specification {
 
     def "Running a script that requires a gem, a separate JRuby and a separate configuration"() {
         given:
-        final String newVersion = '1.7.11'
+        final String newVersion = '1.7.19'
         assert project.jruby.execVersion != newVersion
         project.with {
             configurations.create('RubyWax')
@@ -191,7 +191,7 @@ class JRubyExecIntegrationSpec extends Specification {
              * least one version of JRuby installed
              */
             jruby {
-                execVersion '1.7.11'
+                execVersion '1.7.19'
                 defaultRepositories false
             }
 
