@@ -43,7 +43,6 @@ class JRubyJarPluginSpec extends Specification {
         project.with {
             apply plugin: 'com.github.jruby-gradle.jar'
             jruby.defaultRepositories = false
-            logging.level = LIFECYCLE
 
             repositories {
                 flatDir dirs : TESTREPO_LOCATION.absolutePath
