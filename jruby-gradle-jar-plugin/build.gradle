@@ -13,10 +13,6 @@ dependencies {
     compile project(':jruby-gradle-base-plugin')
     compile 'com.github.jengelman.gradle.plugins:shadow:[1.2.2,2.0)'
 
-    testCompile ("org.spockframework:spock-core:0.7-groovy-${gradle.gradleVersion.startsWith('1.')?'1.8':'2.0'}") {
-        exclude module : 'groovy-all'
-    }
-
     // For the testRepo tests I am locking the versions, instead of a open version, as it makes
     // unit testing easier, This does not affect the final artifact.
     // If you change values here, you need to update JRubyJarPluginSpec as well.

@@ -30,6 +30,10 @@ subprojects {
     apply plugin: 'idea'
     apply plugin: 'maven'
 
+    ext {
+        spockVersion = "1.0-groovy-${GroovySystem.version.replaceAll(/\.\d+$/,'')}"
+    }
+
     repositories {
         jcenter()
         maven { url rubygemsProxy }

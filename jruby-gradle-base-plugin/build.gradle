@@ -35,15 +35,9 @@ dependencies {
         exclude group: 'org.sonatype.nexus.plugins', module: 'nexus-ruby-tools'
     }
 
-    String spockVersion = "org.spockframework:spock-core:1.1-groovy-2.4"
-
     testJRubyPrepare "org.jruby:jruby-complete:${jrubyVersion}"
 
-    testCompile (spockVersion) {
-        exclude module : 'groovy-all'
-    }
-
-    integrationTestCompile (spockVersion) {
+    integrationTestCompile "org.spockframework:spock-core:${spockVersion}", {
         exclude module : 'groovy-all'
     }
 
@@ -153,6 +147,5 @@ bintray {
     }
 }
 bintrayUpload.dependsOn assemble
-
 gradleTest.mustRunAfter integrationTest
 // vim: ft=groovy
