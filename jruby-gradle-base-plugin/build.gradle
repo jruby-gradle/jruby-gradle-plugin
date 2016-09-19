@@ -152,11 +152,5 @@ bintray {
 }
 bintrayUpload.dependsOn assemble
 
-gradleLocations {
-    if(System.getenv('APPVEYOR')) {
-        searchGvm = false
-        download = true
-    }
-}
 
 // vim: ft=groovy
