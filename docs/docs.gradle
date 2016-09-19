@@ -1,0 +1,42 @@
+buildscript {
+    dependencies {
+        classpath fileTree(project.properties.PLUGIN_DIR) {
+            include "*.jar"
+            exclude "*-source*.jar"
+            exclude "*doc.jar"
+        }
+    }
+}
+
+apply plugin: 'com.github.jruby-gradle.base'
+
+import com.github.jrubygradle.JRubyExec
+
+repositories {
+    maven { url rubygemsProxy }
+}
+
+configurations {
+    asciidoctor
+}
+
+dependencies {
+    asciidoctor('rubygems:awestruct:0.5.5')
+    asciidoctor('rubygems:coderay:1.1.0')
+
+    /* later versions of 1.6.x have a dependency incompatibility with
+     * mime-types 2.x
+     */
+    asciidoctor('rubygems:rest-client:1.6.7') { force = true }
+}
+
+task compileAsciidoc(type: JRubyExec) {
+    script 'awestruct'
+    scriptArgs "--generate", "--verbose",
+        "--output-dir", "${buildDir}/_site",
+        '--force'
+    /* without the --force option, awestruct is not smart enough to regenerate
+     * files based on includes */
+    configuration 'asciidoctor'
+    inputs.files fileTree(projectDir).include('**/*.adoc')
+}
