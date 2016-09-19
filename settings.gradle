@@ -1,1 +1,4 @@
-include 'jruby-gradle-base-plugin', 'jruby-gradle-jar-plugin', 'jruby-gradle-war-plugin', 'docs'
+include 'jruby-gradle-base-plugin'
+include 'jruby-gradle-jar-plugin'
+include 'jruby-gradle-war-plugin'
+//include 'docs'

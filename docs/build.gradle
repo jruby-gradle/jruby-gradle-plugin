@@ -1,21 +1,31 @@
+//buildscript {
+//    repositories {
+//        jcenter()
+//        maven {
+//            url "https://plugins.gradle.org/m2/"
+//        }
+//    }
+//    dependencies {
+//        classpath 'com.jfrog.bintray.gradle:gradle-bintray-plugin:1.2'
+//        classpath 'com.netflix.nebula:gradle-extra-configurations-plugin:1.12.+'
+//        classpath 'org.ysb33r.gradle:gradletest:0.5.3'
+//        classpath "org.ajoberstar:gradle-git:1.2.0"
+//
+//        /* wow. so recursion */
+//        classpath "com.github.jruby-gradle:jruby-gradle-plugin:1.0.3"
+//    }
+//}
+
 buildscript {
-    repositories {
-        jcenter()
-        maven {
-            url "https://plugins.gradle.org/m2/"
+    dependencies {
+        classpath fileTree("${rootProject.projectDir}/jruby-gradle-base-plugin/build/libs") {
+            include "*.jar"
+            exclude "*-source*.jar"
+            exclude "*doc.jar"
         }
     }
-    dependencies {
-        classpath 'com.jfrog.bintray.gradle:gradle-bintray-plugin:1.2'
-        classpath 'com.netflix.nebula:gradle-extra-configurations-plugin:1.12.+'
-        classpath 'org.ysb33r.gradle:gradletest:0.5.3'
-        classpath "org.ajoberstar:gradle-git:1.2.0"
-
-        /* wow. so recursion */
-        classpath "com.github.jruby-gradle:jruby-gradle-plugin:1.0.3"
-    }
 }
-apply plugin: 'org.ajoberstar.github-pages'
+
 apply plugin: 'com.github.jruby-gradle.base'
 
 import com.github.jrubygradle.JRubyExec
@@ -25,8 +35,8 @@ import com.github.jrubygradle.JRubyExec
  * the application of gradletest to all other subprojects in this build, so
  * we'll just remove it from ourselves
  */
-tasks.removeAll(tasks.findByName('gradleTest'))
-
+//tasks.removeAll(tasks.findByName('gradleTest'))
+//gradleTest.enabled = false
 
 repositories {
     maven { url rubygemsProxy }
@@ -68,7 +78,7 @@ task compileAsciidoc(type: JRubyExec) {
     /* without the --force option, awestruct is not smart enough to regenerate
      * files based on includes */
     configuration 'asciidoctor'
-    inputs.source fileTree(projectDir).include('**/*.adoc')
+    inputs.files fileTree(projectDir).include('**/*.adoc')
 }
 
 task assembleDocs {
@@ -85,6 +95,3 @@ githubPages {
 }
 publishGhPages.dependsOn assembleDocs
 
-/* We don't need an upload task in here */
-task bintrayUpload(overwrite: true) {
-}

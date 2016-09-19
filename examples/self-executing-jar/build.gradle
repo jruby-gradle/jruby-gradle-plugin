@@ -1,25 +1,22 @@
-/*
- * This project is intended to be used as an acceptance test *and* a
- * documentation example. If you change this file, please be sure that it
- * renders appropriately in the generated documentation
- */
+///*
+// * This project is intended to be used as an acceptance test *and* a
+// * documentation example. If you change this file, please be sure that it
+// * renders appropriately in the generated documentation
+// */
+
 buildscript {
-    repositories { jcenter() }
 
     dependencies {
         /* here to make sure that our dependencies get loaded in properly under
          * GradleTest, this is NOT needed by end-users
          */
-        classpath 'com.github.jengelman.gradle.plugins:shadow:[1.2.2,2.0)'
-
-        /* Replace "%%VERSION%%" with the version of JRuby/Gradle you wish to
-         * use if you want to use this build.gradle outside of gradleTest
-         */
-        classpath 'com.github.jruby-gradle:jruby-gradle-plugin:%%VERSION%%'
-        classpath 'com.github.jruby-gradle:jruby-gradle-jar-plugin:%%VERSION%%'
+        classpath ':shadow:+'
+        classpath ':commons-compress:+'
+        classpath ':jruby-gradle-plugin:+'
     }
 }
 
+// tag::jrubyjar[]
 apply plugin: "com.github.jruby-gradle.jar"
 
 repositories { jcenter() }
@@ -50,3 +47,4 @@ task runGradleTest(type: Exec) {
     workingDir "${buildDir}/libs"
     commandLine 'java', '-jar', jrubyJar.outputs.files.singleFile.absolutePath
 }
+// tag::jrubyjar[]
