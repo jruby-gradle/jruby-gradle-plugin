@@ -10,9 +10,11 @@ buildscript {
         /* here to make sure that our dependencies get loaded in properly under
          * GradleTest, this is NOT needed by end-users
          */
-        classpath ':shadow:+'
-        classpath ':commons-compress:+'
-        classpath ':jruby-gradle-plugin:+'
+        classpath fileTree('../../repo') {
+            include '*.jar'
+            exclude 'groovy*.jar'
+            exclude 'gradle*.jar'
+        }
     }
 }
 
