@@ -20,6 +20,7 @@ class JRubyPluginInstanceSpec extends Specification {
 
         where:
         version   | expected
+        '9.1.2.0' | false
         '9.0.0.0' | false
         '1.7.20'  | false
         '1.7.11'  | true
