@@ -49,4 +49,5 @@ task runGradleTest(type: Exec) {
     workingDir "${buildDir}/libs"
     commandLine 'java', '-jar', jrubyJar.outputs.files.singleFile.absolutePath
 }
-// tag::jrubyjar[]
+
+// end::jrubyjar[]
