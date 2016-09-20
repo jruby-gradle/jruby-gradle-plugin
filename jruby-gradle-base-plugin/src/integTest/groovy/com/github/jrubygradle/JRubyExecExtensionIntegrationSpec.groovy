@@ -69,12 +69,12 @@ class JRubyExecExtensionIntegrationSpec extends Specification {
         }
 
         then: "only the appropriate parameters should be passed"
-        outputBuffer == expected
+        outputBuffer.startsWith(expected)
 
         where:
         input | expected
-        0     | "Hello, Stan\n"
-        1     | "Hello, man\n"
+        0     | "Hello, Stan"
+        1     | "Hello, man"
 
     }
 
