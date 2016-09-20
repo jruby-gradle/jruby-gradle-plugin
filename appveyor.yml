@@ -4,10 +4,10 @@ build:
   verbosity: detailed
 
 build_script:
-  - gradlew.bat assemble --info --no-daemon
+  - gradlew.bat assemble --info
 
 test_script:
-  - gradlew.bat test check gradleTest --info --no-daemon
+  - gradlew.bat test check gradleTest --info
 
 branches:
   only:

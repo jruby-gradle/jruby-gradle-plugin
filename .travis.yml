@@ -9,7 +9,7 @@ install:
  - ./gradlew clean
 
 script:
- - ./gradlew -S -i check gradleTest assemble
+ - ./gradlew -S -i build gradleTest
 
 jdk:
  - oraclejdk8
