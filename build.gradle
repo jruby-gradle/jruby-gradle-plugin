@@ -123,3 +123,4 @@ task release(type: Exec) {
     dependsOn ':docs:publishGhPages'
     commandLine 'git', 'tag', "v${project.version}"
 }
+
