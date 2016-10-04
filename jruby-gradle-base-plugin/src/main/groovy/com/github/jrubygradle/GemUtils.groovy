@@ -95,7 +95,10 @@ class GemUtils {
                 // jbundler and/or jar-dependencies will not attempt to invoke
                 // Maven on a gem's behalf to install a Java dependency that we
                 // should already have taken care of, see #79
-                setEnvironment 'JBUNDLE_SKIP' : true, 'JARS_SKIP' : true
+                environment JBUNDLE_SKIP : true,
+                            JARS_SKIP : true,
+                            GEM_HOME : destDir.absolutePath,
+                            GEM_PATH : destDir.absolutePath
                 main JRUBY_MAINCLASS
                 classpath jRubyClasspath
                 args '-S', GEM, 'install'
