@@ -65,7 +65,7 @@ class JRubyWar extends War {
     static void updateJRubyDependencies(Project project) {
         project.dependencies {
             jrubyWar "org.jruby:jruby-complete:${project.jruby.defaultVersion}"
-            jrubyWar('org.jruby.rack:jruby:rack:[1.1.0,2.0)') {
+            jrubyWar('org.jruby.rack:jruby-rack:[1.1.0,2.0)') {
                 exclude module: 'jruby-complete'
             }
         }
