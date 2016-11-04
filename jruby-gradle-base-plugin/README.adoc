@@ -194,7 +194,7 @@ task unpackMyGems(type : JRubyPrepare) {
 
   // Add one or more gems
   // Can be String(s), File(s), FileCollection(s) or Configuration(s)
-  gems project.configuration.gems
+  dependencies project.configurations.gems
 }
 ----
 
