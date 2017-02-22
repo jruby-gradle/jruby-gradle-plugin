@@ -15,7 +15,7 @@ buildscript {
 apply plugin: 'idea'
 
 group = 'com.github.jruby-gradle'
-version = '1.3.3'
+version = '1.4.0'
 defaultTasks 'check', 'assemble'
 
 if (!releaseBuild) {
