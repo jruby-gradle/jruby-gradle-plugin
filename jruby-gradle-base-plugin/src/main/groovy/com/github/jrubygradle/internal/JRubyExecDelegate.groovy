@@ -55,6 +55,7 @@ class JRubyExecDelegate implements JRubyExecTraits   {
 
     private final List passthrough = []
 
+    @SuppressWarnings('VariableName')
     static Object jrubyexecDelegatingClosure = { Project project, Closure cl ->
         JRubyExecDelegate proxy =  new JRubyExecDelegate()
         proxy.project = project
