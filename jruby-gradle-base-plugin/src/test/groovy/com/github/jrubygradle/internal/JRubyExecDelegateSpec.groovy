@@ -76,6 +76,7 @@ class JRubyExecDelegateSpec extends Specification {
     def "When just passing arbitrary javaexec, expect them to be stored"() {
         given:
             def cl = {
+                environment 'XYZ', '123'
                 executable '/path/to/file'
                 jvmArgs '-x'
                 jvmArgs '-y','-z'
@@ -84,12 +85,14 @@ class JRubyExecDelegateSpec extends Specification {
             cl.call()
 
         expect:
-            jred.valuesAt(0) == '/path/to/file'
-            jred.valuesAt(1) == '-x'
-            jred.valuesAt(2) == ['-y','-z']
-            jred.keyAt(0) == 'executable'
-            jred.keyAt(1) == 'jvmArgs'
+            jred.valuesAt(0) == ['XYZ', '123']
+            jred.valuesAt(1) == '/path/to/file'
+            jred.valuesAt(2) == '-x'
+            jred.valuesAt(3) == ['-y','-z']
+            jred.keyAt(0) == 'environment'
+            jred.keyAt(1) == 'executable'
             jred.keyAt(2) == 'jvmArgs'
+            jred.keyAt(3) == 'jvmArgs'
 
     }
 
