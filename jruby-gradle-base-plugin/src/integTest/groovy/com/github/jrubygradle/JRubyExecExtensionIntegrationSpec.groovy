@@ -138,4 +138,30 @@ class JRubyExecExtensionIntegrationSpec extends Specification {
         new File(project.buildDir, customGemDir).exists()
 
     }
+
+    def "Running a script that requires environment variables"() {
+        // This tests that the passthrough invocation
+        // happens for overloaded versions of environment
+        // and that the environment variables are passed
+        // on to the script
+        given:
+        final String envVarName = 'TEST_ENV_VAR'
+        final String envVarValue = 'Test Value'
+        final Map envVarMap = [TEST_A: 'A123', TEST_B: 'B123']
+
+        when:
+        project.with {
+            jrubyexec {
+                environment    envVarName, envVarValue
+                environment    envVarMap
+                script         "${TEST_SCRIPT_DIR}/envVars.rb"
+                standardOutput output
+            }
+        }
+
+        then:
+        outputBuffer =~ /TEST_ENV_VAR=Test Value/
+        outputBuffer =~ /TEST_A=A123/
+        outputBuffer =~ /TEST_B=B123/
+    }
 }

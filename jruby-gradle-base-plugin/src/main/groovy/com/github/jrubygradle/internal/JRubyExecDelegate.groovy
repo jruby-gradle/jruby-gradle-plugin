@@ -55,6 +55,7 @@ class JRubyExecDelegate implements JRubyExecTraits   {
 
     private final List passthrough = []
 
+    @SuppressWarnings('VariableName')
     static Object jrubyexecDelegatingClosure = { Project project, Closure cl ->
         JRubyExecDelegate proxy =  new JRubyExecDelegate()
         proxy.project = project
@@ -70,7 +71,7 @@ class JRubyExecDelegate implements JRubyExecTraits   {
             proxy.passthrough.each { item ->
                 Object k = item.keySet()[0]
                 Object v = item.values()[0]
-                "${k}" v
+                invokeMethod("${k}", v)
             }
             main 'org.jruby.Main'
             // just keep this even if it does not exists
@@ -81,7 +82,14 @@ class JRubyExecDelegate implements JRubyExecTraits   {
                 args item.toString()
             }
 
-            setEnvironment proxy.getPreparedEnvironment(System.env)
+            // Start with System.env then add from environment,
+            // which will add the user settings and
+            // overwrite any overlapping entries
+            final env = [:]
+            env << System.env
+            env << environment
+
+            setEnvironment proxy.getPreparedEnvironment(env)
         }
     }
 
