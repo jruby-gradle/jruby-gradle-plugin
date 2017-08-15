@@ -15,7 +15,7 @@ buildscript {
 apply plugin: 'idea'
 
 group = 'com.github.jruby-gradle'
-version = '1.5.0'
+version = '1.5.1'
 defaultTasks 'check', 'assemble'
 sourceCompatibility = '1.8'
 targetCompatibility = '1.8'
