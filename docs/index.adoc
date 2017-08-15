@@ -30,7 +30,7 @@ execute a Ruby script, which has Ruby-based dependencies:
 include::../examples/run-simple-ruby-script/build.gradle[lines=6..30]
 ----
 
-.print-script.rb (link:https://github.com/jruby-gradle/jruby-gradle-plugin/blob/master/examples/run-simple-ruby-script/print-script[full source])
+.print-script.rb (link:https://github.com/jruby-gradle/jruby-gradle-plugin/blob/master/examples/run-simple-ruby-script/print-script.rb[full source])
 [source, ruby]
 ----
 include::../examples/run-simple-ruby-script/print-script.rb[]
