@@ -109,6 +109,16 @@ configure(pluginProjects) {
         versions '2.0','2.2','2.6','2.8','2.13','3.0','3.1'
     }
 
+    if (System.env.TRAVIS == 'true') {
+        tasks.withType(GroovyCompile) {
+            groovyOptions.fork = false
+        }
+        tasks.withType(Test) {
+            // containers (currently) have 2 dedicated cores and 4GB of memory
+            maxParallelForks = 2
+            minHeapSize = '128m'
+        }
+    }
 }
 
 task doc {
