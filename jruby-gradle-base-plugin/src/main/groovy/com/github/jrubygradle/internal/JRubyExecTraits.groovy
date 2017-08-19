@@ -182,6 +182,7 @@ trait JRubyExecTraits {
         }
     }
 
+    @CompileDynamic
     Map getPreparedEnvironment(Map env) {
         Map<String, Object> preparedEnv = [:]
 

@@ -1,74 +1,34 @@
-buildscript {
-    repositories {
-        jcenter()
-        maven {
-            url "https://plugins.gradle.org/m2/"
-        }
-    }
-    dependencies {
-        classpath 'com.jfrog.bintray.gradle:gradle-bintray-plugin:1.2'
-        classpath 'com.netflix.nebula:gradle-extra-configurations-plugin:1.12.+'
-        classpath 'org.ysb33r.gradle:gradletest:0.5.3'
-        classpath "org.ajoberstar:gradle-git:1.2.0"
 
-        /* wow. so recursion */
-        classpath "com.github.jruby-gradle:jruby-gradle-plugin:1.0.3"
-    }
-}
-apply plugin: 'org.ajoberstar.github-pages'
-apply plugin: 'com.github.jruby-gradle.base'
+task prepareGroovyDocs(type : Copy) {
 
-import com.github.jrubygradle.JRubyExec
-
-
-/* We don't have a gradleTest to run in this sub-project, but I'd like to keep
- * the application of gradletest to all other subprojects in this build, so
- * we'll just remove it from ourselves
- */
-tasks.removeAll(tasks.findByName('gradleTest'))
-
-
-repositories {
-    maven { url rubygemsProxy }
-}
-
-configurations {
-    asciidoctor
-}
-
-dependencies {
-    asciidoctor('rubygems:awestruct:0.5.5')
-    asciidoctor('rubygems:coderay:1.1.0')
-
-    /* later versions of 1.6.x have a dependency incompatibility with
-     * mime-types 2.x
-     */
-    asciidoctor('rubygems:rest-client:1.6.7') { force = true }
-}
-
-task prepareGroovyDocs(type: Copy) {
     description "Copy Groovydocs into our site directory for deploybment/publication"
     into "${buildDir}/_site/groovydoc"
 
-    rootProject.subprojects.each {
+    rootProject.pluginProjects.each {
         def task = it.tasks.findByName('groovydoc')
 
         if ((task) && (task.outputs.files)) {
             into(it.name) { from task.outputs.files }
         }
     }
-    dependsOn rootProject.subprojects.collect { ":${it.name}:groovydoc" }
+    dependsOn rootProject.pluginProjects.collect { ":${it.name}:groovydoc" }
 }
 
-task compileAsciidoc(type: JRubyExec) {
-    script 'awestruct'
-    scriptArgs "--generate", "--verbose",
-                "--output-dir", "${buildDir}/_site",
-                '--force'
-    /* without the --force option, awestruct is not smart enough to regenerate
-     * files based on includes */
-    configuration 'asciidoctor'
-    inputs.source fileTree(projectDir).include('**/*.adoc')
+task compileAsciidoc( type : GradleBuild ) {
+    buildFile = file('docs.gradle')
+    tasks = ['compileAsciidoc']
+    startParameter.projectProperties+= [
+        PLUGIN_DIR : "${rootProject.projectDir}/jruby-gradle-base-plugin/build/libs",
+        rubygemsProxy : rubygemsProxy
+    ]
+
+    startParameter.projectCacheDir = new File(
+        gradle.startParameter.projectCacheDir ?
+            "${gradle.startParameter.projectCacheDir}" : "${rootProject.projectDir}/.gradle",
+        project.name.replace(":", "_")
+    )
+
+    dependsOn ':jruby-gradle-base-plugin:jar'
 }
 
 task assembleDocs {
@@ -85,6 +45,3 @@ githubPages {
 }
 publishGhPages.dependsOn assembleDocs
 
-/* We don't need an upload task in here */
-task bintrayUpload(overwrite: true) {
-}

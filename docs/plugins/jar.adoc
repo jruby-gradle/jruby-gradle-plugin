@@ -1,3 +1,8 @@
 = The Jar Plugin
 
+[source,groovy]
+----
+include::../../jruby-gradle-jar-plugin/src/gradleTest/self-executing-jar/build.gradle[tags=jrubyjar]
+----
+
 // vim: ft=asciidoc

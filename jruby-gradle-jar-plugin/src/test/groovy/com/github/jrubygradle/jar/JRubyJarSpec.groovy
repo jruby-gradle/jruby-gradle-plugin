@@ -18,7 +18,6 @@ class JRubyJarSpec extends Specification {
         project = ProjectBuilder.builder().build()
         project.gradle.startParameter.offline = true
         project.with {
-            logging.level = LIFECYCLE
             apply plugin: 'com.github.jruby-gradle.base'
             jruby.defaultRepositories = false
         }

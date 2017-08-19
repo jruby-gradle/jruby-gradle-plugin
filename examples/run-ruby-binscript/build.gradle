@@ -1,16 +1,19 @@
 /*
+ *
  * This project is intended to be used as an acceptance test *and* a
  * documentation example. If you change this file, please be sure that it
  * renders appropriately in the generated documentation
  */
 buildscript {
-    repositories { jcenter() }
-
     dependencies {
-        /* Replace "%%VERSION%%" with the version of JRuby/Gradle you wish to
-         * use if you want to use this build.gradle outside of gradleTest
+        /* here to make sure that our dependencies get loaded in properly under
+         * GradleTest, this is NOT needed by end-users
          */
-        classpath 'com.github.jruby-gradle:jruby-gradle-plugin:%%VERSION%%'
+        classpath fileTree('../../repo') {
+            include '*.jar'
+            exclude 'groovy*.jar'
+            exclude 'gradle*.jar'
+        }
     }
 }
 apply plugin: "com.github.jruby-gradle.base"

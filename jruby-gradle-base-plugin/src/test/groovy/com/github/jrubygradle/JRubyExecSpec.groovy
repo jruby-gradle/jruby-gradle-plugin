@@ -31,7 +31,6 @@ class JRubyExecSpec extends Specification {
     void setup() {
         project = ProjectBuilder.builder().withProjectDir(TESTROOT).build()
         project.buildDir = TESTROOT
-        project.logging.level = LIFECYCLE
         project.apply plugin: 'com.github.jruby-gradle.base'
         execTask = project.task(TASK_NAME, type: JRubyExec)
     }
@@ -39,7 +38,6 @@ class JRubyExecSpec extends Specification {
     def "Do not allow JRubyExec to be instantiated if plugin has not been loaded"() {
         given: "A basic project"
         def badProject = ProjectBuilder.builder().build()
-        badProject.logging.level = LIFECYCLE
 
         when: "A JRubyExec task is instantiated with the jruby plugin being applied"
         badProject.task( 'bad', type : JRubyExec )

@@ -45,7 +45,7 @@ task spec(type: JRubyExec) {
     group 'JRuby'
     description 'Execute the RSpecs in JRuby'
     script 'rspec'
-    inputs.source fileTree('spec').include('**/*.rb'), fileTree('lib').include('**/*.rb') // <4>
+    inputs.files fileTree('spec').include('**/*.rb'), fileTree('lib').include('**/*.rb') // <4>
 }
 ----
 <1> Specify our dependency on the JRuby/Gradle link:/base/[base plugin]
