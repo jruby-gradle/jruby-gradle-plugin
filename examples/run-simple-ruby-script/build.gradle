@@ -3,6 +3,18 @@
  * documentation example. If you change this file, please be sure that it
  * renders appropriately in the generated documentation
  */
+buildscript {
+    dependencies {
+        /* here to make sure that our dependencies get loaded in properly under
+         * GradleTest, this is NOT needed by end-users
+         */
+        classpath fileTree('../../repo') {
+            include '*.jar'
+            exclude 'groovy*.jar'
+            exclude 'gradle*.jar'
+        }
+    }
+}
 apply plugin: "com.github.jruby-gradle.base"
 
 import com.github.jrubygradle.JRubyExec
