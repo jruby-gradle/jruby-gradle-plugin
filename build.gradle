@@ -85,9 +85,18 @@ subprojects {
             dependsOn jar
         }
 
+        if (System.env.TRAVIS == 'true') {
+            tasks.withType(GroovyCompile) {
+                groovyOptions.fork = false
+            }
+            tasks.withType(Test) {
+                // containers (currently) have 2 dedicated cores and 4GB of memory
+                maxParallelForks = 2
+            }
+        }
+
         install.dependsOn check
     }
-
 
     idea {
         module {
@@ -95,6 +104,13 @@ subprojects {
             downloadSources = true
         }
     }
+
+}
+
+task doc {
+    dependsOn ':docs:assembleDocs'
+    group 'Documentation'
+    description 'Toplevel documentation invocation'
 }
 
 task release(type: Exec) {
