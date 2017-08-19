@@ -70,7 +70,7 @@ configure(pluginProjects) {
 
     test {
         if (System.env.TRAVIS == 'true') {
-            maxParallelForks = 2
+            maxParallelForks = 1
         }
         testLogging {
             showStandardStreams = true
@@ -112,9 +112,12 @@ configure(pluginProjects) {
         versions '2.0','2.2','2.6','2.8','2.13','3.0','3.1'
     }
 
-    if (System.env.TRAVIS == 'true') {
+    if (System.env.TRAVIS) {
         tasks.withType(GroovyCompile) {
             groovyOptions.fork = false
+        }
+        tasks.withType(Test) {
+            maxParallelForks = 1
         }
     }
 }
