@@ -6,10 +6,10 @@ addons:
       - oracle-java8-installer
 
 install:
- - ./gradlew clean --no-daemon
+ - ./gradlew --no-daemon clean
 
 script:
- - ./gradlew -S -i build gradleTest --no-daemon
+ - ./gradlew -S -i --no-daemon build assemble check gradleTest
 
 jdk:
  - oraclejdk8
