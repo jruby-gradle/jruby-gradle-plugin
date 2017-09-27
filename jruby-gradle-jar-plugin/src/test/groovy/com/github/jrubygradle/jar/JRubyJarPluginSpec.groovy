@@ -43,7 +43,6 @@ class JRubyJarPluginSpec extends Specification {
         project.with {
             apply plugin: 'com.github.jruby-gradle.jar'
             jruby.defaultRepositories = false
-            logging.level = LIFECYCLE
 
             repositories {
                 flatDir dirs : TESTREPO_LOCATION.absolutePath
@@ -240,23 +239,3 @@ class JRubyJarPluginSpec extends Specification {
     }
 }
 
-
-class JRubyPluginInstanceSpec extends Specification {
-    JRubyJarPlugin plugin
-
-    def setup() {
-        plugin = new JRubyJarPlugin()
-    }
-
-    def "isJRubyVersionDeprecated()"() {
-        expect:
-        plugin.isJRubyVersionDeprecated(version) == expected
-
-        where:
-        version   | expected
-        '9.0.0.0' | false
-        '1.7.20'  | false
-        '1.7.11'  | true
-        '1.7.19'  | true
-    }
-}

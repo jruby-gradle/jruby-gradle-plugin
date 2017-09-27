@@ -144,6 +144,7 @@ class JRubyExecIntegrationSpec extends Specification {
         }
         project.repositories {
             rubygems('http://rubygems.lasagna.io/proxy')
+            rubygems('http://rubygems-proxy.torquebox.org')
         }
         project.dependencies {
             jrubyExec "rubygems:a:${version}"

@@ -25,10 +25,6 @@ project.afterEvaluate {
 
 // --- up to here
 
-repositories {
-    maven { url rubygemsProxy }
-}
-
 dependencies {
 
     compile "org.eclipse.jetty:jetty-server:${jettyVersion}"
@@ -39,7 +35,7 @@ dependencies {
         exclude group: 'org.sonatype.nexus.plugins', module: 'nexus-ruby-tools'
     }
 
-    String spockVersion = "org.spockframework:spock-core:1.0-groovy-2.3"
+    String spockVersion = "org.spockframework:spock-core:1.1-groovy-2.4"
 
     testJRubyPrepare "org.jruby:jruby-complete:${jrubyVersion}"
 
@@ -158,15 +154,5 @@ bintray {
 }
 bintrayUpload.dependsOn assemble
 
-gradleLocations {
-    if(System.getenv('APPVEYOR')) {
-        searchGvm = false
-        download = true
-    }
-}
-
-gradleTest {
-    versions '2.0','2.2','2.6'
-    dependsOn jar
-}
+gradleTest.mustRunAfter integrationTest
 // vim: ft=groovy

@@ -5,19 +5,16 @@ addons:
     packages:
       - oracle-java8-installer
 
-install:
- - ./gradlew clean
+install: true
 
 script:
- - ./gradlew -S -i check gradleTest assemble
+ - ./gradlew -S -i --console=plain --no-daemon clean build
 
 jdk:
  - oraclejdk8
 
 os:
  - linux
-
-env: TERM=dumb
 
 cache:
   directories:
