@@ -8,7 +8,6 @@ buildscript {
     dependencies {
         classpath 'com.jfrog.bintray.gradle:gradle-bintray-plugin:1.2'
         classpath 'com.netflix.nebula:gradle-extra-configurations-plugin:1.12.+'
-        classpath 'org.ysb33r.gradle:gradletest:0.5.3'
         classpath "org.ajoberstar:gradle-git:1.2.0"
 
         /* wow. so recursion */
@@ -19,18 +18,6 @@ apply plugin: 'org.ajoberstar.github-pages'
 apply plugin: 'com.github.jruby-gradle.base'
 
 import com.github.jrubygradle.JRubyExec
-
-
-/* We don't have a gradleTest to run in this sub-project, but I'd like to keep
- * the application of gradletest to all other subprojects in this build, so
- * we'll just remove it from ourselves
- */
-tasks.removeAll(tasks.findByName('gradleTest'))
-
-
-repositories {
-    maven { url rubygemsProxy }
-}
 
 configurations {
     asciidoctor
@@ -68,7 +55,7 @@ task compileAsciidoc(type: JRubyExec) {
     /* without the --force option, awestruct is not smart enough to regenerate
      * files based on includes */
     configuration 'asciidoctor'
-    inputs.source fileTree(projectDir).include('**/*.adoc')
+    inputs.files fileTree(projectDir).include('**/*.adoc')
 }
 
 task assembleDocs {

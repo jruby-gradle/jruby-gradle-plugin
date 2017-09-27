@@ -134,6 +134,7 @@ class JRubyExecIntegrationSpec extends Specification {
         outputBuffer =~ /loaded 'a' gem with version ${version}/
     }
 
+    @PendingFeature
     def "Running a script that requires a gem using custom embedded rubygems-servlets maven repo"() {
         given:
         String version = '0.1.0'
@@ -144,6 +145,7 @@ class JRubyExecIntegrationSpec extends Specification {
         }
         project.repositories {
             rubygems('http://rubygems.lasagna.io/proxy')
+            rubygems('http://rubygems-proxy.torquebox.org')
         }
         project.dependencies {
             jrubyExec "rubygems:a:${version}"

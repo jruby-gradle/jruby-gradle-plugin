@@ -34,7 +34,7 @@ task copyIntegrationTestGems (type:Copy) {
 }
 
 task integrationTest(type: Test, dependsOn: jar) {
-    testClassesDir = sourceSets.integrationTest.output.classesDir
+    testClassesDirs = sourceSets.integrationTest.output.classesDirs
     classpath = sourceSets.integrationTest.runtimeClasspath
     dependsOn copyIntegrationTestGems, test
 }

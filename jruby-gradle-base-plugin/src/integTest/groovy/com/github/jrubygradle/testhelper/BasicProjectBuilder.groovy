@@ -17,7 +17,6 @@ class BasicProjectBuilder {
           throw new RuntimeException("no repo at " + repo)
         }
         project.with {
-            logging.level = LIFECYCLE
             apply plugin: 'com.github.jruby-gradle.base'
             jruby.defaultRepositories = true
             repositories {
@@ -32,7 +31,6 @@ class BasicProjectBuilder {
     static Project buildWithLocalRepo( final File projectDir_, final File repoDir_, final File cacheDir_ ) {
         Project project = ProjectBuilder.builder().withProjectDir(projectDir_).build()
         project.with {
-            logging.level = LIFECYCLE
             apply plugin: 'com.github.jruby-gradle.base'
 
             jruby.defaultRepositories = false

@@ -1,7 +1,5 @@
 import groovy.json.JsonOutput
 
-apply plugin: 'org.ysb33r.gradletest'
-
 configurations {
     testJRubyPrepare
     integrationTestCompile.extendsFrom testCompile
@@ -43,7 +41,7 @@ task integrationTest(type: Test) {
     description 'Run the TestKit-based integration tests'
     dependsOn prepareGradleTestKitClasspath, copyIntegrationTestJRuby, test
     classpath = sourceSets.integrationTest.runtimeClasspath
-    testClassesDir = sourceSets.integrationTest.output.classesDir
+    testClassesDirs = sourceSets.integrationTest.output.classesDirs
 
     testLogging {
         showStandardStreams = true
@@ -51,11 +49,6 @@ task integrationTest(type: Test) {
     }
 }
 check.dependsOn integrationTest
-
-gradleTest {
-    versions '2.0', '2.2', '2.6'
-    dependsOn test, integrationTest, jar
-}
 
 dependencies {
     /* Without pruning the groovy-all dependency from this file list, we end up

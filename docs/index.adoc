@@ -10,6 +10,8 @@ link:http://jruby.org[JRuby] with Gradle's excellent task and dependency
 management, *JRuby/Gradle* provides high quality build tooling for
 Ruby and Java developers alike.
 
+NOTE: As from version 1.5.2 you will need at last Gradle 2.8.
+
 *Plugins available:*
 
 * link:base/[Base]
