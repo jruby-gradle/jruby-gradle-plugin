@@ -134,7 +134,6 @@ class JRubyExecIntegrationSpec extends Specification {
         outputBuffer =~ /loaded 'a' gem with version ${version}/
     }
 
-    @PendingFeature
     def "Running a script that requires a gem using custom embedded rubygems-servlets maven repo"() {
         given:
         String version = '0.1.0'
