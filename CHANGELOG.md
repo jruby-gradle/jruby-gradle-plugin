@@ -1,5 +1,10 @@
 # Changelog
 
+## Changelog Moved
+
+This changelog is no longer maintained. For release notes, expand each version's release notes in the [GitHub releases page][].
+[GitHub releases page]: https://github.com/jruby-gradle/jruby-gradle-plugin/releases
+
 ## 0.2.1
 
 * [#125](https://github.com/jruby-gradle/jruby-gradle-plugin/pull/125) - fixes one severe and one little issue with version resolution for gem artifacts
