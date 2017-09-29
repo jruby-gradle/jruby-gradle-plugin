@@ -2,8 +2,7 @@
 
 ## Changelog Moved
 
-This changelog is no longer maintained. For release notes, expand each version's release notes in the [GitHub releases page][].
-[GitHub releases page]: https://github.com/jruby-gradle/jruby-gradle-plugin/releases
+This changelog is no longer maintained. For release notes, expand each version's release notes in the [GitHub milesontes)[https://github.com/jruby-gradle/jruby-gradle-plugin/milestones?state=closed).
 
 ## 0.2.1
 
