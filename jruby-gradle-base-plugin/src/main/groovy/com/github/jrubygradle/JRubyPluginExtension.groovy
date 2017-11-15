@@ -7,7 +7,7 @@ import org.gradle.api.Project
  * Class providing the jruby{} DSL extension to the Gradle build script
  */
 class JRubyPluginExtension {
-    static final String DEFAULT_JRUBY_VERSION = '9.1.12.0'
+    static final String DEFAULT_JRUBY_VERSION = '9.1.14.0'
 
     /** The default version of jruby that will be used  */
     String defaultVersion = DEFAULT_JRUBY_VERSION
