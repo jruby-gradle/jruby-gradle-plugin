@@ -34,7 +34,7 @@ class JRubyJar extends Jar {
     static final String DEFAULT_JRUBYJAR_CONFIG = 'jrubyJar'
     static final String DEFAULT_MAIN_CLASS = 'org.jruby.mains.JarMain'
     static final String EXTRACTING_MAIN_CLASS = 'org.jruby.mains.ExtractingMain'
-    static final String DEFAULT_JRUBY_MAINS = '0.4.0'
+    static final String DEFAULT_JRUBY_MAINS = '0.6.1'
 
     /**
      * @return Directory that the dependencies for this project will be staged into
