@@ -6,6 +6,7 @@ script:
   - ./gradlew -S -i --max-workers=2 --no-daemon clean check build
 jdk:
   - openjdk8
+  - openjdk9
 os:
   - linux
 cache:
