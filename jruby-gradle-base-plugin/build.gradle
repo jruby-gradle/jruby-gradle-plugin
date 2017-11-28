@@ -61,7 +61,7 @@ dependencies {
 
     // NOTE: Leave this at .11 as it must be an older version. if
     // you change it here you will also need to update JRubyExecIntegrationSpec
-    integrationTestGems "org.jruby:jruby-complete:1.7.19"
+    integrationTestGems "org.jruby:jruby-complete:9.0.1.0"
 
     // NOTE: older jruby versions needs this for exec to work properly
     integrationTestGems "rubygems:jar-dependencies:0.1.15"

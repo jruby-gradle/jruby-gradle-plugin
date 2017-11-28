@@ -176,11 +176,6 @@ class JRubyExecUtils {
         if (!(c.dependencies.find { it.name == JRUBY_COMPLETE })) {
             project.dependencies.add(configuration, "org.jruby:jruby-complete:${version}")
         }
-
-        if (version.startsWith('1.7.1')) {
-            project.dependencies.add(configuration,
-                    "rubygems:jar-dependencies:${JAR_DEPENDENCIES_VERSION}")
-        }
     }
 
 }

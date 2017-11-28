@@ -35,7 +35,7 @@ class JRubyPluginExtensionSpec extends Specification {
     def "changing the defaultVersion via a method should work"() {
         given:
         JRubyPluginExtension ext = new JRubyPluginExtension(project)
-        final String version = '1.7.11'
+        final String version = '9.0.1.0'
 
         when:
         ext.defaultVersion version
@@ -47,7 +47,7 @@ class JRubyPluginExtensionSpec extends Specification {
     def "changing the defaultVersion with a setter should work"() {
         given:
         JRubyPluginExtension ext = new JRubyPluginExtension(project)
-        final String version = '1.7.11'
+        final String version = '9.0.1.0'
 
         when:
         ext.defaultVersion = version
@@ -65,7 +65,7 @@ class JRubyPluginExtensionSpec extends Specification {
         ext.registerDefaultVersionCallback {
             executedCallback = true
         }
-        ext.defaultVersion = '1.7.11'
+        ext.defaultVersion = '9.0.1.0'
 
         then:
         executedCallback
@@ -75,13 +75,13 @@ class JRubyPluginExtensionSpec extends Specification {
         given:
         JRubyPluginExtension ext = new JRubyPluginExtension(project)
         Boolean executedCallback = false
-        final String version = '1.7.11'
+        final String version = '9.0.1.0'
 
         when:
         ext.registerExecVersionCallback { String v ->
             executedCallback = v == version
         }
-        ext.defaultVersion = '1.7.11'
+        ext.defaultVersion = '9.0.1.0'
 
         then:
         executedCallback
@@ -91,13 +91,13 @@ class JRubyPluginExtensionSpec extends Specification {
         given:
         JRubyPluginExtension ext = new JRubyPluginExtension(project)
         Boolean executedCallback = false
-        final String version = '1.7.11'
+        final String version = '9.0.1.0'
 
         when:
         ext.registerExecVersionCallback { String v ->
             executedCallback = (v == version)
         }
-        ext.execVersion = '1.7.11'
+        ext.execVersion = '9.0.1.0'
 
         then:
         executedCallback
@@ -107,7 +107,7 @@ class JRubyPluginExtensionSpec extends Specification {
         given:
         JRubyPluginExtension ext = new JRubyPluginExtension(project)
         Boolean executedCallback = false
-        final String version = '1.7.11'
+        final String version = '9.0.1.0'
         int calledbackTimes = 0
 
         when:
@@ -116,7 +116,7 @@ class JRubyPluginExtensionSpec extends Specification {
             executedCallback = (v == version)
         }
         ext.execVersion = version
-        ext.defaultVersion = '1.7.19'
+        ext.defaultVersion = '9.0.1.1'
 
         then:
         executedCallback

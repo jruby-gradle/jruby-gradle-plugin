@@ -1,6 +1,5 @@
 package com.github.jrubygradle
 
-import com.github.jrubygradle.internal.JRubyExecUtils
 import org.gradle.api.Project
 import org.gradle.api.artifacts.Configuration
 import org.gradle.api.artifacts.ResolvedArtifact
@@ -114,12 +113,6 @@ class GemUtils {
                      '--wrappers',
                      '--no-document',
                      '--local'
-
-                // Workaround for bug
-                if (JRubyExecUtils.jrubyJarVersion(jRubyClasspath) == '1.7.14') {
-                    project.logger.debug 'Gem installation: Working around bug in JRuby 1.7.14'
-                    environment HOME : project.gradle.gradleUserHomeDir.absolutePath
-                }
 
                 // Workaround for FFI bug that is seen on some Windows environments
                 if (System.getProperty('os.name').toLowerCase().startsWith('windows')) {
