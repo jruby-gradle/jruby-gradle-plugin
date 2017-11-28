@@ -49,7 +49,7 @@ class JRubyPluginSpec extends Specification {
 
     def "applying the plugin with -PjrubyVersion= set should changej jruby.defaultVersion"() {
         given:
-        final String version = '1.7.11'
+        final String version = '9.0.1.0'
         project = ProjectBuilder.builder().build()
         project.with {
             ext.jrubyVersion = version

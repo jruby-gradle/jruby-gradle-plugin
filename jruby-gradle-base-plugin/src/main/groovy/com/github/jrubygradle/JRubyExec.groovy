@@ -88,7 +88,7 @@ class JRubyExec extends JavaExec implements JRubyExecTraits {
      * compatible with a specific version or when running a script with a different version that what will
      * be packaged.
      *
-     * @param version String in the form '1.7.13'
+     * @param version String in the form '9.0.1.0'
      * @since 0.1.18
      */
     void jrubyVersion(final String ver) {
@@ -100,7 +100,7 @@ class JRubyExec extends JavaExec implements JRubyExecTraits {
      * compatible with a specific version or when running a script with a different version that what will
      * be packaged.
      *
-     * @param version String in the form '1.7.13'
+     * @param version String in the form '9.0.1.0'
      */
     void setJrubyVersion(final String version) {
         customJRubyVersion = version

@@ -44,7 +44,7 @@ class JRubyExecIntegrationSpec extends Specification {
         given: "Version is set on the task"
         Configuration config
         final String configName = 'integ-exec-config'
-        final String newVersion = '1.7.19'
+        final String newVersion = '9.0.1.0'
         Pattern pattern = Pattern.compile(/.*(jruby-complete-.+.jar)/)
 
         when:
@@ -161,13 +161,11 @@ class JRubyExecIntegrationSpec extends Specification {
 
     def "Running a script that requires a gem, a separate JRuby and a separate configuration"() {
         given:
-        final String newVersion = '1.7.19'
+        final String newVersion = '9.0.1.0'
         assert project.jruby.execVersion != newVersion
         project.with {
             configurations.create('RubyWax')
             dependencies.add('RubyWax', VersionFinder.findDependency(FLATREPO, '', 'credit_card_validator', 'gem'))
-            // we need it from flatrepo and not from regular repo. needed only for jruby <1.7.20
-            dependencies.add('RubyWax', VersionFinder.findDependency(FLATREPO ,'rubygems', 'jar-dependencies', 'gem'))
             configure(execTask) {
                 script        "${TEST_SCRIPT_DIR}/requiresGem.rb"
                 standardOutput output
@@ -192,7 +190,7 @@ class JRubyExecIntegrationSpec extends Specification {
              * least one version of JRuby installed
              */
             jruby {
-                execVersion '1.7.19'
+                execVersion '9.0.1.0'
                 defaultRepositories false
             }
 

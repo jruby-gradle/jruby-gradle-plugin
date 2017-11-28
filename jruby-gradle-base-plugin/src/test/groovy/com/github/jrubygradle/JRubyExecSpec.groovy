@@ -76,7 +76,7 @@ class JRubyExecSpec extends Specification {
 
     def "Changing the JRuby version with the default configuration"() {
         given:
-        final String newVersion = '1.7.11'
+        final String newVersion = '9.0.1.0'
         execTask.jrubyVersion = newVersion
 
         when:
@@ -90,7 +90,7 @@ class JRubyExecSpec extends Specification {
     def "Changing the jruby version on a JRubyExec task"() {
         given:
         final String configurationName = 'spock-ruby'
-        final String newVersion = '1.7.11'
+        final String newVersion = '9.0.1.0'
 
         when:
         project.configure(execTask) {
