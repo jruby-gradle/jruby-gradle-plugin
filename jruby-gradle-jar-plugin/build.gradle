@@ -24,7 +24,7 @@ dependencies {
         transitive = false
     }
 
-    testRepo ('org.jruby.mains:jruby-mains:0.4.0') {
+    testRepo ('org.jruby.mains:jruby-mains:0.6.1') {
         transitive = false
     }
 
