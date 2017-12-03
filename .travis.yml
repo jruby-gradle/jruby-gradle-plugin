@@ -1,21 +1,11 @@
-language: groovy
+language: java
 sudo: false
-addons:
-  apt:
-    packages:
-      - oracle-java8-installer
-
-install: true
-
 script:
- - ./gradlew -S -i --console=plain --no-daemon clean build
-
+  - ./gradlew -S -i --no-daemon clean check build
 jdk:
- - oraclejdk8
-
+  - openjdk8
 os:
- - linux
-
+  - linux
 cache:
   directories:
     - $HOME/.gradle
