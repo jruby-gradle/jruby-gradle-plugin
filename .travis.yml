@@ -1,5 +1,7 @@
 language: java
 sudo: false
+env:
+  - GRADLE_OPTS="-Xmx768m -Xms256m -Xss1m"
 script:
   - ./gradlew -S -i --no-daemon clean check build
 jdk:
