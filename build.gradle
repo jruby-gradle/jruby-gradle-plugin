@@ -57,6 +57,10 @@ subprojects {
                 "org.codenarc:CodeNarc:0.24",
                 "org.codehaus.groovy:groovy-all:2.4.0+"
             )
+
+            testCompile "org.spockframework:spock-core:${spockVersion}", {
+                exclude module : 'groovy-all'
+            }
         }
 
         codenarc {
