@@ -16,7 +16,7 @@ class GemVersionResolver {
     private final Logger logger
 
     static void setup(Project project) {
-        project.configurations.each {
+        project.configurations.find { it.name == "gems" }.with {
             new GemVersionResolver(project.logger, it)
         }
     }
