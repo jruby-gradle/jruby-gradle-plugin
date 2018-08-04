@@ -11,7 +11,7 @@ jruby {
 }
 
 task requiresGems( type : JRubyExec ) {
-    script        "scripts/requiresGem.rb"
+    script 'scripts/requiresGem.rb'
 }
 
 task runGradleTest {

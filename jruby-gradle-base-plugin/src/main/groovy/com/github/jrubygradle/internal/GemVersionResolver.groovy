@@ -8,7 +8,7 @@ import org.gradle.api.logging.Logger
 import org.gradle.api.logging.Logging
 
 /**
- * Resolved to compute gem versions
+ * Resolver to compute gem versions
  */
 class GemVersionResolver {
     Map versions

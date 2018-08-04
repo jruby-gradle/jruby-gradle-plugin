@@ -14,7 +14,7 @@ class JRubyPlugin implements Plugin<Project> {
     static final String TASK_GROUP_NAME = 'JRuby'
     static final String RUBYGEMS_ORG_URL = 'https://rubygems.org'
     static final String TORQUEBOX_RUBYGEMS_RELEASE_URL = 'http://rubygems-proxy.torquebox.org/releases'
-    static final String RUBYGEMS_RELEASE_URL = 'http://rubygems.lasagna.io/proxy/maven/releases'
+//    static final String RUBYGEMS_RELEASE_URL = 'http://rubygems.lasagna.io/proxy/maven/releases'
     static final String VERSION_PROPERTY = 'jrubyVersion'
 
     void apply(Project project) {
@@ -82,7 +82,7 @@ class JRubyPlugin implements Plugin<Project> {
         if (!project.repositories.metaClass.respondsTo(project.repositories, 'rubygemsRelease')) {
             project.repositories.metaClass.rubygemsRelease << { ->
                 maven { url TORQUEBOX_RUBYGEMS_RELEASE_URL }
-                maven { url RUBYGEMS_RELEASE_URL }
+//                maven { url RUBYGEMS_RELEASE_URL }
             }
         }
     }

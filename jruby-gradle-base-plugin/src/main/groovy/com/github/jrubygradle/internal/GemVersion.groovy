@@ -3,14 +3,14 @@ package com.github.jrubygradle.internal
 import java.util.regex.Pattern
 
 /**
- * since with rubygems most (almost all) dependencies will be declared
- * via versions ranges an tools like bundler are very strict on how to
- * resolve those versions - i.e. the reolved version needs to obey each given
- * contraint. maven does the same but gradle and ivy do pick the latest and
- * newest version when there are more then on contraint for the same gem -
- * which can create problems when using bundler alongside gradle.
+ * With rubygems almost all dependencies will be declared
+ * via versions ranges and tools like Bundler are very strict on how to
+ * resolve those versions - i.e. the resolved version needs to obey each given
+ * contraint. Maven does the same but Gradle and Ivy pick the latest and
+ * newest version when there are more then one contraint for the same gem -
+ * which can create problems when using Bundler alongside Gradle.
  *
- * when converting a gempsec into a maven pom.xml the translation of a
+ * When converting a GemSpec into a Maven pom.xml the translation of a
  * gem version range into a maven version range. typically '~> 1.0' from ruby
  * becomes [1.0, 1.99999] on the maven side. so most dependencies from
  * gem artifacts will use such version ranges.
@@ -134,7 +134,7 @@ class GemVersion {
     }
 
     /**
-     * compares to version strings. first it splits the version
+     * compares two version strings. first it splits the version
      * into parts on their ".". if one version has more parts then
      * the other, then the number of parts is used for comparison.
      * otherwise we find a part which differs between the versions

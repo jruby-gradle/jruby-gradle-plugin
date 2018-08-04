@@ -9,7 +9,7 @@ import org.gradle.api.tasks.Input
 import org.gradle.api.tasks.Optional
 import org.gradle.internal.FileUtils
 import org.gradle.util.CollectionUtils
-import org.ysb33r.gradle.olifant.StringUtils
+import org.ysb33r.grolifant.api.StringUtils
 
 /** Provides common traits for JRuby script execution across the {@code JRubyExec}
  * task and {@project.jrubyexec} extension.

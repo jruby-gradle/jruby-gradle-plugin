@@ -13,7 +13,7 @@ class JRubyExecDelegate implements JRubyExecTraits   {
 
     Project project
 
-    Object methodMissing(String name, args) {
+    Object methodMissing(String name, Object args) {
         if (name == 'args' || name == 'setArgs') {
             throw new UnsupportedOperationException('Use jrubyArgs/scriptArgs instead')
         }
@@ -85,7 +85,7 @@ class JRubyExecDelegate implements JRubyExecTraits   {
             // Start with System.env then add from environment,
             // which will add the user settings and
             // overwrite any overlapping entries
-            final env = [:]
+            final Map env = [:]
             env << System.env
             env << environment
 
