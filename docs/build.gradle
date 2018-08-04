@@ -6,9 +6,9 @@ buildscript {
         }
     }
     dependencies {
-        classpath 'com.jfrog.bintray.gradle:gradle-bintray-plugin:1.2'
-        classpath 'com.netflix.nebula:gradle-extra-configurations-plugin:1.12.+'
-        classpath "org.ajoberstar:gradle-git:1.2.0"
+//        classpath 'com.jfrog.bintray.gradle:gradle-bintray-plugin:1.2'
+//        classpath 'com.netflix.nebula:gradle-extra-configurations-plugin:1.12.+'
+//        classpath "org.ajoberstar:gradle-git:1.2.0"
 
         /* wow. so recursion */
         classpath "com.github.jruby-gradle:jruby-gradle-plugin:1.0.3"

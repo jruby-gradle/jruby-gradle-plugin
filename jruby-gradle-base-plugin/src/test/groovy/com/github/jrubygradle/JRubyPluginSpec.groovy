@@ -5,6 +5,8 @@ import org.gradle.api.artifacts.repositories.ArtifactRepository
 import org.gradle.testfixtures.ProjectBuilder
 import spock.lang.Specification
 
+import static com.github.jrubygradle.JRubyPlugin.TORQUEBOX_RUBYGEMS_RELEASE_URL
+
 /**
  */
 class JRubyPluginSpec extends Specification {
@@ -25,7 +27,7 @@ class JRubyPluginSpec extends Specification {
         project.evaluate()
 
         then:
-        hasRepositoryUrl(project, 'http://rubygems.lasagna.io/proxy/maven/releases')
+        hasRepositoryUrl(project, TORQUEBOX_RUBYGEMS_RELEASE_URL)
     }
 
     def "setting the default repository via rubygemsRelease()"() {
@@ -36,7 +38,7 @@ class JRubyPluginSpec extends Specification {
         project.repositories.metaClass.respondsTo(project.repositories,'rubygemsRelease')
 
         and:
-        hasRepositoryUrl(project, 'http://rubygems.lasagna.io/proxy/maven/releases')
+        hasRepositoryUrl(project, TORQUEBOX_RUBYGEMS_RELEASE_URL)
     }
 
     def "applying the plugin with no properties should have jruby.defaultVersion defaulted"() {

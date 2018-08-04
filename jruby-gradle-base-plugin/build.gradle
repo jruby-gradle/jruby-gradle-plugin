@@ -1,5 +1,3 @@
-group = rootProject.group
-version = rootProject.version
 archivesBaseName = 'jruby-gradle-plugin'
 apply from: "${rootProject.projectDir}/gradle/integration-tests.gradle"
 
@@ -35,8 +33,6 @@ dependencies {
         exclude group: 'org.sonatype.nexus.plugins', module: 'nexus-ruby-tools'
     }
 
-    String spockVersion = "org.spockframework:spock-core:1.1-groovy-2.4"
-
     testJRubyPrepare "org.jruby:jruby-complete:${jrubyVersion}"
 
     testCompile (spockVersion) {
@@ -69,7 +65,7 @@ dependencies {
     // NOTE: If you change this, you will also need to update JRubyExecExtensionIntegrationSpec
     integrationTestGems 'org.bouncycastle:bcprov-jdk15on:1.46'
 
-    gradleTest "org.jruby:jruby-complete:${jrubyVersion}"
+    gradleTest"org.jruby:jruby-complete:${jrubyVersion}"
     gradleTest 'rubygems:credit_card_validator:1.1.0'
     gradleTest 'org.bouncycastle:bcprov-jdk15on:1.50'
 }

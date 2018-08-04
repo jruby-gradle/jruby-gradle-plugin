@@ -4,7 +4,6 @@ ruleset {
         bug free :)
         '''
 
-    AbcComplexity   // DEPRECATED: Use the AbcMetric rule instead. Requires the GMetrics jar
     AbcMetric   // Requires the GMetrics jar
     AbstractClassName
     AbstractClassWithPublicConstructor
@@ -136,17 +135,6 @@ ruleset {
     GStringAsMapKey
     GStringExpressionWithinString
     GetterMethodCouldBeProperty
-    GrailsDomainHasEquals
-    GrailsDomainHasToString
-    GrailsDomainReservedSqlKeywordName
-    GrailsDomainWithServiceReference
-    GrailsDuplicateConstraint
-    GrailsDuplicateMapping
-    GrailsMassAssignment
-    GrailsPublicControllerMethod
-    GrailsServletContextReference
-    GrailsSessionReference   // DEPRECATED
-    GrailsStatelessService
     GroovyLangImmutable
     HardCodedWindowsFileSeparator
     HardCodedWindowsRootDirectory
