@@ -67,6 +67,8 @@ class GemVersion {
      * @param String version
      */
     GemVersion(String version) {
+        // workaround a bug in gem proxy which can not handle != operators
+        version = version.replace('=', '')
         if (version.contains('+')) {
             low = ZEROS.matcher(PLUS.matcher(DOT_PLUS.matcher(version).replaceFirst('.0')).replaceFirst('')).replaceFirst('')
             high = DIGITS_PLUS.matcher(DOT_PLUS.matcher(version).replaceFirst('.99999')).replaceFirst(MAX_VERSION)

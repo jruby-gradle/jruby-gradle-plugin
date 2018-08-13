@@ -163,12 +163,20 @@ class GemVersionSpec extends Specification {
         subject.intersect('[0,)').toString() == '[0.9,0.9.99999]'
     }
 
-    def "intersects two versions special one"() {
+    def "intersects two versions with special full range"() {
         given:
         GemVersion subject = new GemVersion('[0,)')
 
         expect:
         subject.intersect('[0.9.0,0.9.99999]').toString() == '[0.9,0.9.99999]'
+    }
+
+    def "intersects two versions with workaround due to upstream bug"() {
+        given:
+        GemVersion subject = new GemVersion('(=2.5.1.1,99999)')
+
+        expect:
+        subject.intersect('(=2.5.1.1,)').toString() == '(2.5.1.1,99999)'
     }
 
     def "intersects with conflict"() {
