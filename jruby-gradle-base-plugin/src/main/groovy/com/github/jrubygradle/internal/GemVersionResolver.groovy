@@ -2,8 +2,8 @@ package com.github.jrubygradle.internal
 
 import org.gradle.api.GradleException
 import org.gradle.api.Project
-import org.gradle.api.artifacts.DependencyResolveDetails
 import org.gradle.api.artifacts.Configuration
+import org.gradle.api.artifacts.DependencyResolveDetails
 import org.gradle.api.logging.Logger
 import org.gradle.api.logging.Logging
 
@@ -11,6 +11,7 @@ import org.gradle.api.logging.Logging
  * Resolver to compute gem versions
  */
 class GemVersionResolver {
+    private static final String DBG_SEPARATOR = '                       ------------------------'
     Map versions
     private final Configuration configuration
     private final Logger logger
@@ -24,8 +25,13 @@ class GemVersionResolver {
     GemVersionResolver(Logger logger, Configuration configuration) {
         this.logger = logger
         this.configuration = configuration
-        configuration.resolutionStrategy {
-            eachDependency { this.resolve(it) }
+        try {
+            configuration.resolutionStrategy {
+                eachDependency { this.resolve(it) }
+            }
+        } catch (GradleException e) {
+            logger.debug("${configuration.name}\n${DBG_SEPARATOR}\n" +
+                    "                       can not be a gem\n${DBG_SEPARATOR}")
         }
     }
 
@@ -36,10 +42,8 @@ class GemVersionResolver {
 
     // keep it not private for testing
     void firstRun() {
-        logger.debug("${configuration.name}\n" +
-             '                       --------------------------\n' +
-             '                       collect version range info\n' +
-             '                       --------------------------')
+        logger.debug("${configuration.name}\n${DBG_SEPARATOR}\n" +
+             "                       collect version range info\n${DBG_SEPARATOR}")
         Object config = configuration.copyRecursive()
         versions = [:]
 
@@ -49,10 +53,8 @@ class GemVersionResolver {
 
         config.resolvedConfiguration
 
-        logger.debug("${configuration.name}\n" +
-             '                       ------------------------\n' +
-             '                       apply version range info\n' +
-             '                       ------------------------')
+        logger.debug("${configuration.name}\n${DBG_SEPARATOR}\n" +
+             "                       apply version range info\n${DBG_SEPARATOR}")
     }
 
     void resolve(DependencyResolveDetails details) {
