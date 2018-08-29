@@ -1,7 +1,7 @@
 language: java
-sudo: false
-env:
-  - GRADLE_OPTS="-Xmx768m -Xms256m -Xss1m"
+sudo: true
+#env:
+#  - GRADLE_OPTS="-Xmx768m -Xms256m -Xss1m"
 script:
   - ./gradlew -S -i --max-workers=2 --no-daemon clean check build
 jdk:
