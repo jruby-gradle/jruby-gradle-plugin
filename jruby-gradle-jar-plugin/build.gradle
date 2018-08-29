@@ -10,7 +10,7 @@ configurations {
 }
 
 dependencies {
-    compile project(':jruby-gradle-base-plugin')
+    compile project(':jruby-gradle-plugin')
     compile 'com.github.jengelman.gradle.plugins:shadow:[1.2.2,2.0)'
 
     testCompile (spockVersion) {
