@@ -113,9 +113,9 @@ task installGroovyDoc (type : Copy) {
 publishing {
     publications {
         maven(MavenPublication) {
-            groupId project.group
-            artifactId project.archivesBaseName
-            version project.version
+//            groupId project.group
+//            artifactId project.archivesBaseName
+//            version project.version
 
             artifact sourcesJar {
                 classifier "sources"
