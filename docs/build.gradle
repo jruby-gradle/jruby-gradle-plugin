@@ -69,5 +69,5 @@ githubPages {
 publishGhPages.dependsOn assembleDocs
 
 /* We don't need an upload task in here */
-task bintrayUpload(overwrite: true) {
-}
+//bintrayUpload.enabled = false
+ 
