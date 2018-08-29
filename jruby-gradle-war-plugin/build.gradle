@@ -4,7 +4,7 @@ version = "${rootProject.version}-alpha"
 
 
 dependencies {
-    compile project(':jruby-gradle-base-plugin')
+    compile project(':jruby-gradle-plugin')
     compile group: 'com.github.jruby-gradle', name: 'warbler-bootstrap', version: '0.2.0+'
 
     testCompile (spockVersion) {
