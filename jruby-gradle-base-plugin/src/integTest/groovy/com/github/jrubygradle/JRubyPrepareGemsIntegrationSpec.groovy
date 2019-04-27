@@ -126,6 +126,25 @@ class JRubyPrepareGemsIntegrationSpec extends Specification {
             new File(prepTask.outputDir,"gems/slim-${SLIM_VERSION}").exists()
             !new File(prepTask.outputDir,"gems/temple-${TEMPLE_VERSION}").exists()
             !new File(prepTask.outputDir,"gems/tilt-${TILT_VERSION}").exists()
-   }
+    }
+
+    @Issue('https://github.com/jruby-gradle/jruby-gradle-plugin/issues/341')
+    def "Make a install-time gem dependency available"() {
+        given:
+            def root= new File(TESTROOT, "childprocess")
+            def project = BasicProjectBuilder.buildWithStdRepo(root,CACHEDIR)
+            def jrpg = project.tasks.jrubyPrepare
+            project.jruby.gemInstallDir = root.absolutePath
+
+            project.dependencies {
+                gems "rubygems:childprocess:1.0.1"
+            }
+            project.evaluate()
+            jrpg.copy()
+
+        expect:
+            new File(jrpg.outputDir,"gems/childprocess-1.0.1").exists()
+    }
+
 
 }

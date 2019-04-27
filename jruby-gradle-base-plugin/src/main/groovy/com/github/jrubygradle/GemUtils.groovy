@@ -101,9 +101,24 @@ class GemUtils {
                 main JRUBY_MAINCLASS
                 classpath jRubyClasspath
                 args '-S', GEM, 'install'
-                gemsToProcess.each { File gem ->
+
+                /*
+                 * NOTE: gemsToProcess is assumed to typically be sourced from
+                 * a FileCollection generated elsewhere in the code. The
+                 * FileCollection a flattened version of the dependency tree.
+                 *
+                 * In order to handle Rubygems which depend on their
+                 * dependencies at _installation time_, we need to reverse the
+                 * order to make sure that the .gem files for the
+                 * transitive/nested dependencies are installed first
+                 *
+                 * See:
+                 * https://gikhub.com/jruby-gradle/jruby-gradle-plugin/issues/341
+                 */
+                gemsToProcess.collect { it }.reverse().each { File gem ->
                     args gem
                 }
+
                 // there are a few extra args which look like defaults
                 // but we need to make sure any config in $HOME/.gemrc
                 // is overwritten
