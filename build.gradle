@@ -37,7 +37,6 @@ subprojects {
 
     repositories {
         jcenter()
-        maven { url rubygemsProxy }
         maven { url torqueboxProxy }
     }
 
