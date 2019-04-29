@@ -24,7 +24,6 @@ project.afterEvaluate {
 // --- up to here
 
 dependencies {
-
     compile "org.eclipse.jetty:jetty-server:${jettyVersion}"
     compile "org.eclipse.jetty:jetty-webapp:${jettyVersion}"
     runtime( 'de.saumya.mojo:rubygems:0.2.3@war' ) {
@@ -99,8 +98,6 @@ integrationTest {
     dependsOn copyIntegrationTestJRuby
 }
 
-
-
 task installGroovyDoc (type : Copy) {
     from ({new File(buildDir,'docs/groovydoc')}) {
         include '**'
@@ -108,7 +105,6 @@ task installGroovyDoc (type : Copy) {
     into {new File(project.properties.jrubyGradleWebsiteInstallDir,"docs/api/${archivesBaseName}/${version}")}
     onlyIf { project.hasProperty('jrubyGradleWebsiteInstallDir') }
 }
-
 
 publishing {
     publications {
@@ -150,5 +146,8 @@ bintray {
 }
 bintrayUpload.dependsOn assemble
 
-gradleTest.mustRunAfter integrationTest
+gradleTest {
+    mustRunAfter integrationTest
+    gradleArguments '-i'
+}
 // vim: ft=groovy
