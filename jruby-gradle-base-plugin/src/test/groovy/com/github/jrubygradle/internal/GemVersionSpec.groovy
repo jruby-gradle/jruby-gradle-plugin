@@ -3,7 +3,7 @@ package com.github.jrubygradle.internal
 import spock.lang.*
 
 class GemVersionSpec extends Specification {
-    def "parses single version"() {
+    void "parses single version"() {
         given:
         GemVersion subject = new GemVersion('1.2.3')
 
@@ -11,7 +11,7 @@ class GemVersionSpec extends Specification {
         subject.toString() == '[1.2.3,1.2.3]'
     }
 
-    def "parses single prerelease version"() {
+    void "parses single prerelease version"() {
         given:
         GemVersion subject = new GemVersion('1.2.pre')
 
@@ -19,7 +19,7 @@ class GemVersionSpec extends Specification {
         subject.toString() == '1.2.pre'
     }
 
-    def "parses gradle sematic version first sample"() {
+    void "parses gradle semantic version first sample"() {
         given:
         GemVersion subject = new GemVersion('1.2.3+')
 
@@ -27,7 +27,7 @@ class GemVersionSpec extends Specification {
         subject.toString() == '[1.2.3,1.2.99999]'
     }
 
-    def "parses gradle sematic version second sample"() {
+    void "parses gradle semantic version second sample"() {
         given:
         GemVersion subject = new GemVersion('1.2.+')
 
@@ -35,7 +35,7 @@ class GemVersionSpec extends Specification {
         subject.toString() == '[1.2,1.2.99999]'
     }
 
-    def "parses maven open version range"() {
+    void "parses maven open version range"() {
         given:
         GemVersion subject = new GemVersion('[1.2.0,)')
 
@@ -43,7 +43,7 @@ class GemVersionSpec extends Specification {
         subject.toString() == '[1.2,99999)'
     }
 
-    def "parses maven version range first sample"() {
+    void "parses maven version range first sample"() {
         given:
         GemVersion subject = new GemVersion('(1.2.0.0, 1.2.4)')
 
@@ -51,7 +51,7 @@ class GemVersionSpec extends Specification {
         subject.toString() == '(1.2,1.2.4)'
     }
 
-    def "parses maven version range second sample"() {
+    void "parses maven version range second sample"() {
         given:
         GemVersion subject = new GemVersion('(1.2.0, 1.2.4]')
 
@@ -59,7 +59,7 @@ class GemVersionSpec extends Specification {
         subject.toString() == '(1.2,1.2.4]'
     }
 
-    def "parses maven version range third sample"() {
+    void "parses maven version range third sample"() {
         given:
         GemVersion subject = new GemVersion('[1.2.0, 1.2.4)')
 
@@ -67,7 +67,7 @@ class GemVersionSpec extends Specification {
         subject.toString() == '[1.2,1.2.4)'
     }
 
-    def "parses maven version range forth sample"() {
+    void "parses maven version range forth sample"() {
         given:
         GemVersion subject = new GemVersion('[1.2.1, 1.2.4]')
 
@@ -75,7 +75,7 @@ class GemVersionSpec extends Specification {
         subject.toString() == '[1.2.1,1.2.4]'
     }
 
-    def "parses maven version range trailing zeros"() {
+    void "parses maven version range trailing zeros"() {
         given:
         GemVersion subject = new GemVersion('[1.2.1.0.0.0, 1.2.4]')
 
@@ -83,7 +83,7 @@ class GemVersionSpec extends Specification {
         subject.toString() == '[1.2.1,1.2.4]'
     }
 
-    def "parses maven version range trailing zeros as prereleased version"() {
+    void "parses maven version range trailing zeros as prereleased version"() {
         given:
         GemVersion subject = new GemVersion('[1.2.1.0.pre.0, 1.2.4]')
 
@@ -91,7 +91,7 @@ class GemVersionSpec extends Specification {
         subject.toString() == '[1.2.1.0.pre,1.2.4]'
     }
 
-    def "intersects two versions first sample"() {
+    void "intersects two versions first sample"() {
         given:
         GemVersion subject = new GemVersion('[1.2.1, 1.2.4]')
 
@@ -99,7 +99,7 @@ class GemVersionSpec extends Specification {
         subject.intersect('(1.2.1, 1.2.4)').toString() == '(1.2.1,1.2.4)'
     }
 
-    def "intersects two versions second sample"() {
+    void "intersects two versions second sample"() {
         given:
         GemVersion subject = new GemVersion('[1.2.0, 1.2.4]')
 
@@ -107,7 +107,7 @@ class GemVersionSpec extends Specification {
         subject.intersect('(1.2.1, 1.2.3)').toString() == '(1.2.1,1.2.3)'
     }
 
-    def "intersects two versions third sample"() {
+    void "intersects two versions third sample"() {
         given:
         GemVersion subject = new GemVersion('[1.2.0, 1.2.4]')
 
@@ -115,7 +115,7 @@ class GemVersionSpec extends Specification {
         subject.intersect('[1.2.1, 1.2.3]').toString() == '[1.2.1,1.2.3]'
     }
 
-    def "intersects two versions first sample reversed"() {
+    void "intersects two versions first sample reversed"() {
         given:
         GemVersion subject = new GemVersion('(1.2.0, 1.2.4)')
 
@@ -123,7 +123,7 @@ class GemVersionSpec extends Specification {
         subject.intersect('[1.2.0, 1.2.4]').toString() == '(1.2,1.2.4)'
     }
 
-    def "intersects two versions second sample reversed"() {
+    void "intersects two versions second sample reversed"() {
         given:
         GemVersion subject = new GemVersion('(1.2.1, 1.2.3)')
 
@@ -131,7 +131,7 @@ class GemVersionSpec extends Specification {
         subject.intersect('[1.2.0, 1.2.4]').toString() == '(1.2.1,1.2.3)'
     }
 
-    def "intersects two versions third sample reversed"() {
+    void "intersects two versions third sample reversed"() {
         given:
         GemVersion subject = new GemVersion('[1.2.1, 1.2.3]')
 
@@ -139,7 +139,7 @@ class GemVersionSpec extends Specification {
         subject.intersect('[1.2.0, 1.2.4]').toString() == '[1.2.1,1.2.3]'
     }
 
-    def "intersects two versions with non lexical ordering"() {
+    void "intersects two versions with non lexical ordering"() {
         given:
         GemVersion subject = new GemVersion('[1.2.10, 1.2.14]')
 
@@ -147,7 +147,7 @@ class GemVersionSpec extends Specification {
         subject.intersect('[1.2.2, 1.10.14]').toString() == '[1.2.10,1.2.14]'
     }
 
-    def "intersects two versions with different length"() {
+    void "intersects two versions with different length"() {
         given:
         GemVersion subject = new GemVersion('[1.2, 1.2.14]')
 
@@ -155,7 +155,7 @@ class GemVersionSpec extends Specification {
         subject.intersect('[1.2.2, 1.3]').toString() == '[1.2.2,1.2.14]'
     }
 
-    def "intersects two versions special one"() {
+    void "intersects two versions special one"() {
         given:
         GemVersion subject = new GemVersion('[0.9.0,0.9.99999]')
 
@@ -163,7 +163,7 @@ class GemVersionSpec extends Specification {
         subject.intersect('[0,)').toString() == '[0.9,0.9.99999]'
     }
 
-    def "intersects two versions with special full range"() {
+    void "intersects two versions with special full range"() {
         given:
         GemVersion subject = new GemVersion('[0,)')
 
@@ -171,7 +171,7 @@ class GemVersionSpec extends Specification {
         subject.intersect('[0.9.0,0.9.99999]').toString() == '[0.9,0.9.99999]'
     }
 
-    def "intersects two versions with workaround due to upstream bug"() {
+    void "intersects two versions with workaround due to upstream bug"() {
         given:
         GemVersion subject = new GemVersion('(=2.5.1.1,99999)')
 
@@ -179,7 +179,7 @@ class GemVersionSpec extends Specification {
         subject.intersect('(=2.5.1.1,)').toString() == '(2.5.1.1,99999)'
     }
 
-    def "intersects with conflict"() {
+    void "intersects with conflict"() {
         given:
         GemVersion subject = new GemVersion('[1.2.1, 1.2.3]')
 
@@ -187,7 +187,7 @@ class GemVersionSpec extends Specification {
         subject.intersect('[1.2.4, 1.2.4]').conflict() == true
     }
 
-    def "finds no conflicts in non-integer version ranges"() {
+    void "finds no conflicts in non-integer version ranges"() {
         given:
         GemVersion subject = new GemVersion('[1.2.bar, 1.2.foo]')
 
@@ -195,7 +195,7 @@ class GemVersionSpec extends Specification {
         !subject.conflict()
     }
 
-    def "finds conflicts in non-integer version ranges"() {
+    void "finds conflicts in non-integer version ranges"() {
         given:
         GemVersion subject = new GemVersion('[1.2.foo, 1.2.bar]')
 
@@ -203,7 +203,7 @@ class GemVersionSpec extends Specification {
         subject.conflict()
     }
 
-    def "does not throw an exception for a '+' version"() {
+    void "does not throw an exception for a '+' version"() {
         when:
         new GemVersion('+').conflict()
 
