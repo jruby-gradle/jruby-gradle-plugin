@@ -27,9 +27,7 @@ allprojects {
     ext {
         spockVersion = "org.spockframework:spock-core:1.2-groovy-2.4"
     }
-
 }
-
 
 subprojects {
 
