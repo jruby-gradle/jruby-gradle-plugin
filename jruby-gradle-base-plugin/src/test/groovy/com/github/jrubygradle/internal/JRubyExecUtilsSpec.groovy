@@ -3,10 +3,12 @@ package com.github.jrubygradle.internal
 import org.gradle.api.InvalidUserDataException
 import spock.lang.*
 
+import static com.github.jrubygradle.internal.JRubyExecUtils.buildArgs
+
 class JRubyExecUtilsSpec extends Specification {
     static final boolean IS_WINDOWS = System.getProperty('os.name').toLowerCase().startsWith('windows')
 
-    def "The version string in a jruby jar filename must be extracted correctly"() {
+    void "The version string in a jruby jar filename must be extracted correctly"() {
 
         expect:
             version == JRubyExecUtils.jrubyJarVersion(new File(jarName))
@@ -19,7 +21,7 @@ class JRubyExecUtilsSpec extends Specification {
             'jruby-complete.jar' || null
     }
 
-    def "The version information in a jruby jar filename must be extracted correctly"() {
+    void "The version information in a jruby jar filename must be extracted correctly"() {
 
         expect:
            triplet == JRubyExecUtils.jrubyJarVersionTriple(new File(jarName))
@@ -32,56 +34,55 @@ class JRubyExecUtilsSpec extends Specification {
             'jruby-complete.jar'            || [:]
     }
 
-    def "buildArgs() should raise with no script or jrubyArgs"() {
+    void "buildArgs() should raise with no script or jrubyArgs"() {
         when:
-        JRubyExecUtils.buildArgs([], [], null, [])
+        buildArgs([], [], null, [])
 
         then:
         thrown(InvalidUserDataException)
     }
 
-    def "buildArgs() should raise if jrubyArgs (-S) but no script is present"() {
+    void "buildArgs() should raise if jrubyArgs (-S) but no script is present"() {
         when:
-        JRubyExecUtils.buildArgs([], ['-S'], null, [])
+        buildArgs([], ['-S'], null, [])
 
         then:
         thrown(InvalidUserDataException)
     }
 
-    def "buildArgs() should raise if script looks absolute but doesn't exist"() {
+    void "buildArgs() should raise if script looks absolute but doesn't exist"() {
         given:
         String filename = (IS_WINDOWS ? 'K:' : '') + '/tmp/the-most-unlikely-file-ever'
 
         when:
-        JRubyExecUtils.buildArgs([], [], new File(filename), [])
+        buildArgs([], [], new File(filename), [])
 
         then:
         thrown(InvalidUserDataException)
     }
 
     @Issue('https://github.com/jruby-gradle/jruby-gradle-plugin/issues/152')
-    def "buildArgs() with a script but no jrubyArgs should add '-S' for the JRuby invocation"() {
+    void "buildArgs() with a script but no jrubyArgs should add '-S' for the JRuby invocation"() {
         given:
         List<String> args
 
         when:
-        args = JRubyExecUtils.buildArgs([], [], new File('rspec'), [])
+        args = buildArgs([], [], new File('rspec'), [])
 
         then:
         args.size() > 0
         args == ['-rjars/setup', '-S', 'rspec']
     }
 
-    def "buildArgs() with expressive jrubyArgs should be acceptable instead of needing `script`"() {
+    void "buildArgs() with expressive jrubyArgs should be acceptable instead of needing `script`"() {
         given:
         List<String> args
 
         when:
-        args = JRubyExecUtils.buildArgs([], ['-S', 'rspec'], null, [])
+        args = buildArgs([], ['-S', 'rspec'], null, [])
 
         then:
         args.size() > 0
         args == ['-rjars/setup', '-S', 'rspec']
-
     }
 }

@@ -124,7 +124,7 @@ class JRubyExecUtils {
 
         cmdArgs.addAll(jrubyArgs)
 
-        if (useBinPath) {
+        if (useBinPath && script !=null) {
             if (script.isAbsolute() && (!script.exists())) {
                 throw new InvalidUserDataException("${script} does not exist")
             }
