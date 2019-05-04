@@ -3,6 +3,8 @@ build/
 .ruby-*
 .gradle/
 *.iml
+*.ipr
+*.iws
 .idea
 .awestruct/
 out/
