@@ -14,7 +14,7 @@ allprojects {
     apply plugin: 'idea'
 
     group = 'com.github.jruby-gradle'
-    version = '1.6.0'
+    version = '1.7.0'
 
     if (!releaseBuild) {
         version = "${version}-SNAPSHOT"
@@ -37,7 +37,6 @@ subprojects {
 
     repositories {
         jcenter()
-        maven { url rubygemsProxy }
         maven { url torqueboxProxy }
     }
 
