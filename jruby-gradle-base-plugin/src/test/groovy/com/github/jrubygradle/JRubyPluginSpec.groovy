@@ -10,19 +10,14 @@ import static com.github.jrubygradle.JRubyPlugin.TORQUEBOX_RUBYGEMS_RELEASE_URL
 /**
  */
 class JRubyPluginSpec extends Specification {
-    static final File TESTROOT = new File(System.getProperty('TESTROOT') ?: 'build/tmp/test/unittests')
     Project project
 
-    def setup() {
-        if (TESTROOT.exists()) {
-            TESTROOT.deleteDir()
-        }
-        TESTROOT.mkdirs()
+    void setup() {
         project = ProjectBuilder.builder().build()
         project.apply plugin: 'com.github.jruby-gradle.base'
     }
 
-    def "plugin should set repositories correctly"() {
+    void "plugin should set repositories correctly"() {
         when:
         project.evaluate()
 
@@ -30,7 +25,7 @@ class JRubyPluginSpec extends Specification {
         hasRepositoryUrl(project, TORQUEBOX_RUBYGEMS_RELEASE_URL)
     }
 
-    def "setting the default repository via rubygemsRelease()"() {
+    void "setting the default repository via rubygemsRelease()"() {
         when:
         project.evaluate()
 
@@ -41,7 +36,7 @@ class JRubyPluginSpec extends Specification {
         hasRepositoryUrl(project, TORQUEBOX_RUBYGEMS_RELEASE_URL)
     }
 
-    def "applying the plugin with no properties should have jruby.defaultVersion defaulted"() {
+    void "applying the plugin with no properties should have jruby.defaultVersion defaulted"() {
         when:
         project.evaluate()
 
@@ -49,7 +44,7 @@ class JRubyPluginSpec extends Specification {
         project.jruby.defaultVersion == JRubyPluginExtension.DEFAULT_JRUBY_VERSION
     }
 
-    def "applying the plugin with -PjrubyVersion= set should changej jruby.defaultVersion"() {
+    void "applying the plugin with -PjrubyVersion= set should changej jruby.defaultVersion"() {
         given:
         final String version = '9.0.1.0'
         project = ProjectBuilder.builder().build()
