@@ -25,7 +25,7 @@ allprojects {
     targetCompatibility = '1.8'
 
     ext {
-        spockVersion = "org.spockframework:spock-core:1.1-groovy-2.4"
+        spockVersion = "org.spockframework:spock-core:1.2-groovy-2.4"
     }
 
 }
