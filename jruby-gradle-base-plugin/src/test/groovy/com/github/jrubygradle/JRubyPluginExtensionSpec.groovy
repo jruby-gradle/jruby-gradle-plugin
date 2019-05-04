@@ -11,11 +11,11 @@ import spock.lang.*
 class JRubyPluginExtensionSpec extends Specification {
     Project project
 
-    def setup() {
+    void setup() {
         project = ProjectBuilder.builder().build()
     }
 
-    def "Creating a JRubyPlugin instance"() {
+    void "Creating a JRubyPlugin instance"() {
         when:
         JRubyPluginExtension jrpe = new JRubyPluginExtension(project)
 
@@ -32,7 +32,7 @@ class JRubyPluginExtensionSpec extends Specification {
         jrpe.gemInstallDir == new File(project.projectDir, 'vendor2').absoluteFile
     }
 
-    def "changing the defaultVersion via a method should work"() {
+    void "changing the defaultVersion via a method should work"() {
         given:
         JRubyPluginExtension ext = new JRubyPluginExtension(project)
         final String version = '9.0.1.0'
@@ -44,7 +44,7 @@ class JRubyPluginExtensionSpec extends Specification {
         ext.defaultVersion == version
     }
 
-    def "changing the defaultVersion with a setter should work"() {
+    void "changing the defaultVersion with a setter should work"() {
         given:
         JRubyPluginExtension ext = new JRubyPluginExtension(project)
         final String version = '9.0.1.0'
@@ -56,7 +56,7 @@ class JRubyPluginExtensionSpec extends Specification {
         ext.defaultVersion == version
     }
 
-    def "changing the defaultVersion should invoke registered callbacks"() {
+    void "changing the defaultVersion should invoke registered callbacks"() {
         given:
         JRubyPluginExtension ext = new JRubyPluginExtension(project)
         Boolean executedCallback = false
@@ -71,7 +71,7 @@ class JRubyPluginExtensionSpec extends Specification {
         executedCallback
     }
 
-    def "changing defaultVersion with execVersion callbacks should invoke it"() {
+    void "changing defaultVersion with execVersion callbacks should invoke it"() {
         given:
         JRubyPluginExtension ext = new JRubyPluginExtension(project)
         Boolean executedCallback = false
@@ -87,7 +87,7 @@ class JRubyPluginExtensionSpec extends Specification {
         executedCallback
     }
 
-    def "changing the execVersion should invoke registered callbacks"() {
+    void "changing the execVersion should invoke registered callbacks"() {
         given:
         JRubyPluginExtension ext = new JRubyPluginExtension(project)
         Boolean executedCallback = false
@@ -103,7 +103,7 @@ class JRubyPluginExtensionSpec extends Specification {
         executedCallback
     }
 
-    def "changing default and exec versions "() {
+    void "changing default and exec versions "() {
         given:
         JRubyPluginExtension ext = new JRubyPluginExtension(project)
         Boolean executedCallback = false
