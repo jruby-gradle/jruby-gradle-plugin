@@ -170,17 +170,8 @@ trait JRubyExecTraits {
         )
     }
 
-    File _convertScript() {
-        switch (this.script) {
-            case null:
-                return null
-            case File:
-                return this.script as File
-            case String:
-                return new File(this.script as String)
-            default:
-                return new File(this.script.toString())
-        }
+    File _convertScript(Project project) {
+        this.script ? project.file(this.script) : null
     }
 
     Map getPreparedEnvironment(Map env) {

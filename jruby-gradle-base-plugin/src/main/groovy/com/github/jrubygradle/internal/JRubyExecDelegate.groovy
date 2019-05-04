@@ -34,7 +34,7 @@ class JRubyExecDelegate implements JRubyExecTraits   {
      * @return Get the script to use. Can be null.
      */
     File getScript() {
-        return _convertScript()
+        return _convertScript(project)
     }
 
     /** buildArgs creates a list of arguments to pass to the JVM

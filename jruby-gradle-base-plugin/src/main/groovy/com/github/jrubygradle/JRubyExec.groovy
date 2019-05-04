@@ -68,7 +68,7 @@ class JRubyExec extends JavaExec implements JRubyExecTraits {
     @Optional
     @Input
     File getScript() {
-        _convertScript()
+        _convertScript(project)
     }
 
     private String customJRubyVersion

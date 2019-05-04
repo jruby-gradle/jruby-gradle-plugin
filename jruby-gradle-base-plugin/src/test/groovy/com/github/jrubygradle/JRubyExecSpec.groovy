@@ -1,13 +1,17 @@
 package com.github.jrubygradle
 
-import com.github.jrubygradle.internal.JRubyExecUtils
+
+import org.gradle.api.InvalidUserDataException
+import org.gradle.api.Project
 import org.gradle.api.ProjectConfigurationException
 import org.gradle.api.artifacts.Configuration
-import org.gradle.api.InvalidUserDataException
 import org.gradle.api.tasks.TaskInstantiationException
 import org.gradle.testfixtures.ProjectBuilder
-import spock.lang.*
-import static org.gradle.api.logging.LogLevel.*
+import spock.lang.Issue
+import spock.lang.Specification
+
+import static com.github.jrubygradle.JRubyExec.jarDependenciesGemLibPath
+import static com.github.jrubygradle.internal.JRubyExecUtils.DEFAULT_JRUBYEXEC_CONFIG
 
 // ===============================================
 // *** DO NOT RUN ANY SCRIPTS IN THIS UNITTEST ***
@@ -19,51 +23,50 @@ import static org.gradle.api.logging.LogLevel.*
  *
  */
 class JRubyExecSpec extends Specification {
-
-    static final File TEST_SCRIPT_DIR = new File( System.getProperty('TEST_SCRIPT_DIR') ?: 'src/integTest/resources/scripts').absoluteFile
-    static final File TESTROOT = new File( System.getProperty('TESTROOT') ?: 'build/tmp/test/unittests', 'jes')
-    static final String TEST_JAR_DEPENDENCIES = JRubyExec.jarDependenciesGemLibPath(new File(TESTROOT, 'tmp/jrubyExec'))
     static final String TASK_NAME = 'RubyWax'
+    static final String SCRIPT_NAME = 'helloWorld.rb'
 
-    def project
-    def execTask
+    Project project
+    JRubyExec execTask
+    String testJarDependencies
 
     void setup() {
-        project = ProjectBuilder.builder().withProjectDir(TESTROOT).build()
-        project.buildDir = TESTROOT
+        project = ProjectBuilder.builder().build()
+        testJarDependencies = jarDependenciesGemLibPath(new File(project.buildDir, 'tmp/jrubyExec'))
         project.apply plugin: 'com.github.jruby-gradle.base'
-        execTask = project.task(TASK_NAME, type: JRubyExec)
+        execTask = project.tasks.create(TASK_NAME, JRubyExec)
+
+        project.file(SCRIPT_NAME).text = this.class.getResource("/${SCRIPT_NAME}")
     }
 
-    def "Do not allow JRubyExec to be instantiated if plugin has not been loaded"() {
+    void "Do not allow JRubyExec to be instantiated if plugin has not been loaded"() {
         given: "A basic project"
         def badProject = ProjectBuilder.builder().build()
 
         when: "A JRubyExec task is instantiated with the jruby plugin being applied"
-        badProject.task( 'bad', type : JRubyExec )
+        badProject.task('bad', type: JRubyExec)
 
         then: "An exception should be thrown"
         thrown(TaskInstantiationException)
     }
 
-    def "Do not allow args to be set directly"() {
+    void "Do not allow args to be set directly"() {
         when: "Calling args"
-        execTask.args ( 'a param','b param')
+        execTask.args('a param', 'b param')
 
         then: "An exception should be thrown instead of JavaExec.args being set"
         thrown(UnsupportedOperationException)
-
     }
 
-    def "Check jruby defaults"() {
+    void "Check jruby defaults"() {
         expect: "Default jruby version should be same as project.ruby.execVersion"
         execTask.jrubyVersion == project.jruby.execVersion
 
         and: "Default configuration should be jrubyExec"
-        execTask.configuration == JRubyExecUtils.DEFAULT_JRUBYEXEC_CONFIG
+        execTask.configuration == DEFAULT_JRUBYEXEC_CONFIG
     }
 
-    def "Check jruby defaults when jruby.execVersion is changed after the task is created"() {
+    void "Check jruby defaults when jruby.execVersion is changed after the task is created"() {
         given:
         final String initialVersion = project.jruby.execVersion
 
@@ -74,7 +77,7 @@ class JRubyExecSpec extends Specification {
         execTask.jrubyVersion == '1.5.0'
     }
 
-    def "Changing the JRuby version with the default configuration"() {
+    void "Changing the JRuby version with the default configuration"() {
         given:
         final String newVersion = '9.0.1.0'
         execTask.jrubyVersion = newVersion
@@ -87,7 +90,7 @@ class JRubyExecSpec extends Specification {
         thrown(ProjectConfigurationException)
     }
 
-    def "Changing the jruby version on a JRubyExec task"() {
+    void "Changing the jruby version on a JRubyExec task"() {
         given:
         final String configurationName = 'spock-ruby'
         final String newVersion = '9.0.1.0'
@@ -112,20 +115,20 @@ class JRubyExecSpec extends Specification {
         project.configurations.findByName(configurationName)
     }
 
-    def "Checking the jruby main class"() {
+    void "Checking the jruby main class"() {
         expect:
         execTask.main == JRubyExec.MAIN_CLASS
     }
 
-    def "Setting the script name"() {
+    void "Setting the script name"() {
         when: 'Setting path to a string'
-        execTask.script = "${TEST_SCRIPT_DIR}/helloWorld.rb"
+        execTask.script = SCRIPT_NAME
 
         then: 'script will be File object with the correct path'
-        execTask.script.absolutePath == new File(TEST_SCRIPT_DIR,'helloWorld.rb').absolutePath
+        execTask.script.absolutePath == project.file(SCRIPT_NAME).absolutePath
     }
 
-    def "Setting jruby arguments"()  {
+    void "Setting jruby arguments"() {
         when: "calling scriptArgs multiple times, with different kinds of arguments"
         project.configure(execTask) {
             jrubyArgs 'a', 'b', 'c'
@@ -133,10 +136,10 @@ class JRubyExecSpec extends Specification {
         }
 
         then: "append everything"
-        execTask.jrubyArgs == ['a','b','c','d','e','f']
+        execTask.jrubyArgs == ['a', 'b', 'c', 'd', 'e', 'f']
     }
 
-    def "Setting script arguments"()  {
+    void "Setting script arguments"() {
         when: "calling scriptAtgs multiple times, with different kinds of arguments"
         project.configure(execTask) {
             scriptArgs 'a', 'b', 'c'
@@ -144,54 +147,54 @@ class JRubyExecSpec extends Specification {
         }
 
         then: "append everything"
-        execTask.scriptArgs == ['a','b','c','d','e','f']
+        execTask.scriptArgs == ['a', 'b', 'c', 'd', 'e', 'f']
     }
 
-    def "Setting script arguments with Closures"() {
+    void "Setting script arguments with Closures"() {
         when: "calling scriptArgs with a Closure in the array"
         project.configure(execTask) {
             scriptArgs 'a', { 'b' }, 'c'
         }
 
         then: "evaluate the closure when retrieving scriptArgs"
-        execTask.scriptArgs == ['a','b','c']
+        execTask.scriptArgs == ['a', 'b', 'c']
     }
 
-    def "Getting correct command-line passed"() {
+    void "Getting correct command-line passed"() {
         when:
         project.configure(execTask) {
-            scriptArgs '-s1','-s2','-s3'
-            jrubyArgs  '-j1','-j2','-j3','-S'
-            script     "${TEST_SCRIPT_DIR}/helloWorld.rb"
+            scriptArgs '-s1', '-s2', '-s3'
+            jrubyArgs '-j1', '-j2', '-j3', '-S'
+            script SCRIPT_NAME
         }
 
         then:
-        execTask.getArgs() == ['-I', TEST_JAR_DEPENDENCIES, '-rjars/setup',
-                                '-j1', '-j2', '-j3', '-S',
-                                new File(TEST_SCRIPT_DIR, 'helloWorld.rb').absolutePath,
-                                '-s1', '-s2', '-s3']
+        execTask.getArgs() == ['-I', testJarDependencies, '-rjars/setup',
+                               '-j1', '-j2', '-j3', '-S',
+                               project.file(SCRIPT_NAME).absolutePath,
+                               '-s1', '-s2', '-s3']
     }
 
-    def "Properly handle the lack of a `script` argument"() {
+    void "Properly handle the lack of a `script` argument"() {
         when:
         project.configure(execTask) {
             jrubyArgs '-S', 'rspec'
         }
 
         then:
-        execTask.getArgs() == ['-I', TEST_JAR_DEPENDENCIES, '-rjars/setup', '-S', 'rspec']
+        execTask.getArgs() == ['-I', testJarDependencies, '-rjars/setup', '-S', 'rspec']
     }
 
-    def "Error when `script` is empty and there is no `jrubyArgs`"() {
+    void "Error when `script` is empty and there is no `jrubyArgs`"() {
         when:
-        project.configure(execTask) { }
+        project.configure(execTask) {}
         execTask.getArgs()
 
         then: "An exception should be thrown"
         thrown(InvalidUserDataException)
     }
 
-    def "Properly set the PATH in the Exec envirionment"() {
+    void "Properly set the PATH in the Exec envirionment"() {
         given:
         project.configurations.maybeCreate('foo')
 
@@ -203,9 +206,9 @@ class JRubyExecSpec extends Specification {
         then:
         execTask.getComputedPATH(System.env.PATH).contains('foo')
     }
-    
+
     @Issue('https://github.com/jruby-gradle/jruby-gradle-plugin/issues/170')
-    def "setting configuration with Configuration should work as expected"() {
+    void "setting configuration with Configuration should work as expected"() {
         given: 'a Configuration'
         final Configuration customConfig = project.configurations.create('spockConfig')
 
