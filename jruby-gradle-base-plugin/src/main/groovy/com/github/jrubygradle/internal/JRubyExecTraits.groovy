@@ -171,7 +171,16 @@ trait JRubyExecTraits {
     }
 
     File _convertScript(Project project) {
-        this.script ? project.file(this.script) : null
+        if (this.script) {
+            File intermediate = this.script instanceof File ? (File)this.script : new File(this.script.toString())
+            if (intermediate.absolute) {
+                intermediate
+            } else {
+                intermediate.parentFile ? project.file(this.script) : intermediate
+            }
+        } else {
+            null
+        }
     }
 
     Map getPreparedEnvironment(Map env) {
@@ -183,13 +192,13 @@ trait JRubyExecTraits {
         })
 
         preparedEnv.putAll([
-                'JBUNDLE_SKIP' : true,
-                'JARS_SKIP' : true,
-                'PATH' : getComputedPATH(System.getenv().get(JRubyExecUtils.pathVar())),
-                'GEM_HOME' : getGemWorkDir().absolutePath,
-                'GEM_PATH' : getGemWorkDir().absolutePath,
-                'JARS_HOME' : new File(getGemWorkDir().absolutePath, 'jars'),
-                'JARS_LOCK' : new File(getGemWorkDir().absolutePath, 'Jars.lock')
+                'JBUNDLE_SKIP': true,
+                'JARS_SKIP'   : true,
+                'PATH'        : getComputedPATH(System.getenv().get(JRubyExecUtils.pathVar())),
+                'GEM_HOME'    : getGemWorkDir().absolutePath,
+                'GEM_PATH'    : getGemWorkDir().absolutePath,
+                'JARS_HOME'   : new File(getGemWorkDir().absolutePath, 'jars'),
+                'JARS_LOCK'   : new File(getGemWorkDir().absolutePath, 'Jars.lock')
         ])
 
         return preparedEnv
@@ -206,17 +215,16 @@ trait JRubyExecTraits {
     @SuppressWarnings('UseCollectMany')
     List<String> _convertScriptArgs() {
         return CollectionUtils.stringize(
-            this.scriptArgs.collect { arg ->
-                /* In order to support closures in scriptArgs for lazy
-                 * evaluation, we need to evaluate the closure if it is present
-                 */
-                if (arg instanceof Closure) {
-                    (arg as Closure).call()
-                }
-                else {
-                    arg
-                }
-            }.flatten()
+                this.scriptArgs.collect { arg ->
+                    /* In order to support closures in scriptArgs for lazy
+                     * evaluation, we need to evaluate the closure if it is present
+                     */
+                    if (arg instanceof Closure) {
+                        (arg as Closure).call()
+                    } else {
+                        arg
+                    }
+                }.flatten()
         )
     }
 
