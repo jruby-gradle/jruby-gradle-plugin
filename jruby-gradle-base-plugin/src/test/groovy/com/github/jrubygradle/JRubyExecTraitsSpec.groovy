@@ -7,22 +7,20 @@ import org.gradle.api.Task
 import org.gradle.testfixtures.ProjectBuilder
 import spock.lang.*
 
-class SpockJRubyExecTraitsTask extends DefaultTask implements JRubyExecTraits {
-}
 
 /**
  */
 class JRubyExecTraitsSpec extends Specification {
-    protected Project project
-    protected Task task
+    Project project
+    Task task
     final String taskName = 'abstract-spock-task'
 
-    def setup() {
+    void setup() {
         project = ProjectBuilder.builder().build()
         task = project.task(taskName, type: SpockJRubyExecTraitsTask)
     }
 
-    def "Prepare a basic environment"() {
+    void "Prepare a basic environment"() {
         when:
         Map preparedEnv = task.getPreparedEnvironment([:])
 
@@ -30,7 +28,7 @@ class JRubyExecTraitsSpec extends Specification {
         preparedEnv.size() > 0
     }
 
-    def "Filter out RVM environment values by default"() {
+    void "Filter out RVM environment values by default"() {
         when:
         Map preparedEnv = task.getPreparedEnvironment([
                 'GEM_HOME' : '/tmp/spock',
@@ -43,7 +41,7 @@ class JRubyExecTraitsSpec extends Specification {
         !preparedEnv.containsKey('rvm_ruby_string')
     }
 
-    def "Avoid filtering out the RVM environment if inheritRubyEnv == true"() {
+    void "Avoid filtering out the RVM environment if inheritRubyEnv == true"() {
         given:
         task.inheritRubyEnv true
 
@@ -55,7 +53,7 @@ class JRubyExecTraitsSpec extends Specification {
         then:
         preparedEnv.containsKey('GEM_PATH') }
 
-    def "setting gemWorkDir should work"() {
+    void "setting gemWorkDir should work"() {
         given:
         String workDir = 'customGemDir'
 
@@ -69,7 +67,7 @@ class JRubyExecTraitsSpec extends Specification {
         task.gemWorkDir.absolutePath.endsWith(workDir)
     }
 
-    def "setting gemWorkDir with traits"() {
+    void "setting gemWorkDir with traits"() {
         given:
         String workDir = 'customGemDir'
         task = project.task('spock', type: SpockJRubyExecTraitsTask)
@@ -83,4 +81,8 @@ class JRubyExecTraitsSpec extends Specification {
         task.gemWorkDir == task.getGemWorkDir()
         task.gemWorkDir.absolutePath.endsWith(workDir)
     }
+
+    static class SpockJRubyExecTraitsTask extends DefaultTask implements JRubyExecTraits {
+    }
+
 }
