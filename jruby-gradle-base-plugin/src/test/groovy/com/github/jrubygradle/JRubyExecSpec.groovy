@@ -120,12 +120,12 @@ class JRubyExecSpec extends Specification {
         execTask.main == JRubyExec.MAIN_CLASS
     }
 
-    void "Setting the script name"() {
+    void "Setting the script name without path compoenents yields just the relative file"() {
         when: 'Setting path to a string'
         execTask.script = SCRIPT_NAME
 
         then: 'script will be File object with the correct path'
-        execTask.script.absolutePath == project.file(SCRIPT_NAME).absolutePath
+        execTask.script == new File(SCRIPT_NAME)
     }
 
     void "Setting jruby arguments"() {
@@ -171,7 +171,7 @@ class JRubyExecSpec extends Specification {
         then:
         execTask.getArgs() == ['-I', testJarDependencies, '-rjars/setup',
                                '-j1', '-j2', '-j3', '-S',
-                               project.file(SCRIPT_NAME).absolutePath,
+                               SCRIPT_NAME,
                                '-s1', '-s2', '-s3']
     }
 
