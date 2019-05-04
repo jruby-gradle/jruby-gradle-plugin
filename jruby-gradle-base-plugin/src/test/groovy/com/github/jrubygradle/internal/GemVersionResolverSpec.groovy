@@ -5,15 +5,9 @@ import spock.lang.*
 import org.gradle.api.artifacts.DependencyResolveDetails
 import org.gradle.api.artifacts.ModuleVersionSelector
 
-class TestGemVersionResolver extends GemVersionResolver {
-    void firstRun() {
-        this.versions = [:]
-    }
-}
-
 class GemVersionResolverSpec extends Specification {
 
-    def "ignore non rubygems group modules"() {
+    void "ignore non rubygems group modules"() {
         setup:
             GemVersionResolver subject = new TestGemVersionResolver()
             def details = Mock(DependencyResolveDetails)
@@ -28,7 +22,7 @@ class GemVersionResolverSpec extends Specification {
             0 * details.setTarget(_)
     }
 
-    def "keep rubygems group modules as is on first visit"() {
+    void "keep rubygems group modules as is on first visit"() {
         setup:
             GemVersionResolver subject = new TestGemVersionResolver()
             def details = Mock(DependencyResolveDetails)
@@ -46,7 +40,7 @@ class GemVersionResolverSpec extends Specification {
             subject.toString() != new GemVersionResolver().toString()
     }
 
-    def "narrows down version range on second visit"() {
+    void "narrows down version range on second visit"() {
         setup:
             GemVersionResolver subject = new TestGemVersionResolver()
             def details1 = Mock(DependencyResolveDetails)
@@ -72,7 +66,7 @@ class GemVersionResolverSpec extends Specification {
             0 * details2.setTarget(_)
     }
 
-    def "version conflict"() {
+    void "version conflict"() {
         setup:
             GemVersionResolver subject = new TestGemVersionResolver()
             def details1 = Mock(DependencyResolveDetails)
@@ -94,5 +88,11 @@ class GemVersionResolverSpec extends Specification {
             (1.._) * requested2.getVersion() >> '[3.4.5,4.5.6]'
             def exception = thrown(RuntimeException)
             exception.message == 'there is no overlap for [1.2.3,2.3.4] and [3.4.5,4.5.6]'
+    }
+
+    static class TestGemVersionResolver extends GemVersionResolver {
+        void firstRun() {
+            this.versions = [:]
+        }
     }
 }
