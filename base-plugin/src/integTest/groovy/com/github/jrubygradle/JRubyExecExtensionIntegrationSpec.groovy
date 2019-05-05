@@ -1,167 +1,180 @@
 package com.github.jrubygradle
 
-import com.github.jrubygradle.testhelper.BasicProjectBuilder
-import com.github.jrubygradle.testhelper.VersionFinder
-import org.gradle.api.Project
-import spock.lang.*
+import com.github.jrubygradle.testhelper.IntegrationSpecification
+import org.gradle.testkit.runner.BuildResult
+import spock.lang.Shared
 
 /**
  * @author Schalk W. Cronjé
  */
-class JRubyExecExtensionIntegrationSpec extends Specification {
+class JRubyExecExtensionIntegrationSpec extends IntegrationSpecification {
 
-    static final File CACHEDIR = new File( System.getProperty('TEST_CACHEDIR') ?: 'build/tmp/integrationTest/cache')
-    static final File FLATREPO = new File( System.getProperty('TEST_FLATREPO') ?: 'build/tmp/integrationTest/flatRepo')
-    static final boolean TESTS_ARE_OFFLINE = System.getProperty('TESTS_ARE_OFFLINE') != null
-    static final File TEST_SCRIPT_DIR = new File( System.getProperty('TEST_SCRIPT_DIR') ?: 'src/integTest/resources/scripts').absoluteFile
-    static final File TESTROOT = new File("${System.getProperty('TESTROOT') ?: 'build/tmp/test/integration-tests'}/jreeis").absoluteFile
-    static final File TEST_JARS_DIR = new File(TESTROOT, "build/tmp/jrubyExec/jars")
+    static final String DEFAULT_TASK_NAME = 'inlineJRubyExec'
+    static final String HELLO_WORLD = 'helloWorld.rb'
+    static final String HELLO_NAME = 'helloName.rb'
+    static final String REQUIRES_GEM = 'requiresGem.rb'
+    static final String ENV_VARS = 'envVars.rb'
+    static final String BCPROV_NAME = 'bcprov-jdk15on'
 
-    Project project
-    ByteArrayOutputStream output = new ByteArrayOutputStream()
+    void "Run a script with minimum parameters"() {
+        setup:
+        useScript(HELLO_WORLD, 'src')
+        createJRubyExecProject """
+            script 'src/${HELLO_WORLD}'
+        """
 
-    String getOutputBuffer() {
-        return output.toString()
-    }
 
-    void setup() {
-        if (TESTROOT.exists()) {
-            TESTROOT.deleteDir()
-        }
-        TESTROOT.mkdirs()
-        project = BasicProjectBuilder.buildWithLocalRepo(TESTROOT,FLATREPO,CACHEDIR)
-
-        project.evaluate()
-    }
-
-    def "Run a script with minimum parameters"() {
         when: "I call jrubyexec with only a script name"
-        project.jrubyexec {
-            script        "${TEST_SCRIPT_DIR}/helloWorld.rb"
-            standardOutput output
-        }
+        BuildResult result = build()
 
         then: "I expect the Ruby script to be executed"
-        outputBuffer =~ /Hello, World/
+        result.output =~ /Hello, World/
     }
 
-    def "Run an inline script"() {
-        when: "I call jrubyexec with only a script name"
-        project.jrubyexec {
-            jrubyArgs      "-e", "puts 'Hello, World'"
-            standardOutput output
-        }
+    void "Run an inline script"() {
+        setup:
+        createJRubyExecProject """
+            jrubyArgs '-e', "puts 'Hello, World'"
+        """
+
+        when: "I call jrubyexec with only script text"
+        BuildResult result = build()
 
         then: "I expect the Ruby script to be executed"
-        outputBuffer =~ /Hello, World/
+        result.output =~ /Hello, World/
     }
 
-    def "Run a script containing a conditional"() {
-        when: "we have an 'if' clause"
-        project.jrubyexec {
-            script        "${TEST_SCRIPT_DIR}/helloName.rb"
-            if(input == 0) {
-                scriptArgs 'Stan'
-            } else {
-                scriptArgs 'man'
-            }
-            standardOutput output
-        }
+    void "Run a script with no subpath and arguments"() {
+        useScript(HELLO_NAME)
+        createJRubyExecProject """
+            script '${HELLO_NAME}'
+            scriptArgs 'Stan'
+        """
+
+        when:
+        BuildResult result = build()
 
         then: "only the appropriate parameters should be passed"
-        outputBuffer == expected
-
-        where:
-        input | expected
-        0     | "Hello, Stan\n"
-        1     | "Hello, man\n"
-
+        result.output =~ /Hello, Stan/
     }
 
-    def "Running a script that requires a jar"() {
-        when:
-        project.with {
-            dependencies {
-                jrubyExec VersionFinder.findDependency(FLATREPO,'org.bouncycastle','bcprov-jdk15on','jar')
+    void "Running a script that requires a jar"() {
+        setup:
+        def leadingDir = 'jrubyExec/jars/org/bouncycastle/'
+        def artifactPath = "${BCPROV_NAME}/${bcprovVer}/${BCPROV_NAME}-${bcprovVer}"
+        def withPattern = ~/.*\["file:.+${leadingDir}${artifactPath}\.jar"\].*/
 
-            }
-            jrubyexec {
-                jrubyArgs '-e'
-                jrubyArgs 'print $CLASSPATH'
-                standardOutput output
-            }
-        }
+        def jarToUse = findDependency('org.bouncycastle', BCPROV_NAME, 'jar')
+        createJRubyExecProject withJarToUse(jarToUse), '''
+            jrubyArgs '-e'
+            jrubyArgs 'print $CLASSPATH'
+        '''
+
+        when:
+        BuildResult result = build()
 
         then:
-        def outputFile = new File(TEST_JARS_DIR, 'org/bouncycastle/bcprov-jdk15on/1.46/bcprov-jdk15on-1.46.jar')
-        outputBuffer == "[\"${outputFile.toURI().toURL()}\"]"
+        result.output.readLines().any { it.matches withPattern }
     }
 
-    def "Running a script that requires a gem, a separate jRuby and a separate configuration"() {
-        when:
-        project.with {
-            dependencies {
-                jrubyExec VersionFinder.findDependency(FLATREPO,'','credit_card_validator','gem')
+    void "Running a script that requires a gem, a separate jRuby and a separate configuration"() {
+        setup:
+        useScript(REQUIRES_GEM)
+        createJRubyExecProject withCreditCardValidator(), """
+            script '${REQUIRES_GEM}'
+            jrubyArgs '-T1'
+        """
 
-            }
-            jrubyexec {
-                script        "${TEST_SCRIPT_DIR}/requiresGem.rb"
-                standardOutput output
-                jrubyArgs '-T1'
-            }
-        }
+        when:
+        BuildResult result = build()
 
         then:
-        outputBuffer =~ /Not valid/
+        result.output =~ /Not valid/
     }
 
-    def "Running a script that requires a gem, a separate jRuby, a separate configuration and a custom gemWorkDir"() {
-        given:
+    void "Running a script that requires a gem, a separate jRuby, a separate configuration and a custom gemWorkDir"() {
+        setup:
         final String customGemDir = 'customGemDir'
+        useScript(REQUIRES_GEM)
+        createJRubyExecProject withCreditCardValidator(), """
+            script '${REQUIRES_GEM}'
+            jrubyArgs '-T1'
+            gemWorkDir { new File(project.buildDir, '${customGemDir}' ) }
+        """
 
         when:
-        project.with {
-            dependencies {
-                jrubyExec VersionFinder.findDependency(FLATREPO,'','credit_card_validator','gem')
-
-            }
-            jrubyexec {
-                script        "${TEST_SCRIPT_DIR}/requiresGem.rb"
-                standardOutput output
-                jrubyArgs '-T1'
-                gemWorkDir  "${buildDir}/${customGemDir}"
-            }
-        }
+        BuildResult result = build()
 
         then:
-        outputBuffer =~ /Not valid/
-        new File(project.buildDir, customGemDir).exists()
-
+        result.output =~ /Not valid/
+        new File(projectDir, "build/${customGemDir}").exists()
     }
 
-    def "Running a script that requires environment variables"() {
+    void "Running a script that requires environment variables"() {
         // This tests that the passthrough invocation
         // happens for overloaded versions of environment
         // and that the environment variables are passed
         // on to the script
-        given:
+        setup:
         final String envVarName = 'TEST_ENV_VAR'
         final String envVarValue = 'Test Value'
-        final Map envVarMap = [TEST_A: 'A123', TEST_B: 'B123']
+
+        useScript(ENV_VARS)
+        createJRubyExecProject """
+            environment    '${envVarName}', '${envVarValue}'
+            environment    TEST_A: 'A123', TEST_B: 'B123'
+            script         '${ENV_VARS}'
+        """
 
         when:
-        project.with {
-            jrubyexec {
-                environment    envVarName, envVarValue
-                environment    envVarMap
-                script         "${TEST_SCRIPT_DIR}/envVars.rb"
-                standardOutput output
-            }
-        }
+        BuildResult result = build()
+        String outputBuffer = result.output
 
         then:
         outputBuffer =~ /TEST_ENV_VAR=Test Value/
         outputBuffer =~ /TEST_A=A123/
         outputBuffer =~ /TEST_B=B123/
     }
+
+    private BuildResult build() {
+        gradleRunner(DEFAULT_TASK_NAME, '-i').build()
+    }
+
+    private void createJRubyExecProject(String jrubyexecConfig) {
+        createJRubyExecProject('', jrubyexecConfig)
+    }
+
+    private void createJRubyExecProject(String preamble, String jrubyexecConfig) {
+        buildFile.text = """
+        ${projectWithLocalRepo}
+
+        ${preamble}
+
+        task ${DEFAULT_TASK_NAME} {
+            doLast {
+                jrubyexec {
+                    ${jrubyexecConfig}
+                }
+            }
+        }
+        """
+    }
+
+    private String withJarToUse(String jarFormat) {
+        String dependencies = """
+            dependencies {
+                jrubyExec ${jarFormat}
+            }
+        """
+    }
+
+    private String withCreditCardValidator() {
+        withJarToUse(findDependency('', 'credit_card_validator', 'gem'))
+    }
+
+    private String getBcprovVer() {
+        testProperties.bcprovVersion
+    }
+
+
 }

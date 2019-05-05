@@ -12,9 +12,11 @@ Please do not commit the config file back with DEBUG turned on.
 
 === Running single test suites
 
-If you only want to run the unittests in say `JRubyPlugin` then you can do `./gradlew test -Dtest.single=JRubyPlugin`.
-In a similar manner for integration tests one can do `./gradlew integrationTest -Dtest.single=JRubyIntegrationSpec`.
+If you only want to run the unittests in say `JRubyPlugin` then you can do `./gradlew test --tests JRubyPlugin`.
+In a similar manner for integration tests one can do `./gradlew integrationTest --tests JRubyIntegrationSpec`.
 
-== Release HOWTO
+=== Running tests in IntelliJ
 
-*TBC*
+Go to `File` -> `Settings` -> `Build, Execution, Deployment` -> `Gradle` -> `Runner`, then check `Delete build/run actions to Gradle` and select `Platform Test Runner`.
+
+On a Mac use `IntelliJ IDEA` -> `Preferences` instead of `File/Settings`.
