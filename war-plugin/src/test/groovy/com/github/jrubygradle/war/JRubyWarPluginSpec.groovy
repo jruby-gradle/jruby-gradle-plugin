@@ -1,15 +1,9 @@
 package com.github.jrubygradle.war
 
-import org.gradle.api.Task
-import org.gradle.api.tasks.*
+
 import org.gradle.api.tasks.bundling.War
 import org.gradle.testfixtures.ProjectBuilder
-import org.junit.Test
-import spock.lang.*
-
-
-import static org.gradle.api.logging.LogLevel.LIFECYCLE
-import static org.junit.Assert.assertTrue
+import spock.lang.Specification
 
 /**
  * @author R. Tyler Croy
@@ -27,7 +21,7 @@ class JRubyWarPluginSpec extends Specification {
 
     def "Basic sanity check"() {
         expect:
-            project.tasks.jrubyWar.group == 'JRuby'
-            project.tasks.jrubyWar instanceof War
+        project.tasks.jrubyWar.group == 'JRuby'
+        project.tasks.jrubyWar instanceof War
     }
 }

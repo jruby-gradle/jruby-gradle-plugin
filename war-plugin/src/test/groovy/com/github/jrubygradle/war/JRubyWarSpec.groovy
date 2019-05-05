@@ -9,8 +9,6 @@ import static org.gradle.api.logging.LogLevel.*
  *
  */
 class JRubyWarSpec extends Specification {
-    static final File TEST_SCRIPT_DIR = new File( System.getProperty('TEST_SCRIPT_DIR') ?: 'src/test/resources/scripts')
-    static final File TESTROOT = new File(System.getProperty('TESTROOT') ?: 'build/tmp/test/unittests')
     static final String TASK_NAME = 'WarWarTask'
 
     def project
@@ -18,7 +16,6 @@ class JRubyWarSpec extends Specification {
 
     void setup() {
         project = ProjectBuilder.builder().build()
-        project.buildDir = TESTROOT
         project.apply plugin: 'com.github.jruby-gradle.war'
         warTask = project.task(TASK_NAME, type: JRubyWar)
     }
