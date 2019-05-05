@@ -1,52 +1,46 @@
 package com.github.jrubygradle
 
-import com.github.jrubygradle.testhelper.BasicProjectBuilder
-import org.gradle.internal.os.OperatingSystem
+import com.github.jrubygradle.testhelper.IntegrationSpecification
+import org.ysb33r.grolifant.api.OperatingSystem
 import spock.lang.IgnoreIf
-import spock.lang.Specification
-
 
 /**
  * @author Schalk W. Cronjé
  */
-class JRubyGenerateGradleRbIntegrationSpec extends Specification {
+class JRubyGenerateGradleRbIntegrationSpec extends IntegrationSpecification {
 
-    static final File CACHEDIR = new File( System.getProperty('TEST_CACHEDIR') ?: 'build/tmp/integrationTest/cache')
-    static final File FLATREPO = new File( System.getProperty('TEST_FLATREPO') ?: 'build/tmp/integrationTest/flatRepo')
-    static final File TESTROOT = new File( "${System.getProperty('TESTROOT') ?: 'build/tmp/integrationTest'}/jggris")
-    static final String TASK_NAME = 'RubyWax'
+    static final String DEFAULT_TASK_NAME = 'RubyWax'
 
-    void setup() {
-        if (TESTROOT.exists()) {
-            TESTROOT.deleteDir()
-        }
-        TESTROOT.mkdirs()
-    }
-
-    @IgnoreIf({OperatingSystem.current().isWindows()})
+    @IgnoreIf({ OperatingSystem.current().isWindows() })
     def "Generate gradle.rb"() {
         given: "A set of gems"
-            def project = BasicProjectBuilder.buildWithLocalRepo(TESTROOT,FLATREPO,CACHEDIR)
-            def prepTask = project.task(TASK_NAME, type: GenerateGradleRb)
-            def expected = new File(prepTask.destinationDir, prepTask.baseName)
-            project.evaluate()
+        buildFile.text = """
+            import com.github.jrubygradle.GenerateGradleRb
+    
+            ${projectWithLocalRepo}
+    
+            task ${DEFAULT_TASK_NAME} (type: GenerateGradleRb)  
+        """
 
+        def expected = new File(projectDir, 'gradle.rb')
 
         when: "The load path file is generated "
-            prepTask.execute()
+        gradleRunner(DEFAULT_TASK_NAME, '-i').build()
 
         then: "Expect to be in the configured destinationDir and be called gradle.rb"
-            expected.exists()
+        expected.exists()
 
-        and: "The GEM_HOME to include gemInstallDir"
-            expected.text.contains('export GEM_HOME="' + project.jruby.gemInstallDir + '"')
+        when:
+        String content = expected.text
+
+        then: "The GEM_HOME to include gemInstallDir"
+        expected.text.contains "export GEM_HOME=\"${new File(projectDir, 'build/gems').absolutePath}"
 
         and: "The JARS_HOME is set"
-            expected.text.contains('export JARS_HOME=')
+        expected.text.contains('export JARS_HOME=')
 
         and: "The java command invoked with the -cp flag"
-            // with this test setup it is just jrubyExec.asPath
-            expected.text.find(project.configurations.jrubyExec.asPath)
-
+        // with this test setup it is just jrubyExec.asPath
+        expected.text.contains "-cp ${flatRepoLocation.absolutePath}"
     }
 }
