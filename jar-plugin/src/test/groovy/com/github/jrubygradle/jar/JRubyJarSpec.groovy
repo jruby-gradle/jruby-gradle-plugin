@@ -23,7 +23,7 @@ class JRubyJarSpec extends Specification {
         }
     }
 
-    def "jrubyVersion should be configurable in a Gradle conventional way"() {
+    void "jrubyVersion should be configurable in a Gradle conventional way"() {
         given:
         final String version = '1.7.20'
 
@@ -35,7 +35,7 @@ class JRubyJarSpec extends Specification {
         task.jrubyVersion == version
     }
 
-    def "jrubyMainsVersion should be configurable in a Gradle conventional way"() {
+    void "jrubyMainsVersion should be configurable in a Gradle conventional way"() {
         given:
         final String version = '0.4.1.'
 
@@ -47,7 +47,7 @@ class JRubyJarSpec extends Specification {
         task.jrubyMainsVersion == version
     }
 
-    def "configuration should default to 'jrubyJar'"() {
+    void "configuration should default to 'jrubyJar'"() {
         given:
         JRubyJar task = project.task('spock-jar', type: JRubyJar)
 
@@ -55,7 +55,7 @@ class JRubyJarSpec extends Specification {
         task.configuration == 'jrubyJar'
     }
 
-    def "configuration should be configurable in a Gradle conventional way"() {
+    void "configuration should be configurable in a Gradle conventional way"() {
         given:
         final String customConfig = 'spockConfig'
 
@@ -68,7 +68,7 @@ class JRubyJarSpec extends Specification {
     }
 
     @Issue('https://github.com/jruby-gradle/jruby-gradle-plugin/issues/202')
-    def "defaults 'gems' should log an error"() {
+    void "defaults 'gems' should log an error"() {
         given:
         boolean evaluated = false
         JRubyJar task = project.task('spock-jar', type: JRubyJar)
@@ -83,9 +83,8 @@ class JRubyJarSpec extends Specification {
         evaluated
     }
 
-
     @Issue('https://github.com/jruby-gradle/jruby-gradle-plugin/issues/169')
-    def "configuration should be configurable with a Configuration object"() {
+    void "configuration should be configurable with a Configuration object"() {
         given: 'a configuration'
         project.with {
             configurations {
@@ -103,7 +102,7 @@ class JRubyJarSpec extends Specification {
         task.configuration == customConfig.name
     }
 
-    def "configure library()"() {
+    void "configure library()"() {
         given: 'a task with initScript library()'
         boolean evaluated = false
         JRubyJar task = project.task('library-jar', type: JRubyJar)
