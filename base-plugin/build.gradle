@@ -33,6 +33,7 @@ project.afterEvaluate {
 
 ext {
     olderJRubyVersion = '9.0.1.0'
+    slimVersion = '2.0.2'
 }
 
 dependencies {
@@ -55,8 +56,8 @@ dependencies {
         exclude module : 'groovy-all'
     }
 
-    // NOTE: If you change this, you will also need to update JRubyPrepareGemsIntegrationSpec
-    integrationTestGems 'rubygems:slim:2.0.2'
+    // NOTE: This is used by JRubyPrepareGemsIntegrationSpec
+    integrationTestGems "rubygems:slim:${slimVersion}"
 
     // NOTE: If you change this, you will also need to update JRubyPrepareJarsIntegrationSpec
     integrationTestGems 'rubygems:leafy-complete:0.4.0'
@@ -96,7 +97,8 @@ generateTestConfig {
     testProperties mavenrepo: file('src/integTest/mavenrepo').absolutePath,
         flatrepo: flatRepoDir.absolutePath,
         bcprovVersion: bcprovVersion,
-        olderJRubyVersion: olderJRubyVersion
+        olderJRubyVersion: olderJRubyVersion,
+        slimVersion: slimVersion
 }
 
 task copyIntegrationTestJRuby (type:Copy) {

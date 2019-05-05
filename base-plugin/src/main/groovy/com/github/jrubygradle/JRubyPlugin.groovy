@@ -46,7 +46,7 @@ class JRubyPlugin implements Plugin<Project> {
             group TASK_GROUP_NAME
             description 'Prepare the gems/jars from the `gem` dependencies, extracts the gems into jruby.installGemDir and sets up the jars in jruby.installGemDir/jars'
             dependencies project.configurations.gems
-            outputDir project.jruby.gemInstallDir
+            outputDir {project.jruby.gemInstallDir}
         }
 
         project.task('generateGradleRb', type: GenerateGradleRb) {

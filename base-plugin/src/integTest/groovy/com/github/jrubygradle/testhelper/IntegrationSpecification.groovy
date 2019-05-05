@@ -78,6 +78,17 @@ class IntegrationSpecification extends Specification {
         """
     }
 
+    String getProjectWithDefaultAndMavenRepo() {
+        """
+        plugins {
+            id 'com.github.jruby-gradle.base'
+        }
+
+        jruby.defaultRepositories = true
+        repositories.maven { url 'file://${mavenRepoLocation.absolutePath}' } 
+        """
+    }
+
     GradleRunner gradleRunner(List<String> args) {
         GradleRunner.create()
                 .withProjectDir(projectDir)

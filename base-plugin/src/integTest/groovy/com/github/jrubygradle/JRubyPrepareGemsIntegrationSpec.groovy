@@ -1,150 +1,134 @@
 package com.github.jrubygradle
 
-import com.github.jrubygradle.testhelper.BasicProjectBuilder
-import org.gradle.testfixtures.ProjectBuilder
-import spock.lang.*
-
-import static org.gradle.api.logging.LogLevel.LIFECYCLE
+import com.github.jrubygradle.testhelper.IntegrationSpecification
+import org.gradle.testkit.runner.BuildResult
+import spock.lang.IgnoreIf
+import spock.lang.Issue
 
 /**
  * @author Schalk W. Cronjé.
  */
-class JRubyPrepareGemsIntegrationSpec extends Specification {
+class JRubyPrepareGemsIntegrationSpec extends IntegrationSpecification {
 
-    static final File CACHEDIR = new File( System.getProperty('TEST_CACHEDIR') ?: 'build/tmp/integrationTest/cache')
-    static final File FLATREPO = new File( System.getProperty('TEST_FLATREPO') ?: 'build/tmp/integrationTest/flatRepo')
-    static final boolean TESTS_ARE_OFFLINE = System.getProperty('TESTS_ARE_OFFLINE') != null
-    static final File TESTROOT = new File( "${System.getProperty('TESTROOT') ?: 'build/tmp/integrationTest'}/jpgis")
-    static final String TASK_NAME = 'RubyWax'
-    static final String SLIM_VERSION = '2.0.2'
-    static final String TEMPLE_VERSION = '0.6.10'
-    static final String TILT_VERSION = '2.0.1'
-    static final String OUR_GEM = "rubygems:slim:${SLIM_VERSION}"
+    static final String DEFAULT_TASK_NAME = 'jrubyPrepare'
 
-    void setup() {
-        if(TESTROOT.exists()) {
-            TESTROOT.deleteDir()
-        }
-        TESTROOT.mkdirs()
+    String repoSetup = projectWithLocalRepo
+    String preamble
+    String dependenciesConfig
+
+    void "Check that default 'jrubyPrepareGems' uses the correct directory"() {
+        setup:
+        withDependencies "gems ${slimGem}"
+        withPreamble """
+            jruby.gemInstallDir = '${projectDir.absolutePath}'
+        """
+
+        when:
+        build()
+
+        then:
+        new File(projectDir, "gems/slim-${slimVersion}").exists()
     }
 
-    def "Check that default 'jrubyPrepareGems' uses the correct directory"() {
-        given:
-            def project=BasicProjectBuilder.buildWithLocalRepo(TESTROOT,FLATREPO,CACHEDIR)
-            def jrpg = project.tasks.jrubyPrepare
-            project.jruby.gemInstallDir = TESTROOT.absolutePath
+    @IgnoreIf({ IntegrationSpecification.OFFLINE })
+    void "Check if rack version gets resolved"() {
+        setup:
+        withDefaultRepositories()
+        withPreamble """
+            jruby.gemInstallDir = '${projectDir.absolutePath}'
+        """
+        withDependencies """
+            gems "rubygems:sinatra:1.4.5"
+            gems "rubygems:rack:[0,)"
+            gems "rubygems:lookout-rack-utils:3.1.0.12"
+        """
 
-            project.dependencies {
-                gems "${OUR_GEM}@gem"
-            }
-            project.evaluate()
-            jrpg.copy()
+        when:
+        build()
 
-        expect:
-            new File(jrpg.outputDir,"gems/slim-${SLIM_VERSION}").exists()
+        then:
+        // since we need a version range in the setup the
+        // resolved version here can vary over time
+        new File(projectDir, "gems/rack-1.5.5").exists()
     }
 
-    def "Check if rack version gets resolved"() {
-        given:
-            def root= new File(TESTROOT, "rack-resolve")
-            def project = BasicProjectBuilder.buildWithStdRepo(root,CACHEDIR)
-            def jrpg = project.tasks.jrubyPrepare
-            project.jruby.gemInstallDir = root.absolutePath
+    @IgnoreIf({ IntegrationSpecification.OFFLINE })
+    void "Check if prerelease gem gets resolved"() {
+        setup:
+        withDefaultRepositories()
+        withPreamble """
+            jruby.gemInstallDir = '${projectDir.absolutePath}'
+        """
+        withDependencies 'gems "rubygems:jar-dependencies:0.1.16.pre"'
 
-            project.dependencies {
-                gems "rubygems:sinatra:1.4.5"
-                gems "rubygems:rack:[0,)"
-                gems "rubygems:lookout-rack-utils:3.1.0.12"
-            }
-            project.evaluate()
-            jrpg.copy()
+        when:
+        build()
 
-        expect:
-            // since we need a version range in the setup the
-            // resolved version here can vary over time
-            new File(jrpg.outputDir,"gems/rack-1.5.5").exists()
-    }
-
-    def "Check if prerelease gem gets resolved"() {
-        given:
-            def root= new File(TESTROOT, "prerelease")
-            def project = BasicProjectBuilder.buildWithStdRepo(root,CACHEDIR)
-            def task = project.tasks.jrubyPrepare
-            project.jruby.gemInstallDir = root.absolutePath
-
-            project.dependencies {
-                gems "rubygems:jar-dependencies:0.1.16.pre"
-            }
-            project.evaluate()
-            task.copy()
-
-        expect:
-            new File(task.outputDir,"gems/jar-dependencies-0.1.16.pre").exists()
-    }
-
-//    @IgnoreIf({TESTS_ARE_OFFLINE})
-    @Ignore
-    def "Unpack our gem as normal"() {
-        given:
-            def project=BasicProjectBuilder.buildWithStdRepo(TESTROOT,CACHEDIR)
-            def prepTask = project.task(TASK_NAME, type: JRubyPrepareGems)
-            project.dependencies {
-                gems OUR_GEM
-            }
-            project.configure(prepTask) {
-                outputDir TESTROOT
-                gems project.configurations.gems
-            }
-            project.evaluate()
-            prepTask.copy()
-
-        expect:
-            new File(prepTask.outputDir,"gems/slim-${SLIM_VERSION}").exists()
-            new File(prepTask.outputDir,"gems/temple-${TEMPLE_VERSION}").exists()
-            new File(prepTask.outputDir,"gems/tilt-${TILT_VERSION}").exists()
-    }
-
-//    @IgnoreIf({TESTS_ARE_OFFLINE})
-    @Ignore
-    def "Unpack our gem, but without transitives"() {
-        given:
-            def project=BasicProjectBuilder.buildWithStdRepo(TESTROOT,CACHEDIR)
-            def prepTask = project.task(TASK_NAME, type: JRubyPrepareGems)
-            project.dependencies {
-                gems (OUR_GEM) {
-                    transitive = false
-                }
-            }
-            project.configure(prepTask) {
-                outputDir TESTROOT
-                gems project.configurations.gems
-            }
-            project.evaluate()
-            prepTask.copy()
-
-        expect:
-            new File(prepTask.outputDir,"gems/slim-${SLIM_VERSION}").exists()
-            !new File(prepTask.outputDir,"gems/temple-${TEMPLE_VERSION}").exists()
-            !new File(prepTask.outputDir,"gems/tilt-${TILT_VERSION}").exists()
+        then:
+        new File(projectDir, "gems/jar-dependencies-0.1.16.pre").exists()
     }
 
     @Issue('https://github.com/jruby-gradle/jruby-gradle-plugin/issues/341')
-    def "Make a install-time gem dependency available"() {
-        given:
-            def root= new File(TESTROOT, "childprocess")
-            def project = BasicProjectBuilder.buildWithStdRepo(root,CACHEDIR)
-            def jrpg = project.tasks.jrubyPrepare
-            project.jruby.gemInstallDir = root.absolutePath
+    @IgnoreIf({ IntegrationSpecification.OFFLINE })
+    void "Make a install-time gem dependency available"() {
+        setup:
+        withDefaultRepositories()
+        withPreamble """
+            jruby.gemInstallDir = '${projectDir.absolutePath}'
+        """
+        withDependencies 'gems "rubygems:childprocess:1.0.1"'
 
-            project.dependencies {
-                gems "rubygems:childprocess:1.0.1"
-            }
-            project.evaluate()
-            jrpg.copy()
+        when:
+        build()
 
-        expect:
-            new File(jrpg.outputDir,"gems/childprocess-1.0.1").exists()
+        then:
+        new File(projectDir, "gems/childprocess-1.0.1").exists()
     }
 
+    private void withDefaultRepositories() {
+        repoSetup = projectWithDefaultAndMavenRepo
+    }
 
+    private void withDependencies(String deps) {
+        this.dependenciesConfig = """
+        dependencies {
+            ${deps}
+        }
+        """
+    }
+
+    private void withPreamble(String content) {
+        preamble = content
+    }
+
+    private void writeBuildFile() {
+        buildFile.text = """
+        ${repoSetup}
+
+        ${preamble ?: ''}
+
+        ${dependenciesConfig ?: ''}
+        """
+    }
+
+    private String getSlimVersion() {
+        testProperties.slimVersion
+    }
+
+    private String getSlimGem() {
+        "'rubygems:slim:${slimVersion}@gem'"
+    }
+
+    private BuildResult build() {
+        build(DEFAULT_TASK_NAME)
+    }
+
+    private BuildResult build(String taskName, String... moreTasks) {
+        List<String> tasks = [taskName]
+        tasks.addAll(moreTasks)
+        tasks.add('-i')
+        tasks.add('-s')
+        writeBuildFile()
+        gradleRunner(tasks).build()
+    }
 }
