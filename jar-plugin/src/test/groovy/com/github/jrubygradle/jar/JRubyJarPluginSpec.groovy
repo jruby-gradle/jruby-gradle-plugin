@@ -1,16 +1,14 @@
 package com.github.jrubygradle.jar
 
-import com.github.jrubygradle.JRubyPlugin
 import com.github.jrubygradle.JRubyPrepare
 import org.gradle.api.InvalidUserDataException
 import org.gradle.api.Project
 import org.gradle.api.Task
-import org.gradle.api.artifacts.Configuration
 import org.gradle.api.file.FileCollection
 import org.gradle.testfixtures.ProjectBuilder
-import spock.lang.*
+import spock.lang.Specification
 
-import static org.gradle.api.logging.LogLevel.LIFECYCLE
+import static com.github.jrubygradle.jar.JRubyJar.DEFAULT_MAIN_CLASS
 
 /**
  * @author R. Tyler Croy
@@ -19,8 +17,6 @@ import static org.gradle.api.logging.LogLevel.LIFECYCLE
  *
  */
 class JRubyJarPluginSpec extends Specification {
-    static final File TESTROOT = new File("${System.getProperty('TESTROOT') ?: 'build/tmp/test/unittests'}/jrjps")
-    static final File TESTREPO_LOCATION = new File("${System.getProperty('TESTREPO_LOCATION') ?: 'build/tmp/test/repo'}")
 
     Project project
     JRubyJar jarTask
@@ -36,18 +32,15 @@ class JRubyJarPluginSpec extends Specification {
     static Project setupProject() {
         Project project = ProjectBuilder.builder().build()
         project.gradle.startParameter.offline = true
-        File repo = project.file("${TESTREPO_LOCATION}/../../../../../jruby-gradle-base-plugin/src/integTest/mavenrepo")
-
-        project.buildDir = TESTROOT
 
         project.with {
             apply plugin: 'com.github.jruby-gradle.jar'
             jruby.defaultRepositories = false
 
             repositories {
-                flatDir dirs : TESTREPO_LOCATION.absolutePath
+                flatDir dirs: project.file('fakerepo')
                 maven {
-                    url "file://" + repo.absolutePath
+                    url "file://" + project.file('fakerepo').absolutePath
                 }
             }
         }
@@ -56,30 +49,26 @@ class JRubyJarPluginSpec extends Specification {
     }
 
     void setup() {
-        if (TESTROOT.exists()) {
-            TESTROOT.deleteDir()
-        }
-        TESTROOT.mkdirs()
-
         project = setupProject()
         jarTask = project.tasks.getByName('jrubyJar')
     }
 
-    def 'Checking tasks exist'() {
+    void 'Checking tasks exist'() {
         expect:
         project.tasks.getByName('jrubyJar')
     }
 
-    def 'Checking appendix'() {
+    void 'Checking appendix'() {
         expect:
         project.tasks.getByName('jrubyJar').appendix == 'jruby'
     }
 
-    def "Fails on adding non-existing initScript"() {
+    void "Fails on adding non-existing initScript"() {
         given:
+        def TESTROOT = new File(project.projectDir, 'fake')
         project.jruby.gemInstallDir = TESTROOT.absolutePath
-        new File(TESTROOT,'gems').mkdirs()
-        new File(TESTROOT,'gems/fake.txt').text = 'fake.content'
+        new File(TESTROOT, 'gems').mkdirs()
+        new File(TESTROOT, 'gems/fake.txt').text = 'fake.content'
 
         when: "Setting a default main class"
         project.configure(jarTask) {
@@ -91,19 +80,7 @@ class JRubyJarPluginSpec extends Specification {
         thrown(InvalidUserDataException)
     }
 
-    def "Adding a default main class"() {
-        when: "Setting a default main class"
-        project.configure(jarTask) {
-            defaultMainClass()
-        }
-        jarTask.addJRubyDependency()
-        jarTask.applyConfig()
-
-        then: "Then the attribute should be set to the default in the manifest"
-        jarTask.manifest.attributes.'Main-Class' == JRubyJar.DEFAULT_MAIN_CLASS
-    }
-
-    def "Adding a default extracting main class"() {
+    void "Adding a default extracting main class"() {
         when: "Setting a default extracting main class"
         project.configure(jarTask) {
             extractingMainClass()
@@ -114,7 +91,7 @@ class JRubyJarPluginSpec extends Specification {
         jarTask.manifest.attributes.'Main-Class' == JRubyJar.EXTRACTING_MAIN_CLASS
     }
 
-    def "Adding a custom main class"() {
+    void "Adding a custom main class"() {
         when: "Setting a default main class"
         project.configure(jarTask) {
             mainClass 'org.scooby.doo.snackMain'
@@ -125,7 +102,7 @@ class JRubyJarPluginSpec extends Specification {
         jarTask.manifest.attributes.'Main-Class' == 'org.scooby.doo.snackMain'
     }
 
-    def "Adding a main class and additional manifest attributes"() {
+    void "Adding a main class and additional manifest attributes"() {
         when: "Setting a main class"
         project.configure(jarTask) {
             mainClass 'org.scooby.doo.snackMain'
@@ -137,14 +114,15 @@ class JRubyJarPluginSpec extends Specification {
         jarTask.manifest.attributes.'Class-Path' == 'gangway.jar zoinks.jar'
     }
 
-    def "Setting up a java project"() {
+    void "Setting up a java project"() {
         given: "All jar, java plugins have been applied"
+        def TESTROOT = new File(project.projectDir, 'TESTROOT')
         project = setupProject()
-        project.apply plugin : 'java'
+        project.apply plugin: 'java'
         Task jar = project.tasks.getByName('jrubyJar')
 
         and: "A local repository"
-        File expectedDir= new File(TESTROOT,'libs/')
+        File expectedDir = new File(TESTROOT, 'libs/')
         expectedDir.mkdirs()
         project.configure(jar) {
             initScript library()
@@ -155,19 +133,19 @@ class JRubyJarPluginSpec extends Specification {
         jar.taskDependencies.getDependencies(jar).contains(project.tasks.getByName('prepareJRubyJar'))
     }
 
-    def 'Checking setting no mainClass'() {
+    void 'Checking setting no mainClass'() {
         when:
-        project.file( 'app.rb') << ''
+        project.file('app.rb') << ''
         jarTask.initScript('app.rb')
         jarTask.applyConfig()
 
         then:
-        jarTask.manifest.attributes['Main-Class'] == JRubyJar.DEFAULT_MAIN_CLASS
+        jarTask.manifest.attributes['Main-Class'] == DEFAULT_MAIN_CLASS
     }
 
-    def 'Checking setting of mainClass once'() {
+    void 'Checking setting of mainClass once'() {
         when:
-        project.file( 'app.rb') << ''
+        project.file('app.rb') << ''
         jarTask.initScript('app.rb')
         jarTask.mainClass('org.example.Main')
         jarTask.applyConfig()
@@ -176,7 +154,7 @@ class JRubyJarPluginSpec extends Specification {
         jarTask.manifest.attributes['Main-Class'] == 'org.example.Main'
     }
 
-    def 'Checking setup runnable jrubyJar task'() {
+    void 'Checking setup runnable jrubyJar task'() {
         when:
         jarTask.initScript(jarTask.runnable())
         jarTask.applyConfig()
@@ -185,7 +163,7 @@ class JRubyJarPluginSpec extends Specification {
         jarTask.manifest.attributes.containsKey('Main-Class')
     }
 
-    def 'Checking valid library config'() {
+    void 'Checking valid library config'() {
         when:
         jarTask.initScript(jarTask.library())
         jarTask.applyConfig()
@@ -194,7 +172,7 @@ class JRubyJarPluginSpec extends Specification {
         !jarTask.manifest.attributes.containsKey('Main-Class')
     }
 
-    def 'Checking invalid library config'() {
+    void 'Checking invalid library config'() {
         when:
         jarTask.initScript(jarTask.library())
         jarTask.extractingMainClass()
@@ -205,37 +183,8 @@ class JRubyJarPluginSpec extends Specification {
         e.message == 'can not have mainClass for library'
     }
 
-    @Ignore('should be an integration test since we add jar-dependencies')
-    @Issue('https://github.com/jruby-gradle/jruby-gradle-plugin/issues/115')
-    def "jrubyVersion is lazily evaluated"() {
-        given:
-        final String version = '1.7.11'
-
-        when:
-        project.jruby {
-            defaultVersion version
-        }
-        project.evaluate()
-
-        then:
-        project.tasks.findByName('jrubyJar').jrubyVersion == version
-    }
-
-    def "prepareTask should be an instance of JRubyPrepare"() {
+    void "prepareTask should be an instance of JRubyPrepare"() {
         expect:
         jarTask.dependsOn.find { (it instanceof JRubyPrepare) && (it.name == 'prepareJRubyJar') }
     }
-
-    @Ignore('should be an integration test since we add jar-dependencies')
-    def "prepareTask should have its configuration lazily set"() {
-        given:
-        Task prepareTask = jarTask.dependsOn.find { it instanceof JRubyPrepare }
-
-        when:
-        project.evaluate()
-
-        then:
-        prepareTask.dependencies.find { (it instanceof Configuration) && (it.name == jarTask.configuration) }
-    }
 }
-

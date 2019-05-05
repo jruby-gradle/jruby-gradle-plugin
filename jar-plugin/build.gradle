@@ -1,7 +1,6 @@
-group = rootProject.group
-version = rootProject.version
 
-apply from: "gradle/integration-test.gradle"
+
+
 
 configurations {
     testRepo

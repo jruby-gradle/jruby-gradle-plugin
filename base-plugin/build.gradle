@@ -1,8 +1,3 @@
-apply plugin: TestConfigPlugin
-apply plugin: 'java-gradle-plugin'
-apply from: "${rootProject.projectDir}/gradle/integration-tests.gradle"
-
-apply plugin: 'maven-publish'
 
 // --- Could be in a separate gradle file
 configurations {

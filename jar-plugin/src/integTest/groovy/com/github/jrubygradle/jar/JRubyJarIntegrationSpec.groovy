@@ -102,5 +102,48 @@ class JRubyJarIntegrationSpec extends Specification {
         config.dependencies.find { it.name == 'jruby-mains' && it.version == version }
         config.dependencies.findAll({ it.name == 'jruby-mains' }).size() == 1
     }
+
+    /*
+        @Ignore('should be an integration test since we add jar-dependencies')
+    def "prepareTask should have its configuration lazily set"() {
+        given:
+        Task prepareTask = jarTask.dependsOn.find { it instanceof JRubyPrepare }
+
+        when:
+        project.evaluate()
+
+        then:
+        prepareTask.dependencies.find { (it instanceof Configuration) && (it.name == jarTask.configuration) }
+    }
+
+        def "Adding a default main class"() {
+        when: "Setting a default main class"
+        project.configure(jarTask) {
+            defaultMainClass()
+        }
+        jarTask.addJRubyDependency()
+        jarTask.applyConfig()
+
+        then: "Then the attribute should be set to the default in the manifest"
+        jarTask.manifest.attributes.'Main-Class' == DEFAULT_MAIN_CLASS
+    }
+
+        @Ignore('should be an integration test since we add jar-dependencies')
+    @Issue('https://github.com/jruby-gradle/jruby-gradle-plugin/issues/115')
+    def "jrubyVersion is lazily evaluated"() {
+        given:
+        final String version = '1.7.11'
+
+        when:
+        project.jruby {
+            defaultVersion version
+        }
+        project.evaluate()
+
+        then:
+        project.tasks.findByName('jrubyJar').jrubyVersion == version
+    }
+
+     */
 }
 

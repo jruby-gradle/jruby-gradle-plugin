@@ -13,8 +13,7 @@ buildScan {
 allprojects {
     apply plugin: 'idea'
 
-    group = 'com.github.jruby-gradle'
-    version = '1.7.0'
+    
 
     if (!releaseBuild) {
         version = "${version}-SNAPSHOT"
@@ -39,11 +38,14 @@ subprojects {
     }
 
     if(project.name != 'docs') {
+        apply plugin: TestConfigPlugin
+        apply plugin: 'java-gradle-plugin'
         apply plugin: 'groovy'
         apply plugin: 'codenarc'
         apply plugin: 'com.jfrog.bintray'
         apply plugin: 'org.ysb33r.gradletest'
-
+        apply plugin: 'maven-publish'
+        apply from: "${rootProject.projectDir}/gradle/integration-tests.gradle"
 
         dependencies {
             compile localGroovy()
