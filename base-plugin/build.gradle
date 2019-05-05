@@ -34,6 +34,7 @@ project.afterEvaluate {
 ext {
     olderJRubyVersion = '9.0.1.0'
     slimVersion = '2.0.2'
+    leafyVersion = '0.4.0'
 }
 
 dependencies {
@@ -59,8 +60,8 @@ dependencies {
     // NOTE: This is used by JRubyPrepareGemsIntegrationSpec
     integrationTestGems "rubygems:slim:${slimVersion}"
 
-    // NOTE: If you change this, you will also need to update JRubyPrepareJarsIntegrationSpec
-    integrationTestGems 'rubygems:leafy-complete:0.4.0'
+    // NOTE: This is used by JRubyPrepareJarsIntegrationSpec
+    integrationTestGems "rubygems:leafy-complete:${leafyVersion}"
 
     // NOTE: If you change this, you will also need to update JRubyExecIntegrationSpec & JRubyExecExtensionIntegrationSpec
     integrationTestGems 'rubygems:credit_card_validator:1.1.0'
@@ -98,7 +99,8 @@ generateTestConfig {
         flatrepo: flatRepoDir.absolutePath,
         bcprovVersion: bcprovVersion,
         olderJRubyVersion: olderJRubyVersion,
-        slimVersion: slimVersion
+        slimVersion: slimVersion,
+        leafyVersion: leafyVersion
 }
 
 task copyIntegrationTestJRuby (type:Copy) {
