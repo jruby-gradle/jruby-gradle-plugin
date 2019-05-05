@@ -1,8 +1,3 @@
-import org.gradle.plugins.ide.idea.model.IdeaModel
-import org.gradle.plugins.ide.idea.model.IdeaModule
-
-archivesBaseName = 'jruby-gradle-plugin' // TODO: FIX !!
-
 apply plugin: TestConfigPlugin
 apply plugin: 'java-gradle-plugin'
 apply from: "${rootProject.projectDir}/gradle/integration-tests.gradle"
@@ -19,7 +14,7 @@ ext {
 
     jrubyClassPathFromConfiguration = { Configuration cfg ->
         def f = cfg.files.find { it.name.startsWith('jruby-complete-') }
-        return  f?.absolutePath
+        return f?.absolutePath
     }
 }
 
@@ -41,7 +36,7 @@ dependencies {
 
     compile "org.eclipse.jetty:jetty-server:${jettyVersion}"
     compile "org.eclipse.jetty:jetty-webapp:${jettyVersion}"
-    runtime( 'de.saumya.mojo:rubygems:0.2.3@war' ) {
+    runtime('de.saumya.mojo:rubygems:0.2.3@war') {
         // we just want the war file on the classloader for the application
         // to find it and use the war-file from filesystem
         exclude group: 'org.sonatype.nexus.plugins', module: 'nexus-ruby-tools'
@@ -49,12 +44,12 @@ dependencies {
 
     testJRubyPrepare "org.jruby:jruby-complete:${jrubyVersion}"
 
-    testCompile (spockVersion) {
-        exclude module : 'groovy-all'
+    testCompile(spockVersion) {
+        exclude module: 'groovy-all'
     }
 
-    integrationTestCompile (spockVersion) {
-        exclude module : 'groovy-all'
+    integrationTestCompile(spockVersion) {
+        exclude module: 'groovy-all'
     }
 
     // NOTE: This is used by JRubyPrepareGemsIntegrationSpec
@@ -79,14 +74,14 @@ dependencies {
     // This is used by JRubyExecExtensionIntegrationSpec
     integrationTestGems "org.bouncycastle:bcprov-jdk15on:${bcprovVersion}"
 
-    gradleTest"org.jruby:jruby-complete:${jrubyVersion}"
+    gradleTest "org.jruby:jruby-complete:${jrubyVersion}"
     gradleTest 'rubygems:credit_card_validator:1.1.0'
     gradleTest 'org.bouncycastle:bcprov-jdk15on:1.50'
 }
 
 test {
     if (gradle.startParameter.isOffline()) {
-        systemProperties 'TESTS_ARE_OFFLINE' : '1'
+        systemProperties 'TESTS_ARE_OFFLINE': '1'
     }
 }
 
@@ -99,23 +94,23 @@ generateTestConfig {
             leafyVersion: leafyVersion
 }
 
-task copyIntegrationTestJRuby (type:Copy) {
-    from ({configurations.testJRubyPrepare.files})
-    into new File(buildDir,'tmp/integrationTest/flatRepo')
+task copyIntegrationTestJRuby(type: Copy) {
+    from({ configurations.testJRubyPrepare.files })
+    into new File(buildDir, 'tmp/integrationTest/flatRepo')
 }
 
 integrationTest {
-    if(gradle.startParameter.isOffline()) {
-        systemProperties 'TESTS_ARE_OFFLINE' : '1'
+    if (gradle.startParameter.isOffline()) {
+        systemProperties 'TESTS_ARE_OFFLINE': '1'
     }
     dependsOn copyIntegrationTestJRuby
 }
 
-task installGroovyDoc (type : Copy) {
-    from ({new File(buildDir,'docs/groovydoc')}) {
+task installGroovyDoc(type: Copy) {
+    from({ new File(buildDir, 'docs/groovydoc') }) {
         include '**'
     }
-    into {new File(project.properties.jrubyGradleWebsiteInstallDir,"docs/api/${archivesBaseName}/${version}")}
+    into { new File(project.properties.jrubyGradleWebsiteInstallDir, "docs/api/${archivesBaseName}/${version}") }
     onlyIf { project.hasProperty('jrubyGradleWebsiteInstallDir') }
 }
 
@@ -152,7 +147,7 @@ bintray {
         version {
             name = project.version
             vcsTag = "v${project.version}"
-            attributes = ['gradle-plugin' : 'com.github.jruby-gradle.base:com.github.jruby-gradle:jruby-gradle-plugin']
+            attributes = ['gradle-plugin': 'com.github.jruby-gradle.base:com.github.jruby-gradle:jruby-gradle-plugin']
             desc = 'The purpose of plugin is to encapsulate useful Gradle functionality for JRuby projects.'
 
         }
