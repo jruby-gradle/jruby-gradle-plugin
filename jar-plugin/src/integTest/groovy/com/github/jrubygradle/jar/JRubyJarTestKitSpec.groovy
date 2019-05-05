@@ -9,6 +9,8 @@ import spock.lang.Issue
 import java.util.zip.ZipEntry
 import java.util.zip.ZipFile
 
+import static com.github.jrubygradle.jar.JRubyJar.DEFAULT_MAIN_CLASS
+
 class JRubyJarTestKitSpec extends IntegrationSpecification {
 
     public static final String DEFAULT_TASK_NAME = 'jrubyJar'
@@ -17,6 +19,7 @@ class JRubyJarTestKitSpec extends IntegrationSpecification {
     String jrubyJarConfig
     String repoSetup
     String deps
+    String preamble
     String additionalContent
 
     def setup() {
@@ -36,8 +39,8 @@ class JRubyJarTestKitSpec extends IntegrationSpecification {
     }
 
     void "executing the jrubyJar task produces an executable artifact"() {
-        given:
-        withJRubyConfig """
+        setup:
+        withJRubyJarConfig """
             initScript 'main.rb'
         """
 
@@ -59,8 +62,7 @@ class JRubyJarTestKitSpec extends IntegrationSpecification {
         result.task(":validateJar").outcome == TaskOutcome.SUCCESS
 
         and: "the should not be a jruby-mains.jar or jruby-complete.jar inside the archive"
-        ZipFile zip = new ZipFile("${projectDir}/build/libs/testproject-jruby.jar")
-        !zip.entries().findAll { ZipEntry entry ->
+        !jarEntries.findAll { ZipEntry entry ->
             entry.name.matches(/(.*)jruby-complete-(.*).jar/) || entry.name.matches(/(.*)jruby-mains-(.*).jar/)
         }
 
@@ -70,7 +72,7 @@ class JRubyJarTestKitSpec extends IntegrationSpecification {
 
     @Issue("https://github.com/jruby-gradle/jruby-gradle-plugin/issues/183")
     void "creating a new task based on JRubyJar produces a jar artifact"() {
-        given:
+        setup:
         withAdditionalContent '''
             task someDifferentJar(type: JRubyJar) { 
                 initScript 'main.rb' 
@@ -96,13 +98,13 @@ class JRubyJarTestKitSpec extends IntegrationSpecification {
     @IgnoreIf({ IntegrationSpecification.OFFLINE })
     @Issue('https://github.com/jruby-gradle/jruby-gradle-plugin/pull/271')
     def 'using a more recent jar-dependencies should work'() {
-        given:
+        setup:
         withRepoSetup """
             maven { url 'http://rubygems-proxy.torquebox.org/releases' }
             mavenCentral()
         """
         withDependencies "jrubyJar 'rubygems:jar-dependencies:0.2.3'"
-        withJRubyConfig "initScript 'main.rb'"
+        withJRubyJarConfig "initScript 'main.rb'"
 
         withAdditionalContent '''
             task validateJar(type: JavaExec) {
@@ -122,7 +124,36 @@ class JRubyJarTestKitSpec extends IntegrationSpecification {
         result.output.contains("Hello from JRuby")
     }
 
-    private void withJRubyConfig(String content) {
+    void "Building a Jar with a custom configuration and 'java' plugin is applied"() {
+        setup:
+        withPreamble 'apply plugin: "java"'
+        withJRubyJarConfig "mainClass 'bogus.does.not.exist'"
+
+        when:
+        build()
+
+        then: "I expect to see jruby.home unpacked inside the jar"
+        jarEntries.find { entry ->
+            entry.name == 'META-INF/jruby.home/bin/'
+        }
+
+        and: "I expect the new main class to be listed in the manifest"
+        jarManifestContent.contains 'Main-Class: bogus.does.not.exist'
+    }
+
+    void "Adding a default main class"() {
+        setup:
+        withPreamble 'apply plugin: "java"'
+        withJRubyJarConfig "defaultMainClass()"
+
+        when:
+        build()
+
+        then: "Then the attribute should be set to the default in the manifest"
+        jarManifestContent.contains "Main-Class: ${DEFAULT_MAIN_CLASS}"
+    }
+
+    private void withJRubyJarConfig(String content) {
         jrubyJarConfig = """
         jrubyJar {
             ${content}
@@ -159,6 +190,10 @@ class JRubyJarTestKitSpec extends IntegrationSpecification {
         """
     }
 
+    private void withPreamble(String content) {
+        this.preamble = content
+    }
+
     private void writeBuildFile() {
         buildFile.text = """
         import com.github.jrubygradle.jar.JRubyJar
@@ -167,6 +202,8 @@ class JRubyJarTestKitSpec extends IntegrationSpecification {
             id 'com.github.jruby-gradle.jar'
         }
         
+        ${preamble ?: ''}
+
         jruby.defaultRepositories = false
         
         ${repoSetup ?: ''}
@@ -194,5 +231,20 @@ class JRubyJarTestKitSpec extends IntegrationSpecification {
         List<String> tasks = ['-i', taskName]
         tasks.addAll(additionalTasks)
         gradleRunner(tasks).build()
+    }
+
+    private def getJarEntries() {
+        ZipFile zip = new ZipFile("${projectDir}/build/libs/testproject-jruby.jar")
+        zip.entries()
+    }
+
+    private String getJarManifestContent() {
+        ZipFile zip = new ZipFile("${projectDir}/build/libs/testproject-jruby.jar")
+
+        ZipEntry entry = zip.entries().find { entry ->
+            entry.name == 'META-INF/MANIFEST.MF'
+        }
+
+        zip.getInputStream(entry).text
     }
 }
