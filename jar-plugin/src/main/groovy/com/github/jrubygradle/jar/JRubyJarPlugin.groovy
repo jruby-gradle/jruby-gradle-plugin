@@ -6,6 +6,8 @@ import org.gradle.api.Project
 import org.gradle.api.Task
 import org.gradle.api.tasks.testing.Test
 
+import static com.github.jrubygradle.jar.JRubyJar.DEFAULT_JRUBYJAR_CONFIG
+
 /**
  * @author Schalk W. Cronjé
  * @author Christian Meier
@@ -16,6 +18,7 @@ class JRubyJarPlugin implements Plugin<Project> {
     void apply(Project project) {
         project.apply plugin: 'com.github.jruby-gradle.base'
         project.apply plugin: 'java-base'
+        project.configurations.maybeCreate(DEFAULT_JRUBYJAR_CONFIG)
         project.tasks.create('jrubyJar', JRubyJar)
 
         updateTestTask(project)
@@ -35,7 +38,7 @@ class JRubyJarPlugin implements Plugin<Project> {
             if ((task instanceof JRubyJar) && (task.scriptName != JRubyJar.Type.LIBRARY)) {
                 if (isJRubyVersionDeprecated(task.jrubyVersion)) {
                     project.logger.warn('The task `{}` is using JRuby {} which may cause unexpected behavior, see <http://jruby-gradle.org/errors/jar-deprecated-jrubyversion> for more',
-                        task.name, task.jrubyVersion)
+                            task.name, task.jrubyVersion)
                 }
             }
         }
@@ -60,8 +63,8 @@ class JRubyJarPlugin implements Plugin<Project> {
         // will be writing tests that includes jruby and that they might need some
         // GEMs as part of the tests.
         Closure testConfiguration = { Task t ->
-            environment GEM_HOME : project.jruby.gemInstallDir
-            environment JARS_HOME : project.jruby.jarInstallDir
+            environment GEM_HOME: project.jruby.gemInstallDir
+            environment JARS_HOME: project.jruby.jarInstallDir
             dependsOn 'jrubyPrepare'
         }
 

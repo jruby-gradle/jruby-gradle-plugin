@@ -19,7 +19,7 @@ import com.github.jengelman.gradle.plugins.shadow.internal.ZipCompressor
 import com.github.jengelman.gradle.plugins.shadow.internal.DefaultZipCompressor
 
 /**
- * JRubyJar creates a Java ARchive with Ruby code packed inside of it.
+ * JRubyJar creates a Java Archive with Ruby code packed inside of it.
  *
  * The most common use-case is when packing a self-contained executable jar
  * which would contain your application code, the JRuby runtime and a launcher
@@ -67,7 +67,7 @@ class JRubyJar extends Jar {
     void jrubyVersion(String version) {
         logger.info("setting jrubyVersion to ${version} from ${embeddedJRubyVersion}")
         embeddedJRubyVersion = version
-        addEmbeddedDependencies(project.configurations.maybeCreate(configuration))
+        addEmbeddedDependencies(project.configurations.maybeCreate(configuration)) // TODO <-- Should not be creating a configuration at this stage
     }
 
     /**
