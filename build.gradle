@@ -6,14 +6,13 @@ plugins {
 }
 
 buildScan {
-    termsOfServiceUrl   = 'https://gradle.com/terms-of-service'
+    termsOfServiceUrl = 'https://gradle.com/terms-of-service'
     termsOfServiceAgree = 'yes'
 }
 
 allprojects {
     apply plugin: 'idea'
 
-    
 
     if (!releaseBuild) {
         version = "${version}-SNAPSHOT"
@@ -37,7 +36,7 @@ subprojects {
         maven { url torqueboxProxy }
     }
 
-    if(project.name != 'docs') {
+    if (project.name != 'docs') {
         apply plugin: TestConfigPlugin
         apply plugin: 'java-gradle-plugin'
         apply plugin: 'groovy'
@@ -77,6 +76,12 @@ subprojects {
         }
 
         install.dependsOn check
+
+        tasks.withType(Test) {
+            if (gradle.startParameter.isOffline()) {
+                systemProperties 'TESTS_ARE_OFFLINE': '1'
+            }
+        }
     }
 
 

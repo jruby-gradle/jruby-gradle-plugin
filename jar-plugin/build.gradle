@@ -60,15 +60,6 @@ task prepareTestRepo( type : Copy ) {
 }
 
 test {
-
-    if(gradle.startParameter.isOffline()) {
-        systemProperties 'TESTS_ARE_OFFLINE' : '1'
-    }
-
-    systemProperties TESTROOT : new File(buildDir,'tmp/test/unittests').absolutePath
-    systemProperties TESTREPO_LOCATION : testRepoDir.absolutePath
-    systemProperties 'logback.configurationFile' : new File(projectDir,'src/test/resources/logback-test.xml').absolutePath
-
     dependsOn prepareTestRepo
 }
 
@@ -123,6 +114,5 @@ gradleTest {
 
 integrationTest {
     dependsOn prepareTestRepo
-    systemProperties TESTREPO_LOCATION : testRepoDir.absolutePath
 }
 // vim: ft=groovy

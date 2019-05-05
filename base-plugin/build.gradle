@@ -74,12 +74,6 @@ dependencies {
     gradleTest 'org.bouncycastle:bcprov-jdk15on:1.50'
 }
 
-test {
-    if (gradle.startParameter.isOffline()) {
-        systemProperties 'TESTS_ARE_OFFLINE': '1'
-    }
-}
-
 generateTestConfig {
     testProperties mavenrepo: file('src/integTest/mavenrepo').absolutePath,
             flatrepo: flatRepoDir.absolutePath,
