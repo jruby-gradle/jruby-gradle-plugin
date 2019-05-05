@@ -1,6 +1,8 @@
 
 
-
+ext {
+    testRepoDir = new File(buildDir,'tmp/test/repo' )
+}
 
 configurations {
     testRepo
@@ -8,9 +10,14 @@ configurations {
     testRepoOldFiles
 }
 
+generateTestConfig {
+    testProperties mavenrepo: new File(project(':jruby-gradle-plugin').projectDir,'src/integTest/mavenrepo').absolutePath,
+            flatrepo: testRepoDir.absolutePath
+}
+
 dependencies {
     compile project(':jruby-gradle-plugin')
-    compile 'com.github.jengelman.gradle.plugins:shadow:[1.2.2,2.0)'
+    compile 'com.github.jengelman.gradle.plugins:shadow:[1.2.2,2.0)'  // NEED TO FIX THIS OPEN END
 
     testCompile (spockVersion) {
         exclude module : 'groovy-all'
@@ -44,9 +51,6 @@ dependencies {
     }
 }
 
-ext {
-    testRepoDir = new File(buildDir,'tmp/test/repo' )
-}
 
 task prepareTestRepo( type : Copy ) {
     into testRepoDir

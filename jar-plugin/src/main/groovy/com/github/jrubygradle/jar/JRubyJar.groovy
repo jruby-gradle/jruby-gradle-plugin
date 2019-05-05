@@ -1,22 +1,21 @@
 package com.github.jrubygradle.jar
 
+import com.github.jengelman.gradle.plugins.shadow.internal.DefaultZipCompressor
+import com.github.jengelman.gradle.plugins.shadow.internal.ZipCompressor
 import com.github.jrubygradle.JRubyPrepare
 import com.github.jrubygradle.jar.internal.JRubyDirInfoTransformer
 import com.github.jrubygradle.jar.internal.JRubyJarCopyAction
 import groovy.transform.PackageScope
+import org.apache.tools.zip.ZipOutputStream
 import org.gradle.api.InvalidUserDataException
 import org.gradle.api.artifacts.Configuration
 import org.gradle.api.file.DuplicatesStrategy
+import org.gradle.api.internal.file.copy.CopyAction
 import org.gradle.api.tasks.Input
 import org.gradle.api.tasks.Optional
+import org.gradle.api.tasks.StopExecutionException
 import org.gradle.api.tasks.bundling.Jar
 import org.gradle.api.tasks.bundling.ZipEntryCompression
-import org.gradle.api.tasks.StopExecutionException
-import org.gradle.api.internal.file.copy.CopyAction
-
-import org.apache.tools.zip.ZipOutputStream
-import com.github.jengelman.gradle.plugins.shadow.internal.ZipCompressor
-import com.github.jengelman.gradle.plugins.shadow.internal.DefaultZipCompressor
 
 /**
  * JRubyJar creates a Java Archive with Ruby code packed inside of it.
@@ -29,7 +28,9 @@ import com.github.jengelman.gradle.plugins.shadow.internal.DefaultZipCompressor
  */
 @SuppressWarnings('UnnecessaryGetter')
 class JRubyJar extends Jar {
-    enum Type { RUNNABLE, LIBRARY }
+    enum Type {
+        RUNNABLE, LIBRARY
+    }
 
     static final String DEFAULT_JRUBYJAR_CONFIG = 'jrubyJar'
     static final String DEFAULT_MAIN_CLASS = 'org.jruby.mains.JarMain'
@@ -67,7 +68,7 @@ class JRubyJar extends Jar {
     void jrubyVersion(String version) {
         logger.info("setting jrubyVersion to ${version} from ${embeddedJRubyVersion}")
         embeddedJRubyVersion = version
-        addEmbeddedDependencies(project.configurations.maybeCreate(configuration)) // TODO <-- Should not be creating a configuration at this stage
+        addEmbeddedDependencies(project.configurations.getByName(configuration))
     }
 
     /**
@@ -93,7 +94,7 @@ class JRubyJar extends Jar {
     void jrubyMainsVersion(String version) {
         logger.info("setting jrubyMainsVersion to ${version} from ${embeddedJRubyMainsVersion}")
         embeddedJRubyMainsVersion = version
-        addEmbeddedDependencies(project.configurations.maybeCreate(configuration))
+        addEmbeddedDependencies(project.configurations.getByName(configuration))
     }
 
     /**
@@ -158,7 +159,7 @@ class JRubyJar extends Jar {
      * @deprecated This method is no longer very useful, just use {@link defaultMainClass} instead
      */
     @Deprecated
-    void defaults(final String... defs ) {
+    void defaults(final String... defs) {
         defs.each { String it ->
             switch (it) {
                 case 'mainClass':
@@ -192,8 +193,7 @@ class JRubyJar extends Jar {
             if (mainClass != null) {
                 throw new StopExecutionException('can not have mainClass for library')
             }
-        }
-        else if (mainClass == null) {
+        } else if (mainClass == null) {
             defaultMainClass()
         }
 
@@ -301,11 +301,11 @@ class JRubyJar extends Jar {
     @Override
     protected CopyAction createCopyAction() {
         return new JRubyJarCopyAction(getArchivePath(),
-                                    getInternalCompressor(),
-                                    null, /* DocumentationRegistry */
-                                    [new JRubyDirInfoTransformer()], /* transformers */
-                                    [], /* relocators */
-                                    mainSpec.buildRootResolver().getPatternSet())
+                getInternalCompressor(),
+                null, /* DocumentationRegistry */
+                [new JRubyDirInfoTransformer()], /* transformers */
+                [], /* relocators */
+                mainSpec.buildRootResolver().getPatternSet())
     }
 
     protected ZipCompressor getInternalCompressor() {
@@ -316,7 +316,7 @@ class JRubyJar extends Jar {
                 return new DefaultZipCompressor(this.zip64, ZipOutputStream.STORED)
             default:
                 throw new IllegalArgumentException(String.format('Unknown Compression type %s', entryCompression))
-            }
+        }
     }
 
     /**
