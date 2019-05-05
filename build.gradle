@@ -82,6 +82,14 @@ subprojects {
                 systemProperties 'TESTS_ARE_OFFLINE': '1'
             }
         }
+
+        tasks.withType(CodeNarc) { codenarcSourceSetTask ->
+            def reportName = (codenarcSourceSetTask.name - 'codenarc').uncapitalize()
+            def ideReport = reports.add(org.gradle.api.reporting.internal.TaskGeneratedSingleFileReport, 'ide', reports.task)
+            ideReport.enabled = true
+            ideReport.destination = file( "${project.codenarc.reportsDir}/${reportName}.ide.txt")
+        }
+
     }
 
 
