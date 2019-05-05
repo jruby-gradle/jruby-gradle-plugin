@@ -46,7 +46,7 @@ class JRubyExecSpec extends Specification {
         badProject.task('bad', type: JRubyExec)
 
         then: "An exception should be thrown"
-        thrown(TaskInstantiationException)
+        thrown(org.gradle.api.internal.tasks.DefaultTaskContainer.TaskCreationException)
     }
 
     void "Do not allow args to be set directly"() {
