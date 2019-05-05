@@ -12,7 +12,7 @@ class JRubyPrepareJarsIntegrationSpec extends IntegrationSpecification {
         given:
         buildFile.text = """
             ${projectWithLocalRepo}
-            jruby.gemInstallDir = '${projectDir.absolutePath}'
+            jruby.gemInstallDir = '${pathAsUriStr(projectDir)}'.toURI()
 
             dependencies {
                 gems 'io.dropwizard.metrics:metrics-core:3.1.0'
