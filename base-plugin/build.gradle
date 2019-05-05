@@ -1,4 +1,10 @@
-archivesBaseName = 'jruby-gradle-plugin'
+import org.gradle.plugins.ide.idea.model.IdeaModel
+import org.gradle.plugins.ide.idea.model.IdeaModule
+
+archivesBaseName = 'jruby-gradle-plugin' // TODO: FIX !!
+
+apply plugin: TestConfigPlugin
+apply plugin: 'java-gradle-plugin'
 apply from: "${rootProject.projectDir}/gradle/integration-tests.gradle"
 
 apply plugin: 'maven-publish'
@@ -9,6 +15,8 @@ configurations {
 }
 
 ext {
+    flatRepoDir = file("${buildDir}/tmp/integrationTest/flatRepo")
+
     jrubyClassPathFromConfiguration = { Configuration cfg ->
         def f = cfg.files.find { it.name.startsWith('jruby-complete-') }
         return  f?.absolutePath
@@ -78,6 +86,11 @@ test {
     if (gradle.startParameter.isOffline()) {
         systemProperties 'TESTS_ARE_OFFLINE' : '1'
     }
+}
+
+generateTestConfig {
+    testProperties mavenrepo: file('src/integTest/mavenrepo').absolutePath,
+        flatrepo: flatRepoDir.absolutePath
 }
 
 task copyIntegrationTestJRuby (type:Copy) {
@@ -152,3 +165,4 @@ bintrayUpload.dependsOn assemble
 
 gradleTest.mustRunAfter integrationTest
 // vim: ft=groovy
+
