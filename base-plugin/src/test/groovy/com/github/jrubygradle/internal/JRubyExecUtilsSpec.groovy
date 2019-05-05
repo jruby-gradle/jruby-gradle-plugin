@@ -1,12 +1,13 @@
 package com.github.jrubygradle.internal
 
 import org.gradle.api.InvalidUserDataException
+import org.ysb33r.grolifant.api.OperatingSystem
 import spock.lang.*
 
 import static com.github.jrubygradle.internal.JRubyExecUtils.buildArgs
 
 class JRubyExecUtilsSpec extends Specification {
-    static final boolean IS_WINDOWS = System.getProperty('os.name').toLowerCase().startsWith('windows')
+    static final boolean IS_WINDOWS = OperatingSystem.current().isWindows()
 
     void "The version string in a jruby jar filename must be extracted correctly"() {
 
