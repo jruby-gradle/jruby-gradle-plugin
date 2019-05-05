@@ -1,0 +1,118 @@
+
+
+ext {
+    testRepoDir = new File(buildDir,'tmp/test/repo' )
+}
+
+configurations {
+    testRepo
+    /* this configuration is to dump old versions of things into the flatrepo */
+    testRepoOldFiles
+}
+
+generateTestConfig {
+    testProperties mavenrepo: new File(project(':jruby-gradle-plugin').projectDir,'src/integTest/mavenrepo').absolutePath,
+            flatrepo: testRepoDir.absolutePath
+}
+
+dependencies {
+    compile project(':jruby-gradle-plugin')
+    compile 'com.github.jengelman.gradle.plugins:shadow:[1.2.2,2.0)'  // NEED TO FIX THIS OPEN END
+
+    testCompile (spockVersion) {
+        exclude module : 'groovy-all'
+    }
+
+    // For the testRepo tests I am locking the versions, instead of a open version, as it makes
+    // unit testing easier, This does not affect the final artifact.
+    // If you change values here, you need to update JRubyJarPluginSpec as well.
+    testRepo ("org.jruby:jruby-complete:${jrubyVersion}") {
+        transitive = false
+    }
+
+    testRepo ('rubygems:jar-dependencies:0.1.15') {
+        transitive = false
+    }
+
+    testRepo ('org.jruby.mains:jruby-mains:0.6.1') {
+        transitive = false
+    }
+
+    testRepoOldFiles ('de.saumya.mojo:jruby-mains:0.3.0') {
+        transitive = false
+    }
+
+    testRepoOldFiles ("org.jruby:jruby-complete:1.7.11") {
+        transitive = false
+    }
+
+    testRepo (spockVersion) {
+        transitive = false
+    }
+}
+
+
+task prepareTestRepo( type : Copy ) {
+    into testRepoDir
+    from project.configurations.testRepo
+    from project.configurations.testRepoOldFiles
+
+}
+
+test {
+    dependsOn prepareTestRepo
+}
+
+
+groovydoc {
+    docTitle = "${archivesBaseName} ${version}"
+}
+
+task installGroovyDoc (type : Copy) {
+    from ({new File(buildDir,'docs/groovydoc')}) {
+        include '**'
+    }
+    into {new File(project.properties.jrubyGradleWebsiteInstallDir,"docs/api/${archivesBaseName}/${version}")}
+    onlyIf { project.hasProperty('jrubyGradleWebsiteInstallDir') }
+}
+
+artifacts {
+    archives sourcesJar
+}
+
+bintray {
+    user = project.bintrayUser
+    key = project.bintrayKey
+    publish = true
+    dryRun = false
+    configurations = ['archives']
+
+    pkg {
+        userOrg = 'jruby-gradle'
+        repo = 'plugins'
+        name = 'jruby-gradle-jar-plugin'
+        labels = ['jruby']
+
+        version {
+            name = project.version
+            vcsTag = "v${project.version}"
+            attributes = ['gradle-plugin' : 'com.github.jruby-gradle.jar:com.github.jruby-gradle:jruby-gradle-jar-plugin']
+            desc = 'This plugin encapsulates java archive building functionality for JRuby Gradle projects'
+
+        }
+    }
+}
+
+bintrayUpload {
+    dependsOn assemble
+}
+
+gradleTest {
+    dependsOn jar
+    mustRunAfter test, integrationTest
+}
+
+integrationTest {
+    dependsOn prepareTestRepo
+}
+// vim: ft=groovy

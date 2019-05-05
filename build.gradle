@@ -1,20 +1,18 @@
 plugins {
     id 'com.gradle.build-scan' version '1.16'
-    id 'org.ysb33r.gradletest' version '2.0-alpha-8' apply false
+    id 'org.ysb33r.gradletest' version '2.0-rc.4' apply false
     id 'com.jfrog.bintray' version '1.8.4' apply false
     id 'org.ajoberstar.github-pages' version '1.2.0' apply false
 }
 
 buildScan {
-    termsOfServiceUrl   = 'https://gradle.com/terms-of-service'
+    termsOfServiceUrl = 'https://gradle.com/terms-of-service'
     termsOfServiceAgree = 'yes'
 }
 
 allprojects {
     apply plugin: 'idea'
 
-    group = 'com.github.jruby-gradle'
-    version = '1.7.0'
 
     if (!releaseBuild) {
         version = "${version}-SNAPSHOT"
@@ -25,11 +23,9 @@ allprojects {
     targetCompatibility = '1.8'
 
     ext {
-        spockVersion = "org.spockframework:spock-core:1.1-groovy-2.4"
+        spockVersion = "org.spockframework:spock-core:1.2-groovy-2.4"
     }
-
 }
-
 
 subprojects {
 
@@ -40,12 +36,15 @@ subprojects {
         maven { url torqueboxProxy }
     }
 
-    if(project.name != 'docs') {
+    if (project.name != 'docs') {
+        apply plugin: TestConfigPlugin
+        apply plugin: 'java-gradle-plugin'
         apply plugin: 'groovy'
         apply plugin: 'codenarc'
         apply plugin: 'com.jfrog.bintray'
         apply plugin: 'org.ysb33r.gradletest'
-
+        apply plugin: 'maven-publish'
+        apply from: "${rootProject.projectDir}/gradle/integration-tests.gradle"
 
         dependencies {
             compile localGroovy()
@@ -77,6 +76,12 @@ subprojects {
         }
 
         install.dependsOn check
+
+        tasks.withType(Test) {
+            if (gradle.startParameter.isOffline()) {
+                systemProperties 'TESTS_ARE_OFFLINE': '1'
+            }
+        }
     }
 
 

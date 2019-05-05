@@ -12,6 +12,8 @@ configurations {
 }
 
 dependencies {
+    integrationTestCompile gradleTestKit()
+    
     /* We want to cache jruby-complete at this alternative version which we use
      * in many places
      */

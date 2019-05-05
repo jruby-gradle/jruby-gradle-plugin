@@ -1,0 +1,149 @@
+
+// --- Could be in a separate gradle file
+configurations {
+    testJRubyPrepare
+}
+
+ext {
+    flatRepoDir = file("${buildDir}/tmp/integrationTest/flatRepo")
+
+    jrubyClassPathFromConfiguration = { Configuration cfg ->
+        def f = cfg.files.find { it.name.startsWith('jruby-complete-') }
+        return f?.absolutePath
+    }
+}
+
+project.afterEvaluate {
+    test {
+        systemProperties TEST_JRUBY_CLASSPATH: "${jrubyClassPathFromConfiguration(configurations.testJRubyPrepare)}"
+    }
+}
+
+// --- up to here
+
+ext {
+    olderJRubyVersion = '9.0.1.0'
+    slimVersion = '2.0.2'
+    leafyVersion = '0.4.0'
+}
+
+dependencies {
+
+    compile "org.eclipse.jetty:jetty-server:${jettyVersion}"
+    compile "org.eclipse.jetty:jetty-webapp:${jettyVersion}"
+    runtime('de.saumya.mojo:rubygems:0.2.3@war') {
+        // we just want the war file on the classloader for the application
+        // to find it and use the war-file from filesystem
+        exclude group: 'org.sonatype.nexus.plugins', module: 'nexus-ruby-tools'
+    }
+
+    testJRubyPrepare "org.jruby:jruby-complete:${jrubyVersion}"
+
+    testCompile(spockVersion) {
+        exclude module: 'groovy-all'
+    }
+
+    integrationTestCompile(spockVersion) {
+        exclude module: 'groovy-all'
+    }
+
+    // NOTE: This is used by JRubyPrepareGemsIntegrationSpec
+    integrationTestGems "rubygems:slim:${slimVersion}"
+
+    // NOTE: This is used by JRubyPrepareJarsIntegrationSpec
+    integrationTestGems "rubygems:leafy-complete:${leafyVersion}"
+
+    // NOTE: If you change this, you will also need to update JRubyExecIntegrationSpec & JRubyExecExtensionIntegrationSpec
+    integrationTestGems 'rubygems:credit_card_validator:1.1.0'
+
+    // NOTE: If you change this, you will also need to update JRubyExecIntegrationSpec
+    integrationTestGems 'rubygems:rspec:3.1.0'
+
+    // NOTE: This should always be an older older version. 
+    // It is used by JRubyExecIntegrationSpec
+    integrationTestGems "org.jruby:jruby-complete:${olderJRubyVersion}"
+
+    // NOTE: older jruby versions needs this for exec to work properly
+    integrationTestGems "rubygems:jar-dependencies:0.1.15"
+
+    // This is used by JRubyExecExtensionIntegrationSpec
+    integrationTestGems "org.bouncycastle:bcprov-jdk15on:${bcprovVersion}"
+
+    gradleTest "org.jruby:jruby-complete:${jrubyVersion}"
+    gradleTest 'rubygems:credit_card_validator:1.1.0'
+    gradleTest 'org.bouncycastle:bcprov-jdk15on:1.50'
+}
+
+generateTestConfig {
+    testProperties mavenrepo: file('src/integTest/mavenrepo').absolutePath,
+            flatrepo: flatRepoDir.absolutePath,
+            bcprovVersion: bcprovVersion,
+            olderJRubyVersion: olderJRubyVersion,
+            slimVersion: slimVersion,
+            leafyVersion: leafyVersion
+}
+
+task copyIntegrationTestJRuby(type: Copy) {
+    from({ configurations.testJRubyPrepare.files })
+    into new File(buildDir, 'tmp/integrationTest/flatRepo')
+}
+
+integrationTest {
+    if (gradle.startParameter.isOffline()) {
+        systemProperties 'TESTS_ARE_OFFLINE': '1'
+    }
+    dependsOn copyIntegrationTestJRuby
+}
+
+task installGroovyDoc(type: Copy) {
+    from({ new File(buildDir, 'docs/groovydoc') }) {
+        include '**'
+    }
+    into { new File(project.properties.jrubyGradleWebsiteInstallDir, "docs/api/${archivesBaseName}/${version}") }
+    onlyIf { project.hasProperty('jrubyGradleWebsiteInstallDir') }
+}
+
+
+publishing {
+    publications {
+        maven(MavenPublication) {
+//            groupId project.group
+//            artifactId project.archivesBaseName
+//            version project.version
+
+            artifact sourcesJar {
+                classifier "sources"
+            }
+
+            from components.java
+        }
+    }
+}
+
+bintray {
+    user = project.bintrayUser
+    key = project.bintrayKey
+    publish = true
+    dryRun = false
+    publications = ['maven']
+
+    pkg {
+        userOrg = 'jruby-gradle'
+        repo = 'plugins'
+        name = 'jruby-gradle-plugin'
+        labels = ['jruby']
+
+        version {
+            name = project.version
+            vcsTag = "v${project.version}"
+            attributes = ['gradle-plugin': 'com.github.jruby-gradle.base:com.github.jruby-gradle:jruby-gradle-plugin']
+            desc = 'The purpose of plugin is to encapsulate useful Gradle functionality for JRuby projects.'
+
+        }
+    }
+}
+bintrayUpload.dependsOn assemble
+
+gradleTest.mustRunAfter integrationTest
+// vim: ft=groovy
+
