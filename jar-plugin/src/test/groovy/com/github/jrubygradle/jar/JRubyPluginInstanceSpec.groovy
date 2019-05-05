@@ -5,11 +5,11 @@ import spock.lang.Specification
 class JRubyPluginInstanceSpec extends Specification {
     JRubyJarPlugin plugin
 
-    def setup() {
+    void setup() {
         plugin = new JRubyJarPlugin()
     }
 
-    def "isJRubyVersionDeprecated()"() {
+    void "isJRubyVersionDeprecated()"() {
         expect:
         plugin.isJRubyVersionDeprecated(version) == expected
 
