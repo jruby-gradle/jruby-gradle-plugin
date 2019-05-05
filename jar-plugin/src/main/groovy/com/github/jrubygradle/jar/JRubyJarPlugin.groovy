@@ -1,12 +1,12 @@
 package com.github.jrubygradle.jar
 
+import static com.github.jrubygradle.jar.JRubyJar.DEFAULT_JRUBYJAR_CONFIG
+
 import groovy.transform.PackageScope
 import org.gradle.api.Plugin
 import org.gradle.api.Project
 import org.gradle.api.Task
 import org.gradle.api.tasks.testing.Test
-
-import static com.github.jrubygradle.jar.JRubyJar.DEFAULT_JRUBYJAR_CONFIG
 
 /**
  * @author Schalk W. Cronjé
