@@ -10,10 +10,6 @@ import spock.lang.Shared
 class JRubyExecExtensionIntegrationSpec extends IntegrationSpecification {
 
     static final String DEFAULT_TASK_NAME = 'inlineJRubyExec'
-    static final String HELLO_WORLD = 'helloWorld.rb'
-    static final String HELLO_NAME = 'helloName.rb'
-    static final String REQUIRES_GEM = 'requiresGem.rb'
-    static final String ENV_VARS = 'envVars.rb'
     static final String BCPROV_NAME = 'bcprov-jdk15on'
 
     void "Run a script with minimum parameters"() {

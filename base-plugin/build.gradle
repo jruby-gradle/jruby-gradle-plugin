@@ -31,6 +31,10 @@ project.afterEvaluate {
 
 // --- up to here
 
+ext {
+    olderJRubyVersion = '9.0.1.0'
+}
+
 dependencies {
 
     compile "org.eclipse.jetty:jetty-server:${jettyVersion}"
@@ -63,9 +67,9 @@ dependencies {
     // NOTE: If you change this, you will also need to update JRubyExecIntegrationSpec
     integrationTestGems 'rubygems:rspec:3.1.0'
 
-    // NOTE: Leave this at .11 as it must be an older version. if
-    // you change it here you will also need to update JRubyExecIntegrationSpec
-    integrationTestGems "org.jruby:jruby-complete:9.0.1.0"
+    // NOTE: This should always be an older older version. 
+    // It is used by JRubyExecIntegrationSpec
+    integrationTestGems "org.jruby:jruby-complete:${olderJRubyVersion}"
 
     // NOTE: older jruby versions needs this for exec to work properly
     integrationTestGems "rubygems:jar-dependencies:0.1.15"
@@ -91,7 +95,8 @@ test {
 generateTestConfig {
     testProperties mavenrepo: file('src/integTest/mavenrepo').absolutePath,
         flatrepo: flatRepoDir.absolutePath,
-        bcprovVersion: bcprovVersion
+        bcprovVersion: bcprovVersion,
+        olderJRubyVersion: olderJRubyVersion
 }
 
 task copyIntegrationTestJRuby (type:Copy) {

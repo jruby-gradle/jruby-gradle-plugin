@@ -9,10 +9,20 @@ import spock.lang.Specification
 
 class IntegrationSpecification extends Specification {
 
+    static final boolean OFFLINE = System.getProperty('TESTS_ARE_OFFLINE')
+
+    static final String HELLO_WORLD = 'helloWorld.rb'
+    static final String HELLO_NAME = 'helloName.rb'
+    static final String REQUIRES_GEM = 'requiresGem.rb'
+    static final String REQUIRE_THE_A_GEM = 'require-a-gem.rb'
+    static final String ENV_VARS = 'envVars.rb'
+
     @Shared
     Map testProperties
     @Shared
     File flatRepoLocation
+    @Shared
+    File mavenRepoLocation
 
     @Rule
     TemporaryFolder testFolder
@@ -24,6 +34,7 @@ class IntegrationSpecification extends Specification {
     void setupSpec() {
         testProperties = loadTestProperties()
         flatRepoLocation = new File(testProperties.flatrepo)
+        mavenRepoLocation = new File(testProperties.mavenrepo)
     }
 
     void setup() {
@@ -55,12 +66,25 @@ class IntegrationSpecification extends Specification {
         """
     }
 
+    String getProjectWithMavenRepo() {
+        """
+        plugins {
+            id 'com.github.jruby-gradle.base'
+        }
+
+        jruby.defaultRepositories = false
+        repositories.maven { url 'file://${mavenRepoLocation.absolutePath}' } 
+        repositories.flatDir dirs: '${flatRepoLocation.absolutePath}'
+        """
+    }
+
     GradleRunner gradleRunner(List<String> args) {
         GradleRunner.create()
                 .withProjectDir(projectDir)
                 .withDebug(true)
                 .withArguments(args)
                 .withPluginClasspath()
+                .forwardOutput()
     }
 
     GradleRunner gradleRunner(String... args) {
