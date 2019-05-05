@@ -1,23 +1,14 @@
 package com.github.jrubygradle.jar
 
 import org.gradle.api.Project
-import org.gradle.api.Task
-import org.gradle.api.artifacts.Configuration
-import org.junit.Rule
-import org.junit.rules.TemporaryFolder
-import org.gradle.testkit.runner.BuildResult
-import org.gradle.testkit.runner.GradleRunner
-import org.gradle.testkit.runner.TaskOutcome
-
-import spock.lang.*
-
-import java.util.zip.ZipEntry
-import java.util.zip.ZipFile
+import spock.lang.Ignore
+import spock.lang.Specification
 
 /*
  * A series of tests which expect to use the JRubyJar task in more of an integration
  * test fashion, i.e. evaluating the Project, etc
  */
+
 @Ignore
 class JRubyJarIntegrationSpec extends Specification {
     static final File TESTROOT = new File("${System.getProperty('TESTROOT') ?: 'build/tmp/test/unittests'}/jrjps")

@@ -2,8 +2,7 @@ package com.github.jrubygradle
 
 import org.gradle.api.Project
 import org.gradle.testfixtures.ProjectBuilder
-import spock.lang.*
-
+import spock.lang.Specification
 
 /**
  * Unit test covering the JRuby extensions (i.e. project.jruby)

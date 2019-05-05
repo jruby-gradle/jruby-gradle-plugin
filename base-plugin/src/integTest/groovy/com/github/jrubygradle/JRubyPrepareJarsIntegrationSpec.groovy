@@ -1,6 +1,5 @@
 package com.github.jrubygradle
 
-import com.github.jrubygradle.testhelper.BasicProjectBuilder
 import com.github.jrubygradle.testhelper.IntegrationSpecification
 
 /**

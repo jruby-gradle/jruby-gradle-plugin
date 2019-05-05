@@ -2,37 +2,39 @@ package com.github.jrubygradle.internal
 
 import org.gradle.api.InvalidUserDataException
 import org.ysb33r.grolifant.api.OperatingSystem
-import spock.lang.*
+import spock.lang.Issue
+import spock.lang.Specification
 
 import static com.github.jrubygradle.internal.JRubyExecUtils.buildArgs
 
+@SuppressWarnings(['BuilderMethodWithSideEffects'])
 class JRubyExecUtilsSpec extends Specification {
     static final boolean IS_WINDOWS = OperatingSystem.current().isWindows()
 
     void "The version string in a jruby jar filename must be extracted correctly"() {
 
         expect:
-            version == JRubyExecUtils.jrubyJarVersion(new File(jarName))
+        version == JRubyExecUtils.jrubyJarVersion(new File(jarName))
 
         where:
-            jarName || version
-            'jruby-complete-9.0.0.0.rc2.jar' || '9.0.0.0.rc2'
-            'jruby-complete-9.0.0.0.jar' || '9.0.0.0'
-            'jruby-complete-22.999.888.jar' || '22.999.888'
-            'jruby-complete.jar' || null
+        jarName                          || version
+        'jruby-complete-9.0.0.0.rc2.jar' || '9.0.0.0.rc2'
+        'jruby-complete-9.0.0.0.jar'     || '9.0.0.0'
+        'jruby-complete-22.999.888.jar'  || '22.999.888'
+        'jruby-complete.jar'             || null
     }
 
     void "The version information in a jruby jar filename must be extracted correctly"() {
 
         expect:
-           triplet == JRubyExecUtils.jrubyJarVersionTriple(new File(jarName))
+        triplet == JRubyExecUtils.jrubyJarVersionTriple(new File(jarName))
 
         where:
-            jarName || triplet
-            'jruby-complete-9.0.0.0.rc2.jar' || [ major : 9, minor : 0, patchlevel : 0 ]
-            'jruby-complete-9.0.0.0.jar' || [ major : 9, minor : 0, patchlevel : 0 ]
-            'jruby-complete-22.999.888.jar' || [ major : 22, minor : 999, patchlevel : 888 ]
-            'jruby-complete.jar'            || [:]
+        jarName                          || triplet
+        'jruby-complete-9.0.0.0.rc2.jar' || [major: 9, minor: 0, patchlevel: 0]
+        'jruby-complete-9.0.0.0.jar'     || [major: 9, minor: 0, patchlevel: 0]
+        'jruby-complete-22.999.888.jar'  || [major: 22, minor: 999, patchlevel: 888]
+        'jruby-complete.jar'             || [:]
     }
 
     void "buildArgs() should raise with no script or jrubyArgs"() {

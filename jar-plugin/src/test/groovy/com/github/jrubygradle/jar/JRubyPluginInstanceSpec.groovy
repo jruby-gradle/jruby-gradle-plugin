@@ -9,7 +9,7 @@ class JRubyPluginInstanceSpec extends Specification {
         plugin = new JRubyJarPlugin()
     }
 
-    void "isJRubyVersionDeprecated()"() {
+    void "isJRubyVersionDeprecated"() {
         expect:
         plugin.isJRubyVersionDeprecated(version) == expected
 

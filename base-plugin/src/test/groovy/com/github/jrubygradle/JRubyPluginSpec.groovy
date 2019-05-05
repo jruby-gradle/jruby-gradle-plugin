@@ -30,7 +30,7 @@ class JRubyPluginSpec extends Specification {
         project.evaluate()
 
         then: "rubygemsRelease() should be defined"
-        project.repositories.metaClass.respondsTo(project.repositories,'rubygemsRelease')
+        project.repositories.metaClass.respondsTo(project.repositories, 'rubygemsRelease')
 
         and:
         hasRepositoryUrl(project, TORQUEBOX_RUBYGEMS_RELEASE_URL)

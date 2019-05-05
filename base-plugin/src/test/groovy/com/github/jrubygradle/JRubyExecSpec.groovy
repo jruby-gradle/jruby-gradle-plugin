@@ -1,6 +1,5 @@
 package com.github.jrubygradle
 
-
 import org.gradle.api.InvalidUserDataException
 import org.gradle.api.Project
 import org.gradle.api.ProjectConfigurationException
@@ -67,9 +66,6 @@ class JRubyExecSpec extends Specification {
     }
 
     void "Check jruby defaults when jruby.execVersion is changed after the task is created"() {
-        given:
-        final String initialVersion = project.jruby.execVersion
-
         when: "ExecVersion is changed later on, and JRubyExec.jrubyVersion was not called"
         project.jruby.execVersion = '1.5.0'
 
@@ -169,10 +165,10 @@ class JRubyExecSpec extends Specification {
         }
 
         then:
-        execTask.getArgs() == ['-I', testJarDependencies, '-rjars/setup',
-                               '-j1', '-j2', '-j3', '-S',
-                               SCRIPT_NAME,
-                               '-s1', '-s2', '-s3']
+        execTask.args == ['-I', testJarDependencies, '-rjars/setup',
+                          '-j1', '-j2', '-j3', '-S',
+                          SCRIPT_NAME,
+                          '-s1', '-s2', '-s3']
     }
 
     void "Properly handle the lack of a `script` argument"() {
@@ -182,13 +178,12 @@ class JRubyExecSpec extends Specification {
         }
 
         then:
-        execTask.getArgs() == ['-I', testJarDependencies, '-rjars/setup', '-S', 'rspec']
+        execTask.args == ['-I', testJarDependencies, '-rjars/setup', '-S', 'rspec']
     }
 
     void "Error when `script` is empty and there is no `jrubyArgs`"() {
         when:
-        project.configure(execTask) {}
-        execTask.getArgs()
+        execTask.args
 
         then: "An exception should be thrown"
         thrown(InvalidUserDataException)

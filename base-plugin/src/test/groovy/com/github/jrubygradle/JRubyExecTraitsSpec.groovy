@@ -5,8 +5,7 @@ import org.gradle.api.DefaultTask
 import org.gradle.api.Project
 import org.gradle.api.Task
 import org.gradle.testfixtures.ProjectBuilder
-import spock.lang.*
-
+import spock.lang.Specification
 
 /**
  */
@@ -31,9 +30,9 @@ class JRubyExecTraitsSpec extends Specification {
     void "Filter out RVM environment values by default"() {
         when:
         Map preparedEnv = task.getPreparedEnvironment([
-                'GEM_HOME' : '/tmp/spock',
-                'RUBY_VERSION' : 'notaversion',
-                'rvm_ruby_string' : 'jruby-head',
+                'GEM_HOME'       : '/tmp/spock',
+                'RUBY_VERSION'   : 'notaversion',
+                'rvm_ruby_string': 'jruby-head',
         ])
 
         then:
@@ -47,12 +46,14 @@ class JRubyExecTraitsSpec extends Specification {
 
         when:
         Map preparedEnv = task.getPreparedEnvironment([
-                'GEM_PATH' : '/tmp/spock/invalid',
+                'GEM_PATH': '/tmp/spock/invalid',
         ])
 
         then:
-        preparedEnv.containsKey('GEM_PATH') }
+        preparedEnv.containsKey('GEM_PATH')
+    }
 
+    @SuppressWarnings('UnnecessaryGetter')
     void "setting gemWorkDir should work"() {
         given:
         String workDir = 'customGemDir'
@@ -67,6 +68,7 @@ class JRubyExecTraitsSpec extends Specification {
         task.gemWorkDir.absolutePath.endsWith(workDir)
     }
 
+    @SuppressWarnings('UnnecessaryGetter')
     void "setting gemWorkDir with traits"() {
         given:
         String workDir = 'customGemDir'

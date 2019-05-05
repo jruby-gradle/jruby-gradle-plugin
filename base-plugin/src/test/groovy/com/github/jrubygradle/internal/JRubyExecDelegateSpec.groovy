@@ -10,12 +10,11 @@ import spock.lang.Specification
 // Use JRubyExecExtensionIntegrationSpec instead
 // ===============================================
 
-
 /**
  * @author Schalk W. Cronjé
  */
 class JRubyExecDelegateSpec extends Specification {
-    static final String absFilePrefix = System.getProperty('os.name').toLowerCase().startsWith('windows') ? 'C:' : ''
+    static final String ABS_FILE_PREFIX = System.getProperty('os.name').toLowerCase().startsWith('windows') ? 'C:' : ''
 
     Project project
     JRubyExecDelegate jred
@@ -55,7 +54,7 @@ class JRubyExecDelegateSpec extends Specification {
     void "When passing absolute file and absolute file, expect check for existence to be executed"() {
         given:
         def cl = {
-            script absFilePrefix + '/path/to/file'
+            script ABS_FILE_PREFIX + '/path/to/file'
             jrubyArgs 'c', 'd', '-S'
             scriptArgs '-x'
             scriptArgs '-y', '-z'

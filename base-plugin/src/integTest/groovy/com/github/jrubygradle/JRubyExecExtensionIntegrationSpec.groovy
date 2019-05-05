@@ -2,7 +2,6 @@ package com.github.jrubygradle
 
 import com.github.jrubygradle.testhelper.IntegrationSpecification
 import org.gradle.testkit.runner.BuildResult
-import spock.lang.Shared
 
 /**
  * @author Schalk W. Cronjé
@@ -18,7 +17,6 @@ class JRubyExecExtensionIntegrationSpec extends IntegrationSpecification {
         createJRubyExecProject """
             script 'src/${HELLO_WORLD}'
         """
-
 
         when: "I call jrubyexec with only a script name"
         BuildResult result = build()
@@ -136,10 +134,12 @@ class JRubyExecExtensionIntegrationSpec extends IntegrationSpecification {
         gradleRunner(DEFAULT_TASK_NAME, '-i').build()
     }
 
+    @SuppressWarnings('BuilderMethodWithSideEffects')
     private void createJRubyExecProject(String jrubyexecConfig) {
         createJRubyExecProject('', jrubyexecConfig)
     }
 
+    @SuppressWarnings('BuilderMethodWithSideEffects')
     private void createJRubyExecProject(String preamble, String jrubyexecConfig) {
         buildFile.text = """
         ${projectWithLocalRepo}
@@ -157,7 +157,7 @@ class JRubyExecExtensionIntegrationSpec extends IntegrationSpecification {
     }
 
     private String withJarToUse(String jarFormat) {
-        String dependencies = """
+        """
             dependencies {
                 jrubyExec ${jarFormat}
             }
@@ -171,6 +171,4 @@ class JRubyExecExtensionIntegrationSpec extends IntegrationSpecification {
     private String getBcprovVer() {
         testProperties.bcprovVersion
     }
-
-
 }

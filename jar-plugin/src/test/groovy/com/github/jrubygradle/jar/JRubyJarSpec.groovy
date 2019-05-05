@@ -1,12 +1,10 @@
 package com.github.jrubygradle.jar
 
 import org.gradle.api.Project
-import org.gradle.api.ProjectConfigurationException
 import org.gradle.api.artifacts.Configuration
 import org.gradle.testfixtures.ProjectBuilder
-import spock.lang.*
-
-import static org.gradle.api.logging.LogLevel.LIFECYCLE
+import spock.lang.Issue
+import spock.lang.Specification
 
 /**
  * JRubyJar task's unit tests

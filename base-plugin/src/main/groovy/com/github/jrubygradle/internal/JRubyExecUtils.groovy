@@ -57,8 +57,7 @@ class JRubyExecUtils {
      * @param jar JRuby Jar
      * @return Version string map [major,minor,patchlevel] or null
      *
-     * @since 0.1.16
-     * @deprecated This method is no longer used and will be removed in a later
+     * @since 0.1.16* @deprecated This method is no longer used and will be removed in a later
      *  version
      */
     @CompileDynamic
@@ -76,9 +75,9 @@ class JRubyExecUtils {
         }
 
         return [
-            major : matches[0][1].toInteger(),
-            minor : matches[0][2].toInteger(),
-            patchlevel : matches[0][3].toInteger()
+                major     : matches[0][1].toInteger(),
+                minor     : matches[0][2].toInteger(),
+                patchlevel: matches[0][3].toInteger()
         ]
     }
 
@@ -105,9 +104,9 @@ class JRubyExecUtils {
      * @return sequential list of arguments to pass jruby-complete.jar
      */
     static List<String> buildArgs(List<Object> extra,
-                                    List<Object> jrubyArgs,
-                                    File script,
-                                    List<Object> scriptArgs) {
+                                  List<Object> jrubyArgs,
+                                  File script,
+                                  List<Object> scriptArgs) {
         List<Object> cmdArgs = extra
         // load Jars.lock on startup
         cmdArgs.add('-rjars/setup')
@@ -129,8 +128,7 @@ class JRubyExecUtils {
                 throw new InvalidUserDataException("${script} does not exist")
             }
             cmdArgs.add(script.toString())
-        }
-        else if (script == null) {
+        } else if (script == null) {
             if (useBinPath && (jrubyArgs.size() <= 1)) {
                 throw new InvalidUserDataException('No `script` property defined and no inline script provided')
             }
