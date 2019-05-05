@@ -1,7 +1,7 @@
 package com.github.jrubygradle
 
-import com.github.jrubygradle.internal.JRubyExecDelegate
 import com.github.jrubygradle.internal.GemVersionResolver
+import com.github.jrubygradle.internal.JRubyExecDelegate
 import com.github.jrubygradle.internal.JRubyExecUtils
 import com.github.jrubygradle.internal.RubygemsServlet
 import org.gradle.api.Plugin
@@ -65,7 +65,7 @@ class JRubyPlugin implements Plugin<Project> {
                 // can not cast
                 Object embedded = embeddedServer()
                 String path = embedded.addRepository(localUrl)
-                project.logger.info( 'Adding remote rubygems repo: {}', localUrl)
+                project.logger.info('Adding remote rubygems repo: {}', localUrl)
                 maven {
                     url {
                         startEmbeddedServer(project)
@@ -87,6 +87,7 @@ class JRubyPlugin implements Plugin<Project> {
 
     // can not cast same object from different classloaders
     private Object server
+
     private Object embeddedServer() {
         if (server == null) {
             // TODO maybe things will work now without cloning
@@ -97,7 +98,7 @@ class JRubyPlugin implements Plugin<Project> {
             List<URL> urls = [] as Queue
             URL warFileURL
             RubygemsServlet.classLoader.URLs.each {
-                if (it.file.endsWith('.war') ) {
+                if (it.file.endsWith('.war')) {
                     warFileURL = it
                 }
                 // for integTest we need to filter some jars here
@@ -115,6 +116,7 @@ class JRubyPlugin implements Plugin<Project> {
     }
 
     private boolean serverStarted = false
+
     private void startEmbeddedServer(Project project) {
         if (server != null && !serverStarted) {
             // we need to set the current thread context class loader

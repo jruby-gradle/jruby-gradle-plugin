@@ -6,7 +6,6 @@ import org.junit.rules.TemporaryFolder
 import spock.lang.Shared
 import spock.lang.Specification
 
-
 class IntegrationSpecification extends Specification {
     static final boolean OFFLINE = System.getProperty('TESTS_ARE_OFFLINE')
 

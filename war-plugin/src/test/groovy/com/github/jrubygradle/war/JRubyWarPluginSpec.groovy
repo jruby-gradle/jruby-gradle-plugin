@@ -1,6 +1,5 @@
 package com.github.jrubygradle.war
 
-
 import org.gradle.api.tasks.bundling.War
 import org.gradle.testfixtures.ProjectBuilder
 import spock.lang.Specification

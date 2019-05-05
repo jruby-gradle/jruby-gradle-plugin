@@ -1,6 +1,6 @@
 package com.github.jrubygradle.internal
 
-import spock.lang.*
+import spock.lang.Specification
 
 class GemVersionSpec extends Specification {
     void "parses single version"() {

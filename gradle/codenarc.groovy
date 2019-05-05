@@ -38,12 +38,13 @@ ruleset {
     CatchThrowable
     ChainedTest
     ClassForName
-    ClassJavadoc
+    ClassJavadoc {
+        doNotApplyToFileNames = '*Spec.groovy,*Specification.groovy'
+    }
     ClassName
     ClassNameSameAsFilename
     ClassNameSameAsSuperclass
     ClassSize
-    CloneWithoutCloneable
     CloneableWithoutClone
     CloseWithoutCloseable
     ClosureAsLastMethodParameter
@@ -53,8 +54,6 @@ ruleset {
     ComparisonOfTwoConstants
     ComparisonWithSelf
     ConfusingClassNamedException
-    // This warns on all our useful gradle DSL setters
-    //ConfusingMethodName
     ConfusingMultipleReturns
     ConfusingTernary
     ConsecutiveBlankLines
@@ -66,21 +65,23 @@ ruleset {
     ConstantsOnlyInterface
     CouldBeElvis
     CoupledTestCase
-    CrapMetric   // Requires the GMetrics jar and a Cobertura coverage file
-    CyclomaticComplexity   // Requires the GMetrics jar
     DeadCode
     DirectConnectionManagement
     DoubleCheckedLocking
     DoubleNegative
     DuplicateCaseStatement
     DuplicateImport
-    DuplicateListLiteral
+    DuplicateListLiteral {
+        doNotApplyToFileNames = '*Spec.groovy,*Specification.groovy'
+    }
     DuplicateMapKey
-    DuplicateMapLiteral
-    // This is silly
-    //DuplicateNumberLiteral
+    DuplicateMapLiteral {
+        doNotApplyToFileNames = '*Spec.groovy,*Specification.groovy'
+    }
     DuplicateSetValue
-    DuplicateStringLiteral
+    DuplicateStringLiteral {
+        doNotApplyToFileNames = '*Spec.groovy,*Specification.groovy'
+    }
     ElseBlockBraces
     EmptyCatchBlock
     EmptyClass
@@ -124,11 +125,8 @@ ruleset {
     ExplicitLinkedListInstantiation
     ExplicitStackInstantiation
     ExplicitTreeSetInstantiation
-    // using 'build' as a method prefix is okay IMO
-    //FactoryMethodName
     FieldName
     FileCreateTempFile
-    FileEndsWithoutNewline
     FinalClassWithProtectedMember
     ForLoopShouldBeWhileLoop
     ForStatementBraces
@@ -140,8 +138,6 @@ ruleset {
     HardCodedWindowsRootDirectory
     HashtableIsObsolete
     IfStatementBraces
-    // Verbose if statements are much more readable IMO
-    //IfStatementCouldBeTernary
     IllegalClassMember
     IllegalClassReference
     IllegalPackageReference
@@ -159,25 +155,9 @@ ruleset {
     InterfaceName
     InterfaceNameSameAsSuperInterface
     InvertedIfElse
-    JUnitAssertAlwaysFails
-    JUnitAssertAlwaysSucceeds
-    JUnitAssertEqualsConstantActualValue
-    JUnitFailWithoutMessage
-    JUnitLostTest
-    JUnitPublicField
-    JUnitPublicNonTestMethod
-    JUnitPublicProperty
-    JUnitSetUpCallsSuper
-    JUnitStyleAssertions
-    JUnitTearDownCallsSuper
-    JUnitTestMethodWithoutAssert
-    JUnitUnnecessarySetUp
-    JUnitUnnecessaryTearDown
-    JUnitUnnecessaryThrowsException
+
     //JavaIoPackageAccess
-    JdbcConnectionReference
-    JdbcResultSetReference
-    JdbcStatementReference
+
     // Generally we've been pretty good about this, this warning only really
     // shows up for good descriptive exception messages
     //LineLength
@@ -187,9 +167,10 @@ ruleset {
     LoggingSwallowsStacktrace
     LongLiteralWithLowerCaseL
     MethodCount
-    MethodName
+    MethodName {
+        doNotApplyToFileNames = '*Spec.groovy,*Specification.groovy'
+    }
     MethodSize
-    MisorderedStaticImports
     MissingBlankLineAfterImports
     MissingBlankLineAfterPackage
     MissingNewInThrowStatement
@@ -198,7 +179,9 @@ ruleset {
     NestedBlockDepth
     NestedForLoop
     NestedSynchronization
-    NoDef
+    NoDef {
+        doNotApplyToFileNames = '*Spec.groovy,*Specification.groovy'
+    }
     NoWildcardImports
     NonFinalPublicField
     NonFinalSubclassOfSensitiveInterface
@@ -225,9 +208,6 @@ ruleset {
     ReturnsNullInsteadOfEmptyCollection
     SerialPersistentFields
     SerialVersionUID
-    /* Not needed
-     SerializableClassMustDefineSerialVersionUID
-    */
     SimpleDateFormatMissingLocale
     SpaceAfterCatch
     SpaceAfterClosingBrace
@@ -239,8 +219,6 @@ ruleset {
     SpaceAfterSwitch
     SpaceAfterWhile
     SpaceAroundClosureArrow
-    // I cannot get this rule to cooperate
-    //SpaceAroundMapEntryColon
     SpaceAroundOperator
     SpaceBeforeClosingBrace
     SpaceBeforeOpeningBrace
@@ -276,10 +254,14 @@ ruleset {
     ThrowRuntimeException
     ThrowThrowable
     ToStringReturnsNull
-    TrailingWhitespace
+    TrailingWhitespace {
+        doNotApplyToFileNames = '*Spec.groovy,*Specification.groovy'
+    }
     UnnecessaryBigDecimalInstantiation
     UnnecessaryBigIntegerInstantiation
-    UnnecessaryBooleanExpression
+    UnnecessaryBooleanExpression {
+        doNotApplyToFileNames = '*Spec.groovy,*Specification.groovy'
+    }
     UnnecessaryBooleanInstantiation
     UnnecessaryCallForLastElement
     UnnecessaryCallToSubstring
@@ -297,7 +279,9 @@ ruleset {
     UnnecessaryFail
     UnnecessaryFinalOnPrivateMethod
     UnnecessaryFloatInstantiation
-    UnnecessaryGString
+    UnnecessaryGString {
+        doNotApplyToFileNames = '*Spec.groovy,*Specification.groovy'
+    }
     UnnecessaryGetter
     UnnecessaryGroovyImport
     UnnecessaryIfStatement
@@ -313,8 +297,6 @@ ruleset {
     UnnecessaryPackageReference
     UnnecessaryParenthesesForMethodCallWithClosure
     UnnecessaryPublicModifier
-    // Return keywords are useful for code readability silly
-    //UnnecessaryReturnKeyword
     UnnecessarySafeNavigationOperator
     UnnecessarySelfAssignment
     UnnecessarySemicolon
@@ -324,7 +306,6 @@ ruleset {
     UnnecessaryToString
     UnnecessaryTransientModifier
     UnsafeArrayDeclaration
-    UnsafeImplementationAsMap
     UnusedArray
     UnusedImport
     UnusedMethodParameter
@@ -342,7 +323,9 @@ ruleset {
     UseCollectMany
     UseCollectNested
     UseOfNotifyMethod
-    VariableName
+    VariableName {
+        doNotApplyToFileNames = '*Spec.groovy,*Specification.groovy'
+    }
     VectorIsObsolete
     VolatileArrayField
     VolatileLongOrDoubleField

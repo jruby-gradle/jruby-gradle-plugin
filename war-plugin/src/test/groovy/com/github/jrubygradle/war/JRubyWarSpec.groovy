@@ -1,8 +1,7 @@
 package com.github.jrubygradle.war
 
 import org.gradle.testfixtures.ProjectBuilder
-import spock.lang.*
-import static org.gradle.api.logging.LogLevel.*
+import spock.lang.Specification
 
 /**
  * @author R. Tyler Croy

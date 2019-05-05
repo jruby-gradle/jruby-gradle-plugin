@@ -34,13 +34,13 @@ class JRubyGenerateGradleRbIntegrationSpec extends IntegrationSpecification {
         String content = expected.text
 
         then: "The GEM_HOME to include gemInstallDir"
-        expected.text.contains "export GEM_HOME=\"${new File(projectDir, 'build/gems').absolutePath}"
+        content.contains "export GEM_HOME=\"${new File(projectDir, 'build/gems').absolutePath}"
 
         and: "The JARS_HOME is set"
-        expected.text.contains('export JARS_HOME=')
+        content.contains('export JARS_HOME=')
 
         and: "The java command invoked with the -cp flag"
         // with this test setup it is just jrubyExec.asPath
-        expected.text.contains "-cp ${flatRepoLocation.absolutePath}"
+        content.contains "-cp ${flatRepoLocation.absolutePath}"
     }
 }

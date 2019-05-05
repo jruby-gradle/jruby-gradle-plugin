@@ -55,7 +55,7 @@ subprojects {
 
         codenarc {
             sourceSets = [sourceSets.main]
-            configFile = file("${rootProject.projectDir}/gradle/codenarc.rules")
+            configFile = file("${rootProject.projectDir}/gradle/codenarc.groovy")
         }
 
         test {

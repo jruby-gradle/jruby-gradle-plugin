@@ -32,12 +32,12 @@ class JRubyJarTestKitSpec extends IntegrationSpecification {
         when:
         BuildResult result = build()
 
-
         then:
         result.task(":jrubyJar").outcome == TaskOutcome.SUCCESS
         new File(projectDir, "build/libs/testproject-jruby.jar").exists()
     }
 
+    @SuppressWarnings('GStringExpressionWithinString')
     void "executing the jrubyJar task produces an executable artifact"() {
         setup:
         withJRubyJarConfig """
@@ -71,6 +71,7 @@ class JRubyJarTestKitSpec extends IntegrationSpecification {
     }
 
     @Issue("https://github.com/jruby-gradle/jruby-gradle-plugin/issues/183")
+    @SuppressWarnings('GStringExpressionWithinString')
     void "creating a new task based on JRubyJar produces a jar artifact"() {
         setup:
         withAdditionalContent '''
@@ -97,6 +98,7 @@ class JRubyJarTestKitSpec extends IntegrationSpecification {
 
     @IgnoreIf({ IntegrationSpecification.OFFLINE })
     @Issue('https://github.com/jruby-gradle/jruby-gradle-plugin/pull/271')
+    @SuppressWarnings('GStringExpressionWithinString')
     def 'using a more recent jar-dependencies should work'() {
         setup:
         withRepoSetup """
@@ -233,6 +235,7 @@ class JRubyJarTestKitSpec extends IntegrationSpecification {
         gradleRunner(tasks).build()
     }
 
+    @SuppressWarnings('UnnecessaryDefInMethodDeclaration')
     private def getJarEntries() {
         ZipFile zip = new ZipFile("${projectDir}/build/libs/testproject-jruby.jar")
         zip.entries()
