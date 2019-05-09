@@ -9,12 +9,16 @@ image::https://badges.gitter.im/Join%20Chat.svg[link="https://gitter.im/jruby-gr
 
 You can also join us on the link:https://groups.google.com/forum/#!forum/jruby-gradle[JRuby/Gradle mailing list]
 
-The purpose of these plugins is to bundle useful link:http://gradle.org[Gradle]
-functionality for JRuby projects. Use of this plugin replaces the need for both link:http://bundler.io[Bundler] and link:https://github.com/jruby/warbler[Warbler].
+JRuby/Gradle brings the power and flexibilitye of 
+link:http://gradle.org[Gradle]
+to the Ruby ecosystem! With JRuby/Gradle you can specify your Java and Ruby dependencies together, build jar files, run tests, and much more!.
 
 
-The Ruby gem dependency code for this project relies on the link:http://rubygems.lasagna.io/proxy/maven/releases[Rubygems Maven
-proxy] operated by link:https://github.com/rtyler[R. Tyler Croy]
+Use of this plugin replaces the need for Rake, link:http://bundler.io[Bundler]
+and link:https://github.com/jruby/warbler[Warbler].
+
+
+NOTE: JRuby/Gradle 2.0 relies on JRuby 9.x and later.
 
 
 This repository contains the:
@@ -22,7 +26,6 @@ This repository contains the:
 * `base` (in `jruby-gradle-base-plugin/`): dependency resolution, executing Ruby, etc.
 * `jar` (in `jruby-gradle-jar-plugin/`):  packaging JRuby-based `.jar` files
 * `war` (in `jruby-gradle-war-plugin/`): packaging JRuby-based `.war` files
-
 
 
 NOTE: More documentation can be found on link:http://jruby-gradle.org[jruby-gradle.org]

@@ -10,6 +10,9 @@ JRuby in an "embedded" scenario more reliable. Packing a `JRubyJar` being a
 fairly typical "embedded JRuby" use-case, there is certain functionality that
 relies on these improvements.
 
+
+NOTE: With JRuby/Gradle 2.0.0, JRuby versions 1.7.x are **completely** unsupported.
+
 This does **not** mean older versions of JRuby won't work in `JRubyJar`
 archives but rather: you are _likely_ going to experience problems with a more
 complex use-case on an older JRuby. For example, Rails applications will not
