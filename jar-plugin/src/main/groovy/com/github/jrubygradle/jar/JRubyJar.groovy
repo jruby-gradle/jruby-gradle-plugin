@@ -68,7 +68,6 @@ class JRubyJar extends Jar {
     void jrubyVersion(String version) {
         logger.info("setting jrubyVersion to ${version} from ${embeddedJRubyVersion}")
         embeddedJRubyVersion = version
-        addEmbeddedDependencies(project.configurations.getByName(configuration))
     }
 
     /**
@@ -94,7 +93,6 @@ class JRubyJar extends Jar {
     void jrubyMainsVersion(String version) {
         logger.info("setting jrubyMainsVersion to ${version} from ${embeddedJRubyMainsVersion}")
         embeddedJRubyMainsVersion = version
-        addEmbeddedDependencies(project.configurations.getByName(configuration))
     }
 
     /**
@@ -241,7 +239,6 @@ class JRubyJar extends Jar {
 
     JRubyJar() {
         appendix = 'jruby'
-        addEmbeddedDependencies(project.configurations.maybeCreate(DEFAULT_JRUBYJAR_CONFIG))
         /* Make sure our default configuration is present regardless of whether we use it or not */
         prepareTask = project.task("prepare${prepareNameForSuffix(name)}", type: JRubyPrepare)
         dependsOn prepareTask
@@ -268,13 +265,6 @@ class JRubyJar extends Jar {
         project.dependencies.add(customConfigName, "org.jruby:jruby-complete:${getJrubyVersion()}")
         logger.info("adding the dependency jruby-mains ${getJrubyMainsVersion()} to jar")
         project.dependencies.add(customConfigName, "org.jruby.mains:jruby-mains:${getJrubyMainsVersion()}")
-    }
-
-    /** Add the necessary JRuby dependencies to the specified {@code org.gradle.api.artifacts.Configuration} */
-    void addEmbeddedDependencies(Configuration config) {
-        /* To ensure that we can load our jars properly, we should always have
-         * jar-dependencies in our resolution graph */
-        project.dependencies.add(config.name, 'rubygems:jar-dependencies:[0.1.15,)')
     }
 
     /** Update the staging directory and tasks responsible for setting it up */
