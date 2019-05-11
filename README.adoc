@@ -9,7 +9,7 @@ image::https://badges.gitter.im/Join%20Chat.svg[link="https://gitter.im/jruby-gr
 
 You can also join us on the link:https://groups.google.com/forum/#!forum/jruby-gradle[JRuby/Gradle mailing list]
 
-JRuby/Gradle brings the power and flexibilitye of 
+JRuby/Gradle brings the power and flexibility of 
 link:http://gradle.org[Gradle]
 to the Ruby ecosystem! With JRuby/Gradle you can specify your Java and Ruby dependencies together, build jar files, run tests, and much more!.
 
