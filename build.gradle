@@ -71,7 +71,12 @@ subprojects {
         }
 
         gradleTest {
-            versions '3.0', '3.5', '4.1', '4.7', '4.9'
+            // https://github.com/jruby-gradle/jruby-gradle-plugin/issues/346
+            if (JavaVersion.current().java11) {
+                versions '5.0'
+            } else {
+                versions '4.2', '4.7', '4.10'
+            }
             dependsOn jar
         }
 
