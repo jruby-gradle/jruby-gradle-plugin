@@ -22,7 +22,7 @@ project.afterEvaluate {
 // --- up to here
 
 ext {
-    olderJRubyVersion = '9.0.1.0'
+    olderJRubyVersion = '9.2.1.0'
     slimVersion = '2.0.2'
     leafyVersion = '0.4.0'
 }
