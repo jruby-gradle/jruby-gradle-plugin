@@ -32,7 +32,6 @@ import org.gradle.api.internal.file.DefaultFileTreeElement
 import org.gradle.api.internal.file.copy.CopyAction
 import org.gradle.api.internal.file.copy.CopyActionProcessingStream
 import org.gradle.api.internal.file.copy.FileCopyDetailsInternal
-import org.gradle.api.specs.Spec
 import org.gradle.api.tasks.WorkResult
 import org.gradle.api.tasks.bundling.Zip
 import org.gradle.api.tasks.util.PatternSet
@@ -238,81 +237,26 @@ class JRubyJarCopyAction implements CopyAction {
 
         @Override
         void visitFile(FileCopyDetails fileDetails) {
-            if (!isArchive(fileDetails)) {
-                try {
-                    boolean isClass = isClass(fileDetails)
-                    if (!remapper.hasRelocators() || !isClass) {
-                        if (!isTransformable(fileDetails)) {
-                            String mappedPath = remapper.map(fileDetails.relativePath.pathString)
-                            ZipEntry archiveEntry = new ZipEntry(mappedPath)
-                            archiveEntry.setTime(getArchiveTimeFor(fileDetails.lastModified))
-                            archiveEntry.unixMode = (UnixStat.FILE_FLAG | fileDetails.mode)
-                            zipOutStr.putNextEntry(archiveEntry)
-                            fileDetails.copyTo(zipOutStr)
-                            zipOutStr.closeEntry()
-                        } else {
-                            transform(fileDetails)
-                        }
-                    } else if (isClass && !isUnused(fileDetails.path)) {
-                        remapClass(fileDetails)
-                    }
-                    recordVisit(fileDetails.relativePath)
-                } catch (Exception e) {
-                    throw new GradleException(String.format("Could not add %s to ZIP '%s'.", fileDetails, zipFile), e)
-                }
-            } else {
-                processArchive(fileDetails)
-            }
-        }
-
-        private void processArchive(FileCopyDetails fileDetails) {
-            ZipFile archive = new ZipFile(fileDetails.file)
             try {
-                List<ArchiveFileTreeElement> archiveElements = archive.entries.collect {
-                    new ArchiveFileTreeElement(new RelativeArchivePath(it))
-                }
-                Spec<FileTreeElement> patternSpec = patternSet.asSpec
-                List<ArchiveFileTreeElement> filteredArchiveElements = archiveElements.findAll { ArchiveFileTreeElement archiveElement ->
-                    patternSpec.isSatisfiedBy(archiveElement.asFileTreeElement())
-                }
-                filteredArchiveElements.each { ArchiveFileTreeElement archiveElement ->
-                    if (archiveElement.relativePath.file) {
-                        visitArchiveFile(archiveElement, archive)
-                    }
-                }
-            } finally {
-                archive.close()
-            }
-        }
-
-        private void visitArchiveDirectory(RelativeArchivePath archiveDir) {
-            if (recordVisit(archiveDir)) {
-                zipOutStr.putNextEntry(archiveDir.entry)
-                zipOutStr.closeEntry()
-            }
-        }
-
-        private void visitArchiveFile(ArchiveFileTreeElement archiveFile, ZipFile archive) {
-            RelativeArchivePath archiveFilePath = archiveFile.relativePath
-            if (archiveFile.classFile || !isTransformable(archiveFile)) {
-                if (recordVisit(archiveFilePath) && !isUnused(archiveFilePath.entry.name)) {
-                    if (!remapper.hasRelocators() || !archiveFile.classFile) {
-                        copyArchiveEntry(archiveFilePath, archive)
+                boolean isClass = isClass(fileDetails)
+                if (!remapper.hasRelocators() || !isClass) {
+                    if (!isTransformable(fileDetails)) {
+                        String mappedPath = remapper.map(fileDetails.relativePath.pathString)
+                        ZipEntry archiveEntry = new ZipEntry(mappedPath)
+                        archiveEntry.setTime(getArchiveTimeFor(fileDetails.lastModified))
+                        archiveEntry.unixMode = (UnixStat.FILE_FLAG | fileDetails.mode)
+                        zipOutStr.putNextEntry(archiveEntry)
+                        fileDetails.copyTo(zipOutStr)
+                        zipOutStr.closeEntry()
                     } else {
-                        remapClass(archiveFilePath, archive)
+                        transform(fileDetails)
                     }
+                } else if (isClass && !isUnused(fileDetails.path)) {
+                    remapClass(fileDetails)
                 }
-            } else {
-                transform(archiveFile, archive)
-            }
-        }
-
-        private void addParentDirectories(RelativeArchivePath file) {
-            if (file) {
-                addParentDirectories(file.parent)
-                if (!file.file) {
-                    visitArchiveDirectory(file)
-                }
+                recordVisit(fileDetails.relativePath)
+            } catch (Exception e) {
+                throw new GradleException(String.format("Could not add %s to ZIP '%s'.", fileDetails, zipFile), e)
             }
         }
 
@@ -382,22 +326,6 @@ class JRubyJarCopyAction implements CopyAction {
             } finally {
                 bis.close()
             }
-        }
-
-        private void copyArchiveEntry(RelativeArchivePath archiveFile, ZipFile archive) {
-            String mappedPath = remapper.map(archiveFile.entry.name)
-            ZipEntry entry = new ZipEntry(mappedPath)
-            entry.setTime(getArchiveTimeFor(archiveFile.entry.time))
-            RelativeArchivePath mappedFile = new RelativeArchivePath(entry)
-            addParentDirectories(mappedFile)
-            zipOutStr.putNextEntry(mappedFile.entry)
-            InputStream is = archive.getInputStream(archiveFile.entry)
-            try {
-                IOUtils.copyLarge(is, zipOutStr)
-            } finally {
-                is.close()
-            }
-            zipOutStr.closeEntry()
         }
 
         @Override
