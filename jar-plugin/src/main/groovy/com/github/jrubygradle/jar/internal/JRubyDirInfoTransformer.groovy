@@ -4,7 +4,7 @@ import java.nio.file.Files
 import java.nio.file.Path
 import java.nio.file.Paths
 
-import org.apache.tools.zip.ZipEntry
+import shadow.org.apache.tools.zip.ZipEntry
 import org.codehaus.plexus.util.IOUtil
 import org.gradle.api.file.FileTreeElement
 
