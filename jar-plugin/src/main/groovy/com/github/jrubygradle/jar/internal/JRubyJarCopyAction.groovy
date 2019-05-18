@@ -55,9 +55,8 @@ import java.util.zip.ZipException
  * support the same behavior in a less hackish way.
  */
 @Slf4j
-@SuppressWarnings(['ParameterCount', 'CatchException', 'DuplicateStringLiteral',
-'CatchThrowable', 'VariableName'])
-class JRubyJarCopyAction implements CopyAction {
+class ShadowCopyAction implements CopyAction {
+    static final long CONSTANT_TIME_FOR_ZIP_ENTRIES = (new GregorianCalendar(1980, 1, 1, 0, 0, 0)).getTimeInMillis()
 
     private final File zipFile
     private final ZipCompressor compressor
@@ -65,9 +64,17 @@ class JRubyJarCopyAction implements CopyAction {
     private final List<Transformer> transformers
     private final List<Relocator> relocators
     private final PatternSet patternSet
+    private final ShadowStats stats
+    private final String encoding
+    private final GradleVersionUtil versionUtil
+    private final boolean preserveFileTimestamps
+    private final boolean minimizeJar
+    private final UnusedTracker unusedTracker
 
-    JRubyJarCopyAction(File zipFile, ZipCompressor compressor, DocumentationRegistry documentationRegistry,
-                            List<Transformer> transformers, List<Relocator> relocators, PatternSet patternSet) {
+    ShadowCopyAction(File zipFile, ZipCompressor compressor, DocumentationRegistry documentationRegistry,
+                            String encoding, List<Transformer> transformers, List<Relocator> relocators,
+                            PatternSet patternSet, ShadowStats stats, GradleVersionUtil util,
+                            boolean preserveFileTimestamps, boolean minimizeJar, UnusedTracker unusedTracker) {
 
         this.zipFile = zipFile
         this.compressor = compressor
@@ -75,10 +82,33 @@ class JRubyJarCopyAction implements CopyAction {
         this.transformers = transformers
         this.relocators = relocators
         this.patternSet = patternSet
+        this.stats = stats
+        this.encoding = encoding
+        this.versionUtil = util
+        this.preserveFileTimestamps = preserveFileTimestamps
+        this.minimizeJar = minimizeJar
+        this.unusedTracker = unusedTracker
     }
 
     @Override
     WorkResult execute(CopyActionProcessingStream stream) {
+        Set<String> unusedClasses
+        if (minimizeJar) {
+            stream.process(new BaseStreamAction() {
+                @Override
+                void visitFile(FileCopyDetails fileDetails) {
+                    // All project sources are already present, we just need
+                    // to deal with JAR dependencies.
+                    if (isArchive(fileDetails)) {
+                        unusedTracker.addDependency(fileDetails.file)
+                    }
+                }
+            })
+            unusedClasses = unusedTracker.findUnused()
+        } else {
+            unusedClasses = Collections.emptySet()
+        }
+
         final ZipOutputStream zipOutStr
 
         try {
@@ -91,7 +121,8 @@ class JRubyJarCopyAction implements CopyAction {
             withResource(zipOutStr, new Action<ZipOutputStream>() {
                 void execute(ZipOutputStream outputStream) {
                     try {
-                        stream.process(new StreamAction(outputStream, transformers, relocators, patternSet))
+                        stream.process(new StreamAction(outputStream, encoding, transformers, relocators, patternSet,
+                                unusedClasses, stats))
                         processTransformers(outputStream)
                     } catch (Exception e) {
                         log.error('ex', e)
@@ -103,27 +134,37 @@ class JRubyJarCopyAction implements CopyAction {
         } catch (UncheckedIOException e) {
             if (e.cause instanceof Zip64RequiredException) {
                 throw new Zip64RequiredException(
-                        String.format('%s\n\nTo build this archive, please enable the zip64 extension.\nSee: %s',
-                                e.cause.message, documentationRegistry.getDslRefForProperty(Zip, 'zip64'))
+                        String.format("%s\n\nTo build this archive, please enable the zip64 extension.\nSee: %s",
+                                e.cause.message, documentationRegistry.getDslRefForProperty(Zip, "zip64"))
                 )
             }
         }
-        return WorkResults.didWork(true)
+        return versionUtil.getWorkResult(true)
     }
 
-    private void processTransformers(ZipOutputStream s) {
+    private void processTransformers(ZipOutputStream stream) {
         transformers.each { Transformer transformer ->
             if (transformer.hasTransformedResource()) {
-                transformer.modifyOutputStream(s)
+                transformer.modifyOutputStream(stream, preserveFileTimestamps)
             }
         }
     }
 
-    @SuppressWarnings('EmptyCatchBlock')
+    private long getArchiveTimeFor(long timestamp) {
+        return preserveFileTimestamps ? timestamp : CONSTANT_TIME_FOR_ZIP_ENTRIES
+    }
+
+    private ZipEntry setArchiveTimes(ZipEntry zipEntry) {
+        if (!preserveFileTimestamps) {
+            zipEntry.setTime(CONSTANT_TIME_FOR_ZIP_ENTRIES)
+        }
+        return zipEntry
+    }
+
     private static <T extends Closeable> void withResource(T resource, Action<? super T> action) {
         try {
             action.execute(resource)
-        } catch (Throwable t) {
+        } catch(Throwable t) {
             try {
                 resource.close()
             } catch (IOException e) {
@@ -139,25 +180,16 @@ class JRubyJarCopyAction implements CopyAction {
         }
     }
 
-    class StreamAction implements CopyActionProcessingStreamAction {
-
-        private final ZipOutputStream zipOutStr
-        private final List<Transformer> transformers
-        private final List<Relocator> relocators
-        private final RelocatorRemapper remapper
-        private final PatternSet patternSet
-
-        private final Set<String> visitedFiles = [] as Set
-
-        StreamAction(ZipOutputStream zipOutStr, List<Transformer> transformers, List<Relocator> relocators,
-                            PatternSet patternSet) {
-            this.zipOutStr = zipOutStr
-            this.transformers = transformers
-            this.relocators = relocators
-            this.remapper = new RelocatorRemapper(relocators)
-            this.patternSet = patternSet
+    abstract class BaseStreamAction implements CopyActionProcessingStreamAction {
+        protected boolean isArchive(FileCopyDetails fileDetails) {
+            return fileDetails.relativePath.pathString.endsWith('.jar')
         }
 
+        protected boolean isClass(FileCopyDetails fileDetails) {
+            return FilenameUtils.getExtension(fileDetails.path) == 'class'
+        }
+
+        @Override
         void processFile(FileCopyDetailsInternal details) {
             if (details.directory) {
                 visitDir(details)
@@ -166,39 +198,112 @@ class JRubyJarCopyAction implements CopyAction {
             }
         }
 
+        protected void visitDir(FileCopyDetails dirDetails) {}
+
+        protected abstract void visitFile(FileCopyDetails fileDetails)
+    }
+
+    private class StreamAction extends BaseStreamAction {
+
+        private final ZipOutputStream zipOutStr
+        private final List<Transformer> transformers
+        private final List<Relocator> relocators
+        private final RelocatorRemapper remapper
+        private final PatternSet patternSet
+        private final Set<String> unused
+        private final ShadowStats stats
+
+        private Set<String> visitedFiles = new HashSet<String>()
+
+        StreamAction(ZipOutputStream zipOutStr, String encoding, List<Transformer> transformers,
+                            List<Relocator> relocators, PatternSet patternSet, Set<String> unused,
+                            ShadowStats stats) {
+            this.zipOutStr = zipOutStr
+            this.transformers = transformers
+            this.relocators = relocators
+            this.remapper = new RelocatorRemapper(relocators, stats)
+            this.patternSet = patternSet
+            this.unused = unused
+            this.stats = stats
+            if(encoding != null) {
+                this.zipOutStr.setEncoding(encoding)
+            }
+        }
+
         private boolean recordVisit(RelativePath path) {
             return visitedFiles.add(path.pathString)
         }
 
-        private void visitFile(FileCopyDetails fileDetails) {
-            try {
-                boolean isClass = (FilenameUtils.getExtension(fileDetails.path) == 'class')
-                if (!remapper.hasRelocators() || !isClass) {
-                    if (isTransformable(fileDetails)) {
-                        transform(fileDetails)
+        @Override
+        void visitFile(FileCopyDetails fileDetails) {
+            if (!isArchive(fileDetails)) {
+                try {
+                    boolean isClass = isClass(fileDetails)
+                    if (!remapper.hasRelocators() || !isClass) {
+                        if (!isTransformable(fileDetails)) {
+                            String mappedPath = remapper.map(fileDetails.relativePath.pathString)
+                            ZipEntry archiveEntry = new ZipEntry(mappedPath)
+                            archiveEntry.setTime(getArchiveTimeFor(fileDetails.lastModified))
+                            archiveEntry.unixMode = (UnixStat.FILE_FLAG | fileDetails.mode)
+                            zipOutStr.putNextEntry(archiveEntry)
+                            fileDetails.copyTo(zipOutStr)
+                            zipOutStr.closeEntry()
+                        } else {
+                            transform(fileDetails)
+                        }
+                    } else if (isClass && !isUnused(fileDetails.path)) {
+                        remapClass(fileDetails)
                     }
-                    else {
-                        String mappedPath = remapper.map(fileDetails.relativePath.pathString)
-                        ZipEntry archiveEntry = new ZipEntry(mappedPath)
-                        archiveEntry.setTime(fileDetails.lastModified)
-                        archiveEntry.unixMode = (UnixStat.FILE_FLAG | fileDetails.mode)
-                        zipOutStr.putNextEntry(archiveEntry)
-                        fileDetails.copyTo(zipOutStr)
-                        zipOutStr.closeEntry()
-                    }
-                } else if (isClass) {
-                    remapClass(fileDetails)
+                    recordVisit(fileDetails.relativePath)
+                } catch (Exception e) {
+                    throw new GradleException(String.format("Could not add %s to ZIP '%s'.", fileDetails, zipFile), e)
                 }
-                recordVisit(fileDetails.relativePath)
-            } catch (Exception e) {
-                throw new GradleException(String.format('Could not add %s to ZIP \'%s\'.', fileDetails, zipFile), e)
+            } else {
+                processArchive(fileDetails)
             }
+        }
+
+        private void processArchive(FileCopyDetails fileDetails) {
+            stats.startJar()
+            ZipFile archive = new ZipFile(fileDetails.file)
+            try {
+                List<ArchiveFileTreeElement> archiveElements = archive.entries.collect {
+                    new ArchiveFileTreeElement(new RelativeArchivePath(it))
+                }
+                Spec<FileTreeElement> patternSpec = patternSet.getAsSpec()
+                List<ArchiveFileTreeElement> filteredArchiveElements = archiveElements.findAll { ArchiveFileTreeElement archiveElement ->
+                    patternSpec.isSatisfiedBy(archiveElement.asFileTreeElement())
+                }
+                filteredArchiveElements.each { ArchiveFileTreeElement archiveElement ->
+                    if (archiveElement.relativePath.file) {
+                        visitArchiveFile(archiveElement, archive)
+                    }
+                }
+            } finally {
+                archive.close()
+            }
+            stats.finishJar()
         }
 
         private void visitArchiveDirectory(RelativeArchivePath archiveDir) {
             if (recordVisit(archiveDir)) {
                 zipOutStr.putNextEntry(archiveDir.entry)
                 zipOutStr.closeEntry()
+            }
+        }
+
+        private void visitArchiveFile(ArchiveFileTreeElement archiveFile, ZipFile archive) {
+            def archiveFilePath = archiveFile.relativePath
+            if (archiveFile.classFile || !isTransformable(archiveFile)) {
+                if (recordVisit(archiveFilePath) && !isUnused(archiveFilePath.entry.name)) {
+                    if (!remapper.hasRelocators() || !archiveFile.classFile) {
+                        copyArchiveEntry(archiveFilePath, archive)
+                    } else {
+                        remapClass(archiveFilePath, archive)
+                    }
+                }
+            } else {
+                transform(archiveFile, archive)
             }
         }
 
@@ -211,20 +316,36 @@ class JRubyJarCopyAction implements CopyAction {
             }
         }
 
+        private boolean isUnused(String classPath) {
+            final String className = FilenameUtils.removeExtension(classPath)
+                    .replace('/' as char, '.' as char)
+            final boolean result = unused.contains(className)
+            if (result) {
+                log.debug("Dropping unused class: $className")
+            }
+            return result
+        }
+
         private void remapClass(RelativeArchivePath file, ZipFile archive) {
             if (file.classFile) {
-                addParentDirectories(new RelativeArchivePath(new ZipEntry(remapper.mapPath(file) + '.class'), null))
-                remapClass(archive.getInputStream(file.entry), file.pathString)
+                ZipEntry zipEntry = setArchiveTimes(new ZipEntry(remapper.mapPath(file) + '.class'))
+                addParentDirectories(new RelativeArchivePath(zipEntry))
+                InputStream is = archive.getInputStream(file.entry)
+                try {
+                    remapClass(is, file.pathString, file.entry.time)
+                } finally {
+                    is.close()
+                }
             }
         }
 
         private void remapClass(FileCopyDetails fileCopyDetails) {
             if (FilenameUtils.getExtension(fileCopyDetails.name) == 'class') {
-                remapClass(fileCopyDetails.file.newInputStream(), fileCopyDetails.path)
+                remapClass(fileCopyDetails.file.newInputStream(), fileCopyDetails.path, fileCopyDetails.lastModified)
             }
         }
 
-        private void remapClass(InputStream classInputStream, String path) {
+        private void remapClass(InputStream classInputStream, String path, long lastModified) {
             InputStream is = classInputStream
             ClassReader cr = new ClassReader(is)
 
@@ -240,7 +361,7 @@ class JRubyJarCopyAction implements CopyAction {
             try {
                 cr.accept(cv, ClassReader.EXPAND_FRAMES)
             } catch (Throwable ise) {
-                throw new GradleException('Error in ASM processing class ' + path, ise)
+                throw new GradleException("Error in ASM processing class " + path, ise)
             }
 
             byte[] renamedClass = cw.toByteArray()
@@ -248,42 +369,75 @@ class JRubyJarCopyAction implements CopyAction {
             // Need to take the .class off for remapping evaluation
             String mappedName = remapper.mapPath(path)
 
+            InputStream bis = new ByteArrayInputStream(renamedClass)
             try {
                 // Now we put it back on so the class file is written out with the right extension.
-                zipOutStr.putNextEntry(new ZipEntry(mappedName + '.class'))
-                IOUtils.copyLarge(new ByteArrayInputStream(renamedClass), zipOutStr)
+                ZipEntry archiveEntry = new ZipEntry(mappedName + ".class")
+                archiveEntry.setTime(getArchiveTimeFor(lastModified))
+                zipOutStr.putNextEntry(archiveEntry)
+                IOUtils.copyLarge(bis, zipOutStr)
                 zipOutStr.closeEntry()
             } catch (ZipException e) {
-                log.warn('We have a duplicate ' + mappedName + ' in source project')
+                log.warn("We have a duplicate " + mappedName + " in source project")
+            } finally {
+                bis.close()
             }
         }
 
-        private void visitDir(FileCopyDetails dirDetails) {
+        private void copyArchiveEntry(RelativeArchivePath archiveFile, ZipFile archive) {
+            String mappedPath = remapper.map(archiveFile.entry.name)
+            ZipEntry entry = new ZipEntry(mappedPath)
+            entry.setTime(getArchiveTimeFor(archiveFile.entry.time))
+            RelativeArchivePath mappedFile = new RelativeArchivePath(entry)
+            addParentDirectories(mappedFile)
+            zipOutStr.putNextEntry(mappedFile.entry)
+            InputStream is = archive.getInputStream(archiveFile.entry)
+            try {
+                IOUtils.copyLarge(is, zipOutStr)
+            } finally {
+                is.close()
+            }
+            zipOutStr.closeEntry()
+        }
+
+        @Override
+        protected void visitDir(FileCopyDetails dirDetails) {
             try {
                 // Trailing slash in name indicates that entry is a directory
                 String path = dirDetails.relativePath.pathString + '/'
                 ZipEntry archiveEntry = new ZipEntry(path)
-                archiveEntry.setTime(dirDetails.lastModified)
+                archiveEntry.setTime(getArchiveTimeFor(dirDetails.lastModified))
                 archiveEntry.unixMode = (UnixStat.DIR_FLAG | dirDetails.mode)
                 zipOutStr.putNextEntry(archiveEntry)
                 zipOutStr.closeEntry()
                 recordVisit(dirDetails.relativePath)
             } catch (Exception e) {
-                throw new GradleException(String.format('Could not add %s to ZIP \'%s\'.', dirDetails, zipFile), e)
+                throw new GradleException(String.format("Could not add %s to ZIP '%s'.", dirDetails, zipFile), e)
             }
         }
 
         private void transform(ArchiveFileTreeElement element, ZipFile archive) {
-            transform(element, archive.getInputStream(element.relativePath.entry))
+            transformAndClose(element, archive.getInputStream(element.relativePath.entry))
         }
 
         private void transform(FileCopyDetails details) {
-            transform(details, details.file.newInputStream())
+            transformAndClose(details, details.file.newInputStream())
         }
 
-        private void transform(FileTreeElement element, InputStream is) {
-            String mappedPath = remapper.map(element.relativePath.pathString)
-            transformers.find { it.canTransformResource(element) }.transform(mappedPath, is, relocators)
+        private void transformAndClose(FileTreeElement element, InputStream is) {
+            try {
+                String mappedPath = remapper.map(element.relativePath.pathString)
+                transformers.find { it.canTransformResource(element) }.transform(
+                        TransformerContext.builder()
+                                .path(mappedPath)
+                                .is(is)
+                                .relocators(relocators)
+                                .stats(stats)
+                                .build()
+                )
+            } finally {
+                is.close()
+            }
         }
 
         private boolean isTransformable(FileTreeElement element) {
@@ -295,12 +449,10 @@ class JRubyJarCopyAction implements CopyAction {
     class RelativeArchivePath extends RelativePath {
 
         ZipEntry entry
-        FileCopyDetails details
 
-        RelativeArchivePath(ZipEntry entry, FileCopyDetails fileDetails) {
+        RelativeArchivePath(ZipEntry entry) {
             super(!entry.directory, entry.name.split('/'))
             this.entry = entry
-            this.details = fileDetails
         }
 
         boolean isClassFile() {
@@ -310,15 +462,14 @@ class JRubyJarCopyAction implements CopyAction {
         RelativeArchivePath getParent() {
             if (!segments || segments.length == 1) {
                 return null
+            } else {
+                //Parent is always a directory so add / to the end of the path
+                String path = segments[0..-2].join('/') + '/'
+                return new RelativeArchivePath(setArchiveTimes(new ZipEntry(path)))
             }
-
-            //Parent is always a directory so add / to the end of the path
-            String path = segments[0..-2].join('/') + '/'
-            return new RelativeArchivePath(new ZipEntry(path), null)
         }
     }
 
-    @SuppressWarnings('GetterMethodCouldBeProperty')
     class ArchiveFileTreeElement implements FileTreeElement {
 
         private final RelativeArchivePath archivePath
@@ -384,6 +535,10 @@ class JRubyJarCopyAction implements CopyAction {
         @Override
         int getMode() {
             return archivePath.entry.unixMode
+        }
+
+        FileTreeElement asFileTreeElement() {
+            return new DefaultFileTreeElement(null, new RelativePath(!isDirectory(), archivePath.segments), null, null)
         }
     }
 }
