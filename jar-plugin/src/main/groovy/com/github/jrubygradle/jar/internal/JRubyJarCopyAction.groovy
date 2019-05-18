@@ -37,7 +37,7 @@ import org.gradle.internal.UncheckedException
 import org.objectweb.asm.ClassReader
 import org.objectweb.asm.ClassVisitor
 import org.objectweb.asm.ClassWriter
-import org.objectweb.asm.commons.RemappingClassAdapter
+import org.objectweb.asm.commons.ClassRemapper
 
 import java.util.zip.ZipException
 
@@ -235,7 +235,7 @@ class JRubyJarCopyAction implements CopyAction {
             // that use the constant pool to determine the dependencies of a class.
             ClassWriter cw = new ClassWriter(0)
 
-            ClassVisitor cv = new RemappingClassAdapter(cw, remapper)
+            ClassVisitor cv = new ClassRemapper(cw, remapper)
 
             try {
                 cr.accept(cv, ClassReader.EXPAND_FRAMES)
