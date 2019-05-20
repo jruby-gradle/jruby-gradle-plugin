@@ -1,7 +1,12 @@
 package com.github.jrubygradle.jar
 
+/*
+ * These two internal imports from the Shadow plugin are unavoidable because of
+ * the expected internals of ShadowCopyAction
+ */
 import com.github.jengelman.gradle.plugins.shadow.internal.DefaultZipCompressor
 import com.github.jengelman.gradle.plugins.shadow.internal.ZipCompressor
+
 import com.github.jrubygradle.JRubyPrepare
 import com.github.jrubygradle.jar.internal.JRubyDirInfoTransformer
 import com.github.jrubygradle.jar.internal.JRubyJarCopyAction
@@ -12,6 +17,7 @@ import org.gradle.api.artifacts.Configuration
 import org.gradle.api.file.DuplicatesStrategy
 import org.gradle.api.internal.file.copy.CopyAction
 import org.gradle.api.tasks.Input
+import org.gradle.api.tasks.Internal
 import org.gradle.api.tasks.Optional
 import org.gradle.api.tasks.StopExecutionException
 import org.gradle.api.tasks.bundling.Jar
@@ -293,11 +299,18 @@ class JRubyJar extends Jar {
         return new JRubyJarCopyAction(getArchivePath(),
                 getInternalCompressor(),
                 null, /* DocumentationRegistry */
+                'utf-8', /* encoding */
                 [new JRubyDirInfoTransformer()], /* transformers */
                 [], /* relocators */
-                mainSpec.buildRootResolver().getPatternSet())
+                mainSpec.buildRootResolver().getPatternSet(), /* patternSet */
+                false, /* preserveFileTimestamps */
+                false, /* minimizeJar */
+                null /* unusedTracker */
+                )
+
     }
 
+    @Internal
     protected ZipCompressor getInternalCompressor() {
         switch (entryCompression) {
             case ZipEntryCompression.DEFLATED:

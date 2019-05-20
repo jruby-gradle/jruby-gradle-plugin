@@ -4,13 +4,13 @@ import java.nio.file.Files
 import java.nio.file.Path
 import java.nio.file.Paths
 
-import org.apache.tools.zip.ZipOutputStream
-import org.apache.tools.zip.ZipEntry
+import shadow.org.apache.tools.zip.ZipEntry
 import org.codehaus.plexus.util.IOUtil
 import org.gradle.api.file.FileTreeElement
 
-import com.github.jengelman.gradle.plugins.shadow.relocation.Relocator
+import shadow.org.apache.tools.zip.ZipOutputStream
 import com.github.jengelman.gradle.plugins.shadow.transformers.Transformer
+import com.github.jengelman.gradle.plugins.shadow.transformers.TransformerContext
 
 /**
  * JRubyDirInfoTransformer implements a {@link Transformer} interface.
@@ -44,7 +44,7 @@ class JRubyDirInfoTransformer implements Transformer {
     }
 
     /** No-op since we don't transform the actual file */
-    void transform(String path, InputStream is, List<Relocator> relocators) {
+    void transform(TransformerContext context) {
         return
     }
 
@@ -63,7 +63,7 @@ class JRubyDirInfoTransformer implements Transformer {
      * This method will also clean up our tempdir to make sure we don't
      * clutter the user's machine with junk
      */
-    void modifyOutputStream(ZipOutputStream os) {
+    void modifyOutputStream(ZipOutputStream os, boolean preserveFileTimestamps) {
         processDirectory(os, tmpDir)
         deleteTempDirectory(tmpDir)
     }
