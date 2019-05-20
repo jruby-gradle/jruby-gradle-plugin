@@ -7,7 +7,6 @@ package com.github.jrubygradle.jar.internal
 */
 
 import com.github.jengelman.gradle.plugins.shadow.impl.RelocatorRemapper
-import com.github.jengelman.gradle.plugins.shadow.internal.GradleVersionUtil
 import com.github.jengelman.gradle.plugins.shadow.internal.UnusedTracker
 import com.github.jengelman.gradle.plugins.shadow.internal.ZipCompressor
 import com.github.jengelman.gradle.plugins.shadow.relocation.Relocator
@@ -33,6 +32,7 @@ import org.gradle.api.internal.file.copy.CopyAction
 import org.gradle.api.internal.file.copy.CopyActionProcessingStream
 import org.gradle.api.internal.file.copy.FileCopyDetailsInternal
 import org.gradle.api.tasks.WorkResult
+import org.gradle.api.tasks.WorkResults
 import org.gradle.api.tasks.bundling.Zip
 import org.gradle.api.tasks.util.PatternSet
 import org.gradle.internal.UncheckedException
@@ -69,14 +69,13 @@ class JRubyJarCopyAction implements CopyAction {
     private final List<Relocator> relocators
     private final PatternSet patternSet
     private final String encoding
-    private final GradleVersionUtil versionUtil
     private final boolean preserveFileTimestamps
     private final boolean minimizeJar
     private final UnusedTracker unusedTracker
 
     JRubyJarCopyAction(File zipFile, ZipCompressor compressor, DocumentationRegistry documentationRegistry,
                             String encoding, List<Transformer> transformers, List<Relocator> relocators,
-                            PatternSet patternSet, GradleVersionUtil util,
+                            PatternSet patternSet,
                             boolean preserveFileTimestamps, boolean minimizeJar, UnusedTracker unusedTracker) {
 
         this.zipFile = zipFile
@@ -86,7 +85,6 @@ class JRubyJarCopyAction implements CopyAction {
         this.relocators = relocators
         this.patternSet = patternSet
         this.encoding = encoding
-        this.versionUtil = util
         this.preserveFileTimestamps = preserveFileTimestamps
         this.minimizeJar = minimizeJar
         this.unusedTracker = unusedTracker
@@ -141,7 +139,7 @@ class JRubyJarCopyAction implements CopyAction {
                 )
             }
         }
-        return versionUtil.getWorkResult(true)
+        return WorkResults.didWork(true)
     }
 
     private void processTransformers(ZipOutputStream stream) {

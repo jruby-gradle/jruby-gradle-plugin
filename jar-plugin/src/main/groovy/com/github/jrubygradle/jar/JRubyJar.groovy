@@ -1,11 +1,17 @@
 package com.github.jrubygradle.jar
 
-import com.github.jengelman.gradle.plugins.shadow.internal.GradleVersionUtil
+/*
+ * These two internal imports from the Shadow plugin are unavoidable because of
+ * the expected internals of ShadowCopyAction
+ */
+import com.github.jengelman.gradle.plugins.shadow.internal.DefaultZipCompressor
 import com.github.jengelman.gradle.plugins.shadow.internal.ZipCompressor
+
 import com.github.jrubygradle.JRubyPrepare
 import com.github.jrubygradle.jar.internal.JRubyDirInfoTransformer
 import com.github.jrubygradle.jar.internal.JRubyJarCopyAction
 import groovy.transform.PackageScope
+import org.apache.tools.zip.ZipOutputStream
 import org.gradle.api.InvalidUserDataException
 import org.gradle.api.artifacts.Configuration
 import org.gradle.api.file.DuplicatesStrategy
@@ -15,6 +21,7 @@ import org.gradle.api.tasks.Internal
 import org.gradle.api.tasks.Optional
 import org.gradle.api.tasks.StopExecutionException
 import org.gradle.api.tasks.bundling.Jar
+import org.gradle.api.tasks.bundling.ZipEntryCompression
 
 /**
  * JRubyJar creates a Java Archive with Ruby code packed inside of it.
@@ -240,7 +247,6 @@ class JRubyJar extends Jar {
         appendix = 'jruby'
         /* Make sure our default configuration is present regardless of whether we use it or not */
         prepareTask = project.task("prepare${prepareNameForSuffix(name)}", type: JRubyPrepare)
-        versionUtil = new GradleVersionUtil(getProject().getGradle().getGradleVersion())
         dependsOn prepareTask
 
         // TODO get rid of this and try to adjust the CopySpec for the gems
@@ -297,7 +303,6 @@ class JRubyJar extends Jar {
                 [new JRubyDirInfoTransformer()], /* transformers */
                 [], /* relocators */
                 mainSpec.buildRootResolver().getPatternSet(), /* patternSet */
-                versionUtil, /* util */
                 false, /* preserveFileTimestamps */
                 false, /* minimizeJar */
                 null /* unusedTracker */
@@ -307,7 +312,14 @@ class JRubyJar extends Jar {
 
     @Internal
     protected ZipCompressor getInternalCompressor() {
-        return versionUtil.getInternalCompressor(getEntryCompression(), this)
+        switch (entryCompression) {
+            case ZipEntryCompression.DEFLATED:
+                return new DefaultZipCompressor(this.zip64, ZipOutputStream.DEFLATED)
+            case ZipEntryCompression.STORED:
+                return new DefaultZipCompressor(this.zip64, ZipOutputStream.STORED)
+            default:
+                throw new IllegalArgumentException(String.format('Unknown Compression type %s', entryCompression))
+        }
     }
 
     /**
@@ -329,5 +341,4 @@ class JRubyJar extends Jar {
     protected String embeddedJRubyMainsVersion = DEFAULT_JRUBY_MAINS
     protected String jarConfiguration = DEFAULT_JRUBYJAR_CONFIG
     protected String jarMainClass
-    protected GradleVersionUtil versionUtil
 }
