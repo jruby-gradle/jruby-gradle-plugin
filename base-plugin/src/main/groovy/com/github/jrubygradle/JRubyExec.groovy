@@ -150,6 +150,7 @@ class JRubyExec extends JavaExec implements JRubyExecTraits {
      * @throw {@code org.gradle.api.InvalidUserDataException} if mode of behaviour cannot be determined.
      */
     @Override
+    @Input
     @SuppressWarnings('UnnecessaryGetter')
     List<String> getArgs() {
         // just add the extra load-path even if it does not exists

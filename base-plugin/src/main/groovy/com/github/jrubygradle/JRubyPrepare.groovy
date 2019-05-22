@@ -6,6 +6,7 @@ import org.gradle.api.DefaultTask
 import org.gradle.api.artifacts.Configuration
 import org.gradle.api.file.FileCollection
 import org.gradle.api.tasks.InputFiles
+import org.gradle.api.tasks.Internal
 import org.gradle.api.tasks.Optional
 import org.gradle.api.tasks.OutputDirectory
 import org.gradle.api.tasks.TaskAction
@@ -46,6 +47,7 @@ class JRubyPrepare extends DefaultTask {
         outputDir = f
     }
 
+    @Internal
     List<Object> dependencies = []
 
     @Optional
