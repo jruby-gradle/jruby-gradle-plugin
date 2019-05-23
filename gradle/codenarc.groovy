@@ -243,7 +243,6 @@ ruleset {
     SystemOutPrint
     SystemRunFinalizersOnExit
     TernaryCouldBeElvis
-    ThisReferenceEscapesConstructor
     ThreadGroup
     ThreadLocalNotStaticFinal
     ThreadYield
