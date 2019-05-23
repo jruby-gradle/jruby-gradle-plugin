@@ -3,6 +3,7 @@ plugins {
     id 'org.ysb33r.gradletest' version '2.0-rc.4' apply false
     id 'com.jfrog.bintray' version '1.8.4' apply false
     id 'org.ajoberstar.github-pages' version '1.2.0' apply false
+    id 'org.ysb33r.cloudci.appveyor.testreporter' version '2.5' apply false
 }
 
 buildScan {
@@ -44,6 +45,7 @@ subprojects {
         apply plugin: 'com.jfrog.bintray'
         apply plugin: 'org.ysb33r.gradletest'
         apply plugin: 'maven-publish'
+        apply plugin: 'org.ysb33r.cloudci.appveyor.testreporter'
         apply from: "${rootProject.projectDir}/gradle/integration-tests.gradle"
 
         dependencies {
