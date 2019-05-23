@@ -54,6 +54,10 @@ class IntegrationSpecification extends Specification {
         "'${VersionFinder.findDependency(flatRepoLocation, organisation, artifact, extension)}'"
     }
 
+    String pathAsUriStr(final File path) {
+        path.absoluteFile.toURI().toString()
+    }
+
     String getProjectWithLocalRepo() {
         """
         plugins {
@@ -61,7 +65,11 @@ class IntegrationSpecification extends Specification {
         }
 
         jruby.defaultRepositories = false
-        repositories.flatDir dirs: '${flatRepoLocation.absolutePath}'
+        repositories {
+            flatDir {
+                dirs '${pathAsUriStr(flatRepoLocation)}'.toURI()
+            }
+        }
         """
     }
 
@@ -72,8 +80,15 @@ class IntegrationSpecification extends Specification {
         }
 
         jruby.defaultRepositories = false
-        repositories.maven { url 'file://${mavenRepoLocation.absolutePath}' } 
-        repositories.flatDir dirs: '${flatRepoLocation.absolutePath}'
+
+        repositories { 
+            flatDir { 
+                dirs '${pathAsUriStr(flatRepoLocation)}'.toURI()
+            }
+            maven { 
+                url '${pathAsUriStr(mavenRepoLocation)}'.toURI()
+            } 
+        }
         """
     }
 
@@ -84,7 +99,7 @@ class IntegrationSpecification extends Specification {
         }
 
         jruby.defaultRepositories = true
-        repositories.maven { url 'file://${mavenRepoLocation.absolutePath}' } 
+        repositories.maven { url '${pathAsUriStr(mavenRepoLocation)}'.toURI() } 
         """
     }
 

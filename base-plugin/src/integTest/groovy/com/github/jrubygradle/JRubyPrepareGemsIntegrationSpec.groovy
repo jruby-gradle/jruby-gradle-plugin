@@ -20,7 +20,7 @@ class JRubyPrepareGemsIntegrationSpec extends IntegrationSpecification {
         setup:
         withDependencies "gems ${slimGem}"
         withPreamble """
-            jruby.gemInstallDir = '${projectDir.absolutePath}'
+            jruby.gemInstallDir = '${pathAsUriStr(projectDir)}'.toURI()
         """
 
         when:
@@ -35,7 +35,7 @@ class JRubyPrepareGemsIntegrationSpec extends IntegrationSpecification {
         setup:
         withDefaultRepositories()
         withPreamble """
-            jruby.gemInstallDir = '${projectDir.absolutePath}'
+            jruby.gemInstallDir = '${pathAsUriStr(projectDir)}'.toURI()
         """
         withDependencies """
             gems "rubygems:sinatra:1.4.5"
@@ -57,7 +57,7 @@ class JRubyPrepareGemsIntegrationSpec extends IntegrationSpecification {
         setup:
         withDefaultRepositories()
         withPreamble """
-            jruby.gemInstallDir = '${projectDir.absolutePath}'
+            jruby.gemInstallDir = '${pathAsUriStr(projectDir)}'.toURI()
         """
         withDependencies 'gems "rubygems:jar-dependencies:0.1.16.pre"'
 
@@ -74,7 +74,7 @@ class JRubyPrepareGemsIntegrationSpec extends IntegrationSpecification {
         setup:
         withDefaultRepositories()
         withPreamble """
-            jruby.gemInstallDir = '${projectDir.absolutePath}'
+            jruby.gemInstallDir = '${pathAsUriStr(projectDir)}'.toURI()
         """
         withDependencies 'gems "rubygems:childprocess:1.0.1"'
 

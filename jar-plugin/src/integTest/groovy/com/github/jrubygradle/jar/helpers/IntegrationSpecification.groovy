@@ -46,6 +46,10 @@ class IntegrationSpecification extends Specification {
                 .forwardOutput()
     }
 
+    String pathAsUriStr(final File path) {
+        path.absoluteFile.toURI().toString()
+    }
+
     private Map<String, String> loadTestProperties() {
         this.class.getResource('/jruby-gradle-testconfig.properties').withInputStream { strm ->
             Properties props = new Properties()

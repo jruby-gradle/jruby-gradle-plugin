@@ -8,7 +8,6 @@ import org.gradle.api.file.FileCollection
 import org.gradle.api.tasks.InputFiles
 import org.gradle.api.tasks.Internal
 import org.gradle.api.tasks.Optional
-import org.gradle.api.tasks.OutputDirectory
 import org.gradle.api.tasks.TaskAction
 
 /**
@@ -19,9 +18,12 @@ import org.gradle.api.tasks.TaskAction
 @CompileStatic
 class JRubyPrepare extends DefaultTask {
 
+    JRubyPrepare() {
+        outputs.dir({ JRubyPrepare t -> new File(t.getOutputDir(), 'gems') }.curry(this))
+    }
+
     /** Target directory for GEMs. Extracted GEMs should end up in {@code outputDir + "/gems"}
      */
-    @OutputDirectory
     File getOutputDir() {
         project.file(this.outputDir)
     }

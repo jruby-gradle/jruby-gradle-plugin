@@ -169,9 +169,13 @@ class JRubyJarTestKitSpec extends IntegrationSpecification {
 
     private void withLocalRepositories() {
         this.repoSetup = """
-            repositories {
-                repositories.flatDir dirs: '${flatRepoLocation.absolutePath}'
-                repositories.maven { url 'file://${mavenRepoLocation.absolutePath}' } 
+            repositories { 
+                flatDir { 
+                    dirs '${pathAsUriStr(flatRepoLocation)}' 
+                }
+                maven { 
+                    url '${pathAsUriStr(mavenRepoLocation)}'
+                } 
             }
         """
     }
