@@ -82,6 +82,7 @@ Common methods for `JRubyExec` for executing a script
 
 * `script` - `Object` (Usually File or String). Path to the script.
 * `scriptArgs` - `List`.  List of arguments to pass to script.
+* `jrubyArgs` - `List`.  List of arguments to be passed to JRuby itself.
 * `workingDir` - `Object` (Usually File or String).  Working directory for script.
 * `environment` - `Map`.  Environment to be set. Do not set `GEM_HOME` or `GEM_PATH` with this method.
 * `standardInput` - `InputStream`.  Set an input stream to be read by the script.
