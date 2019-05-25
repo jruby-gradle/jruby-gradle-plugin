@@ -21,6 +21,17 @@ class JRubyJarSpec extends Specification {
         }
     }
 
+    @Issue('https://github.com/jruby-gradle/jruby-gradle-plugin/issues/357')
+    void 'group should be set to "JRuby"'() {
+        given:
+        JRubyJar task = project.task('spock-jar', type: JRubyJar)
+        def prepareTask = project.tasks.find { it.name == 'prepareSpock-jar' }
+
+        expect:
+        task.group == 'JRuby'
+        prepareTask.group == task.group
+    }
+
     void "jrubyVersion should be configurable in a Gradle conventional way"() {
         given:
         final String version = '1.7.20'
