@@ -1,11 +1,14 @@
 package com.github.jrubygradle.internal
 
+import com.github.jrubygradle.core.GemVersion
 import org.gradle.api.GradleException
 import org.gradle.api.Project
 import org.gradle.api.artifacts.Configuration
 import org.gradle.api.artifacts.DependencyResolveDetails
 import org.gradle.api.logging.Logger
 import org.gradle.api.logging.Logging
+
+import static com.github.jrubygradle.core.GemVersion.gemVersionFromGradleRequirement
 
 /**
  * Resolver to compute gem versions
@@ -84,7 +87,7 @@ class GemVersionResolver {
             details.useVersion(next.toString())
         }
         else {
-            GemVersion next = new GemVersion(details.requested.version)
+            GemVersion next = gemVersionFromGradleRequirement(details.requested.version)
             versions[details.requested.name] = next
             logger.debug("${configuration}      nothing collected")
             logger.debug("${configuration}      resolved  ${next}")

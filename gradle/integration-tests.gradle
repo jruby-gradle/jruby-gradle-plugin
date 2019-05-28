@@ -38,6 +38,7 @@ task copyIntegrationTestGems (type:Copy) {
 task integrationTest(type: Test, dependsOn: jar) {
     testClassesDirs = sourceSets.integrationTest.output.classesDirs
     classpath = sourceSets.integrationTest.runtimeClasspath
-    dependsOn copyIntegrationTestGems, test
+    dependsOn copyIntegrationTestGems
+    mustRunAfter test
 }
 check.dependsOn integrationTest

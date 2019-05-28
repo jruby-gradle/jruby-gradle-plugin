@@ -1,4 +1,4 @@
-['base','war','jar'].each { mod ->
+['base','war','jar', 'core'].each { mod ->
     def fName = "jruby-gradle${(mod == 'base') ? '' : ('-' + mod)}-plugin"
 
     include fName

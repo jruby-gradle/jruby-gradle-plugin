@@ -1,0 +1,31 @@
+//plugins {
+//    id "io.ratpack.ratpack-java"
+//}
+
+//plugins {
+//    id 'io.spring.dependency-management' version '1.0.6.RELEASE'
+//}
+//
+//
+//
+//dependencyManagement {
+//    imports {
+//        mavenBom 'io.micronaut:micronaut-bom:1.1.2'
+//    }
+//}
+dependencies {
+//    implementation 'io.micronaut:micronaut-http-server-netty'
+    implementation "io.github.http-builder-ng:http-builder-ng-okhttp:${httpbuilderNgVersion}"
+    implementation "io.ratpack:ratpack-core:1.6.1"
+    integrationTestCompile gradleTestKit()
+
+    testCompile(spockVersion) {
+        exclude module: 'groovy-all'
+        exclude group: 'org.codehaus.groovy'
+    }
+
+    integrationTestCompile(spockVersion) {
+        exclude module: 'groovy-all'
+        exclude group: 'org.codehaus.groovy'
+    }
+}

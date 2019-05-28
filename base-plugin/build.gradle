@@ -29,6 +29,7 @@ ext {
 
 dependencies {
 
+    compile project(":jruby-gradle-core-plugin")
     compile "org.eclipse.jetty:jetty-server:${jettyVersion}"
     compile "org.eclipse.jetty:jetty-webapp:${jettyVersion}"
     runtime('de.saumya.mojo:rubygems:0.2.3@war') {
