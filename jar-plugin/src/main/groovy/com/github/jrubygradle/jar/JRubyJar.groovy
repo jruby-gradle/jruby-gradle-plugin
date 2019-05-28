@@ -23,6 +23,8 @@ import org.gradle.api.tasks.StopExecutionException
 import org.gradle.api.tasks.bundling.Jar
 import org.gradle.api.tasks.bundling.ZipEntryCompression
 
+import static com.github.jrubygradle.JRubyPlugin.TASK_GROUP_NAME
+
 /**
  * JRubyJar creates a Java Archive with Ruby code packed inside of it.
  *
@@ -247,7 +249,9 @@ class JRubyJar extends Jar {
         appendix = 'jruby'
         /* Make sure our default configuration is present regardless of whether we use it or not */
         prepareTask = project.task("prepare${prepareNameForSuffix(name)}", type: JRubyPrepare)
+        prepareTask.group TASK_GROUP_NAME
         dependsOn prepareTask
+        group TASK_GROUP_NAME
 
         // TODO get rid of this and try to adjust the CopySpec for the gems
         // to exclude '.jrubydir'
