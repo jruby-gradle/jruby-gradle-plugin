@@ -204,11 +204,9 @@ task unpackMyGems(type : JRubyPrepare) {
 
 === Using the built-in Gem proxy
 
-As of version 1.1.0, the JRuby/Gradle base plugin supports embedding a
-link:https://github.com/torquebox/rubygems-servlets[rubygems-servlets] process
-*inside* the Gradle process itself. This obviates the need for a third-party
+As of version 2.0, the JRuby/Gradle base plugin supports embedding a lightweight proxy inside* the Gradle process itself. This obviates the need for a third-party
 proxy to present the Maven-compatible dependency information that JRuby/Gradle
-relies on.
+relies on and it also supercedes the older link:https://github.com/torquebox/rubygems-servlets[rubygems-servlets] process
 
 .build.gradle
 [source,gradle]
@@ -220,13 +218,24 @@ jruby.defaultRepositories false
 
 repositories {
     jcenter()
-    rubygems('https://rubygems.org')
+    ruby.gems() // <1>
+    ruby.gems('https://your-own-server.org') // <2>
+    ruby.gems('https://another-server.org', 'acmegems') // <3>
 }
 
 dependencies {
-    gems 'rubygems:sinatra:1.4.5'
+    gems 'rubygems:sinatra:1.4.5' // <4>
+    gems 'acmegems:some-gem:1.2.3' // <5>
 }
 ----
+<1> Retrieve GEMs from https://rubygems.org
+<2> Retrieve GEMs from another server.
+<3> Retrieve GEMS from another server and associated a custom group name with that server.
+<4> Retrieve a GEM. `rubygems` is the default group for GEMs.
+<5> Retrieve a GEM using a custom group.
+
+NOTE: If the version of Gradle supports the `content` DSL keyword for repositories, only
+  requests dependencies with the specific groups will be sent to the GEM repositories.
 
 === Using a custom Gem repository
 

@@ -23,9 +23,10 @@ NOTE: JRuby/Gradle 2.0 relies on JRuby 9.x and later.
 
 This repository contains the:
 
-* `base` (in `jruby-gradle-base-plugin/`): dependency resolution, executing Ruby, etc.
-* `jar` (in `jruby-gradle-jar-plugin/`):  packaging JRuby-based `.jar` files
-* `war` (in `jruby-gradle-war-plugin/`): packaging JRuby-based `.war` files
+* `core` (in `core-plugin/`): Rubygems proxy.
+* `base` (in `base-plugin/`): dependency resolution, executing Ruby, etc.
+* `jar` (in `jar-plugin/`):  packaging JRuby-based `.jar` files
+* `war` (in `war-plugin/`): packaging JRuby-based `.war` files
 
 
 NOTE: More documentation can be found on link:http://jruby-gradle.org[jruby-gradle.org]
