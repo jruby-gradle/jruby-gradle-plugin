@@ -8,17 +8,28 @@ import java.security.MessageDigest
 import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.ConcurrentMap
 
-/** Allow only one version of the proxy to run
+/** Allow only one version of the proxy to run.
  *
+ * @Since 2.0
  */
 @CompileStatic
 class IvyXmlGlobalProxyRegistry {
 
+    /** Create the registry and associate it with a Gradle project.
+     *
+     * @param project Associated project.
+     */
     IvyXmlGlobalProxyRegistry(Project project) {
         rootCacheDir = new File(project.gradle.gradleUserHomeDir, 'rubygems-ivyxml-cache')
         refresh = project.gradle.startParameter.refreshDependencies
     }
 
+    /** Registers a URI and group to be server via the proxy.
+     *
+     * @param remoteURI URI of remote Rubygems server.
+     * @param group Group name for GEMs that will be fected from the remote.
+     * @return Access to a proxy sever. If the server does not exist it will be created.
+     */
     IvyXmlProxyServer registerProxy(URI remoteURI, String group) {
         IvyXmlProxyServer proxy = getOrCreateServer(remoteURI, group, new File(rootCacheDir, uriHash(remoteURI)))
         proxy.refreshDependencies = refresh

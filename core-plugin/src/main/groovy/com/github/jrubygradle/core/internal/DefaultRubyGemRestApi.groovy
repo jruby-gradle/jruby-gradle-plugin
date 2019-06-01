@@ -13,20 +13,38 @@ import static groovyx.net.http.ContentTypes.JSON
 import static groovyx.net.http.NativeHandlers.Parsers.json
 import static groovyx.net.http.OkHttpBuilder.configure
 
-/**
+/** Implementation for a RubyGems REST API client based upon
+ * HttpBuilder-ng.
+ *
  * @since 2.0
  */
 @CompileStatic
 class DefaultRubyGemRestApi implements RubyGemQueryRestApi {
 
+    /** Creates a client from a URI
+     *
+     * @param serverUri URI as a String. ONly the scheme plus host
+     * parts should be provided.
+     */
     DefaultRubyGemRestApi(final String serverUri) {
         this.httpBuilder = getHttpBuilder(serverUri.toURI())
     }
 
+    /** Creates a client from a URI
+     *
+     * @param serverUri Only the scheme plus host
+     * parts should be provided.
+     */
     DefaultRubyGemRestApi(final URI serverUri) {
         this.httpBuilder = getHttpBuilder(serverUri)
     }
 
+    /** Returns all versions of a specific GEM.
+     *
+     * @param gemName Name of GEM.
+     * @return List of versions
+     * @throw {@link ApiException} if a networking error occurred.
+     */
     @Override
     @SuppressWarnings('CatchThrowable')
     List<String> allVersions(String gemName) {
@@ -37,6 +55,12 @@ class DefaultRubyGemRestApi implements RubyGemQueryRestApi {
         }
     }
 
+    /** Returns the latest version for a specific GEM.
+     *
+     * @param gemName Name of GEM.
+     * @return Latest version.
+     * @throw {@link ApiException} if a networking error occurred or the GEM does not exist.
+     */
     @Override
     @SuppressWarnings('CatchThrowable')
     String latestVersion(String gemName) {
@@ -52,6 +76,13 @@ class DefaultRubyGemRestApi implements RubyGemQueryRestApi {
         version
     }
 
+    /** Retrieves the GEM metadata.
+     *
+     * @param gemName Name of GEM.
+     * @param gemVersion Version of the GEM.
+     * @return {@link GemInfo} instance.
+     * @throw {@link ApiException} if a networking error occurred or the GEM does not exist.
+     */
     @Override
     @SuppressWarnings('CatchThrowable')
     GemInfo metadata(String gemName, String gemVersion) {

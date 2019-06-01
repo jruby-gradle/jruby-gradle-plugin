@@ -6,6 +6,8 @@ import groovy.transform.CompileStatic
 
 /** An implementation of GEM metadata.
  *
+ * Elements in this class match directly to the Rubgems REST API.
+ *
  * @since 2.0
  */
 @CompileStatic

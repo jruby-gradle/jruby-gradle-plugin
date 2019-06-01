@@ -9,6 +9,14 @@ import groovy.transform.CompileStatic
  */
 @CompileStatic
 class DefaultGemDependency implements GemDependency {
+
+    /** Name of transitive dependency.
+     *
+     */
     String name
+
+    /** Version requirements upon this transitive dependency.
+     *
+     */
     String requirements
 }

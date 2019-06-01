@@ -3,6 +3,10 @@ package com.github.jrubygradle.core;
 import java.net.URI;
 import java.util.List;
 
+/** GEM metadata.
+ *
+ * @since 2.0
+ */
 public interface GemInfo {
 
     /** GEM name.

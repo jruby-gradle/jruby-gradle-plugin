@@ -17,19 +17,44 @@ class RepositoryHandlerExtension {
     public static final String NAME = 'ruby'
     public static final String DEFAULT_GROUP_NAME = 'rubygems'
 
+    /** Creates an extension and associate it with a project.
+     *
+     * @param project Gradle project.
+     */
     RepositoryHandlerExtension(final Project project) {
         this.project = project
         this.ivyProxies = new IvyXmlGlobalProxyRegistry((project))
     }
 
+    /** Create an artifact repository which will use {@link https://rubygems.org} and
+     * associate group {@code rubygems} with it.
+     *
+     * @return Artifact repository.
+     */
     ArtifactRepository gems() {
         bindRepositoryToProxyServer('https://rubygems.org'.toURI(), DEFAULT_GROUP_NAME)
     }
 
+    /** Create an artifact repository which will use specified URI and
+     * associate group {@code rubygems} with it.
+     *
+     * @param uri URI of remote repository that serves up Rubygems. Any object convertible
+     * with {@code project.uri} can be provided.
+     *
+     * @return Artifact repository.
+     */
     ArtifactRepository gems(Object uri) {
         bindRepositoryToProxyServer(project.uri(uri), DEFAULT_GROUP_NAME)
     }
 
+    /** Create an artifact repository which will use specified URI and
+     * associate a specified group with it.
+     *
+     * @param group Group to associate this server with.
+     * @param uri URI of remote repository that serves up Rubygems. Any object convertible
+     * with {@code project.uri} can be provided.
+     * @return Artifact repository.
+     */
     ArtifactRepository gems(String group, Object uri) {
         bindRepositoryToProxyServer(project.uri(uri), group)
     }

@@ -31,6 +31,13 @@ import static java.nio.file.StandardCopyOption.REPLACE_EXISTING
 @CompileStatic
 @Slf4j
 class IvyXmlRatpackProxyServer implements IvyXmlProxyServer {
+
+    /** Implementation of a proxy server based upon Ratpack.
+     *
+     * @param cache Root directory for local Ivy XML cache.
+     * @param serverUri URI of remote Rubygems proxy.
+     * @param group Group that will be associated with the Rubygems proxy.
+     */
     IvyXmlRatpackProxyServer(File cache, URI serverUri, String group) {
         localCachePath = cache
         gemToIvy = new GemToIvy(serverUri)
@@ -38,24 +45,27 @@ class IvyXmlRatpackProxyServer implements IvyXmlProxyServer {
         this.group = group
     }
 
-    void debug(String text) {
-        log.debug(text)
-    }
-
-    void debug(String text, Object context) {
-        log.debug(text, context)
-    }
-
+    /** Tell the server to refresh dependencies upon a next run.
+     *
+     * @param refresh {@code true} to reload dependencies.
+     */
     @Override
     void setRefreshDependencies(boolean refresh) {
         refreshDependencies = refresh ? 1 : 0
     }
 
+    /** Get the address of the local proxy.
+     *
+     * @return Local address as a URI.
+     */
     @Override
     URI getBindAddress() {
         "http://localhost:${server.bindPort}".toURI()
     }
 
+    /** Start the proxy.
+     *
+     */
     @Override
     @SuppressWarnings('DuplicateStringLiteral')
     void run() {
@@ -102,6 +112,13 @@ class IvyXmlRatpackProxyServer implements IvyXmlProxyServer {
         server
     }
 
+    /** Returns the cache location for a specific GEM.
+     *
+     * @param group Group associated with GEM.
+     * @param name GEM name.
+     * @param revision GEM revision.
+     * @return Location of {@code ivy.xml} file.
+     */
     @SuppressWarnings('UnusedMethodParameter')
     Path ivyFile(String group, String name, String revision) {
         new File(localCachePath, "${name}/${revision}/ivy.xml").toPath()
@@ -125,6 +142,14 @@ class IvyXmlRatpackProxyServer implements IvyXmlProxyServer {
     private String getGemQueryRevisionFromIvy(String gemName, String revisionPattern) {
         GemVersion version = gemVersionFromGradleRequirement(revisionPattern)
         version.openHigh ? api.latestVersion(gemName) : version.high
+    }
+
+    private void debug(String text) {
+        log.debug(text)
+    }
+
+    private void debug(String text, Object context) {
+        log.debug(text, context)
     }
 
     private volatile int refreshDependencies = 0

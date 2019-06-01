@@ -5,6 +5,7 @@ import groovy.transform.InheritConstructors
 
 /** Throws when there are issues with the RubyGems REST API.
  *
+ * @since 2.0
  */
 @InheritConstructors
 @CompileStatic

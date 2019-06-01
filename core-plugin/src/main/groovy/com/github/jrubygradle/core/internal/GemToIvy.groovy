@@ -15,15 +15,31 @@ import static com.github.jrubygradle.core.GemVersion.gemVersionFromGemRequiremen
 @CompileStatic
 class GemToIvy {
 
+    /** Create a converter from GEM metadata to Ivy metadata.
+     *
+     * This constructor version assumes that the group is called {@code rubygems}.
+     * @param serverUri URI of the RubyGems server.
+     */
     GemToIvy(URI serverUri) {
         this.serverUri = serverUri.toString()
     }
 
+    /** Create a converter from GEM metadata to Ivy metadata.
+     *
+     * @param serverUri URI of the RubyGems server.
+     * @param group Use a group name other than {@code rubygems}.
+     */
     GemToIvy(URI serverUri, String group) {
         this.serverUri = serverUri.toString()
         this.org = group
     }
 
+    /** Write the Ivy metadata.
+     *
+     * @param writer Writer for output
+     * @param gem GEM metadata
+     * @return {@code writer} after population with Ivy metadata in XML format.
+     */
     @CompileDynamic
     @SuppressWarnings('NoDef')
     Writer writeTo(Writer writer, GemInfo gem) {
@@ -65,6 +81,11 @@ class GemToIvy {
         writer
     }
 
+    /** Write the Ivy metadata to a string.
+     *
+     * @param gem GEM metadata.
+     * @return String containing the Ivy metadata in XML format.
+     */
     String write(GemInfo gem) {
         StringWriter writer = new StringWriter()
         writeTo(writer, gem)
