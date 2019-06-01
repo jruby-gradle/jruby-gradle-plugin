@@ -6,6 +6,8 @@ import org.junit.Rule
 import org.junit.rules.TemporaryFolder
 import spock.lang.Specification
 
+import java.util.regex.Pattern
+
 
 class IvyXmlProxyServerIntegrationSpec extends Specification {
 
@@ -133,6 +135,15 @@ class IvyXmlProxyServerIntegrationSpec extends Specification {
             .build()
 
         then:
-        new File(projectDir,'build/something/asciidoctor-2.0.9.gem').exists()
+        findFiles ~/^asciidoctor-2.*gem$/
+    }
+
+    List<File> findFiles(Pattern pat) {
+        new File(projectDir,'build/something').listFiles( new FilenameFilter() {
+            @Override
+            boolean accept(File dir, String name) {
+                name =~ pat
+            }
+        }) as List<File>
     }
 }
