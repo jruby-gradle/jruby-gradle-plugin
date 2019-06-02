@@ -3,7 +3,13 @@ package com.github.jrubygradle.core
 import groovy.transform.CompileDynamic
 import groovy.transform.CompileStatic
 
+import java.util.regex.MatchResult
 import java.util.regex.Pattern
+
+import static com.github.jrubygradle.core.GemVersion.Boundary.EXCLUSIVE
+import static com.github.jrubygradle.core.GemVersion.Boundary.INCLUSIVE
+import static com.github.jrubygradle.core.GemVersion.Boundary.INCLUSIVE
+import static com.github.jrubygradle.core.GemVersion.Boundary.OPEN_ENDED
 
 /**
  * With rubygems almost all dependencies will be declared
@@ -31,27 +37,69 @@ import java.util.regex.Pattern
  * pattern.
  *
  * @author Christian Meier
+ * @author Schalk W. Cronjé
  *
  * @since 2.0 (Moved here from base plugin where it existed since 0.4.0)
  */
 @CompileStatic
 class GemVersion implements Comparable<GemVersion> {
 
+    /** How versions at boundaries are defined.
+     *
+     */
+    enum Boundary {
+        /** The specified version is included on the border.
+         *
+         */
+        INCLUSIVE('[',']'),
+
+        /** THe specified version is excluded on the border.
+         *
+         */
+        EXCLUSIVE(']','['),
+
+        /** All values below (on the low border) or above (on the high border)
+         * are acceptable
+         *
+         */
+        OPEN_ENDED('(',')')
+
+        final String low
+        final String high
+
+        private Boundary( String low, String hi) {
+            this.low = low
+            this.high = hi
+        }
+    }
+
     public static final String MAX_VERSION = '99999'
+    public static final String MIN_VERSION = '0.0.0'
 
     private static final String LOW_EX = '('
     private static final String LOW_IN = '['
     private static final String UP_EX = ')'
     private static final String UP_IN = ']'
-    private static final Pattern DOT_PLUS = Pattern.compile('\\.\\+')
-    private static final Pattern PLUS = Pattern.compile('\\+')
-    private static final Pattern DIGITS_PLUS = Pattern.compile('[0-9]+\\+')
-    private static final Pattern HEAD = Pattern.compile('^.*,\\s*')
-    private static final Pattern TAIL = Pattern.compile(',.*$')
-    private static final Pattern FIRST = Pattern.compile('^[\\[\\(]')
-    private static final Pattern LAST = Pattern.compile('[\\]\\)]$')
-    private static final Pattern ZEROS = Pattern.compile('(\\.0)+$')
+    private static final String UP_IVY_EX = LOW_IN
+    private static final String LOW_IVY_EX = UP_IN
 
+    // Gradle/Ivy version patterns
+    private static final Pattern DOT_PLUS = ~/^(.+?)\.\+$/
+    private static final Pattern PLUS = ~/^\+$/
+    private static final Pattern DIGITS_PLUS = ~/^(.+?)\.(\p{Alnum}+)\+$/
+    private static final Pattern OPEN_BOTTOM = ~/^\(,(.+)(\[|\])$/
+    private static final Pattern OPEN_TOP = ~/^(\[|\])(.+),\)$/
+    private static final Pattern RANGE = ~/^(\[|\])(.+?),(.+?)(\[|\])$/
+
+    private static final Pattern ONLY_DIGITS = ~/^\d+$/
+
+    private static final Pattern HEAD = ~/^.*,\s*/
+    private static final Pattern TAIL = ~/,.*$'/
+    private static final Pattern FIRST = ~/^[\[\]\(]/
+    private static final Pattern LAST = ~/[\]\[\)]$/
+    private static final Pattern ZEROS = ~/(\.0)+$/
+
+    // GEM requirement patterns
     private static final Pattern GREATER_EQUAL = ~/^>=\s*(.+)/
     private static final Pattern GREATER = ~/^>\s*(.+)/
     private static final Pattern EQUAL = ~/^=\s*(.+)/
@@ -59,12 +107,12 @@ class GemVersion implements Comparable<GemVersion> {
     private static final Pattern LESS_EQUAL = ~/^<=\s*(.+)/
     private static final Pattern TWIDDLE_WAKKA = ~/^~>\s*(.+)/
 
-    private static final String VERSION_SPLIT = '[.]'
+    private static final String VERSION_SPLIT = '.'
 
     final String low
     final String high
-    final String prefix = LOW_IN
-    final String postfix = UP_IN
+    private final Boundary lowBoundary
+    private final Boundary highBoundary
 
     /** Create a Gem version instance from a Gradle version requirement.
      *
@@ -73,7 +121,7 @@ class GemVersion implements Comparable<GemVersion> {
      *
      * @since 2.0
      */
-    static GemVersion gemVersionFromGradleRequirement(String singleRequirement) {
+    static GemVersion gemVersionFromGradleIvyRequirement(String singleRequirement) {
         new GemVersion(singleRequirement)
     }
 
@@ -124,7 +172,7 @@ class GemVersion implements Comparable<GemVersion> {
             )
         } else if (singleRequirement.matches(TWIDDLE_WAKKA)) {
             String base = getVersionFromRequirement(singleRequirement, TWIDDLE_WAKKA)
-            int adds = 3 - base.split(VERSION_SPLIT).size()
+            int adds = 3 - base.tokenize('.').size()
             if (adds < 0) {
                 adds = 0
             }
@@ -146,7 +194,7 @@ class GemVersion implements Comparable<GemVersion> {
      * @since 2.0
      */
     boolean isLowInclusive() {
-        prefix == LOW_IN
+        lowBoundary == INCLUSIVE
     }
 
     /** Is the high version specification inclusive?
@@ -156,7 +204,7 @@ class GemVersion implements Comparable<GemVersion> {
      * @since 2.0
      */
     boolean isHighInclusive() {
-        postfix == UP_IN
+        highBoundary == INCLUSIVE
     }
 
     /** Is the high version unspecified?
@@ -165,8 +213,8 @@ class GemVersion implements Comparable<GemVersion> {
      *
      * @since 2.0
      */
-    boolean isOpenHigh() {
-        high == MAX_VERSION
+    boolean isHighOpenEnded() {
+        highBoundary == Boundary.OPEN_ENDED
     }
 
     /**
@@ -179,7 +227,7 @@ class GemVersion implements Comparable<GemVersion> {
      * @return GemVersion the intersected version range
      */
     GemVersion intersect(String otherVersion) {
-        intersect(gemVersionFromGradleRequirement(otherVersion))
+        intersect(gemVersionFromGradleIvyRequirement(otherVersion))
     }
 
     /**
@@ -194,39 +242,50 @@ class GemVersion implements Comparable<GemVersion> {
      * @since 2.0
      */
     GemVersion intersect(GemVersion other) {
-        String newPrefix
+        Boundary newLowBoundary
         String newLow
         switch (compare(low, other.low)) {
             case -1:
                 newLow = other.low
-                newPrefix = other.prefix
+                newLowBoundary = other.lowBoundary
                 break
             case 0:
-                newPrefix = prefix == LOW_EX || other.prefix == LOW_EX ? LOW_EX : LOW_IN
+                newLowBoundary = (lowBoundary == EXCLUSIVE || other.lowBoundary == EXCLUSIVE) ? EXCLUSIVE : INCLUSIVE
                 newLow = low
                 break
             case 1:
                 newLow = low
-                newPrefix = prefix
+                newLowBoundary = lowBoundary
         }
 
-        String newPostfix
+        Boundary newHighBoundary
         String newHigh
 
-        switch (compare(high, other.high)) {
-            case 1:
-                newHigh = other.high
-                newPostfix = other.postfix
-                break
-            case 0:
-                newPostfix = postfix == UP_EX || other.postfix == UP_EX ? UP_EX : UP_IN
-                newHigh = high
-                break
-            case -1:
-                newHigh = high
-                newPostfix = postfix
+        if(!high && other.high) {
+            newHigh = other.high
+            newHighBoundary = other.highBoundary
+        } else if (high && !other.high) {
+            newHigh = high
+            newHighBoundary = highBoundary
+        } else if(!high && !other.high) {
+            newHigh = null
+            newHighBoundary = highBoundary
+        } else {
+            switch (compare(high, other.high)) {
+                case 1:
+                    newHigh = other.high
+                    newHighBoundary = other.highBoundary
+                    break
+                case 0:
+                    newHighBoundary = (highBoundary == EXCLUSIVE || other.highBoundary == EXCLUSIVE) ? EXCLUSIVE : INCLUSIVE
+                    newHigh = high
+                    break
+                case -1:
+                    newHigh = high
+                    newHighBoundary = highBoundary
+            }
         }
-        return new GemVersion(newPrefix, newLow, newHigh, newPostfix)
+        return new GemVersion(newLowBoundary, newLow, newHigh, newHighBoundary)
     }
 
     /** Creates a new GEM version requirement which that the lowest of two requirements and the highest
@@ -242,7 +301,7 @@ class GemVersion implements Comparable<GemVersion> {
         GemVersion min = pair.min()
         GemVersion max = pair.max()
 
-        new GemVersion(min.prefix, min.low, max.high, max.postfix)
+        new GemVersion(min.lowBoundary, min.low, max.high, max.highBoundary)
     }
 
     /** Allows for versions to be compared and sorted.
@@ -259,8 +318,13 @@ class GemVersion implements Comparable<GemVersion> {
             return loCompare
         }
 
-        if (prefix != other.prefix) {
-            return prefix == LOW_IN ? -1 : 1
+        if (lowBoundary != other.lowBoundary) {
+            if(lowBoundary == OPEN_ENDED) {
+                return -1
+            } else if(other.lowBoundary == OPEN_ENDED) {
+                return 1
+            }
+            return lowBoundary == INCLUSIVE ? -1 : 1
         }
 
         int hiCompare = compare(high, other.high)
@@ -269,8 +333,13 @@ class GemVersion implements Comparable<GemVersion> {
             return hiCompare
         }
 
-        if (postfix != other.postfix) {
-            return postfix == UP_IN ? 1 : -1
+        if (highBoundary != other.highBoundary) {
+            if(highBoundary == OPEN_ENDED) {
+                return 1
+            } else if(other.highBoundary == OPEN_ENDED) {
+                return -1
+            }
+            return highBoundary == INCLUSIVE ? 1 : -1
         }
 
         0
@@ -283,21 +352,19 @@ class GemVersion implements Comparable<GemVersion> {
      * @return boolean true if lower bound bigger then upper bound
      */
     boolean conflict() {
-        return (compare(low, high) == 1)
+        compare(stripNonIntegerTail(low), stripNonIntegerTail(high)) == 1
     }
 
-    /**
-     * string of the underlying data as maven version range. for prereleased
-     * versions with ranges like [1.pre, 1.pre] the to range will be replaced
-     * by the single boundary of the range.
+    /** String of the underlying data as Ivy version range.
      *
-     * @return String maven version range
+     * @return Gradle Ivy version range
      */
     String toString() {
-        if (prefix == LOW_IN && postfix == UP_IN && low == high && low =~ /[a-zA-Z]/) {
-            return low
+        if (lowBoundary == INCLUSIVE && highBoundary == INCLUSIVE && low == high) {
+            low
+        } else {
+            "${lowBoundary?.low ?: ''}${low ?: ''},${high ?: ''}${highBoundary?.high ?: ''}"
         }
-        return "${prefix}${low},${high}${postfix}"
     }
 
     @CompileDynamic
@@ -308,17 +375,17 @@ class GemVersion implements Comparable<GemVersion> {
     }
 
     private GemVersion(Boolean lowInclusive, String low, String high, Boolean highInclusive) {
-        this.prefix = lowInclusive ? LOW_IN : LOW_EX
+        this.lowBoundary = lowInclusive ? INCLUSIVE : EXCLUSIVE
         this.low = low
         this.high = high
-        this.postfix = highInclusive ? UP_IN : UP_EX
+        this.highBoundary = highInclusive ? INCLUSIVE : EXCLUSIVE
     }
 
-    private GemVersion(String pre, String low, String high, String post) {
-        this.prefix = pre
+    private GemVersion(Boundary pre, String low, String high, Boundary post) {
+        this.lowBoundary = pre
         this.low = low
         this.high = high
-        this.postfix = post
+        this.highBoundary = post
     }
 
     /**
@@ -327,23 +394,49 @@ class GemVersion implements Comparable<GemVersion> {
      *
      * @param String gradleVersionPattern
      */
+    @CompileDynamic
     private GemVersion(final String gradleVersionPattern) {
-        if (gradleVersionPattern.contains('+')) {
-            low = ZEROS.matcher(PLUS.matcher(DOT_PLUS.matcher(gradleVersionPattern).replaceFirst('.0')).replaceFirst('')).replaceFirst('')
-            high = DIGITS_PLUS.matcher(DOT_PLUS.matcher(gradleVersionPattern).replaceFirst('.99999')).replaceFirst(MAX_VERSION)
-        } else if (gradleVersionPattern.contains(LOW_IN) || gradleVersionPattern.contains(LOW_EX) ||
-            gradleVersionPattern.contains(UP_IN) || gradleVersionPattern.contains(UP_EX)) {
-            prefix = gradleVersionPattern.charAt(0).toString()
-            postfix = gradleVersionPattern.charAt(gradleVersionPattern.size() - 1).toString()
-            low = ZEROS.matcher(FIRST.matcher(TAIL.matcher(gradleVersionPattern).replaceFirst('')).replaceFirst('')).replaceFirst('')
-            high = LAST.matcher(HEAD.matcher(gradleVersionPattern).replaceFirst('')).replaceFirst('')
+        String cleanedString = gradleVersionPattern.replaceAll(~/\p{Blank}/,'')
+        MatchResult dotPlus = cleanedString =~ DOT_PLUS
+        MatchResult plus = cleanedString =~ PLUS
+        MatchResult digitsPlus = cleanedString =~ DIGITS_PLUS
+        MatchResult openBottom = cleanedString =~ OPEN_BOTTOM
+        MatchResult openTop = cleanedString =~ OPEN_TOP
+        MatchResult range = cleanedString =~ RANGE
 
-            if (high == '') {
-                high = MAX_VERSION
-            }
+        if (dotPlus.matches()) {
+            String base = dotPlus[0][1]
+            this.low = padVersion(base,'0')
+            this.high = padVersion(base,MAX_VERSION)
+            this.lowBoundary = INCLUSIVE
+            this.highBoundary = INCLUSIVE
+        } else if (plus.matches()) {
+            this.low = MIN_VERSION
+            this.lowBoundary = INCLUSIVE
+            this.highBoundary = OPEN_ENDED
+        } else if(digitsPlus.matches()) {
+            this.lowBoundary = INCLUSIVE
+            this.highBoundary = INCLUSIVE
+            this.low = "${digitsPlus[0][1]}.${digitsPlus[0][2]}"
+            this.high = "${digitsPlus[0][1]}.${MAX_VERSION}"
+        } else if (openBottom.matches()) {
+            this.lowBoundary = OPEN_ENDED
+            this.high = openBottom[0][1]
+            this.highBoundary = openBottom[0][2] == UP_IN ? INCLUSIVE : EXCLUSIVE
+        } else if(openTop.matches()) {
+            this.highBoundary = OPEN_ENDED
+            this.low = openTop[0][2]
+            this.lowBoundary = openTop[0][1] == LOW_IN ? INCLUSIVE : EXCLUSIVE
+        } else if(range.matches()) {
+            this.lowBoundary = range[0][1] == LOW_IN ? INCLUSIVE : EXCLUSIVE
+            this.highBoundary = range[0][4] == UP_IN ? INCLUSIVE : EXCLUSIVE
+            this.low = range[0][2]
+            this.high = range[0][3]
         } else {
-            low = gradleVersionPattern
-            high = gradleVersionPattern
+            this.low = cleanedString
+            this.high = cleanedString
+            this.lowBoundary = INCLUSIVE
+            this.highBoundary = INCLUSIVE
         }
     }
 
@@ -356,39 +449,61 @@ class GemVersion implements Comparable<GemVersion> {
      * integers if both contains only digits. otherwise a lexical
      * string comparision is used.
      *
-     * @param String aObject first version
-     * @param String bObject second version
-     * @return int -1 if aObject < bObject, 0 if both are equal and 1 if aObject > bObject
+     * @param lhs first version
+     * @param rhs second version
+     * @return lexicographical comparison. Any part containing alpha characters will always be less than
+     * a part with pure digits.
      */
-    private int compare(String aObject, String bObject) {
-        String[] aDigits = aObject.split(VERSION_SPLIT)
-        String[] bDigits = bObject.split(VERSION_SPLIT)
-        int index = -1
+    private int compare(String lhs, String rhs) {
+        if(!lhs && !rhs) {
+            return 0
+        }
 
-        for (int i = 0; i < aDigits.length && i < bDigits.length; i++) {
-            if (aDigits[i] != bDigits[i]) {
-                index = i
-                break
+        if(!lhs && rhs) {
+            return -1
+        }
+
+        if(lhs && !rhs) {
+            return -1
+        }
+
+        List<String> lhsParts = lhs.tokenize(VERSION_SPLIT)
+        List<String> rhsParts = rhs.tokenize(VERSION_SPLIT)
+
+        for (int i = 0; i < lhsParts.size() && i < rhsParts.size(); i++) {
+            int cmp
+            boolean lhsNumerical = lhsParts[i].matches(ONLY_DIGITS)
+            boolean rhsNumerical = rhsParts[i].matches(ONLY_DIGITS)
+
+            if(lhsNumerical && rhsNumerical) {
+                cmp = lhsParts[i].toInteger() <=> rhsParts[i].toInteger()
+            } else if(lhsNumerical && !rhsNumerical) {
+                cmp = 1
+            } else if(!lhsNumerical && rhsNumerical) {
+                cmp = -1
+            } else {
+                cmp = lhsParts[i] <=> rhsParts[i]
+            }
+
+            if(cmp != 0) {
+                return cmp
             }
         }
 
-        if (index == -1) {
-            // one contains the other - so look at the length
-            if (aDigits.length < bDigits.length) {
-                return -1
-            }
-            if (aDigits.length == bDigits.length) {
-                return 0
-            }
-            return 1
-        }
-
-        if (aDigits[index].isInteger() && bDigits[index].isInteger()) {
-            // compare them as number
-            aDigits[index] as int <=> bDigits[index] as int
-        } else {
-            // compare them as string
-            aDigits[index] <=> bDigits[index]
-        }
+        lhsParts.size() <=> rhsParts.size()
     }
+
+    private String padVersion(final String base, final String padValue) {
+        String pad = ".${padValue}"
+        int adds = 3 - base.tokenize('.').size()
+        if (adds < 0) {
+            adds = 0
+        }
+        "${base}${pad * adds}"
+    }
+
+    private String stripNonIntegerTail(String version) {
+        version?.replaceFirst(~/\.\p{Alpha}.*$/,'')
+    }
+
 }

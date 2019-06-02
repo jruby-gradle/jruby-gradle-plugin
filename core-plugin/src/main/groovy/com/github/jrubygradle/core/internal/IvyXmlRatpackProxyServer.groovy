@@ -11,13 +11,12 @@ import groovy.util.logging.Slf4j
 import org.ysb33r.grolifant.api.ExclusiveFileAccess
 import ratpack.handling.RequestLogger
 import ratpack.server.RatpackServer
-
 import ratpack.server.ServerConfig
 
 import java.nio.file.Files
 import java.nio.file.Path
 
-import static com.github.jrubygradle.core.GemVersion.gemVersionFromGradleRequirement
+import static com.github.jrubygradle.core.GemVersion.gemVersionFromGradleIvyRequirement
 import static com.github.jrubygradle.core.internal.IvyUtils.revisionsAsHtmlDirectoryListing
 import static java.nio.file.Files.move
 import static java.nio.file.StandardCopyOption.ATOMIC_MOVE
@@ -96,6 +95,17 @@ class IvyXmlRatpackProxyServer implements IvyXmlProxyServer {
 
                     debug "Cached file is ${ivyXml.toAbsolutePath()}"
                     debug "Cached file contains ${ivyXml.text}"
+                }.get("${this.group}/:module/:revision/ivy.xml.sha1") { ctx ->
+                    String name = ctx.allPathTokens['module']
+                    String revision = getGemQueryRevisionFromIvy(name, ctx.allPathTokens['revision'])
+                    Path ivyXml = ivyFile(group, name, revision)
+                    Path ivyXmlSha1 = ivyXml.resolveSibling("${ivyXml.toFile().name}.sha1")
+                    if(Files.exists(ivyXmlSha1)) {
+                        ctx.response.contentType('text/plain').sendFile(ivyXmlSha1)
+                    } else {
+                        // TODO: Resolve ivy.xml first.
+                        ctx.clientError(404)
+                    }
                 }.get(':group/:module') { ctx ->
                     String grp = ctx.allPathTokens['group']
                     String name = ctx.allPathTokens['module']
@@ -136,12 +146,13 @@ class IvyXmlRatpackProxyServer implements IvyXmlProxyServer {
                 gemToIvy.writeTo(writer, gemInfo)
             }
             move(tmp, ivyXml, ATOMIC_MOVE, REPLACE_EXISTING)
+            gemToIvy.writeSha1(ivyXml.toFile())
         }
     }
 
     private String getGemQueryRevisionFromIvy(String gemName, String revisionPattern) {
-        GemVersion version = gemVersionFromGradleRequirement(revisionPattern)
-        version.openHigh ? api.latestVersion(gemName) : version.high
+        GemVersion version = gemVersionFromGradleIvyRequirement(revisionPattern)
+        version.highOpenEnded ? api.latestVersion(gemName) : version.high
     }
 
     private void debug(String text) {

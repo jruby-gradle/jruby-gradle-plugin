@@ -12,7 +12,6 @@ class JRubyPrepareJarsIntegrationSpec extends IntegrationSpecification {
         given:
         buildFile.text = """
             ${projectWithLocalRepo}
-            jruby.gemInstallDir = '${pathAsUriStr(projectDir)}'.toURI()
 
             dependencies {
                 gems 'io.dropwizard.metrics:metrics-core:3.1.0'
@@ -23,7 +22,7 @@ class JRubyPrepareJarsIntegrationSpec extends IntegrationSpecification {
         gradleRunner('jrubyPrepare', '-i').build()
 
         then:
-        new File(projectDir, 'Jars.lock').text.trim() == 'io.dropwizard.metrics:metrics-core:3.1.0:runtime:'
-        new File(projectDir, 'jars/io/dropwizard/metrics/metrics-core/3.1.0/metrics-core-3.1.0.jar').exists()
+        new File(projectDir, 'build/.gems/Jars.lock').text.trim() == 'io.dropwizard.metrics:metrics-core:3.1.0:runtime:'
+        new File(projectDir, 'build/.gems/jars/io/dropwizard/metrics/metrics-core/3.1.0/metrics-core-3.1.0.jar').exists()
     }
 }

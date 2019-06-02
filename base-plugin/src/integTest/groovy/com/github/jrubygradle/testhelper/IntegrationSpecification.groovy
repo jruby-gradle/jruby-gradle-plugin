@@ -64,7 +64,6 @@ class IntegrationSpecification extends Specification {
             id 'com.github.jruby-gradle.base'
         }
 
-        jruby.defaultRepositories = false
         repositories {
             flatDir {
                 dirs '${pathAsUriStr(flatRepoLocation)}'.toURI()
@@ -78,8 +77,6 @@ class IntegrationSpecification extends Specification {
         plugins {
             id 'com.github.jruby-gradle.base'
         }
-
-        jruby.defaultRepositories = false
 
         repositories { 
             flatDir { 
@@ -103,6 +100,21 @@ class IntegrationSpecification extends Specification {
         """
     }
 
+    String getProjectWithRubyGemsRepo() {
+        """
+        plugins {
+            id 'com.github.jruby-gradle.base'
+        }
+
+        repositories {
+            flatDir { 
+                dirs '${pathAsUriStr(flatRepoLocation)}'.toURI()
+            } 
+        
+            ruby.gems()
+        }
+        """
+    }
     GradleRunner gradleRunner(List<String> args) {
         GradleRunner.create()
                 .withProjectDir(projectDir)

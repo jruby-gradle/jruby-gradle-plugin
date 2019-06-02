@@ -22,6 +22,8 @@ class IvyXmlProxyServerIntegrationSpec extends Specification {
         projectDir = new File(temporaryFolder.root, 'test-project')
         buildFile = new File(projectDir, 'build.gradle')
         testKitDir = new File(temporaryFolder.root, '.gradle')
+        testKitDir.deleteDir()
+        projectDir.deleteDir()
         testKitDir.mkdirs()
         projectDir.mkdirs()
     }
@@ -61,38 +63,15 @@ class IvyXmlProxyServerIntegrationSpec extends Specification {
     }
 
     void 'Download a collection of GEMs'() {
-        when:
-        buildFile.text = '''
-        plugins {
-            id 'com.github.jruby-gradle.core'
-        }
-        
-        repositories {
-            ruby.gems()
-        }
-        
-        configurations {
-            something
-        }
-        
+        setup:
+        withBuildFile '''
         dependencies {
             something 'rubygems:credit_card_validator:1.3.2'    
         }
-        
-        task copyGems(type: Copy) {
-            from configurations.something
-            into "${buildDir}/something"
-        }
         '''
 
-        BuildResult result = GradleRunner.create()
-            .withProjectDir(projectDir)
-            .withPluginClasspath()
-            .withTestKitDir(testKitDir)
-            .withArguments(['copyGems',  '-i', '-s'])
-            .forwardOutput()
-            .withDebug(true)
-            .build()
+        when:
+        build()
 
         then:
         new File(projectDir,'build/something/credit_card_validator-1.3.2.gem').exists()
@@ -101,31 +80,47 @@ class IvyXmlProxyServerIntegrationSpec extends Specification {
 
 
     void 'Download Asciidoctor Reveal.JS GEM and friends'() {
-        when:
-        buildFile.text = '''
-        plugins {
-            id 'com.github.jruby-gradle.core'
-        }
-        
-        repositories {
-            ruby.gems()
-        }
-        
-        configurations {
-            something
-        }
-        
+        setup:
+        withBuildFile '''
         dependencies {
             something 'rubygems:asciidoctor-revealjs:2.0.0'    
         }
-        
-        task copyGems(type: Copy) {
-            from configurations.something
-            into "${buildDir}/something"
+        '''
+
+        when:
+        build()
+
+        then:
+        findFiles ~/^asciidoctor-2.*gem$/
+    }
+
+    void 'Resolve childprocess GEM which contains an open range Rake'() {
+        setup:
+        withBuildFile '''
+        dependencies {
+            something 'rubygems:childprocess:1.0.1'    
         }
         '''
 
-        BuildResult result = GradleRunner.create()
+        when:
+        build()
+
+        then:
+        findFiles ~/^childprocess-1.0.1.gem$/
+        findFiles ~/^rake-.*gem$/
+    }
+
+    private List<File> findFiles(Pattern pat) {
+        new File(projectDir,'build/something').listFiles( new FilenameFilter() {
+            @Override
+            boolean accept(File dir, String name) {
+                name =~ pat
+            }
+        }) as List<File>
+    }
+
+    private BuildResult build() {
+        GradleRunner.create()
             .withProjectDir(projectDir)
             .withPluginClasspath()
             .withTestKitDir(testKitDir)
@@ -133,17 +128,32 @@ class IvyXmlProxyServerIntegrationSpec extends Specification {
             .forwardOutput()
             .withDebug(true)
             .build()
-
-        then:
-        findFiles ~/^asciidoctor-2.*gem$/
     }
 
-    List<File> findFiles(Pattern pat) {
-        new File(projectDir,'build/something').listFiles( new FilenameFilter() {
-            @Override
-            boolean accept(File dir, String name) {
-                name =~ pat
-            }
-        }) as List<File>
+    private void withBuildFile(String content) {
+        buildFile.text = """
+        plugins {
+            id 'com.github.jruby-gradle.core'
+        }
+
+        repositories {
+            ruby.gems()
+        }
+
+        configurations {
+            something
+        }
+
+        dependencies {
+            something 'rubygems:asciidoctor-revealjs:2.0.0'
+        }
+
+        task copyGems(type: Copy) {
+            from configurations.something
+            into "\${buildDir}/something"
+        }
+        
+        ${content}
+        """
     }
 }

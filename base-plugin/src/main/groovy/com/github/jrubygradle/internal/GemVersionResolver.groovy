@@ -8,7 +8,7 @@ import org.gradle.api.artifacts.DependencyResolveDetails
 import org.gradle.api.logging.Logger
 import org.gradle.api.logging.Logging
 
-import static com.github.jrubygradle.core.GemVersion.gemVersionFromGradleRequirement
+import static com.github.jrubygradle.core.GemVersion.gemVersionFromGradleIvyRequirement
 
 /**
  * Resolver to compute gem versions
@@ -87,7 +87,7 @@ class GemVersionResolver {
             details.useVersion(next.toString())
         }
         else {
-            GemVersion next = gemVersionFromGradleRequirement(details.requested.version)
+            GemVersion next = gemVersionFromGradleIvyRequirement(details.requested.version)
             versions[details.requested.name] = next
             logger.debug("${configuration}      nothing collected")
             logger.debug("${configuration}      resolved  ${next}")

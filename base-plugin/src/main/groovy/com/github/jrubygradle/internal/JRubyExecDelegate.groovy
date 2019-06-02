@@ -1,101 +1,192 @@
 package com.github.jrubygradle.internal
 
-import com.github.jrubygradle.JRubyExec
-import groovy.transform.PackageScope
+import com.github.jrubygradle.JRubyPluginExtension
+import com.github.jrubygradle.core.JRubyExecSpec
+import org.gradle.api.Action
 import org.gradle.api.Project
-import org.gradle.api.artifacts.Configuration
+import org.gradle.api.file.FileCollection
+import org.gradle.process.ExecResult
+import org.gradle.process.JavaExecSpec
+import org.ysb33r.grolifant.api.ClosureUtils
+
+import static com.github.jrubygradle.JRubyExec.MAIN_CLASS
+import static com.github.jrubygradle.internal.JRubyExecUtils.buildArgs
+import static com.github.jrubygradle.internal.JRubyExecUtils.prepareJRubyEnvironment
+import static com.github.jrubygradle.internal.JRubyExecUtils.resolveScript
+import static org.ysb33r.grolifant.api.StringUtils.stringize
 
 /**
  * @author Schalk W. Cronjé
  */
-class JRubyExecDelegate implements JRubyExecTraits   {
-    static final String JRUBYEXEC_CONFIG = JRubyExecUtils.DEFAULT_JRUBYEXEC_CONFIG
+class JRubyExecDelegate {
 
-    Project project
-
-    Object methodMissing(String name, Object args) {
-        if (name == 'args' || name == 'setArgs') {
-            throw new UnsupportedOperationException('Use jrubyArgs/scriptArgs instead')
-        }
-        if (name == 'main') {
-            throw new UnsupportedOperationException('Setting main class for jruby is not a valid operation')
-        }
-
-        if (args.size() == 1) {
-            passthrough.add([(name.toString()) : args[0]])
-        }
-        else {
-            passthrough.add([(name.toString()) : args])
-        }
-    }
-
-    /** Gets the script to use.
-     *
-     * @return Get the script to use. Can be null.
-     */
-    File getScript() {
-        return _convertScript(project)
-    }
-
-    /** buildArgs creates a list of arguments to pass to the JVM
-     */
-    List<String> buildArgs() {
-        return JRubyExecUtils.buildArgs(_convertJrubyArgs(), script, _convertScriptArgs())
-    }
-
-    @PackageScope
-    Object keyAt(Integer index) {
-        return passthrough[index].keySet()[0]
-    }
-
-    @PackageScope
-    Object valuesAt(Integer index) {
-        return passthrough[index].values()[0]
-    }
-
-    private final List passthrough = []
-
-    @SuppressWarnings('VariableName')
-    static Object jrubyexecDelegatingClosure = { Project project, Closure cl ->
-        JRubyExecDelegate proxy =  new JRubyExecDelegate()
-        proxy.project = project
-        Closure cl2 = cl.clone()
-        cl2.delegate = proxy
-        cl2.call()
-
-        Configuration config = project.configurations.getByName(JRUBYEXEC_CONFIG)
-        proxy.prepareDependencies(project)
-
-        project.javaexec {
-            classpath JRubyExecUtils.classpathFromConfiguration(config)
-            proxy.passthrough.each { item ->
-                Object k = item.keySet()[0]
-                Object v = item.values()[0]
-                invokeMethod("${k}", v)
+    static void addToProject(final Project project, final String name) {
+        project.extensions.extraProperties.set(name, { JRubyExecDelegate delegator, def cfg ->
+            switch (cfg) {
+                case Closure:
+                    delegator.call((Closure) cfg)
+                    break
+                case Action:
+                    delegator.call((Action) cfg)
+                    break
+                default:
+                    throw new UnsupportedOperationException(
+                        "Invalid type passed to ${name}. Use closure or Action<JRubyExecSpec>."
+                    )
             }
-            main 'org.jruby.Main'
-            // just keep this even if it does not exists
-            args '-I' + JRubyExec.jarDependenciesGemLibPath(proxy.gemWorkDir)
-            // load Jars.lock on startup
-            args '-rjars/setup'
-            proxy.buildArgs().each { item ->
-                args item.toString()
-            }
+        }.curry(new JRubyExecDelegate(project)))
+    }
 
-            // Start with System.env then add from environment,
-            // which will add the user settings and
-            // overwrite any overlapping entries
-            final Map env = [:]
-            env << System.env
-            env << environment
-
-            setEnvironment proxy.getPreparedEnvironment(env)
+    ExecResult call(@DelegatesTo(JRubyExecSpec) Closure cfg) {
+        project.javaexec { JavaExecSpec javaExecSpec ->
+            ExecSpec execSpec = new ExecSpec(project, javaExecSpec)
+            ClosureUtils.configureItem(execSpec, cfg)
+            finaliseJavaExecConfiguration(execSpec, javaExecSpec)
         }
     }
 
-    static void addToProject(Project project) {
-        project.ext {
-            jrubyexec = JRubyExecDelegate.jrubyexecDelegatingClosure.curry(project)
+    ExecResult call(Action<JRubyExecSpec> cfg) {
+        project.javaexec { JavaExecSpec javaExecSpec ->
+            ExecSpec execSpec = new ExecSpec(project, javaExecSpec)
+            cfg.execute(spec)
+            finaliseJavaExecConfiguration(execSpec, javaExecSpec)
         }
+    }
+
+    void finaliseJavaExecConfiguration(ExecSpec execSpec, JavaExecSpec javaExecSpec) {
+        JRubyPluginExtension jruby = project.extensions.getByType(JRubyPluginExtension)
+        javaExecSpec.with {
+            main = MAIN_CLASS
+            classpath = jruby.jrubyConfiguration
+            args = buildArgs([], execSpec.jrubyArgs, execSpec.script, execSpec.scriptArgs)
+            environment = prepareJRubyEnvironment(
+                environment,
+                execSpec.inheritRubyEnv,
+                project.tasks.getByName(jruby.gemPrepareTaskName).outputDir
+            )
+        }
+    }
+
+    private JRubyExecDelegate(Project project) {
+        this.project = project
+    }
+
+    private final Project project
+
+    private static class ExecSpec implements JRubyExecSpec {
+        ExecSpec(Project project, JavaExecSpec spec) {
+            this.project = project
+            this.javaExecSpec = spec
+        }
+
+        boolean inheritRubyEnv
+
+        @Override
+        JavaExecSpec args(Iterable<?> a) {
+            notSupported(USE_ARGS_ALTERNATIVES)
+        }
+
+        @Override
+        JavaExecSpec args(Object... a) {
+            notSupported(USE_ARGS_ALTERNATIVES)
+        }
+
+        @Override
+        JavaExecSpec setArgs(Iterable<?> a) {
+            notSupported(USE_ARGS_ALTERNATIVES)
+        }
+
+        JavaExecSpec setArgs(Object... a) {
+            notSupported(USE_ARGS_ALTERNATIVES)
+        }
+
+        @Override
+        JavaExecSpec setMain(String m) {
+            notSupported('Main class name cannot be changed')
+        }
+
+        @Override
+        JavaExecSpec setClasspath(FileCollection cp) {
+            notSupported('Classpath cannot be changed. Use jruby.gemConfiguration/jruby.jrubyVersion instead.')
+        }
+
+        @Override
+        void script(Object scr) {
+            this.script = resolveScript(project, scr)
+        }
+
+        @Override
+        void setScript(Object scr) {
+            this.script = resolveScript(project, scr)
+        }
+
+        @Override
+        File getScript() {
+            this.script
+        }
+
+        @Override
+        void setScriptArgs(Iterable<Object> args) {
+            this.scriptArgs.clear()
+            this.scriptArgs.addAll(stringize(args))
+        }
+
+        @Override
+        void scriptArgs(Object... args) {
+            this.scriptArgs.addAll(stringize(args.toList()))
+        }
+
+        @Override
+        List<String> getScriptArgs() {
+            this.scriptArgs
+        }
+
+        @Override
+        void setJrubyArgs(Iterable<Object> args) {
+            this.jrubyArgs.clear()
+            this.jrubyArgs.addAll(stringize(args))
+        }
+
+        @Override
+        void jrubyArgs(Object... args) {
+            this.jrubyArgs.addAll(stringize(args.toList()))
+        }
+
+        @Override
+        List<String> getJrubyArgs() {
+            this.jrubyArgs
+        }
+
+//        JavaExecSpec copyTo(JavaExecSpec execSpec) {
+//            delegate.copyTo(execSpec)
+//
+//            execSpec.workingDir = delegate.workingDir
+//            execSpec.args = delegate.getArgs()
+//            execSpec.classpath = delegate.jruby.jrubyConfiguration
+//            execSpec.main = delegate.main
+//
+//            execSpec.errorOutput = delegate.errorOutput
+//            execSpec.standardOutput = delegate.standardOutput
+//            execSpec.standardInput = delegate.standardInput
+//            execSpec.ignoreExitValue = delegate.ignoreExitValue
+//
+//            execSpec.environment = prepareJRubyEnvironment(
+//                delegate.environment, delegate.inheritRubyEnv, delegate.gemWorkDir.get()
+//            )
+//        }
+
+
+        private void notSupported(final String msg) {
+            throw new UnsupportedOperationException()
+        }
+
+        private static final String USE_ARGS_ALTERNATIVES = 'Use jrubyArgs/scriptArgs instead of `args`'
+
+        private File script
+        private final List<String> scriptArgs = []
+        private final List<String> jrubyArgs = []
+        private final @Delegate
+        JavaExecSpec javaExecSpec
+        private final Project project
     }
 }

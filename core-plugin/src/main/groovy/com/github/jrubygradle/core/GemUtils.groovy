@@ -1,26 +1,30 @@
-package com.github.jrubygradle
+package com.github.jrubygradle.core
 
+import groovy.transform.CompileDynamic
+import groovy.transform.CompileStatic
+import org.gradle.api.Action
 import org.gradle.api.Project
 import org.gradle.api.artifacts.Configuration
 import org.gradle.api.artifacts.ResolvedArtifact
 import org.gradle.api.file.CopySpec
 import org.gradle.api.file.DuplicateFileCopyingException
 import org.gradle.api.file.FileCollection
+import org.gradle.process.JavaExecSpec
+import org.ysb33r.grolifant.api.OperatingSystem
 
-/** A collection of utilities to manipulate GEMs
+import static com.github.jrubygradle.core.GemOverwriteAction.FAIL
+import static com.github.jrubygradle.core.GemOverwriteAction.SKIP
+import static com.github.jrubygradle.core.GemOverwriteAction.OVERWRITE
+
+/** A collection of utilities to manipulate GEMs.
  *
  * @author R Tyler Croy
  * @author Schalk W. Cronjé
  */
+@CompileStatic
 class GemUtils {
-    static final String JRUBY_MAINCLASS = 'org.jruby.Main'
-    static final String JRUBY_ARCHIVE_NAME = 'jruby-complete'
-
-    private static final String GEM = 'gem'
-    private static final String GEM_EXTENSION = '.gem'
-    private static final String EVERYTHING = '**'
-
-    enum OverwriteAction { FAIL, SKIP, OVERWRITE }
+    public static final String JRUBY_MAINCLASS = 'org.jruby.Main'
+    public static final String JRUBY_ARCHIVE_NAME = 'jruby-complete'
 
     /** Given a FileCollection return a filtered FileCollection only containing GEMs
      *
@@ -35,26 +39,38 @@ class GemUtils {
 
     /** Extracts a gem to a folder
      *
-     * @param project Project instance
-     * @param jRubyClasspath Where to find the jruby-complete jar
-     * @param gem Gem file to extract
-     * @param destDir Directory to extract to
-     * @param overwrite Allow overwrite of an existing gem folder
+     * @param project Project instance.
+     * @param jRubyClasspath The path to the {@code jruby-complete} jar.
+     * @param gem Gem file to extract.
+     * @param destDir Directory to extract to.
+     * @param overwrite Allow overwrite of an existing gem folder.
      */
-    static void extractGem(Project project,
-                            File jRubyClasspath,
-                            File gem,
-                            File destDir,
-                            GemUtils.OverwriteAction overwrite) {
+    static void extractGem(
+        Project project,
+        File jRubyClasspath,
+        File gem,
+        File destDir,
+        GemOverwriteAction overwrite
+    ) {
 
         extractGems(project, jRubyClasspath, project.files(gem), destDir, overwrite)
     }
 
-    static void extractGems(Project project,
-                           File jRubyClasspath,
-                           FileCollection gems,
-                           File destDir,
-                           GemUtils.OverwriteAction overwrite) {
+    /** Extracts and install a collection of GEMs.
+     *
+     * @param project Project instance.
+     * @param jRubyClasspath The path to the {@code jruby-complete} jar.
+     * @param gems GEMs to install.
+     * @param destDir Directory to extract to.
+     * @param overwrite Allow overwrite of an existing gem folder.
+     */
+    static void extractGems(
+        Project project,
+        File jRubyClasspath,
+        FileCollection gems,
+        File destDir,
+        GemOverwriteAction overwrite
+    ) {
         Set<File> gemsToProcess = []
         Set<File> deletes = []
 
@@ -66,15 +82,15 @@ class GemUtils {
             File extractDirForJava = new File(destDir, "gems/${gemName}-java")
 
             switch (overwrite) {
-                case GemUtils.OverwriteAction.SKIP:
+                case SKIP:
                     if (extractDir.exists() || extractDirForJava.exists()) {
                         return
                     }
-                case GemUtils.OverwriteAction.OVERWRITE:
+                case OVERWRITE:
                     deletes.add(extractDir)
                     deletes.add(extractDirForJava)
                     break
-                case GemUtils.OverwriteAction.FAIL:
+                case FAIL:
                     if (extractDir.exists() || extractDirForJava.exists()) {
                         throw new DuplicateFileCopyingException("Gem ${gem.name} already exists")
                     }
@@ -89,20 +105,21 @@ class GemUtils {
 
             project.logger.info("Installing ${gemsToProcess*.name.join(',')}")
 
-            project.javaexec {
-                // Setting these environment variables will ensure that
-                // jbundler and/or jar-dependencies will not attempt to invoke
-                // Maven on a gem's behalf to install a Java dependency that we
-                // should already have taken care of, see #79
-                environment JBUNDLE_SKIP : true,
-                            JARS_SKIP : true,
-                            GEM_HOME : destDir.absolutePath,
-                            GEM_PATH : destDir.absolutePath
-                main JRUBY_MAINCLASS
-                classpath jRubyClasspath
-                args '-S', GEM, 'install'
+            project.javaexec { JavaExecSpec spec ->
+                spec.with {
+                    // Setting these environment variables will ensure that
+                    // jbundler and/or jar-dependencies will not attempt to invoke
+                    // Maven on a gem's behalf to install a Java dependency that we
+                    // should already have taken care of, see #79
+                    environment JBUNDLE_SKIP: true,
+                        JARS_SKIP: true,
+                        GEM_HOME: destDir.absolutePath,
+                        GEM_PATH: destDir.absolutePath
+                    main = JRUBY_MAINCLASS
+                    classpath jRubyClasspath
+                    args '-S', GEM, 'install'
 
-                /*
+                    /*
                  * NOTE: gemsToProcess is assumed to typically be sourced from
                  * a FileCollection generated elsewhere in the code. The
                  * FileCollection a flattened version of the dependency tree.
@@ -115,26 +132,27 @@ class GemUtils {
                  * See:
                  * https://gikhub.com/jruby-gradle/jruby-gradle-plugin/issues/341
                  */
-                gemsToProcess.collect { it }.reverse().each { File gem ->
-                    args gem
+                    gemsToProcess.collect { it }.reverse().each { File gem ->
+                        args gem
+                    }
+
+                    // there are a few extra args which look like defaults
+                    // but we need to make sure any config in $HOME/.gemrc
+                    // is overwritten
+                    args '--ignore-dependencies',
+                        "--install-dir=${destDir.absolutePath}",
+                        '--no-user-install',
+                        '--wrappers',
+                        '--no-document',
+                        '--local'
+
+                    // Workaround for FFI bug that is seen on some Windows environments
+                    if (OperatingSystem.current().windows) {
+                        environment 'TMP': System.getenv('TMP'), 'TEMP': System.getenv('TEMP')
+                    }
+
+                    systemProperties 'file.encoding': 'utf-8'
                 }
-
-                // there are a few extra args which look like defaults
-                // but we need to make sure any config in $HOME/.gemrc
-                // is overwritten
-                args '--ignore-dependencies',
-                     "--install-dir=${destDir.absolutePath}",
-                     '--no-user-install',
-                     '--wrappers',
-                     '--no-document',
-                     '--local'
-
-                // Workaround for FFI bug that is seen on some Windows environments
-                if (System.getProperty('os.name').toLowerCase().startsWith('windows')) {
-                    environment 'TMP' : System.env.TMP, 'TEMP' : System.env.TEMP
-                }
-
-                systemProperties 'file.encoding' : 'utf-8'
             }
         }
     }
@@ -148,26 +166,33 @@ class GemUtils {
      * @param action Allow overwrite of an existing gem folder
      */
     static void extractGems(
-            Project project,
-            Configuration jRubyConfig,
-            Configuration gemConfig,
-            File destDir,
-            GemUtils.OverwriteAction action ) {
+        Project project,
+        Configuration jRubyConfig,
+        Configuration gemConfig,
+        File destDir,
+        GemOverwriteAction action) {
 
         Set<File> cp = jRubyConfig.files
         File jRubyClasspath = cp.find { it.name.startsWith(JRUBY_ARCHIVE_NAME) }
-        assert jRubyClasspath != null
+        if (jRubyClasspath == null) {
+            throw new GemInstallException(
+                "Cannot find ${JRUBY_ARCHIVE_NAME}. Classpath contains ${cp.join(':')}"
+            )
+        }
         extractGems(project, jRubyClasspath, project.files(gemConfig.files), destDir, action)
     }
 
+    /** Write a JARs lock file if the content has changed.
+     *
+     * @param jarsLock Loc file to write to.
+     * @param coordinates Coordinates.
+     */
     static void writeJarsLock(File jarsLock, List<String> coordinates) {
-        // just write out the file when it changed or none-existing
         String content
 
         if (jarsLock.exists()) {
             content = jarsLock.text
-        }
-        else {
+        } else {
             jarsLock.parentFile.mkdirs()
             content = ''
         }
@@ -176,24 +201,35 @@ class GemUtils {
         if (content != newContent.toString()) {
             jarsLock.text = newContent
         }
+        newContent.close()
     }
 
-    static void rewriteJarDependencies(File jarsDir, List<File> dependencies,
-                                       Map<String, String> renameMap,
-                                       GemUtils.OverwriteAction overwrite) {
+    /** Rewrite the JAR dependencies
+     *
+     * @param jarsDir
+     * @param dependencies
+     * @param renameMap
+     * @param overwrite
+     */
+    static void rewriteJarDependencies(
+        File jarsDir,
+        List<File> dependencies,
+        Map<String, String> renameMap,
+        GemOverwriteAction overwrite
+    ) {
         dependencies.each { File dependency ->
             if (dependency.name.toLowerCase().endsWith('.jar') && !dependency.name.startsWith(JRUBY_ARCHIVE_NAME)) {
-                File destination = new File (jarsDir, renameMap[dependency.name])
+                File destination = new File(jarsDir, renameMap[dependency.name])
                 switch (overwrite) {
-                    case OverwriteAction.FAIL:
+                    case FAIL:
                         if (destination.exists()) {
                             throw new DuplicateFileCopyingException("Jar ${destination.name} already exists")
                         }
-                    case OverwriteAction.SKIP:
+                    case SKIP:
                         if (destination.exists()) {
                             break
                         }
-                    case OverwriteAction.OVERWRITE:
+                    case OVERWRITE:
                         destination.delete()
                         destination.parentFile.mkdirs()
                         dependency.withInputStream { destination << it }
@@ -202,11 +238,19 @@ class GemUtils {
         }
     }
 
-    static void setupJars(Configuration config,
-                          File destDir,
-                          GemUtils.OverwriteAction overwrite) {
+    /**
+     *
+     * @param config
+     * @param destDir
+     * @param overwrite
+     */
+    static void setupJars(
+        Configuration config,
+        File destDir,
+        GemOverwriteAction overwrite
+    ) {
         Set<ResolvedArtifact> artifacts = config.resolvedConfiguration.resolvedArtifacts
-        Map<String,String> fileRenameMap = [:]
+        Map<String, String> fileRenameMap = [:]
         List<String> coordinates = []
         List<File> files = []
         artifacts.each { ResolvedArtifact dependency ->
@@ -217,9 +261,9 @@ class GemUtils {
             String newFileName = "${groupAsPath}/${dependency.name}/${version}/${dependency.name}-${version}.${dependency.type}"
 
             // we do not want jruby-complete.jar or gems
-            if (group != 'rubygems' && dependency.type != GEM && dependency.name != JRUBY_ARCHIVE_NAME) {
+            if (dependency.type != GEM && dependency.name != JRUBY_ARCHIVE_NAME) {
                 // TODO classifier and system-scope
-                coordinates << "${group}:${dependency.name}:${version}:runtime:"
+                coordinates.add("${group}:${dependency.name}:${version}:runtime:".toString())
             }
             fileRenameMap[dependency.file.name] = newFileName
             // TODO omit system-scoped files
@@ -230,13 +274,16 @@ class GemUtils {
         writeJarsLock(new File(destDir, 'Jars.lock'), coordinates)
 
         rewriteJarDependencies(new File(destDir, 'jars'),
-                                files,
-                                fileRenameMap,
-                                overwrite)
+            files,
+            fileRenameMap,
+            overwrite)
     }
 
     /** Take the given .gem filename (e.g. rake-10.3.2.gem) and just return the
      * gem "full name" (e.g. rake-10.3.2)
+     *
+     * @param filename GEM filename.
+     * @return GEM name + version.
      */
     static String gemFullNameFromFile(String filename) {
         return filename.replaceAll(~GEM_EXTENSION, '')
@@ -255,34 +302,44 @@ class GemUtils {
      * @return Returns a CopySpec which can be attached as a child to another object that implements a CopySpec
      * @since 0.1.2
      */
-    static CopySpec gemCopySpec(Map properties=[:], Project project, Object dir) {
+    @CompileDynamic
+    static CopySpec gemCopySpec(Map properties = [:], Project project, Object dir) {
         boolean fullGem = properties['fullGem']
         String subFolder = properties['subfolder']
 
-        project.copySpec {
-            from(dir) {
-                include EVERYTHING
-                // TODO have some standard which is bin/*, gems/**
-                // specifications/*
-                if (!fullGem) {
-                    exclude 'cache/**'
-                    exclude 'gems/*/test/**'
-                    exclude 'gems/*/tests/**'
-                    exclude 'gems/*/spec/**'
-                    exclude 'gems/*/specs/**'
-                    exclude 'build_info'
+        project.copySpec (new Action<CopySpec>() {
+            void execute(CopySpec spec) {
+                spec.with {
+                    from(dir) {
+                        include EVERYTHING
+                        // TODO have some standard which is bin/*, gems/**
+                        // specifications/*
+                        if (!fullGem) {
+                            exclude 'cache/**'
+                            exclude 'gems/*/test/**'
+                            exclude 'gems/*/tests/**'
+                            exclude 'gems/*/spec/**'
+                            exclude 'gems/*/specs/**'
+                            exclude 'build_info'
+                        }
+                    }
+                    if (subFolder) {
+                        into subFolder
+                    }
                 }
             }
-
-            if (subFolder) {
-                into subFolder
-            }
-        }
+        })
     }
 
     static CopySpec jarCopySpec(Project project, Object dir) {
-	    project.copySpec {
-            from(dir) { include EVERYTHING }
+        project.copySpec { CopySpec spec ->
+            spec.with {
+                from(dir) { include EVERYTHING }
+            }
         }
     }
+
+    private static final String GEM = 'gem'
+    private static final String GEM_EXTENSION = '.gem'
+    private static final String EVERYTHING = '**'
 }

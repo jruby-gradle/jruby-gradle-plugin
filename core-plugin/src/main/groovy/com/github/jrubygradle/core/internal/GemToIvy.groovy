@@ -6,6 +6,8 @@ import groovy.transform.CompileDynamic
 import groovy.transform.CompileStatic
 import groovy.xml.MarkupBuilder
 
+import java.security.MessageDigest
+
 import static com.github.jrubygradle.core.GemVersion.gemVersionFromGemRequirement
 
 /** Converts from Gem metadata to Ivy metadata.
@@ -90,6 +92,17 @@ class GemToIvy {
         StringWriter writer = new StringWriter()
         writeTo(writer, gem)
         writer.toString()
+    }
+
+    /** Writes the SHA1 checksum of the {@code ivy.xmnl} file.
+     *
+     * @param ivyXml Fle containing the {@code ivy.xml} content/
+     * @return Checksum file.
+     */
+    File writeSha1(File ivyXml) {
+        File shaFile = new File(ivyXml.parentFile, "${ivyXml.name}.sha1")
+        shaFile.text = MessageDigest.getInstance('SHA-1').digest(ivyXml.bytes).encodeHex().toString()
+        shaFile
     }
 
     private String translateGemRevisionRequirements(String requirements) {

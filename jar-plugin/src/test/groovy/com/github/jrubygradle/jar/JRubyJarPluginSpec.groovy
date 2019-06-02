@@ -66,7 +66,6 @@ class JRubyJarPluginSpec extends Specification {
     void "Fails on adding non-existing initScript"() {
         given:
         def TESTROOT = new File(project.projectDir, 'fake')
-        project.jruby.gemInstallDir = TESTROOT.absolutePath
         new File(TESTROOT, 'gems').mkdirs()
         new File(TESTROOT, 'gems/fake.txt').text = 'fake.content'
 

@@ -1,65 +1,55 @@
 package com.github.jrubygradle
 
-import com.github.jrubygradle.internal.JRubyExecTraits
+import com.github.jrubygradle.core.JRubyAwareTask
+import com.github.jrubygradle.core.JRubyExecSpec
 import com.github.jrubygradle.internal.JRubyExecUtils
-import org.gradle.api.InvalidUserDataException
-import org.gradle.api.Project
+import org.gradle.api.Task
 import org.gradle.api.artifacts.Configuration
+import org.gradle.api.file.FileCollection
+import org.gradle.api.provider.Provider
 import org.gradle.api.tasks.Input
 import org.gradle.api.tasks.JavaExec
 import org.gradle.api.tasks.Optional
-import org.gradle.api.tasks.TaskInstantiationException
 import org.gradle.process.JavaExecSpec
+
+import java.util.concurrent.Callable
+
+import static com.github.jrubygradle.internal.JRubyExecUtils.prepareJRubyEnvironment
+import static com.github.jrubygradle.internal.JRubyExecUtils.resolveScript
+import static org.ysb33r.grolifant.api.StringUtils.stringize
 
 /** Runs a ruby script using JRuby
  *
  * @author Schalk W. Cronjé
  */
-class JRubyExec extends JavaExec implements JRubyExecTraits {
-    static final String MAIN_CLASS = 'org.jruby.Main'
+class JRubyExec extends JavaExec implements JRubyAwareTask, JRubyExecSpec {
+
+    public static final String MAIN_CLASS = 'org.jruby.Main'
     private static final String USE_JVM_ARGS = 'Use jvmArgs / scriptArgs instead'
 
-    static String jarDependenciesGemLibPath(File gemDir) {
-        new File(gemDir, "gems/jar-dependencies-${JRubyExecUtils.JAR_DEPENDENCIES_VERSION}/lib").absolutePath
-    }
-
     /**
-     * Ensure that our JRuby depedencies are updated properly for the default jrubyExec configuration
-     * and all other JRubyExec tasks
-     *
-     * This function also ensures that we have a proper version of jar-dependencies
-     * on older versions of JRuby so jar requires work properly on those version
-     *
-     * @param project
-     * @since 1.0.0
+     * Allows for use script author to control the effect of the
+     * system Ruby environment.
      */
-    static void updateJRubyDependencies(Project project) {
-        JRubyExecUtils.updateJRubyDependenciesForConfiguration(project,
-                JRubyExecUtils.DEFAULT_JRUBYEXEC_CONFIG,
-                project.jruby.execVersion)
-
-        project.tasks.withType(JRubyExec) { JRubyExec task ->
-            /* Only update non-default configurations */
-            if (task.configuration != JRubyExecUtils.DEFAULT_JRUBYEXEC_CONFIG) {
-                JRubyExecUtils.updateJRubyDependenciesForConfiguration(project,
-                        task.configuration,
-                        task.jrubyVersion)
-            }
-        }
-    }
+    @Input
+    boolean InheritRubyEnv = false
 
     JRubyExec() {
         super()
         super.setMain MAIN_CLASS
+        this.jruby = extensions.create(JRubyPluginExtension.NAME, JRubyPluginExtension, this)
 
-        try {
-            project.configurations.getByName(JRubyExecUtils.DEFAULT_JRUBYEXEC_CONFIG)
-        }
-        catch (UnknownConfigurationException) {
-            throw new TaskInstantiationException('Cannot instantiate a JRubyExec instance before jruby plugin has been loaded')
+        inputs.property 'jrubyver', {
+            jruby.jrubyVersion
         }
 
-        project.afterEvaluate { this.validateTaskConfiguration() }
+        inputs.property 'gemConfiguration', {
+            jruby.gemConfiguration
+        }
+
+        dependsOn(project.provider({ JRubyPluginExtension jpe ->
+            project.tasks.getByName(jpe.gemPrepareTaskName)
+        }.curry(this.jruby)))
     }
 
     /** Script to execute.
@@ -68,70 +58,171 @@ class JRubyExec extends JavaExec implements JRubyExecTraits {
     @Optional
     @Input
     File getScript() {
-        _convertScript(project)
-    }
-
-    private String customJRubyVersion
-    /** If it is required that a JRubyExec task needs to be executed with a different version of JRuby that the
-     * globally configured one, it can be done by setting it here.
-     */
-    @Input
-    String getJrubyVersion() {
-        if (customJRubyVersion == null) {
-            return project.jruby.execVersion
-        }
-        return customJRubyVersion
-    }
-
-    /** Setting the {@code jruby-complete} version allows for tasks to be run using different versions of JRuby.
-     * This is useful for comparing the results of different version or running with a gem that is only
-     * compatible with a specific version or when running a script with a different version that what will
-     * be packaged.
-     *
-     * @param version String in the form '9.0.1.0'
-     * @since 0.1.18
-     */
-    void jrubyVersion(final String ver) {
-        setJrubyVersion(ver)
-    }
-
-    /** Setting the {@code jruby-complete} version allows for tasks to be run using different versions of JRuby.
-     * This is useful for comparing the results of different version or running with a gem that is only
-     * compatible with a specific version or when running a script with a different version that what will
-     * be packaged.
-     *
-     * @param version String in the form '9.0.1.0'
-     */
-    void setJrubyVersion(final String version) {
-        customJRubyVersion = version
-        JRubyExecUtils.updateJRubyDependenciesForConfiguration(project, configuration, version)
+        resolveScript(project, this.script)
     }
 
     /** Returns a list of script arguments
      */
-    @Optional
     @Input
-    List<Object> getScriptArgs() {
-        _convertScriptArgs()
+    List<String> getScriptArgs() {
+        stringize(this.scriptArgs)
     }
 
     /** Returns a list of jruby arguments
      */
-    @Optional
     @Input
     List<String> getJrubyArgs() {
-        _convertJrubyArgs()
+        stringize(this.jrubyArgs)
+    }
+
+    /**
+     * Set script to execute.
+     *
+     * @param scr Path to script. Can be any object that is convertible to File.
+     */
+    @Override
+    void script(Object scr) {
+        this.script = scr
+    }
+
+    /**
+     * Set script to execute.
+     *
+     * @param scr Path to script. Can be any object that is convertible to File.
+     */
+    @Override
+    void setScript(Object scr) {
+        this.script = scr
+    }
+
+    /**
+     * Clear existing arguments and assign a new set.
+     *
+     * @param args New set of script arguments.
+     */
+    @Override
+    void setScriptArgs(Iterable<Object> args) {
+        this.scriptArgs.clear()
+        this.scriptArgs.addAll(args)
+    }
+
+    /**
+     * Add arguments for script
+     *
+     * @param args Arguments to be aqdded to script arguments
+     */
+    @Override
+    void scriptArgs(Object... args) {
+        this.scriptArgs.addAll(args.toList())
+    }
+
+    /**
+     * Clear existing JRuby-specific arguments and assign a new set.
+     *
+     * @param args New collection of JRUby-sepcific arguments.
+     */
+    @Override
+    void setJrubyArgs(Iterable<Object> args) {
+        this.jrubyArgs.clear()
+        this.jrubyArgs.addAll(args)
+    }
+
+    /**
+     * Add JRuby-specific arguments.
+     *
+     * @param args
+     */
+    @Override
+    void jrubyArgs(Object... args) {
+        this.jrubyArgs.addAll(args.toList())
+    }
+
+    /** Location of GEM working directory.
+     *
+     * @return Provider of GEM working directory.
+     */
+    Provider<File> getGemWorkDir() {
+        Callable<File> resolveGemWorkDir = { JRubyPluginExtension jpe ->
+            ((JRubyPrepare) project.tasks.getByName(jpe.gemPrepareTaskName)).outputDir
+        }.curry(jruby) as Callable<File>
+
+        project.provider(resolveGemWorkDir)
+    }
+
+    /** If it is required that a JRubyExec task needs to be executed with a different version of JRuby that the
+     * globally configured one, it can be done by setting it here.
+     *
+     * @deprecated Use{@code jruby.getJrubyVersion( )} instead.
+     *
+     */
+    @Deprecated
+    String getJrubyVersion() {
+        deprecated("Use jruby.getJrubyVersion rather getJrubyVersion()")
+        jruby.jrubyVersion
+    }
+
+    /** Setting the {@code jruby-complete} version allows for tasks to be run using different versions of JRuby.
+     * This is useful for comparing the results of different version or running with a gem that is only
+     * compatible with a specific version or when running a script with a different version that what will
+     * be packaged.
+     *
+     * @param version String in the form '9.0.1.0'
+     *
+     * @deprecated Use{@code jruby.jrubyVersion} instead.
+     *
+     * @since 0.1.18
+     */
+    @Deprecated
+    void jrubyVersion(final String ver) {
+        deprecated("Use jruby.jrubyVersion rather jrubyVersion")
+        jruby.jrubyVersion(ver)
+    }
+
+    /**
+     *
+     * @param newConfiguration
+     *
+     * @deprecated Use{@code jruby.setGemConfiguration( )} instead.
+     */
+    @Deprecated
+    void configuration(Configuration newConfiguration) {
+        deprecated("Use jruby.setGemConfiguration() rather than configuration()")
+        jruby.gemConfiguration(newConfiguration)
+    }
+
+    /**
+     *
+     * @param newConfiguration
+     *
+     * @deprecated Use{@code jruby.setGemConfiguration( )} instead.
+     */
+    @Deprecated
+    void configuration(String newConfiguration) {
+        deprecated("Use jruby.setGemConfiguration() rather than configuration()")
+        jruby.gemConfiguration(newConfiguration)
+    }
+
+    /** Setting the {@code jruby-complete} version allows for tasks to be run using different versions of JRuby.
+     * This is useful for comparing the results of different version or running with a gem that is only
+     * compatible with a specific version or when running a script with a different version that what will
+     * be packaged.
+     *
+     * @param version String in the form '9.0.1.0'
+     *
+     * @deprecated Use{@code jruby.setJrubyVersion} rather {@code setJrubyVersion}.
+     */
+    @Deprecated
+    void setJrubyVersion(final String version) {
+        deprecated("Use jruby.setJrubyVersion rather setJrubyVersion")
+        jruby.jrubyVersion(version)
     }
 
     @Override
     @SuppressWarnings('UnnecessaryGetter')
     void exec() {
-        Configuration execConfiguration = project.configurations.findByName(configuration)
-        logger.info("Executing with configuration: ${configuration}")
-        prepareDependencies(project)
-
-        setEnvironment getPreparedEnvironment(environment)
-        super.classpath JRubyExecUtils.classpathFromConfiguration(execConfiguration)
+        File gemDir = getGemWorkDir().get()
+        setEnvironment prepareJRubyEnvironment(this.environment, inheritRubyEnv, gemDir)
+        super.classpath jruby.jrubyConfiguration
         super.setArgs(getArgs())
         super.exec()
     }
@@ -153,9 +244,7 @@ class JRubyExec extends JavaExec implements JRubyExecTraits {
     @Input
     @SuppressWarnings('UnnecessaryGetter')
     List<String> getArgs() {
-        // just add the extra load-path even if it does not exists
-        List<String> extra = ['-I', jarDependenciesGemLibPath(getGemWorkDir())]
-        JRubyExecUtils.buildArgs(extra, jrubyArgs, getScript(), scriptArgs)
+        JRubyExecUtils.buildArgs([], jrubyArgs, getScript(), scriptArgs)
     }
 
     @Override
@@ -182,21 +271,17 @@ class JRubyExec extends JavaExec implements JRubyExecTraits {
         throw notAllowed(USE_JVM_ARGS)
     }
 
-    /** Verify that we are in a good configuration for execution */
-    void validateTaskConfiguration() {
-        if ((jrubyVersion != project.jruby.execVersion) &&
-            (configuration == JRubyExecUtils.DEFAULT_JRUBYEXEC_CONFIG)) {
-            String message = """\
-The \"${name}\" task cannot be configured wth a custom JRuby (${jrubyVersion})
-and still use the default \"${JRubyExecUtils.DEFAULT_JRUBYEXEC_CONFIG}\" configuration
-
-Please see this page for more details: <http://jruby-gradle.org/errors/jrubyexec-version-conflict/>
-"""
-            throw new InvalidUserDataException(message)
-        }
-    }
-
     private static UnsupportedOperationException notAllowed(final String msg) {
-        return new UnsupportedOperationException (msg)
+        return new UnsupportedOperationException(msg)
     }
+
+    private void deprecated(String message) {
+        logger.info "Deprecated method in task ${name}: ${message}"
+    }
+
+    private final JRubyPluginExtension jruby
+    private Object script
+    private final List<Object> scriptArgs = []
+    private final List<Object> jrubyArgs = []
+
 }
