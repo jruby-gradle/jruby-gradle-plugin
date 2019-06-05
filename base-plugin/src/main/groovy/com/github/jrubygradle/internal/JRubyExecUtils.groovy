@@ -2,8 +2,8 @@ package com.github.jrubygradle.internal
 
 import com.github.jrubygradle.JRubyPlugin
 import com.github.jrubygradle.JRubyPluginExtension
-import com.github.jrubygradle.core.GemOverwriteAction
-import com.github.jrubygradle.core.GemUtils
+import com.github.jrubygradle.api.gems.GemOverwriteAction
+import com.github.jrubygradle.api.gems.GemUtils
 import groovy.transform.CompileDynamic
 import groovy.transform.CompileStatic
 import org.gradle.api.InvalidUserDataException
@@ -15,8 +15,8 @@ import org.ysb33r.grolifant.api.StringUtils
 
 import java.util.regex.Matcher
 
-import static com.github.jrubygradle.core.GemOverwriteAction.OVERWRITE
-import static com.github.jrubygradle.core.GemOverwriteAction.SKIP
+import static com.github.jrubygradle.api.gems.GemOverwriteAction.OVERWRITE
+import static com.github.jrubygradle.api.gems.GemOverwriteAction.SKIP
 import static org.ysb33r.grolifant.api.StringUtils.stringize
 
 /**

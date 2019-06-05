@@ -1,7 +1,6 @@
 package com.github.jrubygradle
 
-import com.github.jrubygradle.core.JRubyAwareTask
-import com.github.jrubygradle.internal.JRubyExecUtils
+import com.github.jrubygradle.api.core.JRubyAwareTask
 import groovy.transform.CompileDynamic
 import groovy.transform.CompileStatic
 import org.apache.tools.ant.filters.ReplaceTokens

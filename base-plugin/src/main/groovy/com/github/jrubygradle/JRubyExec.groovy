@@ -1,11 +1,9 @@
 package com.github.jrubygradle
 
-import com.github.jrubygradle.core.JRubyAwareTask
-import com.github.jrubygradle.core.JRubyExecSpec
+import com.github.jrubygradle.api.core.JRubyAwareTask
+import com.github.jrubygradle.api.core.JRubyExecSpec
 import com.github.jrubygradle.internal.JRubyExecUtils
-import org.gradle.api.Task
 import org.gradle.api.artifacts.Configuration
-import org.gradle.api.file.FileCollection
 import org.gradle.api.provider.Provider
 import org.gradle.api.tasks.Input
 import org.gradle.api.tasks.JavaExec

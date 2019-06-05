@@ -1,15 +1,8 @@
 package com.github.jrubygradle
 
-import com.github.jrubygradle.core.AbstractJRubyPrepare
-import com.github.jrubygradle.core.GemOverwriteAction
+import com.github.jrubygradle.api.core.AbstractJRubyPrepare
 import com.github.jrubygradle.internal.JRubyExecUtils
 import groovy.transform.CompileStatic
-import org.gradle.api.artifacts.Configuration
-import org.gradle.api.tasks.TaskAction
-
-import static com.github.jrubygradle.core.GemOverwriteAction.SKIP
-import static com.github.jrubygradle.core.GemUtils.extractGems
-import static com.github.jrubygradle.core.GemUtils.setupJars
 
 /**
  * @author Schalk W. Cronjé

@@ -1,16 +1,13 @@
 package com.github.jrubygradle
 
-import com.github.jrubygradle.core.JRubyCorePlugin
-import com.github.jrubygradle.internal.GemVersionResolver
+import com.github.jrubygradle.api.core.JRubyCorePlugin
 import com.github.jrubygradle.internal.JRubyExecDelegate
-import groovy.transform.CompileDynamic
 import groovy.transform.CompileStatic
 import org.gradle.api.Action
 import org.gradle.api.Plugin
 import org.gradle.api.Project
 import org.gradle.api.Task
 import org.gradle.api.artifacts.Configuration
-import org.ysb33r.grolifant.api.TaskProvider
 
 import static org.ysb33r.grolifant.api.TaskProvider.registerTask
 
@@ -28,8 +25,6 @@ class JRubyPlugin implements Plugin<Project> {
         project.apply plugin: JRubyCorePlugin
         Configuration gems = project.configurations.create(DEFAULT_CONFIGURATION)
 
-        setupDefaultRepositories(project)
-
         JRubyPluginExtension jruby = project.extensions.create(
             JRubyPluginExtension.NAME,
             JRubyPluginExtension,
@@ -44,18 +39,6 @@ class JRubyPlugin implements Plugin<Project> {
             'generateGradleRb',
             GenerateGradleRb
         ).configure(generateGradleRbConfiguration(project))
-
-        // Set up a special configuration group for our embedding jars
-//        project.configurations.create(JRubyExecUtils.DEFAULT_JRUBYEXEC_CONFIG)
-
-    }
-
-    @CompileDynamic
-    private void setupDefaultRepositories(Project project) {
-        project.afterEvaluate {
-            GemVersionResolver.setup(project)
-            //JRubyExec.updateJRubyDependencies(project)
-        }
     }
 
     private Action<? super Task> generateGradleRbConfiguration(Project project) {

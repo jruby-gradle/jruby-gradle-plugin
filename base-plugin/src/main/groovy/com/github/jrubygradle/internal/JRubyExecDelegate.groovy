@@ -1,7 +1,7 @@
 package com.github.jrubygradle.internal
 
 import com.github.jrubygradle.JRubyPluginExtension
-import com.github.jrubygradle.core.JRubyExecSpec
+import com.github.jrubygradle.api.core.JRubyExecSpec
 import org.gradle.api.Action
 import org.gradle.api.Project
 import org.gradle.api.file.FileCollection

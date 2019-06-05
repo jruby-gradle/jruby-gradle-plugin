@@ -1,7 +1,7 @@
 package com.github.jrubygradle
 
-import com.github.jrubygradle.core.JRubyAwareTask
-import com.github.jrubygradle.core.RepositoryHandlerExtension
+import com.github.jrubygradle.api.core.JRubyAwareTask
+import com.github.jrubygradle.api.core.RepositoryHandlerExtension
 import com.github.jrubygradle.internal.JRubyPrepareUtils
 import groovy.transform.CompileStatic
 import org.gradle.api.Action

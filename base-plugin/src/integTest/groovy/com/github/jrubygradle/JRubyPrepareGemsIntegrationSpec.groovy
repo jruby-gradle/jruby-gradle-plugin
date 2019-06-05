@@ -41,7 +41,7 @@ class JRubyPrepareGemsIntegrationSpec extends IntegrationSpecification {
         withDependencies """
             gems "rubygems:sinatra:1.4.5"
             gems "rubygems:rack:[0,)"
-            gems "rubygems:lookout-rack-utils:3.1.0.12"
+            gems "rubygems:lookout-rack-utils:3.8.0.39"
         """
 
         when:
