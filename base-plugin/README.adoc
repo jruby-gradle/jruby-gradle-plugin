@@ -7,24 +7,16 @@ image::https://api.bintray.com/packages/jruby-gradle/plugins/jruby-gradle-plugin
 
 === Compatibility
 
-This plugin requires link:http://gradle.org[Gradle] 2.0 or better
-
+This plugin requires link:http://gradle.org[Gradle] 4.0 or better
 
 === Installing
 
 .build.gradle
 [source, groovy]
 ----
-buildscript {
-    repositories { jcenter() }
-
-    dependencies {
-        /* check jruby-gradle.org for the latest release */
-        classpath "com.github.jruby-gradle:jruby-gradle-plugin:[1.1.4,2.0)"
-    }
+plugins {
+  id 'com.github.jruby-gradle.base' version 'VERSION-OF-PLUGIN'
 }
-
-apply plugin: 'com.github.jruby-gradle.base'
 ----
 
 === Adding gems
@@ -44,15 +36,9 @@ dependencies {
 }
 ----
 
-IMPORTANT: Prereleased gems can only be a specific version due to limitations of mapping a rubygems repository to a maven repository.
+IMPORTANT: Prereleased gems should only be a specific version due to limitations of mapping a rubygems repository to an Ivy repository.
 
-NOTE: This functionality currently relies on a deployed version of the
-link:https://github.com/torquebox/rubygems-servlets[rubygems-servlets]
-software to help proxy a Rubygem repository into a Maven repository format.
-This ensures that Gradle can resolve gem-based dependencies. _Currently_ the
-plugin release on link:http://rubygems.lasagna.io/proxy/maven/releases[a
-Rubygems Maven proxy] operated by link:https://github.com/rtyler[R. Tyler
-Croy]
+NOTE: This functionality relies on an internal proxy which converts information from https://rubygems.org in to an Ivy repository service. this functionality is enabled by adding `ruby.gems()` to the `repositories` block. If you have a running Maven GEMs proxy you may use that too.
 
 == Tasks
 
@@ -89,16 +75,7 @@ Common methods for `JRubyExec` for executing a script
 * `standardOutput` - `OutputStream`.  Capture the output of the script.
 * `errorOutput` - `OutputStream`.  Capture the error output of the script.
 * `ignoreExitValue` - `Boolean`.  Ignore the JVm exit value. Exit values are only effective if the exit value of the Ruby script is correctly communicated back to the JVM.
-* `configuration` - `String`.  Configuration to copy gems from. (*)
-* `classpath` - `List`.  Additional Jars/Directories to place on classpath.
-* `jrubyVersion` - `String`.  JRuby version to use if not the same as ```project.jruby.execVersion```.
-* `gemWorkDir` - `File`. Provide a custom working directory for unpacking GEMs. By default each `JRubyExec` task
-  uses it's own work directory. Use this to set a common work directory for a number of tasks.
-
-(*) If `jrubyVersion` has not been set, `jrubyExec` will used as configuration.
-However, if `jrubyVersion` has been set, a configuration must also be provded
-to maintain dependency isolation, see
-link:http://jruby-gradle.org/errors/jrubyexec-version-conflict/[this page] for more details.
+* `jruby` - `JRubyPluginExtension`. Allows to override settigns from the global `jruby` extension.
 
 Additional `JRubyExec` methods for controlling the JVM instance
 
@@ -135,11 +112,8 @@ task needSomeRubyLove {
 
 The behaviour of `project.jrubyexec` is slightly different to that of `JRubyExec`.
 
-* The version of `jruby-complete` is strictly tied to the `jruby.execVersion`. Therefore trying to set `jrubyVersion`
-in the ```jrubyexec``` closure will cause a failure
-* GEMs and additional JARs are only taken from the `jrubyExec` configuration.
-* It is not possible to supply a `configuration` parameter to the `jrubyexec` closure.
-* GEMs will be installed to `jruby.gemInstallDir`. Existing gems will not be overwritten.
+* The version of JRuby is strictly tied to the global `jruby.jrubyVersion`.
+* GEMs and additional JARs are only taken from the `jruby.gemConfiguration` configuration.
 
 As with `JRubyExec`, `args`, `setArgs` and `main` are illegal within the `jrubyexec` closure.
 All other methods should work.
@@ -180,7 +154,11 @@ ext {
 
 link:/groovydoc/jruby-gradle-base-plugin/com/github/jrubygradle/JRubyPrepare.html[API docs]
 
-Unpacking occurs using the default `jruby` version as set by `jruby.execVersion`.
+Unpacking occurs using the default JRuby version as set by `jruby.jrubyVersion`. This can be overridden within the task itself if required.
+
+In most cases you do not have to do anything. The JRubyPrepare task will be created for you and associated with the appropriate configuration. If you customise configurations or use different configurations for different tasks, Gradle will useually create appropriate `JRubyPrepare` tasks for you and link the appropriate task dependencies.
+
+You can also create your own custom `JRubyPrepare` tasks if required.
 
 .build.gradle
 [source,gradle]
@@ -237,36 +215,6 @@ dependencies {
 NOTE: If the version of Gradle supports the `content` DSL keyword for repositories, only
   requests dependencies with the specific groups will be sent to the GEM repositories.
 
-=== Using a custom Gem repository
-
-By default the jruby plugin will use
-link:http://rubygems.lasanga.io[rubygems.lasanga.io] as its source of Ruby
-gems. This is a server operated by link:https://github.com/rtyler[R. Tyler
-Croy] and it presents a Maven repository of the data from
-link:https://rubygems.org[rubygems.org].
-
-If you **do not** wish to use this repository, you can run your own Maven proxy
-repository for either rubygems.org or your own gem repository by running the
-link:https://github.com/torquebox/rubygems-servlets[rubygems-servlets] server.
-
-You can then use that custom Gem repository with:
-
-.build.gradle
-[source,gradle]
-----
-jruby {
-    defaultRepositories false
-}
-
-repositories {
-    maven { url 'http://localhost:8989/releases' }
-}
-
-dependencies {
-    gems 'rubygems:my-custom-gem:1.0.1'
-}
-----
-
 === Using the JRuby/Gradle without Gradle
 
 There are still plenty of cases, such as for local development, when you might
@@ -286,3 +234,86 @@ end
 
 NOTE: The `.rb` file is assuming it's in the top level of the source tree, i.e.
 where `build.gradle` is located
+
+== Upgrading to 2.x from 1.7.x
+
+If you are already using the base proxy for work, upgrading will yield a number of surprises. Hopefully they will come as nice wow factors once you have changed your build file.
+
+=== Default repositories
+
+Repositories are no longer added by default. You should explictly declare which repositories you require. If you still need the old behaviour, you can obtain that by
+
+[source,groovy]
+----
+jruby {
+    defaultRepositories = true // <1>
+}
+----
+<1> Adds `ruby.gems()` and `jcenter()`.
+
+This functionality is deprecated and will be removed in a future version.
+
+=== jrubyExec configuration
+
+The `jrubyExec` configuration is no longer added as the GEM configuration handling has been cleaned up and much improved in 2.x. If you have a number of instances relying on `jrubyExec` you can do
+
+[source,groovy]
+----
+configurations {
+    jrubyExec
+}
+----
+
+and then enable this configuration either globally as your GEM configuration by doing
+
+[source,groovy]
+----
+jruby {
+    gemConfiguration 'jrubyExec'
+}
+----
+
+or on a task-specific basis
+
+[source,groovy]
+----
+task myRunner(type: JRubyExec) {
+    jruby {
+        gemConfiguration 'jrubyExec' // <1>
+    }
+}
+----
+<1> Enables configuration only for the given task.
+
+NOTE: If you set `gemConfiguration 'jrubyExec'` you will also notice that Gradle creates a `jrubyPrepareJrubyExec` tasks to unpack your GEMs in an isolated area.
+
+=== Setting GEM & JAR installation directories
+
+This behaviour was already deprecated in 1.7.x and has now been removed. Directories are now associated with specific configuration names. For the `gems` configuration this is in `${buildDir}/.gems`. For other configurations it will be a different directory. You can obtain the directory, via the `JRubyPrepare.getOutputDir()` method.
+
+=== Setting the JRuby version to use
+
+`jruby.defaultVersion` is deprecated. Do this rather via
+
+[source,groovy]
+----
+jruby {
+    jrubyVersion = '9.1.2.3'
+}
+----
+
+You can also override the JRuby version a per-task basis.
+
+[source,groovy]
+----
+task myRunner(type: JRubyExec) {
+    jruby {
+        jrubyVersion = '9.1.2.3' // <1>
+    }
+}
+----
+<1> Use a different version of JRuby only in a specific task, whilst using a globally configured version for everything else.
+
+=== Changing the JRubyExec configuration
+
+The `configuration` is deprecated. Use `jruby.gemConfiguration` on the task itself for a custom configuration.
