@@ -4,14 +4,16 @@ import com.github.jrubygradle.api.gems.GemVersion
 import spock.lang.Specification
 import spock.lang.Unroll
 
+import static com.github.jrubygradle.api.gems.GemVersion.gemVersionFromGemRequirement
 import static com.github.jrubygradle.api.gems.GemVersion.gemVersionFromGradleIvyRequirement
+import static com.github.jrubygradle.api.gems.GemVersion.singleGemVersionFromMultipleGemRequirements
 
 class GemVersionSpec extends Specification {
 
     @Unroll
-    void "#gemRequirement (gem) ⇒ #ivyNotation (ivy)"() {
+    void "#gemRequirement (gem requirement) ⇒ #ivyNotation (ivy)"() {
         when:
-        String ivy = GemVersion.gemVersionFromGemRequirement(gemRequirement).toString()
+        String ivy = gemVersionFromGemRequirement(gemRequirement).toString()
 
         then:
         ivy == ivyNotation
@@ -73,6 +75,11 @@ class GemVersionSpec extends Specification {
         '[0.9.0,0.9.99999]' | '[0,)'              | '[0.9.0,0.9.99999]'
         '[0,)'              | '[0.9.0,0.9.99999]' | '[0.9.0,0.9.99999]'
         ']2.5.1.1,99999]'   | ']2.5.1.1,)'        | ']2.5.1.1,99999]'
+    }
+
+    void 'Ivy union of < 3, >= 1.2'() {
+        expect:
+        singleGemVersionFromMultipleGemRequirements('< 3,>= 1.2').toString() == '[1.2,3['
     }
 
     void "intersects with conflict"() {

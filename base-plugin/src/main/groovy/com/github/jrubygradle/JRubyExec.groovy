@@ -30,7 +30,7 @@ class JRubyExec extends JavaExec implements JRubyAwareTask, JRubyExecSpec {
      * system Ruby environment.
      */
     @Input
-    boolean InheritRubyEnv = false
+    boolean inheritRubyEnv = false
 
     JRubyExec() {
         super()
@@ -155,7 +155,7 @@ class JRubyExec extends JavaExec implements JRubyAwareTask, JRubyExecSpec {
      */
     @Deprecated
     String getJrubyVersion() {
-        deprecated("Use jruby.getJrubyVersion rather getJrubyVersion()")
+        deprecated('Use jruby.getJrubyVersion rather getJrubyVersion()')
         jruby.jrubyVersion
     }
 
@@ -172,7 +172,7 @@ class JRubyExec extends JavaExec implements JRubyAwareTask, JRubyExecSpec {
      */
     @Deprecated
     void jrubyVersion(final String ver) {
-        deprecated("Use jruby.jrubyVersion rather jrubyVersion")
+        deprecated('Use jruby.jrubyVersion rather jrubyVersion')
         jruby.jrubyVersion(ver)
     }
 
@@ -184,7 +184,7 @@ class JRubyExec extends JavaExec implements JRubyAwareTask, JRubyExecSpec {
      */
     @Deprecated
     void configuration(Configuration newConfiguration) {
-        deprecated("Use jruby.setGemConfiguration() rather than configuration()")
+        deprecated('Use jruby.setGemConfiguration() rather than configuration()')
         jruby.gemConfiguration(newConfiguration)
     }
 
@@ -196,7 +196,7 @@ class JRubyExec extends JavaExec implements JRubyAwareTask, JRubyExecSpec {
      */
     @Deprecated
     void configuration(String newConfiguration) {
-        deprecated("Use jruby.setGemConfiguration() rather than configuration()")
+        deprecated('Use jruby.setGemConfiguration(newConfiguration) rather than configuration(newConfiguration)')
         jruby.gemConfiguration(newConfiguration)
     }
 
@@ -211,7 +211,7 @@ class JRubyExec extends JavaExec implements JRubyAwareTask, JRubyExecSpec {
      */
     @Deprecated
     void setJrubyVersion(final String version) {
-        deprecated("Use jruby.setJrubyVersion rather setJrubyVersion")
+        deprecated('Use jruby.setJrubyVersion rather setJrubyVersion')
         jruby.jrubyVersion(version)
     }
 
@@ -219,7 +219,7 @@ class JRubyExec extends JavaExec implements JRubyAwareTask, JRubyExecSpec {
     @SuppressWarnings('UnnecessaryGetter')
     void exec() {
         File gemDir = getGemWorkDir().get()
-        setEnvironment prepareJRubyEnvironment(this.environment, inheritRubyEnv, gemDir)
+        setEnvironment prepareJRubyEnvironment(this.environment, this.inheritRubyEnv, gemDir)
         super.classpath jruby.jrubyConfiguration
         super.setArgs(getArgs())
         super.exec()

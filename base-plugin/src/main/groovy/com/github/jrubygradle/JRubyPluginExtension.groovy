@@ -316,7 +316,7 @@ class JRubyPluginExtension extends AbstractCombinedProjectTaskExtension {
             if (taskResolutionStrategiesOnly) {
                 this.resolutionsStrategies
             } else {
-                getExtFromProject().allResolutionStrategyActions + this.resolutionsStrategies
+                extFromProject.allResolutionStrategyActions + this.resolutionsStrategies
             }
         } else {
             this.resolutionsStrategies

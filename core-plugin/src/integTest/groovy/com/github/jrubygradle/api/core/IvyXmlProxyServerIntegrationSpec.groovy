@@ -4,11 +4,13 @@ import org.gradle.testkit.runner.BuildResult
 import org.gradle.testkit.runner.GradleRunner
 import org.junit.Rule
 import org.junit.rules.TemporaryFolder
+import spock.lang.IgnoreIf
+import spock.lang.Issue
 import spock.lang.Specification
 
 import java.util.regex.Pattern
 
-
+@IgnoreIf({ System.getProperty('TESTS_ARE_OFFLINE') })
 class IvyXmlProxyServerIntegrationSpec extends Specification {
 
     @Rule
@@ -52,7 +54,7 @@ class IvyXmlProxyServerIntegrationSpec extends Specification {
             .withProjectDir(projectDir)
             .withPluginClasspath()
             .withTestKitDir(testKitDir)
-            .withArguments(['dependencies', '--configuration=something',  '-i', '-s'])
+            .withArguments(['dependencies', '--configuration=something', '-i', '-s'])
             .forwardOutput()
             .withDebug(true)
             .build()
@@ -74,8 +76,8 @@ class IvyXmlProxyServerIntegrationSpec extends Specification {
         build()
 
         then:
-        new File(projectDir,'build/something/credit_card_validator-1.3.2.gem').exists()
-        new File(projectDir,'build/something/base_app-1.0.6.gem').exists()
+        new File(projectDir, 'build/something/credit_card_validator-1.3.2.gem').exists()
+        new File(projectDir, 'build/something/base_app-1.0.6.gem').exists()
     }
 
 
@@ -110,8 +112,24 @@ class IvyXmlProxyServerIntegrationSpec extends Specification {
         findFiles ~/^rake-.*gem$/
     }
 
+    @Issue('https://github.com/jruby-gradle/jruby-gradle-plugin/issues/290')
+    void 'Resolve ranges with =, != and non-dotted versions'() {
+        setup:
+        withBuildFile '''
+        dependencies {
+            something 'rubygems:github-pages:106'    
+        }
+        '''
+
+        when:
+        build()
+
+        then:
+        findFiles ~/^github-pages-106.gem$/
+    }
+
     private List<File> findFiles(Pattern pat) {
-        new File(projectDir,'build/something').listFiles( new FilenameFilter() {
+        new File(projectDir, 'build/something').listFiles(new FilenameFilter() {
             @Override
             boolean accept(File dir, String name) {
                 name =~ pat

@@ -95,5 +95,3 @@ abstract class AbstractJRubyPrepare extends DefaultTask implements JRubyAwareTas
     private Object outputDir = { -> "${project.buildDir}/.gems" }
 }
 
-
-

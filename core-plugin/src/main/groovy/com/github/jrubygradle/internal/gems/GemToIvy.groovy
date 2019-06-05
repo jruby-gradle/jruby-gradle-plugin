@@ -1,7 +1,5 @@
 package com.github.jrubygradle.internal.gems
 
-
-import com.github.jrubygradle.api.gems.GemVersion
 import com.github.jrubygradle.api.gems.GemInfo
 import groovy.transform.CompileDynamic
 import groovy.transform.CompileStatic
@@ -9,7 +7,7 @@ import groovy.xml.MarkupBuilder
 
 import java.security.MessageDigest
 
-import static com.github.jrubygradle.api.gems.GemVersion.gemVersionFromGemRequirement
+import static com.github.jrubygradle.api.gems.GemVersion.singleGemVersionFromMultipleGemRequirements
 
 /** Converts from Gem metadata to Ivy metadata.
  *
@@ -75,7 +73,11 @@ class GemToIvy {
             if (gem.dependencies) {
                 dependencies {
                     gem.dependencies.each { dep ->
-                        dependency(org: this.org, name: dep.name, rev: translateGemRevisionRequirements(dep.requirements))
+                        dependency(
+                            org: this.org,
+                            name: dep.name,
+                            rev: singleGemVersionFromMultipleGemRequirements(dep.requirements).toString()
+                        )
                     }
                 }
             }
@@ -104,18 +106,6 @@ class GemToIvy {
         File shaFile = new File(ivyXml.parentFile, "${ivyXml.name}.sha1")
         shaFile.text = MessageDigest.getInstance('SHA-1').digest(ivyXml.bytes).encodeHex().toString()
         shaFile
-    }
-
-    private String translateGemRevisionRequirements(String requirements) {
-        List<GemVersion> reqs = requirements.split(/,\s*/).collect { String it ->
-            gemVersionFromGemRequirement(it)
-        }
-
-        if (reqs.size() > 1) {
-            reqs.min().union(reqs.max()).toString()
-        } else {
-            reqs[0].toString()
-        }
     }
 
     private final String serverUri

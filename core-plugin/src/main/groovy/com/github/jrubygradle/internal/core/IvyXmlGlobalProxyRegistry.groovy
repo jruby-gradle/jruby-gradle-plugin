@@ -1,6 +1,5 @@
 package com.github.jrubygradle.internal.core
 
-
 import groovy.transform.CompileStatic
 import org.gradle.api.Project
 

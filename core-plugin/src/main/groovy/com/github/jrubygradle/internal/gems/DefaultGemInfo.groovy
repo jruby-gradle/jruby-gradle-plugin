@@ -1,6 +1,5 @@
 package com.github.jrubygradle.internal.gems
 
-
 import com.github.jrubygradle.api.gems.GemInfo
 import com.github.jrubygradle.api.gems.GemDependency
 import groovy.transform.CompileStatic

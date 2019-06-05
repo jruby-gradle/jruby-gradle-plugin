@@ -96,6 +96,7 @@ class JRubyExecDelegate {
             notSupported(USE_ARGS_ALTERNATIVES)
         }
 
+        @SuppressWarnings('UnusedMethodParameter')
         JavaExecSpec setArgs(Object... a) {
             notSupported(USE_ARGS_ALTERNATIVES)
         }
@@ -157,27 +158,8 @@ class JRubyExecDelegate {
             this.jrubyArgs
         }
 
-//        JavaExecSpec copyTo(JavaExecSpec execSpec) {
-//            delegate.copyTo(execSpec)
-//
-//            execSpec.workingDir = delegate.workingDir
-//            execSpec.args = delegate.getArgs()
-//            execSpec.classpath = delegate.jruby.jrubyConfiguration
-//            execSpec.main = delegate.main
-//
-//            execSpec.errorOutput = delegate.errorOutput
-//            execSpec.standardOutput = delegate.standardOutput
-//            execSpec.standardInput = delegate.standardInput
-//            execSpec.ignoreExitValue = delegate.ignoreExitValue
-//
-//            execSpec.environment = prepareJRubyEnvironment(
-//                delegate.environment, delegate.inheritRubyEnv, delegate.gemWorkDir.get()
-//            )
-//        }
-
-
         private void notSupported(final String msg) {
-            throw new UnsupportedOperationException()
+            throw new UnsupportedOperationException(msg)
         }
 
         private static final String USE_ARGS_ALTERNATIVES = 'Use jrubyArgs/scriptArgs instead of `args`'

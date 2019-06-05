@@ -65,6 +65,7 @@ class GenerateGradleRb extends DefaultTask implements JRubyAwareTask {
 
     @TaskAction
     @CompileDynamic
+    @SuppressWarnings('DuplicateStringLiteral')
     void generate() {
         Object source = getSourceFromResource()
         File destination = destinationFile().parentFile

@@ -1,6 +1,5 @@
 package com.github.jrubygradle.internal.core
 
-
 import com.github.jrubygradle.api.gems.GemInfo
 import com.github.jrubygradle.internal.gems.DefaultGemDependency
 import com.github.jrubygradle.internal.gems.DefaultGemInfo

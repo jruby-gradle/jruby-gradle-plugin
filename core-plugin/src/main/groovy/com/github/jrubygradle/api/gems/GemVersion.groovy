@@ -2,6 +2,7 @@ package com.github.jrubygradle.api.gems
 
 import groovy.transform.CompileDynamic
 import groovy.transform.CompileStatic
+import groovy.util.logging.Slf4j
 
 import java.util.regex.MatchResult
 import java.util.regex.Pattern
@@ -41,36 +42,41 @@ import static com.github.jrubygradle.api.gems.GemVersion.Boundary.OPEN_ENDED
  * @since 2.0 (Moved here from base plugin where it existed since 0.4.0)
  */
 @CompileStatic
+@Slf4j
 class GemVersion implements Comparable<GemVersion> {
 
     /** How versions at boundaries are defined.
      *
      */
+    @SuppressWarnings('DuplicateStringLiteral')
     enum Boundary {
         /** The specified version is included on the border.
          *
          */
-        INCLUSIVE('[',']'),
+        INCLUSIVE('[', ']'),
 
         /** THe specified version is excluded on the border.
          *
          */
-        EXCLUSIVE(']','['),
+        EXCLUSIVE(']', '['),
 
         /** All values below (on the low border) or above (on the high border)
          * are acceptable
          *
          */
-        OPEN_ENDED('(',')')
+        OPEN_ENDED('(', ')')
 
         final String low
         final String high
 
-        private Boundary( String low, String hi) {
+        private Boundary(String low, String hi) {
             this.low = low
             this.high = hi
         }
     }
+
+    public static final GemVersion NO_VERSION = new GemVersion(null, null, null, null)
+    public static final GemVersion EVERYTHING = new GemVersion(OPEN_ENDED, null, null, OPEN_ENDED)
 
     public static final String MAX_VERSION = '99999'
     public static final String MIN_VERSION = '0.0.0'
@@ -92,11 +98,16 @@ class GemVersion implements Comparable<GemVersion> {
     private static final Pattern GREATER_EQUAL = ~/^>=\s*(.+)/
     private static final Pattern GREATER = ~/^>\s*(.+)/
     private static final Pattern EQUAL = ~/^=\s*(.+)/
+    private static final Pattern NOT_EQUAL = ~/^!=\s*(.+)/
     private static final Pattern LESS = ~/^<\s*(.+)/
     private static final Pattern LESS_EQUAL = ~/^<=\s*(.+)/
     private static final Pattern TWIDDLE_WAKKA = ~/^~>\s*(.+)/
 
     private static final String VERSION_SPLIT = '.'
+    private static final String PAD_ZERO = '0'
+    private static final String EMPTY = ''
+
+    private static final String NOT_GEM_REQ = 'This does not look like a standard GEM version requirement'
 
     final String low
     final String high
@@ -114,10 +125,43 @@ class GemVersion implements Comparable<GemVersion> {
         new GemVersion(singleRequirement)
     }
 
+    /** Takes a GEM requirement list and creates a list of GEM versions
+     *
+     * @param multipleRequirements Comma-separated list of GEM requirements.
+     * @return List of GEM versions. Can be empty if all requirements evaluate to {@link #NO_VERSION}.
+     */
+    static List<GemVersion> gemVersionsFromMultipleGemRequirements(String multipleRequirements) {
+        multipleRequirements.split(/,\s*/).collect { String it ->
+            gemVersionFromGemRequirement(it)
+        }.findAll {
+            it != NO_VERSION
+        }
+    }
+
+    /** Takes a GEM requirement list and creates a single GEM versoin, by taking a union of
+     * all requirements.
+     *
+     * @param multipleRequirements Comma-separated list of GEM requirements.
+     * @return Unioned GEM
+     */
+    static GemVersion singleGemVersionFromMultipleGemRequirements(String multipleRequirements) {
+        List<GemVersion> gemVersions = gemVersionsFromMultipleGemRequirements(multipleRequirements)
+        if (gemVersions.empty) {
+            EVERYTHING
+        } else if (gemVersions.size() == 1) {
+            gemVersions.first()
+        } else {
+            gemVersions[1..-1].inject(gemVersions.first()) { range, value ->
+                range.union(value)
+            }
+        }
+    }
+
     /** Create a Gem version instance from a single GEM version requirement.
      *
      * @param singleRequirement Single GEM requirement string.
-     * @return GemVersion instance.
+     * @return GemVersion instance. Can return {@link #NO_VERSION} if the version is parseable,
+     *   but not translatable to Ivy format.
      *
      * @since 2.0
      */
@@ -145,6 +189,9 @@ class GemVersion implements Comparable<GemVersion> {
                 exact,
                 INCLUSIVE
             )
+        } else if (singleRequirement.matches(NOT_EQUAL)) {
+            log.info("'${singleRequirement}' is supported by Ivy.")
+            NO_VERSION
         } else if (singleRequirement.matches(LESS_EQUAL)) {
             new GemVersion(
                 OPEN_ENDED,
@@ -240,13 +287,13 @@ class GemVersion implements Comparable<GemVersion> {
         Boundary newHighBoundary
         String newHigh
 
-        if(!high && other.high) {
+        if (!high && other.high) {
             newHigh = other.high
             newHighBoundary = other.highBoundary
         } else if (high && !other.high) {
             newHigh = high
             newHighBoundary = highBoundary
-        } else if(!high && !other.high) {
+        } else if (!high && !other.high) {
             newHigh = null
             newHighBoundary = highBoundary
         } else {
@@ -298,9 +345,9 @@ class GemVersion implements Comparable<GemVersion> {
         }
 
         if (lowBoundary != other.lowBoundary) {
-            if(lowBoundary == OPEN_ENDED) {
+            if (lowBoundary == OPEN_ENDED) {
                 return -1
-            } else if(other.lowBoundary == OPEN_ENDED) {
+            } else if (other.lowBoundary == OPEN_ENDED) {
                 return 1
             }
             return lowBoundary == INCLUSIVE ? -1 : 1
@@ -313,9 +360,9 @@ class GemVersion implements Comparable<GemVersion> {
         }
 
         if (highBoundary != other.highBoundary) {
-            if(highBoundary == OPEN_ENDED) {
+            if (highBoundary == OPEN_ENDED) {
                 return 1
-            } else if(other.highBoundary == OPEN_ENDED) {
+            } else if (other.highBoundary == OPEN_ENDED) {
                 return -1
             }
             return highBoundary == INCLUSIVE ? 1 : -1
@@ -339,17 +386,21 @@ class GemVersion implements Comparable<GemVersion> {
      * @return Gradle Ivy version range
      */
     String toString() {
-        if (lowBoundary == INCLUSIVE && highBoundary == INCLUSIVE && low == high) {
+        if (this == EVERYTHING) {
+            '+'
+        } else if (this == NO_VERSION) {
+            ']0,0['
+        } else if (lowBoundary == INCLUSIVE && highBoundary == INCLUSIVE && low == high) {
             low
         } else {
-            "${lowBoundary?.low ?: ''}${low ?: ''},${high ?: ''}${highBoundary?.high ?: ''}"
+            "${lowBoundary?.low ?: EMPTY}${low ?: EMPTY},${high ?: EMPTY}${highBoundary?.high ?: EMPTY}"
         }
     }
 
     private static GemVersion parseTwiddleWakka(String singleRequirement) {
         String base = getVersionFromRequirement(singleRequirement, TWIDDLE_WAKKA)
-        List<String> parts = base.tokenize('.')
-        if(1 == parts) {
+        List<String> parts = base.tokenize(VERSION_SPLIT)
+        if (1 == parts) {
             throw new GemVersionException(
                 "'${singleRequirement}' does not look like a correctly formattedGEM twiddle-wakka requirement"
             )
@@ -357,9 +408,9 @@ class GemVersion implements Comparable<GemVersion> {
         String lastNumberPart = parts[0..-2].reverse().find {
             it =~ ONLY_DIGITS
         }
-        if(lastNumberPart == null) {
+        if (lastNumberPart == null) {
             throw new GemVersionException("Cannot extract last number part from '${singleRequirement}'. " +
-                'This does not look like a standard GEM version requirement')
+                NOT_GEM_REQ)
         }
         int bottomAdds = 3 - parts.size()
         if (bottomAdds < 0) {
@@ -367,7 +418,7 @@ class GemVersion implements Comparable<GemVersion> {
         }
         try {
             Integer nextUp = lastNumberPart.toInteger() + 1
-            String leader = parts.size() <= 2 ? '' : "${parts[0..-3].join('.')}."
+            String leader = parts.size() <= 2 ? EMPTY : "${parts[0..-3].join(VERSION_SPLIT)}."
             new GemVersion(
                 INCLUSIVE,
                 "${base}${'.0' * bottomAdds}",
@@ -376,7 +427,7 @@ class GemVersion implements Comparable<GemVersion> {
             )
         } catch (NumberFormatException e) {
             throw new GemVersionException("Can extract last number part from '${singleRequirement}'. " +
-                'This does not look like a standard GEM version requirement', e)
+                NOT_GEM_REQ, e)
         }
     }
 
@@ -409,7 +460,7 @@ class GemVersion implements Comparable<GemVersion> {
      */
     @CompileDynamic
     private GemVersion(final String gradleVersionPattern) {
-        String cleanedString = gradleVersionPattern.replaceAll(~/\p{Blank}/,'')
+        String cleanedString = gradleVersionPattern.replaceAll(~/\p{Blank}/, '')
         MatchResult dotPlus = cleanedString =~ DOT_PLUS
         MatchResult plus = cleanedString =~ PLUS
         MatchResult digitsPlus = cleanedString =~ DIGITS_PLUS
@@ -419,15 +470,15 @@ class GemVersion implements Comparable<GemVersion> {
 
         if (dotPlus.matches()) {
             String base = dotPlus[0][1]
-            this.low = padVersion(base,'0')
-            this.high = padVersion(base,MAX_VERSION)
+            this.low = padVersion(base, PAD_ZERO)
+            this.high = padVersion(base, MAX_VERSION)
             this.lowBoundary = INCLUSIVE
             this.highBoundary = INCLUSIVE
         } else if (plus.matches()) {
             this.low = MIN_VERSION
             this.lowBoundary = INCLUSIVE
             this.highBoundary = OPEN_ENDED
-        } else if(digitsPlus.matches()) {
+        } else if (digitsPlus.matches()) {
             this.lowBoundary = INCLUSIVE
             this.highBoundary = INCLUSIVE
             this.low = "${digitsPlus[0][1]}.${digitsPlus[0][2]}"
@@ -436,11 +487,11 @@ class GemVersion implements Comparable<GemVersion> {
             this.lowBoundary = OPEN_ENDED
             this.high = openBottom[0][1]
             this.highBoundary = openBottom[0][2] == UP_IN ? INCLUSIVE : EXCLUSIVE
-        } else if(openTop.matches()) {
+        } else if (openTop.matches()) {
             this.highBoundary = OPEN_ENDED
             this.low = openTop[0][2]
             this.lowBoundary = openTop[0][1] == LOW_IN ? INCLUSIVE : EXCLUSIVE
-        } else if(range.matches()) {
+        } else if (range.matches()) {
             this.lowBoundary = range[0][1] == LOW_IN ? INCLUSIVE : EXCLUSIVE
             this.highBoundary = range[0][4] == UP_IN ? INCLUSIVE : EXCLUSIVE
             this.low = range[0][2]
@@ -468,15 +519,15 @@ class GemVersion implements Comparable<GemVersion> {
      * a part with pure digits.
      */
     private int compare(String lhs, String rhs) {
-        if(!lhs && !rhs) {
+        if (!lhs && !rhs) {
             return 0
         }
 
-        if(!lhs && rhs) {
+        if (!lhs && rhs) {
             return -1
         }
 
-        if(lhs && !rhs) {
+        if (lhs && !rhs) {
             return -1
         }
 
@@ -488,17 +539,17 @@ class GemVersion implements Comparable<GemVersion> {
             boolean lhsNumerical = lhsParts[i].matches(ONLY_DIGITS)
             boolean rhsNumerical = rhsParts[i].matches(ONLY_DIGITS)
 
-            if(lhsNumerical && rhsNumerical) {
+            if (lhsNumerical && rhsNumerical) {
                 cmp = lhsParts[i].toInteger() <=> rhsParts[i].toInteger()
-            } else if(lhsNumerical && !rhsNumerical) {
+            } else if (lhsNumerical && !rhsNumerical) {
                 cmp = 1
-            } else if(!lhsNumerical && rhsNumerical) {
+            } else if (!lhsNumerical && rhsNumerical) {
                 cmp = -1
             } else {
                 cmp = lhsParts[i] <=> rhsParts[i]
             }
 
-            if(cmp != 0) {
+            if (cmp != 0) {
                 return cmp
             }
         }
@@ -508,7 +559,7 @@ class GemVersion implements Comparable<GemVersion> {
 
     private String padVersion(final String base, final String padValue) {
         String pad = ".${padValue}"
-        int adds = 3 - base.tokenize('.').size()
+        int adds = 3 - base.tokenize(VERSION_SPLIT).size()
         if (adds < 0) {
             adds = 0
         }
@@ -516,7 +567,7 @@ class GemVersion implements Comparable<GemVersion> {
     }
 
     private String stripNonIntegerTail(String version) {
-        version?.replaceFirst(~/\.\p{Alpha}.*$/,'')
+        version?.replaceFirst(~/\.\p{Alpha}.*$/, '')
     }
 
 }

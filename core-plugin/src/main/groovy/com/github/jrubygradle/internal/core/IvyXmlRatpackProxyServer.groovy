@@ -1,8 +1,7 @@
 package com.github.jrubygradle.internal.core
 
-
-import com.github.jrubygradle.api.gems.GemVersion
 import com.github.jrubygradle.api.gems.GemInfo
+import com.github.jrubygradle.api.gems.GemVersion
 import com.github.jrubygradle.internal.gems.GemToIvy
 import groovy.transform.CompileStatic
 import groovy.transform.Synchronized
@@ -15,8 +14,8 @@ import ratpack.server.ServerConfig
 import java.nio.file.Files
 import java.nio.file.Path
 
-import static com.github.jrubygradle.api.gems.GemVersion.gemVersionFromGradleIvyRequirement
 import static IvyUtils.revisionsAsHtmlDirectoryListing
+import static com.github.jrubygradle.api.gems.GemVersion.gemVersionFromGradleIvyRequirement
 import static java.nio.file.Files.move
 import static java.nio.file.StandardCopyOption.ATOMIC_MOVE
 import static java.nio.file.StandardCopyOption.REPLACE_EXISTING
@@ -65,7 +64,7 @@ class IvyXmlRatpackProxyServer implements com.github.jrubygradle.api.core.IvyXml
      *
      */
     @Override
-    @SuppressWarnings('DuplicateStringLiteral')
+    @SuppressWarnings(['DuplicateStringLiteral', 'AbcMetric'])
     void run() {
         server = RatpackServer.start {
             it.serverConfig(
@@ -99,7 +98,7 @@ class IvyXmlRatpackProxyServer implements com.github.jrubygradle.api.core.IvyXml
                     String revision = getGemQueryRevisionFromIvy(name, ctx.allPathTokens['revision'])
                     Path ivyXml = ivyFile(group, name, revision)
                     Path ivyXmlSha1 = ivyXml.resolveSibling("${ivyXml.toFile().name}.sha1")
-                    if(Files.exists(ivyXmlSha1)) {
+                    if (Files.exists(ivyXmlSha1)) {
                         ctx.response.contentType('text/plain').sendFile(ivyXmlSha1)
                     } else {
                         // TODO: Resolve ivy.xml first.

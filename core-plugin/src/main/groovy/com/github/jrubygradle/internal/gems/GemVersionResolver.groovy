@@ -1,6 +1,5 @@
 package com.github.jrubygradle.internal.gems
 
-
 import com.github.jrubygradle.api.gems.GemVersion
 import com.github.jrubygradle.api.gems.GemGroups
 import groovy.transform.PackageScope
