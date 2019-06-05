@@ -11,6 +11,8 @@ import static com.github.jrubygradle.api.gems.GemVersion.singleGemVersionFromMul
 
 /** Converts from Gem metadata to Ivy metadata.
  *
+ * @author Schalk W. Cronjé
+ *
  * @since 2.0
  */
 @CompileStatic

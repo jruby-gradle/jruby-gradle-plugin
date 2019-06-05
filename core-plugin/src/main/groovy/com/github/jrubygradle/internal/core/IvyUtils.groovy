@@ -6,6 +6,8 @@ import groovy.xml.MarkupBuilder
 
 /** Utilities for dealing with Ivy formats.
  *
+ * @author Schalk W. Cronjé
+ *
  * @since 2.0
  */
 @CompileStatic

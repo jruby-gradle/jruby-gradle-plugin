@@ -11,6 +11,8 @@ import org.gradle.util.GradleVersion
 
 /** Extension which can be added to {@code project.repositories}.
  *
+ * @author Schalk W. Cronjé
+ *
  * @since 2.0
  */
 @CompileStatic

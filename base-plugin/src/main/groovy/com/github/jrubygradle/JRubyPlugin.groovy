@@ -13,6 +13,10 @@ import static org.ysb33r.grolifant.api.TaskProvider.registerTask
 
 /** Base plugin for JRuby.
  *
+ * @author Schalk W. Cronjé
+ * @author R Tyler Croy
+ * @author Christian Meier
+ *
  */
 @CompileStatic
 class JRubyPlugin implements Plugin<Project> {

@@ -2,7 +2,9 @@ package com.github.jrubygradle.api.core;
 
 import org.gradle.api.Task;
 
-/** For tasks that require JRUby in some form
+/** For tasks that require JRuby in some form
+ *
+ * @author Schalk W. Cronjé
  *
  * @since 2.0
  */

@@ -16,8 +16,12 @@ import java.util.regex.Matcher
 
 import static org.ysb33r.grolifant.api.StringUtils.stringize
 
-/**
- * @author Schalk W. Cronjé.
+/** Utilities for preparation or executing JRuby.
+ *
+ * @author Schalk W. Cronjé
+ * @author R Tyler Croy
+ * @author Christian Meier
+ *
  */
 @CompileStatic
 class JRubyExecUtils {

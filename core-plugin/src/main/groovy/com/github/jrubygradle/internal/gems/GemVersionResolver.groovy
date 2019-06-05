@@ -14,6 +14,11 @@ import static com.github.jrubygradle.api.gems.GemVersion.gemVersionFromGradleIvy
 
 /**
  * Resolver to compute gem versions
+ *
+ * @author Schalk W. Cronjé
+ * @author Christian Meier
+ *
+ * @since 2.0
  */
 class GemVersionResolver {
     static void addGemResolver(Configuration cfg, GemGroups gemGroups, GemVersionResolver versionResolver) {

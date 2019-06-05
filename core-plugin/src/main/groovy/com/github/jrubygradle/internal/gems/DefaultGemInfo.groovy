@@ -8,6 +8,8 @@ import groovy.transform.CompileStatic
  *
  * Elements in this class match directly to the Rubgems REST API.
  *
+ * @author Schalk W. Cronjé
+ *
  * @since 2.0
  */
 @CompileStatic

@@ -11,6 +11,8 @@ import org.gradle.api.plugins.ExtensionAware
 /** Provides only a repository handler extensiosn for looking up rubygem
  * metadata.
  *
+ * @author Schalk W. Cronjé
+ *
  * @since 2.0
  */
 @CompileStatic

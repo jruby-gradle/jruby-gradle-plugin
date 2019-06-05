@@ -21,6 +21,9 @@ import static org.ysb33r.grolifant.api.StringUtils.stringize
 /** Runs a ruby script using JRuby
  *
  * @author Schalk W. Cronjé
+ * @author R Tyler Croy
+ * @author Christian Meier
+ *
  */
 class JRubyExec extends JavaExec implements JRubyAwareTask, JRubyExecSpec {
 

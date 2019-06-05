@@ -15,8 +15,11 @@ import static com.github.jrubygradle.internal.JRubyExecUtils.prepareJRubyEnviron
 import static com.github.jrubygradle.internal.JRubyExecUtils.resolveScript
 import static org.ysb33r.grolifant.api.StringUtils.stringize
 
-/**
+/** Delegate for running JRuby using {@code project.jrubyexec}.
+ *
  * @author Schalk W. Cronjé
+ * @author R Tyler Croy
+ *
  */
 class JRubyExecDelegate {
 

@@ -5,6 +5,8 @@ import groovy.transform.InheritConstructors
 
 /** Thrown when a parameter has not been correctly initialised.
  *
+ * @author Schalk W. Cronjé
+ *
  * @since 2.0
  */
 @CompileStatic

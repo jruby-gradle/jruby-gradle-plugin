@@ -20,6 +20,8 @@ import static com.github.jrubygradle.api.gems.GemOverwriteAction.OVERWRITE
  *
  * @author R Tyler Croy
  * @author Schalk W. Cronjé
+ *
+ * @since 2.0
  */
 @CompileStatic
 class GemUtils {

@@ -3,9 +3,9 @@ package com.github.jrubygradle.api.gems
 import com.github.jrubygradle.api.core.RepositoryHandlerExtension
 import groovy.transform.CompileStatic
 
-import static RepositoryHandlerExtension.DEFAULT_GROUP_NAME
+import static com.github.jrubygradle.api.core.RepositoryHandlerExtension.DEFAULT_GROUP_NAME
 
-/**
+/** Defines groups which contains GEMs
  *
  * @author Schalk W. Cronjé
  *

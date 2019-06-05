@@ -4,6 +4,11 @@ import groovy.transform.CompileStatic
 
 /** Overwrite actions when installing GEMs locally into the build area
  *
+ * @author Schalk W. Cronjé
+ * @author R Tyler Croy
+ * @author Christian Meier
+ *
+ * @since 2.0
  */
 @CompileStatic
 enum GemOverwriteAction {

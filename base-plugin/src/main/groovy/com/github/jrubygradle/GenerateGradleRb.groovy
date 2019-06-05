@@ -19,6 +19,9 @@ import static com.github.jrubygradle.internal.JRubyExecUtils.classpathFromConfig
  * performing local manual testing.
  *
  * @author Schalk W. Cronjé
+ * @author R Tyler Croy
+ * @author Christian Meier
+ *
  * @since 0.1.15
  */
 @SuppressWarnings('UnnecessaryGetter')

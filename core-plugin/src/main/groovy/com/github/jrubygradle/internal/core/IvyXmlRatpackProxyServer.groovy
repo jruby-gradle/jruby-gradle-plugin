@@ -23,6 +23,8 @@ import static java.nio.file.StandardCopyOption.REPLACE_EXISTING
 /** Uses Ratpack to run a small proxy server inside Gradle to proxy Rubygems.org
  * as if it is local Ivy server with remote artifacts.
  *
+ * @author Schalk W. Cronjé
+ *
  * @since 2.0
  */
 @CompileStatic

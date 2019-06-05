@@ -5,6 +5,8 @@ import java.util.List;
 
 /** GEM metadata.
  *
+ * @author Schalk W. Cronjé
+ *
  * @since 2.0
  */
 public interface GemInfo {

@@ -7,6 +7,8 @@ import java.nio.file.Path;
  * Proxy service which can translate RubyGems structures into Ivy structures
  * and vice-versa.
  *
+ * @author Schalk W. Cronjé
+ *
  * @since 2.0
  */
 public interface IvyXmlProxyServer extends Runnable {

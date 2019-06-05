@@ -16,6 +16,8 @@ import static groovyx.net.http.OkHttpBuilder.configure
 /** Implementation for a RubyGems REST API client based upon
  * HttpBuilder-ng.
  *
+ * @author Schalk W. Cronjé
+ *
  * @since 2.0
  */
 @CompileStatic

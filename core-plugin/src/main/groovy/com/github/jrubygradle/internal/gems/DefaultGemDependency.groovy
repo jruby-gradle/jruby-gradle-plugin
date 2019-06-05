@@ -5,6 +5,8 @@ import groovy.transform.CompileStatic
 
 /** Defining a GEM dependency.
  *
+ * @author Schalk W. Cronjé
+ *
  * @since 2.0
  */
 @CompileStatic

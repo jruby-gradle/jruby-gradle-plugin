@@ -2,6 +2,8 @@ package com.github.jrubygradle.api.gems;
 
 /** Description of a transitive GEM dependency.
  *
+ * @author Schalk W. Cronjé
+ *
  * @since 2.0
  */
 public interface GemDependency {

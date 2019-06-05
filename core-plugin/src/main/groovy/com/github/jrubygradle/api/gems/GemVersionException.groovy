@@ -6,6 +6,8 @@ import groovy.transform.InheritConstructors
 
 /** Thrown when GEM version strings cannot be correctly parsed.
  *
+ * @author Schalk W. Cronjé
+ *
  * @since 2.0
  */
 @InheritConstructors

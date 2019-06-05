@@ -9,7 +9,9 @@ import java.util.concurrent.ConcurrentMap
 
 /** Allow only one version of the proxy to run.
  *
- * @Since 2.0
+ * @author Schalk W. Cronjé
+ *
+ * @since 2.0
  */
 @CompileStatic
 class IvyXmlGlobalProxyRegistry {

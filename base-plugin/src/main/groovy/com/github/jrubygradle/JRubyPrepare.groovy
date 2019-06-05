@@ -4,7 +4,8 @@ import com.github.jrubygradle.api.core.AbstractJRubyPrepare
 import com.github.jrubygradle.internal.JRubyExecUtils
 import groovy.transform.CompileStatic
 
-/**
+/** Task for preparing a project-local installation of GEMs & JARs.
+ *
  * @author Schalk W. Cronjé
  * @author R Tyler Croy
  * @author Christian Meier

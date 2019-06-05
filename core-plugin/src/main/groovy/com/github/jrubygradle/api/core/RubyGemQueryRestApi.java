@@ -6,6 +6,8 @@ import java.util.List;
 
 /** Interface for querying a service that confirorms to the RubyGem API.
  *
+ * @author Schalk W. Cronjé
+ *
  * @since 2.0.
  *
  * @see https://guides.rubygems.org/rubygems-org-api

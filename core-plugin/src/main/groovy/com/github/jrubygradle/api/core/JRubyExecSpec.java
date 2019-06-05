@@ -9,6 +9,7 @@ import java.util.List;
  * Formalises a way of executing JRuby from Gradle via an execution specification
  *
  * @author Schalk W. Cronjé
+ *
  * @since 2.0
  */
 public interface JRubyExecSpec extends JavaExecSpec {
