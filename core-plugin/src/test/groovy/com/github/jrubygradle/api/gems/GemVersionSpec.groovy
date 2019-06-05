@@ -7,6 +7,27 @@ import spock.lang.Unroll
 import static com.github.jrubygradle.api.gems.GemVersion.gemVersionFromGradleIvyRequirement
 
 class GemVersionSpec extends Specification {
+
+    @Unroll
+    void "#gemRequirement (gem) ⇒ #ivyNotation (ivy)"() {
+        when:
+        String ivy = GemVersion.gemVersionFromGemRequirement(gemRequirement).toString()
+
+        then:
+        ivy == ivyNotation
+
+        where:
+        gemRequirement | ivyNotation
+        '= 1.0.0'      | '1.0.0'
+        '> 2.0'        | ']2.0,)'
+        '>= 2.2.0'     | '[2.2.0,)'
+        '<= 3.0'       | '(,3.0]'
+        '< 2.3.0'      | '(,2.3.0['
+        '~> 1.0'       | '[1.0.0,2.0['
+        '~> 2.2'       | '[2.2.0,3.0['
+        '~> 2.2.0'     | '[2.2.0,2.3.0['
+    }
+
     @Unroll
     void "toString: #ivyVer (ivy) ⇒ #ivyRange (range)"() {
         when:

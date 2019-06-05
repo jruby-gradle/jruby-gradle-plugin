@@ -20,18 +20,18 @@ import static com.github.jrubygradle.api.gems.GemVersion.Boundary.OPEN_ENDED
  *
  * When converting a GemSpec into a Ivy ivy.xml the translation of a
  * gem version range into an Ivy version range. typically '~> 1.0' from ruby
- * becomes [1.0, 1.99999] or 1.0.+ on the Ivy side. so most dependencies from
+ * becomes {@code [1.0.0,2.0[} on the Ivy side. so most dependencies from
  * gem artifacts will use such version ranges.
  *
  * To help gradle to be closer to the rubygems world when resolving gem
  * artifacts, it needs to calculate intersection between version ranges
  * in maven manner.
  *
- * this class basically represents an Ivy version range with boundary
- * (exclusive vs. inclusive) and its lower and upper bounded version and
+ * This class basically represents an Ivy version range with boundary
+ * (exclusive vs. inclusive or open-ended) and its lower and upper bounded version and
  * allows to intersect its range with another version range.
  *
- * it also translate fixed version '1.0' to [1.0, 1.0] or the gradle notation
+ * It also translate fixed version '1.0' to [1.0, 1.0] or the gradle notation
  * 1.2+ to [1.2, 1.99999] or 1.+ to [1.0, 1.99999] following the gemspec-to-pom
  * pattern.
  *
@@ -125,54 +125,44 @@ class GemVersion implements Comparable<GemVersion> {
     static GemVersion gemVersionFromGemRequirement(String singleRequirement) {
         if (singleRequirement.matches(GREATER_EQUAL)) {
             new GemVersion(
-                true,
+                INCLUSIVE,
                 getVersionFromRequirement(singleRequirement, GREATER_EQUAL),
-                "${MAX_VERSION.toString()}.0.0",
-                true
+                null,
+                OPEN_ENDED
             )
         } else if (singleRequirement.matches(GREATER)) {
             new GemVersion(
-                false,
+                EXCLUSIVE,
                 getVersionFromRequirement(singleRequirement, GREATER),
-                "${MAX_VERSION.toString()}.0.0",
-                true
+                null,
+                OPEN_ENDED
             )
         } else if (singleRequirement.matches(EQUAL)) {
             String exact = getVersionFromRequirement(singleRequirement, EQUAL)
             new GemVersion(
-                true,
+                INCLUSIVE,
                 exact,
                 exact,
-                true
-            )
-        } else if (singleRequirement.matches(LESS)) {
-            new GemVersion(
-                true,
-                '0.0.0',
-                getVersionFromRequirement(singleRequirement, LESS),
-                false
+                INCLUSIVE
             )
         } else if (singleRequirement.matches(LESS_EQUAL)) {
             new GemVersion(
-                true,
-                '0.0.0',
+                OPEN_ENDED,
+                null,
                 getVersionFromRequirement(singleRequirement, LESS_EQUAL),
-                true
+                INCLUSIVE
+            )
+        } else if (singleRequirement.matches(LESS)) {
+            new GemVersion(
+                OPEN_ENDED,
+                null,
+                getVersionFromRequirement(singleRequirement, LESS),
+                EXCLUSIVE
             )
         } else if (singleRequirement.matches(TWIDDLE_WAKKA)) {
-            String base = getVersionFromRequirement(singleRequirement, TWIDDLE_WAKKA)
-            int adds = 3 - base.tokenize('.').size()
-            if (adds < 0) {
-                adds = 0
-            }
-            new GemVersion(
-                true,
-                "${base}${'.0' * adds} ",
-                "${base}${('.' + MAX_VERSION) * adds}",
-                true
-            )
+            parseTwiddleWakka(singleRequirement)
         } else {
-            throw new GemVersionException("Do not not how to process ${singleRequirement} as a version string")
+            throw new GemVersionException("'${singleRequirement}' does not look like a GEM version requirement")
         }
     }
 
@@ -356,6 +346,40 @@ class GemVersion implements Comparable<GemVersion> {
         }
     }
 
+    private static GemVersion parseTwiddleWakka(String singleRequirement) {
+        String base = getVersionFromRequirement(singleRequirement, TWIDDLE_WAKKA)
+        List<String> parts = base.tokenize('.')
+        if(1 == parts) {
+            throw new GemVersionException(
+                "'${singleRequirement}' does not look like a correctly formattedGEM twiddle-wakka requirement"
+            )
+        }
+        String lastNumberPart = parts[0..-2].reverse().find {
+            it =~ ONLY_DIGITS
+        }
+        if(lastNumberPart == null) {
+            throw new GemVersionException("Cannot extract last number part from '${singleRequirement}'. " +
+                'This does not look like a standard GEM version requirement')
+        }
+        int bottomAdds = 3 - parts.size()
+        if (bottomAdds < 0) {
+            bottomAdds = 0
+        }
+        try {
+            Integer nextUp = lastNumberPart.toInteger() + 1
+            String leader = parts.size() <= 2 ? '' : "${parts[0..-3].join('.')}."
+            new GemVersion(
+                INCLUSIVE,
+                "${base}${'.0' * bottomAdds}",
+                "${leader}${nextUp}.0",
+                EXCLUSIVE
+            )
+        } catch (NumberFormatException e) {
+            throw new GemVersionException("Can extract last number part from '${singleRequirement}'. " +
+                'This does not look like a standard GEM version requirement', e)
+        }
+    }
+
     @CompileDynamic
     @SuppressWarnings('NoDef')
     private static String getVersionFromRequirement(String gemRevision, Pattern matchPattern) {
@@ -363,12 +387,12 @@ class GemVersion implements Comparable<GemVersion> {
         matcher[0][1]
     }
 
-    private GemVersion(Boolean lowInclusive, String low, String high, Boolean highInclusive) {
-        this.lowBoundary = lowInclusive ? INCLUSIVE : EXCLUSIVE
-        this.low = low
-        this.high = high
-        this.highBoundary = highInclusive ? INCLUSIVE : EXCLUSIVE
-    }
+//    private GemVersion(Boolean lowInclusive, String low, String high, Boolean highInclusive) {
+//        this.lowBoundary = lowInclusive ? INCLUSIVE : EXCLUSIVE
+//        this.low = low
+//        this.high = high
+//        this.highBoundary = highInclusive ? INCLUSIVE : EXCLUSIVE
+//    }
 
     private GemVersion(Boundary pre, String low, String high, Boundary post) {
         this.lowBoundary = pre

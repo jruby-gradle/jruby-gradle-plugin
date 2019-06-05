@@ -112,14 +112,10 @@ class GemToIvy {
         }
 
         if (reqs.size() > 1) {
-            ivyFormatFromRange(reqs.min().union(reqs.max()))
+            reqs.min().union(reqs.max()).toString()
         } else {
-            ivyFormatFromRange(reqs[0])
+            reqs[0].toString()
         }
-    }
-
-    private String ivyFormatFromRange(GemVersion range) {
-        "${range.lowInclusive ? '[' : ']'}${range.low},${range.high}${range.highInclusive ? ']' : '['}"
     }
 
     private final String serverUri

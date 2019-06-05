@@ -59,7 +59,7 @@ class IvyXmlProxyServerIntegrationSpec extends Specification {
 
         then:
         result.output.contains('rubygems:credit_card_validator:1.3.2')
-        result.output.contains('rubygems:base_app:[1.0.5,99999.0.0] ->')
+        result.output.contains('rubygems:base_app:[1.0.5,) ->')
     }
 
     void 'Download a collection of GEMs'() {
