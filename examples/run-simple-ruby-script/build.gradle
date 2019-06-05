@@ -3,15 +3,21 @@
  * documentation example. If you change this file, please be sure that it
  * renders appropriately in the generated documentation
  */
-apply plugin: "com.github.jruby-gradle.base"
-
 import com.github.jrubygradle.JRubyExec
 
+plugins {
+    id 'com.github.jruby-gradle.base'
+}
+
+repositories {
+    ruby.gems()
+}
+
 dependencies {
-    /* Using the built-in `jrubyExec` configuration to describe the
+    /* Using the built-in `gems` configuration to describe the
      * dependencies our JRubyExec-based tasks will need
      */
-    jrubyExec "rubygems:colorize:0.7.7+"
+    gems "rubygems:colorize:0.7.7+"
 }
 
 task printSomePrettyOutputPlease(type: JRubyExec) {

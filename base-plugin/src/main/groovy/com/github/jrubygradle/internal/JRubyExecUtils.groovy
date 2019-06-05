@@ -9,14 +9,11 @@ import groovy.transform.CompileStatic
 import org.gradle.api.InvalidUserDataException
 import org.gradle.api.Project
 import org.gradle.api.artifacts.Configuration
-import org.gradle.api.file.FileCollection
 import org.ysb33r.grolifant.api.OperatingSystem
 import org.ysb33r.grolifant.api.StringUtils
 
 import java.util.regex.Matcher
 
-import static com.github.jrubygradle.api.gems.GemOverwriteAction.OVERWRITE
-import static com.github.jrubygradle.api.gems.GemOverwriteAction.SKIP
 import static org.ysb33r.grolifant.api.StringUtils.stringize
 
 /**
@@ -92,15 +89,6 @@ class JRubyExecUtils {
             minor     : matches[0][2].toInteger(),
             patchlevel: matches[0][3].toInteger()
         ]
-    }
-
-    /** Extract the jruby-complete-XXX.jar as a FileCollection
-     *
-     * @param cfg FileCollection
-     * @return Returns the classpath as a File or null if the jar was not found
-     */
-    static FileCollection jrubyJar(FileCollection fc) {
-        fc.filter { File f -> f.name.startsWith(JRUBY_COMPLETE) }
     }
 
     /** Resolves a script location object.
@@ -215,40 +203,21 @@ class JRubyExecUtils {
         }
     }
 
-//    /**
-//     * Prepare the Ruby and Java dependencies for the configured configuration
-//     *
-//     * This method will determine the appropriate dependency overwrite behavior
-//     * from the Gradle invocation. In effect, if the --refresh-dependencies flag
-//     * is used, already installed gems will be overwritten.
-//     *
-//     * @param project The currently executing project
-//     */
-//    static void prepareDependencies(Project project) {
-//        GemOverwriteAction overwrite = SKIP
-//
-//        if (project.gradle.startParameter.refreshDependencies) {
-//            overwrite = OVERWRITE
-//        }
-//
-//        prepareDependencies(project, overwrite)
-//    }
-
-    static void prepareDependencies(
-        Project project,
-        File gemWorkDir,
-        JRubyPluginExtension jruby,
-        Configuration gemConfiguration
-    ) {
-        GemOverwriteAction overwrite = SKIP
-
-        if (project.gradle.startParameter.refreshDependencies) {
-            overwrite = OVERWRITE
-        }
-
-        prepareDependencies(project, gemWorkDir, jruby, gemConfiguration, overwrite)
-    }
-
+    /**
+     * Prepare the Ruby and Java dependencies for the configured configuration
+     *
+     * This method will determine the appropriate dependency overwrite behavior
+     * from the Gradle invocation. In effect, if the --refresh-dependencies flag
+     * is used, already installed gems will be overwritten.
+     *
+     * @param project The associated Gradle project.
+     * @param gemWorkDir THe GEM unpack/working directory.
+     * @param jruby The associated JRuby project or task extension.
+     * @param gemConfiguration Configuration which contains GEMs for unpacking.
+     * @param overwrite Overwrite mode.
+     *
+     * @since 2.0
+     */
     static void prepareDependencies(
         Project project,
         File gemWorkDir,
@@ -273,30 +242,6 @@ class JRubyExecUtils {
             overwrite
         )
     }
-//    /** Prepare dependencies with a custom overwrite behavior.
-//     *
-//     */
-//    static void prepareDependencies(Project project, GemOverwriteAction overwrite) {
-//
-//        Configuration execConfiguration = project.configurations.findByName(configuration)
-//
-//        File gemDir = getGemWorkDir().absoluteFile
-//
-//        gemDir.mkdirs()
-//
-//        GemUtils.extractGems(
-//            project,
-//            execConfiguration,
-//            execConfiguration,
-//            gemDir,
-//            overwrite
-//        )
-//        GemUtils.setupJars(
-//            execConfiguration,
-//            gemDir,
-//            overwrite
-//        )
-//    }
 
     /** Prepare en environment which can be used to execute JRuby.
      *

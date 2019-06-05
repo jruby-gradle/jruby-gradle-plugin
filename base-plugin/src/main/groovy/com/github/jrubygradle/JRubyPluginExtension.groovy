@@ -114,11 +114,6 @@ class JRubyPluginExtension extends AbstractCombinedProjectTaskExtension {
         setJrubyVersion(newDefaultVersion)
     }
 
-    /** Set this to false if you do not want the default set of repositories to be loaded.
-     *
-     * @since 0.1.1
-     */
-
     /** Legacy method for setting default repositories.
      *
      * @deprecated Default repositories are no longer set by default. People
@@ -126,6 +121,8 @@ class JRubyPluginExtension extends AbstractCombinedProjectTaskExtension {
      *   are encouraged to migrate to using the {@code repositories} block instead.
      *
      * @param value {@code true} to enabled default repositories
+     *
+     * @since 0.1.1
      */
     @Deprecated
     void setDefaultRepositories(boolean value) {
@@ -147,31 +144,6 @@ class JRubyPluginExtension extends AbstractCombinedProjectTaskExtension {
             }
         }
     }
-
-//    /** Resolves the currently configured Jars installation directory.
-//     *
-//     * @return Install directory as an absolute path
-//     * @since 0.1.16
-//     */
-//    @Deprecated
-//    File getJarInstallDir() {
-//        project.file(this.jarInstallDir).absoluteFile
-//    }
-//
-//    /** Sets the jar installation directory. Anything that can be passed to {@code project.file} can be
-//     * passed here as well.
-//     *
-//     * @param dir Directory (String, GString, File, Closure etc.)
-//     * @return The passed object.
-//     * @deprecated Setting a custom jarInstallDir can cause dependencies to
-//     *  overlap and unexpected behavior. Please use Configurations instead.
-//     *
-//     * @since 0.1.16
-//     */
-//    @Deprecated
-//    Object setJarInstallDir(Object dir) {
-//        this.jarInstallDir = dir
-//    }
 
     /** Clears the current list of resolution strategies.
      *
@@ -294,19 +266,6 @@ class JRubyPluginExtension extends AbstractCombinedProjectTaskExtension {
         }
     }
 
-//    /**
-//     * Register a callback to be invoked when defaultVersion is updated
-//     *
-//     * NOTE: This is primarily meant for JRuby/Gradle plugin developers
-//     *
-//     * @param callback
-//     * @since 1.1.0
-//     */
-//    @Incubating
-//    void registerDefaultVersionCallback(Closure callback) {
-//        defaultVersionCallbacks.add(callback)
-//    }
-
     /** Return all of the resolution strategies that are related to this extension.
      *
      * @return List of resolution strategy actions to perform.
@@ -338,22 +297,6 @@ class JRubyPluginExtension extends AbstractCombinedProjectTaskExtension {
             project.dependencies.create(notation)
         }
     }
-
-//    /** Directory for jrubyPrepare to install GEM dependencies into */
-//    @Deprecated
-//    private Object gemInstallDir
-//
-//    /** Directory for jrubyPrepare to install JAR dependencies into */
-//    @Deprecated
-//    private Object jarInstallDir
-
-//    /** List of callbacks to invoke when jruby.defaultVersion is modified */
-//    private final List<Closure> defaultVersionCallbacks = []
-//
-//    /** List of callbacks to invoke when jruby.execVersion is modified */
-//    private final List<Closure> execVersionCallbacks = []
-//
-//    private Boolean isExecVersionModified = false
 
     private void registerPrepareTask(final String configurationName) {
         JRubyPrepareUtils.registerPrepareTask(project, configurationName)

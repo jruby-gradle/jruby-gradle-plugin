@@ -33,8 +33,6 @@ class JRubyPrepareGemsIntegrationSpec extends IntegrationSpecification {
     @IgnoreIf({ IntegrationSpecification.OFFLINE })
     void "Check if rack version gets resolved"() {
         setup:
-        //withDefaultRepositories()
-
         withPreamble """repositories.ruby.gems()
             jrubyPrepare.outputDir = '${pathAsUriStr(projectDir)}'.toURI()
         """
@@ -50,7 +48,7 @@ class JRubyPrepareGemsIntegrationSpec extends IntegrationSpecification {
         then:
         // since we need a version range in the setup the
         // resolved version here can vary over time
-        new File(projectDir, "gems/rack-1.5.5").exists()
+        new File(projectDir, "gems/rack-1.6.11").exists()
     }
 
     @IgnoreIf({ IntegrationSpecification.OFFLINE })

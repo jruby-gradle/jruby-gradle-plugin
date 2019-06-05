@@ -30,8 +30,6 @@ ext {
 dependencies {
 
     compile project(':jruby-gradle-core-plugin')
-//    compile "org.eclipse.jetty:jetty-server:${jettyVersion}"
-//    compile "org.eclipse.jetty:jetty-webapp:${jettyVersion}"
     runtime('de.saumya.mojo:rubygems:0.2.3@war') {
         // we just want the war file on the classloader for the application
         // to find it and use the war-file from filesystem

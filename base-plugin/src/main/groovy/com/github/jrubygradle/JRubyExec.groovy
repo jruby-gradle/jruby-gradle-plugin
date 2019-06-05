@@ -3,12 +3,14 @@ package com.github.jrubygradle
 import com.github.jrubygradle.api.core.JRubyAwareTask
 import com.github.jrubygradle.api.core.JRubyExecSpec
 import com.github.jrubygradle.internal.JRubyExecUtils
+import org.gradle.api.Task
 import org.gradle.api.artifacts.Configuration
 import org.gradle.api.provider.Provider
 import org.gradle.api.tasks.Input
 import org.gradle.api.tasks.JavaExec
 import org.gradle.api.tasks.Optional
 import org.gradle.process.JavaExecSpec
+import org.gradle.util.GradleVersion
 
 import java.util.concurrent.Callable
 
@@ -45,9 +47,15 @@ class JRubyExec extends JavaExec implements JRubyAwareTask, JRubyExecSpec {
             jruby.gemConfiguration
         }
 
-        dependsOn(project.provider({ JRubyPluginExtension jpe ->
-            project.tasks.getByName(jpe.gemPrepareTaskName)
-        }.curry(this.jruby)))
+        if (GradleVersion.current() >= GradleVersion.version('4.10')) {
+            dependsOn(project.provider({ JRubyPluginExtension jpe ->
+                project.tasks.getByName(jpe.gemPrepareTaskName)
+            }.curry(this.jruby)))
+        } else {
+            project.afterEvaluate({ Task t, JRubyPluginExtension jpe ->
+                t.dependsOn(jpe.gemPrepareTaskName)
+            }.curry(this, this.jruby))
+        }
     }
 
     /** Script to execute.

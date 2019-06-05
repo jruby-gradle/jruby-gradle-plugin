@@ -2,15 +2,20 @@ import com.github.jrubygradle.JRubyExec
 
 apply plugin : 'com.github.jruby-gradle.base'
 
+configurations {
+    jrubyExec
+}
+
 dependencies {
     jrubyExec ':credit_card_validator:1.1.0@gem'
 }
 
-jruby {
-    defaultRepositories = false
-}
 
 task requiresGems( type : JRubyExec ) {
+    jruby {
+        gemConfiguration 'jrubyExec'
+    }
+
     script 'scripts/requiresGem.rb'
 }
 
