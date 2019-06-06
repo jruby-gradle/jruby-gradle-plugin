@@ -4,9 +4,11 @@ import com.github.jrubygradle.api.gems.GemGroups
 import com.github.jrubygradle.internal.core.IvyXmlGlobalProxyRegistry
 import groovy.transform.CompileDynamic
 import groovy.transform.CompileStatic
+import org.gradle.api.Action
 import org.gradle.api.Project
 import org.gradle.api.artifacts.repositories.ArtifactRepository
 import org.gradle.api.artifacts.repositories.IvyArtifactRepository
+import org.gradle.api.artifacts.repositories.MavenArtifactRepository
 import org.gradle.util.GradleVersion
 
 /** Extension which can be added to {@code project.repositories}.
@@ -62,6 +64,25 @@ class RepositoryHandlerExtension {
         bindRepositoryToProxyServer(project.uri(uri), group)
     }
 
+    /** Adds the legacy Torquebox Maven proxy to {@code rubygems.org}.
+     *
+     * Please note that this proxy is effectively unmaintained an no longer supported
+     * by the original creators.
+     *
+     * @return Maven artifact repository
+     */
+    MavenArtifactRepository torquebox() {
+        Action mvnConfigurator = new Action<MavenArtifactRepository>() {
+            void execute(MavenArtifactRepository mvn) {
+                mvn.url = 'http://rubygems-proxy.torquebox.org/releases'.toURI()
+            }
+        }
+        (MavenArtifactRepository)restrictToGems(
+            this.project.repositories.maven(mvnConfigurator),
+            DEFAULT_GROUP_NAME
+        )
+    }
+
     private ArtifactRepository bindRepositoryToProxyServer(
         URI serverUri,
         String group
@@ -80,7 +101,7 @@ class RepositoryHandlerExtension {
     }
 
     @CompileDynamic
-    private IvyArtifactRepository restrictToGems(IvyArtifactRepository repo, String group) {
+    private ArtifactRepository restrictToGems(ArtifactRepository repo, String group) {
         if (HAS_CONTENT_FEATURE) {
             repo.content {
                 it.includeGroup group

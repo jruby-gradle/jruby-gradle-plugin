@@ -199,18 +199,20 @@ repositories {
     ruby.gems() // <1>
     ruby.gems('https://your-own-server.org') // <2>
     ruby.gems('https://another-server.org', 'acmegems') // <3>
+    ruby.torquebox() // <4>
 }
 
 dependencies {
-    gems 'rubygems:sinatra:1.4.5' // <4>
-    gems 'acmegems:some-gem:1.2.3' // <5>
+    gems 'rubygems:sinatra:1.4.5' // <5>
+    gems 'acmegems:some-gem:1.2.3' // <6>
 }
 ----
 <1> Retrieve GEMs from https://rubygems.org
 <2> Retrieve GEMs from another server.
 <3> Retrieve GEMS from another server and associated a custom group name with that server.
-<4> Retrieve a GEM. `rubygems` is the default group for GEMs.
-<5> Retrieve a GEM using a custom group.
+<4> Enabled the legacy Torquebox Maven proxy. Please note that this proxy server is unmaintained upstream and may lead to brittle builds in some cases.
+<5> Retrieve a GEM. `rubygems` is the default group for GEMs.
+<6> Retrieve a GEM using a custom group.
 
 NOTE: If the version of Gradle supports the `content` DSL keyword for repositories, only
   requests dependencies with the specific groups will be sent to the GEM repositories.
