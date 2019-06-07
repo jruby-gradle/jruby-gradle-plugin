@@ -14,6 +14,7 @@ import org.ysb33r.grolifant.api.ExclusiveFileAccess
 
 import java.nio.file.Files
 import java.nio.file.Path
+import java.time.Instant
 
 import static com.github.jrubygradle.api.gems.GemVersion.gemVersionFromGradleIvyRequirement
 import static com.github.jrubygradle.internal.core.IvyUtils.revisionsAsHtmlDirectoryListing
@@ -106,12 +107,18 @@ abstract class AbstractIvyXmlProxyServer implements IvyXmlProxyServer {
         grp == this.group
     }
 
+    protected boolean expired(Path ivyXml) {
+        System.currentTimeMillis()
+        Files.notExists(ivyXml) ||
+            (Files.getLastModifiedTime(ivyXml).toMillis() + EXPIRY_PERIOD_MILLIS < Instant.now().toEpochMilli())
+    }
+
     protected Path getIvyXml(String grp, String name, String version) throws NotFound {
         if (inGroups(grp)) {
             String revision = getGemQueryRevisionFromIvy(name, version)
             Path ivyXml = ivyFile(grp, name, revision)
             debug "Requested ${group}:${name}:${version} translated to GEM with version ${revision}"
-            if (Files.notExists(ivyXml) || refreshDependencies) {
+            if (refreshDependencies || expired(ivyXml)) {
                 try {
                     createIvyXml(ivyXml, name, revision)
                 } catch (ApiException e) {
@@ -163,6 +170,8 @@ abstract class AbstractIvyXmlProxyServer implements IvyXmlProxyServer {
         log.debug(text, context)
     }
 
+    private static final long EXPIRY_PERIOD_MILLIS =
+        System.getProperty('com.github.jrubygradle.cache-expiry-days', '15').toInteger() * 24 * 3600 * 1000
     private volatile int refreshDependencies = 0
     private final File localCachePath
     private final GemToIvy gemToIvy
