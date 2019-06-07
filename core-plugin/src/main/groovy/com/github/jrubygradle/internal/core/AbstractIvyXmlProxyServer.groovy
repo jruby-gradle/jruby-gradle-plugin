@@ -18,6 +18,7 @@ import java.time.Instant
 
 import static com.github.jrubygradle.api.gems.GemVersion.gemVersionFromGradleIvyRequirement
 import static com.github.jrubygradle.internal.core.IvyUtils.revisionsAsHtmlDirectoryListing
+import static java.nio.file.Files.getLastModifiedTime
 import static java.nio.file.Files.move
 import static java.nio.file.StandardCopyOption.ATOMIC_MOVE
 import static java.nio.file.StandardCopyOption.REPLACE_EXISTING
