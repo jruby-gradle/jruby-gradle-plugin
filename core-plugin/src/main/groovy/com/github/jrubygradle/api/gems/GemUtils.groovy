@@ -134,7 +134,7 @@ class GemUtils {
                  * See:
                  * https://gikhub.com/jruby-gradle/jruby-gradle-plugin/issues/341
                  */
-                    gemsToProcess.collect { it }.reverse().each { File gem ->
+                    gemsToProcess.toList().reverse().each { File gem ->
                         args gem
                     }
 

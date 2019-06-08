@@ -18,7 +18,6 @@ import java.time.Instant
 
 import static com.github.jrubygradle.api.gems.GemVersion.gemVersionFromGradleIvyRequirement
 import static com.github.jrubygradle.internal.core.IvyUtils.revisionsAsHtmlDirectoryListing
-import static java.nio.file.Files.getLastModifiedTime
 import static java.nio.file.Files.move
 import static java.nio.file.StandardCopyOption.ATOMIC_MOVE
 import static java.nio.file.StandardCopyOption.REPLACE_EXISTING
@@ -110,7 +109,8 @@ abstract class AbstractIvyXmlProxyServer implements IvyXmlProxyServer {
 
     protected boolean expired(Path ivyXml) {
         System.currentTimeMillis()
-        Files.notExists(ivyXml) ||
+        Path ivyXmlSha1 = ivyXml.resolveSibling("${ivyXml.toFile().name}.sha1")
+        Files.notExists(ivyXml) || Files.notExists(ivyXmlSha1) ||
             (Files.getLastModifiedTime(ivyXml).toMillis() + EXPIRY_PERIOD_MILLIS < Instant.now().toEpochMilli())
     }
 
@@ -139,6 +139,8 @@ abstract class AbstractIvyXmlProxyServer implements IvyXmlProxyServer {
         if (inGroups(grp)) {
             Path ivyXml = getIvyXml(grp, name, version)
             ivyXml.resolveSibling("${ivyXml.toFile().name}.sha1")
+        } else {
+            throw new NotFound()
         }
     }
 

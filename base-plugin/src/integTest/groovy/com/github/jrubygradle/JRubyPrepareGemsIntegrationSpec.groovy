@@ -131,6 +131,7 @@ class JRubyPrepareGemsIntegrationSpec extends IntegrationSpecification {
         tasks.addAll(moreTasks)
         tasks.add('-i')
         tasks.add('-s')
+        tasks.add('--refresh-dependencies')
         writeBuildFile()
         gradleRunner(tasks).build()
     }
