@@ -285,7 +285,7 @@ class JRubyExec extends JavaExec implements JRubyAwareTask, JRubyExecSpec {
     }
 
     private void deprecated(String message) {
-        logger.info "Deprecated method in task ${name}: ${message}"
+        logger.warn "Deprecated method in task ${name}: ${message}"
     }
 
     private final JRubyPluginExtension jruby

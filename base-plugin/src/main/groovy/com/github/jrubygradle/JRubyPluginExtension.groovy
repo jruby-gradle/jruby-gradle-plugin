@@ -81,16 +81,6 @@ class JRubyPluginExtension extends AbstractCombinedProjectTaskExtension {
         this.jrubyVersion = v
     }
 
-//    void setDefaultVersion(String newDefaultVersion) {
-//        defaultVersion = newDefaultVersion
-//        defaultVersionCallbacks.each { Closure callback -> callback.call(defaultVersion) }
-//        execVersionCallbacks.each { Closure callback ->
-//            if (!isExecVersionModified) {
-//                callback.call(defaultVersion)
-//            }
-//        }
-//    }
-
     /**
      *
      * @deprecated Use{@link #getJrubyVersion}
@@ -207,7 +197,7 @@ class JRubyPluginExtension extends AbstractCombinedProjectTaskExtension {
     /** Sets the GEM configuration.
      *
      * @param c Configuration instance, Character sequence as configuration name, or a {@code Provider<Configuration}.
-            */
+             */
     void setGemConfiguration(final Object c) {
         switch (c) {
             case Configuration:
@@ -234,7 +224,7 @@ class JRubyPluginExtension extends AbstractCombinedProjectTaskExtension {
     /** Declarative way of setting the GEM configuration.
      *
      * @param c Configuration instance, Character sequence as configuration name, or a {@code Provider<Configuration}.
-            */
+             */
     void gemConfiguration(final Object c) {
         setGemConfiguration(c)
     }
