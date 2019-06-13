@@ -1,8 +1,7 @@
 jruby-gradle-plugin is distributed under the following license:
 ----------------------------------------------------
 
-Copyright (c) 2014 Lookout, Inc.
-https://www.lookout.com/about/contact
+Copyright (c) 2019, R. Tyler Croy <rtyler@brokenco.de>, Schalk Cronje, Christian Meier, Lookout, Inc.
 
 Permission is hereby granted, free of charge, to any person obtaining
 a copy of this software and associated documentation files (the
