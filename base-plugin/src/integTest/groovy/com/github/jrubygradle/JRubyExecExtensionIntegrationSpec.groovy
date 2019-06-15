@@ -54,7 +54,7 @@ class JRubyExecExtensionIntegrationSpec extends IntegrationSpecification {
 
     void "Running a script that requires a jar"() {
         setup:
-        def leadingDir = 'jrubyExec/jars/org/bouncycastle/'
+        def leadingDir = '.gems/jars/org/bouncycastle/'
         def artifactPath = "${BCPROV_NAME}/${bcprovVer}/${BCPROV_NAME}-${bcprovVer}"
         def withPattern = ~/.*\["file:.+${leadingDir}${artifactPath}\.jar"\].*/
 
@@ -86,24 +86,6 @@ class JRubyExecExtensionIntegrationSpec extends IntegrationSpecification {
         result.output =~ /Not valid/
     }
 
-    void "Running a script that requires a gem, a separate jRuby, a separate configuration and a custom gemWorkDir"() {
-        setup:
-        final String customGemDir = 'customGemDir'
-        useScript(REQUIRES_GEM)
-        createJRubyExecProject withCreditCardValidator(), """
-            script '${REQUIRES_GEM}'
-            jrubyArgs '-T1'
-            gemWorkDir { new File(project.buildDir, '${customGemDir}' ) }
-        """
-
-        when:
-        BuildResult result = build()
-
-        then:
-        result.output =~ /Not valid/
-        new File(projectDir, "build/${customGemDir}").exists()
-    }
-
     void "Running a script that requires environment variables"() {
         // This tests that the passthrough invocation
         // happens for overloaded versions of environment
@@ -131,7 +113,7 @@ class JRubyExecExtensionIntegrationSpec extends IntegrationSpecification {
     }
 
     private BuildResult build() {
-        gradleRunner(DEFAULT_TASK_NAME, '-i').build()
+        gradleRunner(DEFAULT_TASK_NAME, '-i', '-s').build()
     }
 
     @SuppressWarnings('BuilderMethodWithSideEffects')
@@ -152,6 +134,8 @@ class JRubyExecExtensionIntegrationSpec extends IntegrationSpecification {
                     ${jrubyexecConfig}
                 }
             }
+
+            dependsOn jrubyPrepare
         }
         """
     }
@@ -159,7 +143,7 @@ class JRubyExecExtensionIntegrationSpec extends IntegrationSpecification {
     private String withJarToUse(String jarFormat) {
         """
             dependencies {
-                jrubyExec ${jarFormat}
+                gems ${jarFormat}
             }
         """
     }

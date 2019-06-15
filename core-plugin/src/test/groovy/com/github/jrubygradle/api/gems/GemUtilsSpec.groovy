@@ -1,9 +1,15 @@
-package com.github.jrubygradle
+package com.github.jrubygradle.api.gems
 
+import com.github.jrubygradle.api.gems.GemOverwriteAction
+import com.github.jrubygradle.api.gems.GemUtils
 import org.gradle.api.Project
 import org.gradle.api.file.DuplicateFileCopyingException
 import org.gradle.testfixtures.ProjectBuilder
 import spock.lang.Specification
+
+import static com.github.jrubygradle.api.gems.GemOverwriteAction.FAIL
+import static com.github.jrubygradle.api.gems.GemOverwriteAction.OVERWRITE
+import static com.github.jrubygradle.api.gems.GemOverwriteAction.SKIP
 
 /**
  * @author Schalk W. Cronjé
@@ -152,7 +158,7 @@ class GemUtilsSpec extends Specification {
     def "rewrite jar dependency"() {
         when:
         File jars = new File(dest, 'jars')
-        GemUtils.OverwriteAction.values().each {
+        GemOverwriteAction.values().each {
             File jar = new File(dest, "${it}.jar")
             jar << 'something'
             GemUtils.rewriteJarDependencies(jars, [jar], ['FAIL.jar': 'fail.jar', 'SKIP.jar': 'skip.jar', 'OVERWRITE.jar': 'over.jar'], it)
@@ -176,9 +182,12 @@ class GemUtilsSpec extends Specification {
         jars.mkdir()
         target1 << ''
         target2.delete()
-        GemUtils.rewriteJarDependencies(jars, [jar1, jar2],
-                ['jar1.jar': 'jar1.jar', 'jar2.jar': 'jar2.jar'],
-                GemUtils.OverwriteAction.SKIP)
+        GemUtils.rewriteJarDependencies(
+            jars,
+            [jar1, jar2],
+            ['jar1.jar': 'jar1.jar', 'jar2.jar': 'jar2.jar'],
+            SKIP
+        )
 
         then:
         target1.length() == 0
@@ -197,9 +206,12 @@ class GemUtilsSpec extends Specification {
         jars.mkdir()
         target1 << ''
         target2.delete()
-        GemUtils.rewriteJarDependencies(jars, [jar1, jar2],
-                ['jar1.jar': 'jar1.jar', 'jar2.jar': 'jar2.jar'],
-                GemUtils.OverwriteAction.OVERWRITE)
+        GemUtils.rewriteJarDependencies(
+            jars,
+            [jar1, jar2],
+            ['jar1.jar': 'jar1.jar', 'jar2.jar': 'jar2.jar'],
+            OVERWRITE
+        )
 
         then:
         target1.length() == 9
@@ -214,7 +226,7 @@ class GemUtilsSpec extends Specification {
         jar << 'something'
         jars.mkdir()
         target << ''
-        GemUtils.rewriteJarDependencies(jars, [jar], ['jar.jar': 'jar.jar'], GemUtils.OverwriteAction.FAIL)
+        GemUtils.rewriteJarDependencies(jars, [jar], ['jar.jar': 'jar.jar'], FAIL)
 
         then:
         thrown(DuplicateFileCopyingException)

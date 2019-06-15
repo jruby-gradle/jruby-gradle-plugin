@@ -14,9 +14,14 @@ buildscript {
     }
 }
 
-apply plugin: "com.github.jruby-gradle.jar"
+plugins {
+   id 'com.github.jruby-gradle.jar'
+}
 
-repositories { jcenter() }
+repositories {
+    jcenter()
+    ruby.gems()
+}
 
 dependencies {
     /* Using the built-in `jrubyJar` configuration to describe the

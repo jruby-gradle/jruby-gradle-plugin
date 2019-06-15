@@ -1,0 +1,5 @@
+= Core plugin
+:page-layout: base
+:toc: right
+
+include::./../core-plugin/README.adoc[]

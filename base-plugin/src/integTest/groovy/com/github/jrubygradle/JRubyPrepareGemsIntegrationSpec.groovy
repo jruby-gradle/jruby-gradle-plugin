@@ -20,7 +20,7 @@ class JRubyPrepareGemsIntegrationSpec extends IntegrationSpecification {
         setup:
         withDependencies "gems ${slimGem}"
         withPreamble """
-            jruby.gemInstallDir = '${pathAsUriStr(projectDir)}'.toURI()
+            jrubyPrepare.outputDir = '${pathAsUriStr(projectDir)}'.toURI()
         """
 
         when:
@@ -33,14 +33,13 @@ class JRubyPrepareGemsIntegrationSpec extends IntegrationSpecification {
     @IgnoreIf({ IntegrationSpecification.OFFLINE })
     void "Check if rack version gets resolved"() {
         setup:
-        withDefaultRepositories()
-        withPreamble """
-            jruby.gemInstallDir = '${pathAsUriStr(projectDir)}'.toURI()
+        withPreamble """repositories.ruby.gems()
+            jrubyPrepare.outputDir = '${pathAsUriStr(projectDir)}'.toURI()
         """
         withDependencies """
             gems "rubygems:sinatra:1.4.5"
             gems "rubygems:rack:[0,)"
-            gems "rubygems:lookout-rack-utils:3.1.0.12"
+            gems "rubygems:lookout-rack-utils:5.0.0.49"
         """
 
         when:
@@ -49,7 +48,7 @@ class JRubyPrepareGemsIntegrationSpec extends IntegrationSpecification {
         then:
         // since we need a version range in the setup the
         // resolved version here can vary over time
-        new File(projectDir, "gems/rack-1.5.5").exists()
+        new File(projectDir, "gems/rack-1.6.11").exists()
     }
 
     @IgnoreIf({ IntegrationSpecification.OFFLINE })
@@ -57,7 +56,7 @@ class JRubyPrepareGemsIntegrationSpec extends IntegrationSpecification {
         setup:
         withDefaultRepositories()
         withPreamble """
-            jruby.gemInstallDir = '${pathAsUriStr(projectDir)}'.toURI()
+            jrubyPrepare.outputDir = '${pathAsUriStr(projectDir)}'.toURI()
         """
         withDependencies 'gems "rubygems:jar-dependencies:0.1.16.pre"'
 
@@ -70,11 +69,11 @@ class JRubyPrepareGemsIntegrationSpec extends IntegrationSpecification {
 
     @Issue('https://github.com/jruby-gradle/jruby-gradle-plugin/issues/341')
     @IgnoreIf({ IntegrationSpecification.OFFLINE })
-    void "Make a install-time gem dependency available"() {
+    void "Make an install-time gem dependency available"() {
         setup:
-        withDefaultRepositories()
+        withRubyGemsRepository()
         withPreamble """
-            jruby.gemInstallDir = '${pathAsUriStr(projectDir)}'.toURI()
+            jrubyPrepare.outputDir = '${pathAsUriStr(projectDir)}'.toURI()
         """
         withDependencies 'gems "rubygems:childprocess:1.0.1"'
 
@@ -87,6 +86,10 @@ class JRubyPrepareGemsIntegrationSpec extends IntegrationSpecification {
 
     private void withDefaultRepositories() {
         repoSetup = projectWithDefaultAndMavenRepo
+    }
+
+    private void withRubyGemsRepository() {
+        repoSetup = projectWithRubyGemsRepo
     }
 
     private void withDependencies(String deps) {

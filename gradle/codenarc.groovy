@@ -322,9 +322,6 @@ ruleset {
     UseCollectMany
     UseCollectNested
     UseOfNotifyMethod
-    VariableName {
-        doNotApplyToFileNames = '*Spec.groovy,*Specification.groovy'
-    }
     VectorIsObsolete
     VolatileArrayField
     VolatileLongOrDoubleField

@@ -1,0 +1,10 @@
+== Core plugin
+
+The core plugin is not meant for consumption by build script authors. It is rather targeted at authors of other plugins that might require some core JRuby functionality without the conventional and extensions that is associated with other JRuby-Gradle plugins.
+
+This plugin offers the following functionality:
+
+* A repository handler extension to resolve GEMs directly from https://rubygems.org or another GEM repository that serves the same REST API.
+* Conversion between GEM-style and Ivy-style dependencies notations.
+* An abstract task class (`AbstractJRubyPrepare`) for preparing local GEM + JAR installations.
+

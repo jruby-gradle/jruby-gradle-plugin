@@ -6,6 +6,7 @@ import spock.lang.Issue
 import spock.lang.Specification
 
 import static com.github.jrubygradle.internal.JRubyExecUtils.buildArgs
+import static com.github.jrubygradle.internal.JRubyExecUtils.prepareJRubyEnvironment
 
 @SuppressWarnings(['BuilderMethodWithSideEffects'])
 class JRubyExecUtilsSpec extends Specification {
@@ -87,5 +88,27 @@ class JRubyExecUtilsSpec extends Specification {
         then:
         args.size() > 0
         args == ['-rjars/setup', '-S', 'rspec']
+    }
+
+    void "Prepare a basic JRuby environment"() {
+        when:
+        Map preparedEnv = prepareJRubyEnvironment([:],false, new File('tmp/foo'))
+
+        then:
+        preparedEnv.size() > 0
+    }
+
+    void "Filter out RVM environment values by default for JRuby environment"() {
+        when:
+        File gemWorkDir = new File('tmp/foo')
+        Map preparedEnv = prepareJRubyEnvironment([
+            'GEM_HOME'       : '/tmp/spock',
+            'RUBY_VERSION'   : 'notaversion',
+            'rvm_ruby_string': 'jruby-head',
+        ],false, gemWorkDir)
+
+        then:
+        preparedEnv['GEM_HOME'] == gemWorkDir.absolutePath
+        !preparedEnv.containsKey('rvm_ruby_string')
     }
 }

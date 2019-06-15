@@ -19,13 +19,15 @@ class JRubyGenerateGradleRbIntegrationSpec extends IntegrationSpecification {
     
             ${projectWithLocalRepo}
     
-            task ${DEFAULT_TASK_NAME} (type: GenerateGradleRb)  
+            task ${DEFAULT_TASK_NAME} (type: GenerateGradleRb)  {
+                gemInstallDir 'build/gems'
+            }
         """
 
         def expected = new File(projectDir, 'gradle.rb')
 
         when: "The load path file is generated "
-        gradleRunner(DEFAULT_TASK_NAME, '-i').build()
+        gradleRunner(DEFAULT_TASK_NAME, '-i', '-s').build()
 
         then: "Expect to be in the configured destinationDir and be called gradle.rb"
         expected.exists()

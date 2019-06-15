@@ -1,19 +1,33 @@
 package com.github.jrubygradle.internal
 
+import com.github.jrubygradle.JRubyPlugin
+import com.github.jrubygradle.JRubyPluginExtension
+import com.github.jrubygradle.api.gems.GemOverwriteAction
+import com.github.jrubygradle.api.gems.GemUtils
 import groovy.transform.CompileDynamic
+import groovy.transform.CompileStatic
 import org.gradle.api.InvalidUserDataException
 import org.gradle.api.Project
 import org.gradle.api.artifacts.Configuration
-import org.gradle.api.file.FileCollection
+import org.ysb33r.grolifant.api.OperatingSystem
+import org.ysb33r.grolifant.api.StringUtils
 
 import java.util.regex.Matcher
 
-/**
- * @author Schalk W. Cronjé.
+import static org.ysb33r.grolifant.api.StringUtils.stringize
+
+/** Utilities for preparation or executing JRuby.
+ *
+ * @author Schalk W. Cronjé
+ * @author R Tyler Croy
+ * @author Christian Meier
+ *
  */
+@CompileStatic
 class JRubyExecUtils {
-    static final String JAR_DEPENDENCIES_VERSION = '0.1.15'
-    static final String DEFAULT_JRUBYEXEC_CONFIG = 'jrubyExec'
+
+    public static final List<String> FILTERED_ENV_KEYS = ['GEM_PATH', 'RUBY_VERSION', 'GEM_HOME']
+    public static final String DEFAULT_JRUBYEXEC_CONFIG = JRubyPlugin.DEFAULT_CONFIGURATION
 
     private static final String JRUBY_COMPLETE = 'jruby-complete'
     private static final String BINPATH_FLAG = '-S'
@@ -23,7 +37,7 @@ class JRubyExecUtils {
      * @param cfg Configuration to use
      * @return
      */
-    static Set classpathFromConfiguration(Configuration cfg) {
+    static Set<File> classpathFromConfiguration(Configuration cfg) {
         return cfg.files.findAll { File f -> f.name.startsWith(JRUBY_COMPLETE) }
     }
 
@@ -75,21 +89,38 @@ class JRubyExecUtils {
         }
 
         return [
-                major     : matches[0][1].toInteger(),
-                minor     : matches[0][2].toInteger(),
-                patchlevel: matches[0][3].toInteger()
+            major     : matches[0][1].toInteger(),
+            minor     : matches[0][2].toInteger(),
+            patchlevel: matches[0][3].toInteger()
         ]
     }
 
-    /** Extract the jruby-complete-XXX.jar as a FileCollection
+    /** Resolves a script location object.
      *
-     * @param cfg FileCollection
-     * @return Returns the classpath as a File or null if the jar was not found
+     * @paream project Project context for script.
+     * @param script Script to resolve.
+     * @return Resolved script location. Will be {@code null} if {@code script == null},
      */
-    static FileCollection jrubyJar(FileCollection fc) {
-        fc.filter { File f -> f.name.startsWith(JRUBY_COMPLETE) }
+    static File resolveScript(Project project, Object script) {
+        if (script) {
+            File intermediate = script instanceof File ? (File) script : new File(stringize(script))
+            if (intermediate.absolute) {
+                intermediate
+            } else {
+                intermediate.parentFile ? project.file(script) : intermediate
+            }
+        } else {
+            null
+        }
     }
 
+    /** Builds a list of arguments that can be used to run JRuby.
+     *
+     * @param jrubyArgs JRuby-specific arguments
+     * @param script Script to run.
+     * @param scriptArgs Script arguments
+     * @return List of resolved arguments.
+     */
     static List<String> buildArgs(List<Object> jrubyArgs, File script, List<Object> scriptArgs) {
         buildArgs([], jrubyArgs, script, scriptArgs)
     }
@@ -113,7 +144,7 @@ class JRubyExecUtils {
         boolean hasInlineScript = jrubyArgs.contains('-e')
         boolean useBinPath = jrubyArgs.contains(BINPATH_FLAG)
 
-        /* Fefault to adding the -S option if we don't have an expression to evaluate
+        /* Default to adding the -S option if we don't have an expression to evaluate
          * <https://github.com/jruby-gradle/jruby-gradle-plugin/issues/152>
          */
         if (!hasInlineScript && script && !jrubyArgs.contains(BINPATH_FLAG)) {
@@ -138,8 +169,8 @@ class JRubyExecUtils {
             }
         }
 
-        cmdArgs.addAll(scriptArgs as List<String>)
-        return cmdArgs
+        cmdArgs.addAll(scriptArgs)
+        StringUtils.stringize(cmdArgs)
     }
 
     /** Get the name of the system search path environmental variable
@@ -148,7 +179,7 @@ class JRubyExecUtils {
      * @since 0.1.11
      */
     static String pathVar() {
-        org.gradle.internal.os.OperatingSystem.current().pathVar
+        OperatingSystem.current().pathVar
     }
 
     /** Create a search path that includes the GEM working directory
@@ -174,6 +205,79 @@ class JRubyExecUtils {
         if (!(c.dependencies.find { it.name == JRUBY_COMPLETE })) {
             project.dependencies.add(configuration, "org.jruby:jruby-complete:${version}")
         }
+    }
+
+    /**
+     * Prepare the Ruby and Java dependencies for the configured configuration
+     *
+     * This method will determine the appropriate dependency overwrite behavior
+     * from the Gradle invocation. In effect, if the --refresh-dependencies flag
+     * is used, already installed gems will be overwritten.
+     *
+     * @param project The associated Gradle project.
+     * @param gemWorkDir THe GEM unpack/working directory.
+     * @param jruby The associated JRuby project or task extension.
+     * @param gemConfiguration Configuration which contains GEMs for unpacking.
+     * @param overwrite Overwrite mode.
+     *
+     * @since 2.0
+     */
+    static void prepareDependencies(
+        Project project,
+        File gemWorkDir,
+        JRubyPluginExtension jruby,
+        Configuration gemConfiguration,
+        GemOverwriteAction overwrite
+    ) {
+        File gemDir = gemWorkDir.absoluteFile
+
+        gemDir.mkdirs()
+
+        GemUtils.extractGems(
+            project,
+            jruby.jrubyConfiguration,
+            gemConfiguration,
+            gemDir,
+            overwrite
+        )
+        GemUtils.setupJars(
+            gemConfiguration,
+            gemDir,
+            overwrite
+        )
+    }
+
+    /** Prepare en environment which can be used to execute JRuby.
+     *
+     * @param presetEnvironment Preset envrionment to use.
+     * @param inheritRubyEnv Whether to inherit the global Ruby environment.
+     * @param gemWorkDir Working directory where GEMs are unpacked to.
+     * @return Environment which can be used to execute JRuby within.
+     *
+     * @since 2.0
+     */
+    static Map<String, Object> prepareJRubyEnvironment(
+        Map<String, Object> presetEnvironment,
+        boolean inheritRubyEnv,
+        File gemWorkDir
+    ) {
+        final Map<String, Object> preparedEnv = [:]
+
+        preparedEnv.putAll(presetEnvironment.findAll { String key, Object value ->
+            inheritRubyEnv || !(key in FILTERED_ENV_KEYS || key.matches(/rvm.*/))
+        })
+
+        preparedEnv.putAll([
+            'JBUNDLE_SKIP': true,
+            'JARS_SKIP'   : true,
+            'PATH'        : prepareWorkingPath(gemWorkDir, System.getenv(pathVar())),
+            'GEM_HOME'    : gemWorkDir.absolutePath,
+            'GEM_PATH'    : gemWorkDir.absolutePath,
+            'JARS_HOME'   : new File(gemWorkDir.absoluteFile, 'jars'),
+            'JARS_LOCK'   : new File(gemWorkDir.absoluteFile, 'Jars.lock')
+        ])
+
+        return preparedEnv
     }
 
 }

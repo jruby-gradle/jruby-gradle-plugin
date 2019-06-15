@@ -1,0 +1,15 @@
+dependencies {
+    implementation "io.github.http-builder-ng:http-builder-ng-okhttp:${httpbuilderNgVersion}"
+    implementation "io.ratpack:ratpack-core:${ratpackVersion}"
+    integrationTestCompile gradleTestKit()
+
+    testCompile(spockVersion) {
+        exclude module: 'groovy-all'
+        exclude group: 'org.codehaus.groovy'
+    }
+
+    integrationTestCompile(spockVersion) {
+        exclude module: 'groovy-all'
+        exclude group: 'org.codehaus.groovy'
+    }
+}

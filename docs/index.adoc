@@ -18,6 +18,7 @@ NOTE: As from version 2.0.0 you will need at least Gradle 4.2.
 * link:jar/[Jar]
 * link:war/[War]
 * link:storm/[Storm]
+* link:core/[Core]
 
 == Quick Start
 

@@ -96,36 +96,6 @@ class JRubyJarTestKitSpec extends IntegrationSpecification {
         result.output.contains("Hello from JRuby")
     }
 
-    @IgnoreIf({ IntegrationSpecification.OFFLINE })
-    @Issue('https://github.com/jruby-gradle/jruby-gradle-plugin/pull/271')
-    @SuppressWarnings('GStringExpressionWithinString')
-    def 'using a more recent jar-dependencies should work'() {
-        setup:
-        withRepoSetup """
-            maven { url 'http://rubygems-proxy.torquebox.org/releases' }
-            mavenCentral()
-        """
-        withDependencies "jrubyJar 'rubygems:jar-dependencies:0.2.3'"
-        withJRubyJarConfig "initScript 'main.rb'"
-
-        withAdditionalContent '''
-            task validateJar(type: JavaExec) {
-                main = '-jar'
-                dependsOn jrubyJar
-                environment [:]
-                workingDir "${buildDir}/libs"
-                args jrubyJar.outputs.files.singleFile.absolutePath
-            }
-        '''
-
-        when:
-        BuildResult result = build('validateJar')
-
-        then:
-        result.task(":validateJar").outcome == TaskOutcome.SUCCESS
-        result.output.contains("Hello from JRuby")
-    }
-
     void "Building a Jar with a custom configuration and 'java' plugin is applied"() {
         setup:
         withPreamble 'apply plugin: "java"'

@@ -4,6 +4,7 @@ plugins {
     id 'com.jfrog.bintray' version '1.8.4' apply false
     id 'org.ajoberstar.github-pages' version '1.2.0' apply false
     id 'org.ysb33r.cloudci.appveyor.testreporter' version '2.5' apply false
+    id "io.ratpack.ratpack-java" version "1.6.1" apply false
 }
 
 buildScan {
@@ -51,8 +52,8 @@ subprojects {
         dependencies {
             compile localGroovy()
             compile gradleApi()
-            compile 'org.ysb33r.gradle:grolifant:0.8'
-            gradleTestRuntime 'org.ysb33r.gradle:grolifant:0.8'
+            compile 'org.ysb33r.gradle:grolifant:0.12'
+            gradleTestRuntime 'org.ysb33r.gradle:grolifant:0.12'
         }
 
         codenarc {

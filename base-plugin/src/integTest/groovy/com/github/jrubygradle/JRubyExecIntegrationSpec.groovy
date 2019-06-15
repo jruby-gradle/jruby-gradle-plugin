@@ -10,6 +10,7 @@ import static com.github.jrubygradle.internal.JRubyExecUtils.DEFAULT_JRUBYEXEC_C
 
 class JRubyExecIntegrationSpec extends IntegrationSpecification {
     static final String DEFAULT_TASK_NAME = 'RubyWax'
+    static final String DEFAULT_JRUBYEXEC_CONFIG = JRubyPlugin.DEFAULT_CONFIGURATION
 
     String jrubyExecConfig
     String preamble
@@ -34,13 +35,13 @@ class JRubyExecIntegrationSpec extends IntegrationSpecification {
 
         withJRubyExecConfig """
             configuration '${configName}'
-            jrubyVersion '${altVersion}'
+            jruby.jrubyVersion '${altVersion}'
         """
 
         withAdditionalContent """
             task validateVersion {
                 doLast {
-                    assert jruby.execVersion != '${altVersion}'
+                    assert jruby.jrubyVersion != '${altVersion}'
                 }
             }
             
@@ -74,8 +75,8 @@ class JRubyExecIntegrationSpec extends IntegrationSpecification {
         """
         withDependencies "${altConfiguration} ${withCreditCardValidator()}"
         withJRubyExecConfig """
-            jrubyVersion  '${altVersion}'
-            configuration '${altConfiguration}'            
+            jruby.jrubyVersion  '${altVersion}'
+            jruby.gemConfiguration '${altConfiguration}'            
         """
 
         when:
@@ -109,34 +110,15 @@ class JRubyExecIntegrationSpec extends IntegrationSpecification {
         result.output =~ /Not valid/
     }
 
-    // Embedded server has never worked well - ignoring for now
-    @PendingFeature
-    @IgnoreIf({ IntegrationSpecification.OFFLINE })
-    void "Running a script that requires a gem using default embedded rubygems-servlets maven repo"() {
-        setup:
-        String version = '0.1.1'
-        useScript(REQUIRE_THE_A_GEM)
-        withPreamble 'repositories { rubygems() }'
-        withDependencies "jrubyExec 'rubygems:a:${version}'"
-        withJRubyExecConfig 'setEnvironment [:]'
-
-        when:
-        BuildResult result = build()
-
-        then:
-        // note this test has some error output not sure where this comes from. but the actual test passes
-        result.output =~ /loaded 'a' gem with version ${version}/
-    }
-
     @Issue('https://github.com/jruby-gradle/jruby-gradle-plugin/issues/77')
     void "Running rspec from a script should not cause a gemWorkDir failure"() {
         setup:
-        withPreamble "jruby.execVersion '${olderJRubyVersion}'"
+        withPreamble "jruby.jrubyVersion '${olderJRubyVersion}'"
 
         withDependencies """
-            jrubyExec ${findDependency('', 'rspec', 'gem')}
-            jrubyExec ${findDependency('', 'rspec-core', 'gem')}
-            jrubyExec ${findDependency('', 'rspec-support', 'gem')}
+            ${DEFAULT_JRUBYEXEC_CONFIG} ${findDependency('', 'rspec', 'gem')}
+            ${DEFAULT_JRUBYEXEC_CONFIG} ${findDependency('', 'rspec-core', 'gem')}
+            ${DEFAULT_JRUBYEXEC_CONFIG} ${findDependency('', 'rspec-support', 'gem')}
         """
 
         withJRubyExecConfig """
@@ -152,25 +134,6 @@ class JRubyExecIntegrationSpec extends IntegrationSpecification {
         then:
         noExceptionThrown()
         result.output =~ /No examples found./
-    }
-
-    @Issue('https://github.com/jruby-gradle/jruby-gradle-plugin/issues/73')
-    void "Running a script that has a custom gemdir"() {
-        setup:
-        String customGemDir = 'customGemDir'
-        useScript(REQUIRES_GEM)
-        withDependencies "${DEFAULT_JRUBYEXEC_CONFIG} ${withCreditCardValidator()}"
-        withJRubyExecConfig """
-            setEnvironment [:]
-            gemWorkDir '${customGemDir}'
-        """
-
-        when:
-        BuildResult result = build()
-
-        then:
-        result.output =~ /Not valid/
-        new File(projectDir, customGemDir).exists()
     }
 
     @Override
