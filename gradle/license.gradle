@@ -1,0 +1,19 @@
+apply plugin : 'com.github.hierynomus.license'
+
+license {
+    header = rootProject.file('gradle/license.txt')
+    strictCheck = true
+    ignoreFailures = false
+    ext.year = project.copyrightYear
+    excludes([
+        '**/*.ad',
+        '**/*.asciidoc',
+        '**/*.adoc',
+        '**/rubystub.template'
+    ])
+}
+
+pluginManager.withPlugin('org.ysb33r.gradletest') {
+    licenseGradleTest.enabled = false
+}
+
