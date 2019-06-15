@@ -1,8 +1,10 @@
 package com.github.jrubygradle.internal.core
 
 import com.github.jrubygradle.api.gems.GemInfo
+import com.github.jrubygradle.api.gems.JarDependency
 import com.github.jrubygradle.internal.gems.DefaultGemDependency
 import com.github.jrubygradle.internal.gems.DefaultGemInfo
+import com.github.jrubygradle.internal.gems.DefaultJarDependency
 import groovy.transform.CompileDynamic
 import groovy.transform.CompileStatic
 import groovyx.net.http.HttpBuilder
@@ -141,7 +143,7 @@ class DefaultRubyGemRestApi implements com.github.jrubygradle.api.core.RubyGemQu
             gemUri: jsonParser.gem_uri?.toURI(),
             homepageUri: jsonParser.homepage_uri?.toURI(),
             documentationUri: jsonParser.documentation_uri?.toURI(),
-            authors: ((String) jsonParser.authors).split(', ').toList() ?: [],
+            authors: ((String) jsonParser.authors).split(COMMA_SPACE).toList() ?: [],
             prerelease: jsonParser.prerelease
             // licenses arrayList
         )
@@ -158,10 +160,36 @@ class DefaultRubyGemRestApi implements com.github.jrubygradle.api.core.RubyGemQu
             })
         }
 
+        if (jsonParser.requirements) {
+            metadata.jarRequirements.addAll(findJarRequirements(jsonParser.requirements))
+        }
+
         metadata
+    }
+
+    private List<JarDependency> findJarRequirements(Iterable<String> reqs) {
+        reqs.findAll { String it ->
+            it.startsWith('jar ')
+        }.collect {
+            String[] parts = ((String) it)[4..-1].split(COMMA_SPACE, 2)
+            String[] name_parts = parts[0].split(':', 2)
+            if (name_parts.size() == 1) {
+                new DefaultJarDependency(
+                    name: parts[0],
+                    requirements: parts[1]
+                )
+            } else {
+                new DefaultJarDependency(
+                    group: name_parts[0],
+                    name: name_parts[1],
+                    requirements: parts[1]
+                )
+            }
+        } as List<JarDependency>
     }
 
     private final HttpBuilder httpBuilder
     static private final String V1 = 'api/v1'
     static private final String V2 = 'api/v2'
+    static private final String COMMA_SPACE = ', '
 }

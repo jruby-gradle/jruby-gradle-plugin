@@ -48,9 +48,18 @@ class GemToIvy {
     Writer writeTo(Writer writer, GemInfo gem) {
         def xml = new MarkupBuilder(writer)
 
+        final Map artifactAttributes = [
+            type: 'gem', url: gem.gemUri
+        ]
+
+        if (gem.platform == JAVA_PLATFORM) {
+            artifactAttributes['e:classifier'] = JAVA_PLATFORM
+        }
+
         xml.'ivy-module'(
             'xmlns:xsi': 'http://www.w3.org/2001/XMLSchema-instance',
             'xsi:noNamespaceSchemaLocation': 'http://ant.apache.org/ivy/schemas/ivy.xsd',
+            'xmlns:e': 'http://ant.apache.org/ivy/extra',
             version: '2.0'
         ) {
             info(organisation: this.org, module: gem.name, revision: gem.version /*, publication: */) {
@@ -69,10 +78,10 @@ class GemToIvy {
             }
 
             publications {
-                artifact(type: 'gem')
+                artifact(artifactAttributes)
             }
 
-            if (gem.dependencies) {
+            if (gem.dependencies || gem.jarRequirements) {
                 dependencies {
                     gem.dependencies.each { dep ->
                         dependency(
@@ -80,6 +89,20 @@ class GemToIvy {
                             name: dep.name,
                             rev: singleGemVersionFromMultipleGemRequirements(dep.requirements).toString()
                         )
+                    }
+                    gem.jarRequirements.each { dep ->
+                        if (dep.group) {
+                            dependency(
+                                org: dep.group,
+                                name: dep.name,
+                                rev: singleGemVersionFromMultipleGemRequirements(dep.requirements).toString()
+                            )
+                        } else {
+                            dependency(
+                                name: dep.name,
+                                rev: singleGemVersionFromMultipleGemRequirements(dep.requirements).toString()
+                            )
+                        }
                     }
                 }
             }
@@ -110,6 +133,7 @@ class GemToIvy {
         shaFile
     }
 
+    private static final String JAVA_PLATFORM = 'java'
     private final String serverUri
     private final String org = 'rubygems'
 }

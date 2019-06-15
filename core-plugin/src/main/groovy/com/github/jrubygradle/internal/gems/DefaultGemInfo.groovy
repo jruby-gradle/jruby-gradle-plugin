@@ -2,6 +2,7 @@ package com.github.jrubygradle.internal.gems
 
 import com.github.jrubygradle.api.gems.GemInfo
 import com.github.jrubygradle.api.gems.GemDependency
+import com.github.jrubygradle.api.gems.JarDependency
 import groovy.transform.CompileStatic
 
 /** An implementation of GEM metadata.
@@ -34,4 +35,5 @@ class DefaultGemInfo implements GemInfo {
 
     List<GemDependency> dependencies = []
     List<GemDependency> developmentDependencies = []
+    List<JarDependency> jarRequirements = []
 }

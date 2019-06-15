@@ -95,7 +95,7 @@ class RepositoryHandlerExtension {
     @CompileDynamic
     private IvyArtifactRepository createIvyRepo(URI server, URI bindAddress) {
         this.project.repositories.ivy {
-            artifactPattern "${server}/downloads/[artifact]-[revision].gem"
+            artifactPattern "${server}/downloads/[artifact]-[revision](-[classifier]).gem"
             ivyPattern "${bindAddress}/[organisation]/[module]/[revision]/ivy.xml"
         }
     }

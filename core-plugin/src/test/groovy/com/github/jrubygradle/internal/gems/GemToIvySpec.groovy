@@ -9,7 +9,9 @@ class GemToIvySpec extends Specification {
         given:
         def gem = new DefaultGemInfo(
             name: 'foo_module',
-            version: '1.2.3'
+            version: '1.2.3',
+            dependencies: [new DefaultGemDependency(name: 'foo', requirements: '< 13.0')],
+            jarRequirements: [new DefaultJarDependency(group: 'bar', name: 'foo', requirements: '>=2.2')]
         )
         def gemToIvy = new GemToIvy('https://foo'.toURI())
 
@@ -18,5 +20,7 @@ class GemToIvySpec extends Specification {
 
         then:
         result.contains("info organisation='rubygems' module='foo_module' revision='1.2.3'")
+        result.contains("<dependency org='rubygems' name='foo' rev='(,13.0['")
+        result.contains("<dependency org='bar' name='foo' rev='[2.2,)'")
     }
 }

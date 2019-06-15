@@ -93,6 +93,7 @@ class GemVersion implements Comparable<GemVersion> {
     private static final Pattern RANGE = ~/^(\[|\])(.+?),(.+?)(\[|\])$/
 
     private static final Pattern ONLY_DIGITS = ~/^\d+$/
+    private static final Pattern DIGITS_AND_DOTS = ~/^\d+(\.\d+){1,3}(-\p{Alnum}+)?$/
 
     // GEM requirement patterns
     private static final Pattern GREATER_EQUAL = ~/^>=\s*(.+)/
@@ -132,13 +133,13 @@ class GemVersion implements Comparable<GemVersion> {
      */
     static List<GemVersion> gemVersionsFromMultipleGemRequirements(String multipleRequirements) {
         multipleRequirements.split(/,\s*/).collect { String it ->
-            gemVersionFromGemRequirement(it)
+            gemVersionFromGemRequirement(it.trim())
         }.findAll {
             it != NO_VERSION
         }
     }
 
-    /** Takes a GEM requirement list and creates a single GEM versoin, by taking a union of
+    /** Takes a GEM requirement list and creates a single GEM versin, by taking a union of
      * all requirements.
      *
      * @param multipleRequirements Comma-separated list of GEM requirements.
@@ -208,6 +209,13 @@ class GemVersion implements Comparable<GemVersion> {
             )
         } else if (singleRequirement.matches(TWIDDLE_WAKKA)) {
             parseTwiddleWakka(singleRequirement)
+        } else if (singleRequirement.matches(DIGITS_AND_DOTS)) {
+            new GemVersion(
+                INCLUSIVE,
+                singleRequirement,
+                singleRequirement,
+                INCLUSIVE
+            )
         } else {
             throw new GemVersionException("'${singleRequirement}' does not look like a GEM version requirement")
         }

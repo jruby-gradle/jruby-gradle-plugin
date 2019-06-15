@@ -128,6 +128,22 @@ class IvyXmlProxyServerIntegrationSpec extends Specification {
         findFiles ~/^github-pages-106.gem$/
     }
 
+    void 'Resolve GEM with JAR dependencies'() {
+        setup:
+        withBuildFile '''
+        repositories.jcenter()
+        dependencies {
+            something 'rubygems:jruby-openssl:0.10.2'    
+        }
+        '''
+
+        when:
+        build()
+
+        then:
+        findFiles ~/^jruby-openssl-0.10.2-java.gem$/
+    }
+
     private List<File> findFiles(Pattern pat) {
         new File(projectDir, 'build/something').listFiles(new FilenameFilter() {
             @Override

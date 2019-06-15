@@ -18,7 +18,7 @@ import java.util.concurrent.Callable
 import static org.ysb33r.grolifant.api.StringUtils.stringize
 
 /**
- * Class providing the jruby{} DSL extension to the Gradle build script.
+ * Class providing the jruby DSL extension to the Gradle build script.
  *
  * @author Schalk W. Cronjé
  * @author R Tyler Croy

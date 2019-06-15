@@ -101,6 +101,12 @@ public interface GemInfo {
      */
     List<GemDependency> getDevelopmentDependencies();
 
+    /** Transitive JAR requirements.
+     *
+     * @return List of JAR requirements. Can be empty, but never {@code null}
+     */
+    List<JarDependency> getJarRequirements();
+
     /** Whether the GEM is still a prerelease version.
      *
      * @return {@code true} for prerelease
