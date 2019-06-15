@@ -15,7 +15,6 @@ buildScan {
 allprojects {
     apply plugin: 'idea'
 
-
     if (!releaseBuild) {
         version = "${version}-SNAPSHOT"
     }
