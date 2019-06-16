@@ -4,7 +4,8 @@ plugins {
     id 'com.jfrog.bintray' version '1.8.4' apply false
     id 'org.ajoberstar.github-pages' version '1.2.0' apply false
     id 'org.ysb33r.cloudci.appveyor.testreporter' version '2.5' apply false
-    id "io.ratpack.ratpack-java" version "1.6.1" apply false
+    id 'com.github.hierynomus.license' version '0.14.0' apply false
+    id 'io.ratpack.ratpack-java' version "1.6.1" apply false
 }
 
 buildScan {
@@ -47,6 +48,7 @@ subprojects {
         apply plugin: 'maven-publish'
         apply plugin: 'org.ysb33r.cloudci.appveyor.testreporter'
         apply from: "${rootProject.projectDir}/gradle/integration-tests.gradle"
+        apply from: "${rootProject.projectDir}/gradle/license.gradle"
 
         dependencies {
             compile localGroovy()
