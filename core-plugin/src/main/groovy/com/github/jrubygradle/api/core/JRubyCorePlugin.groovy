@@ -23,7 +23,7 @@
  */
 package com.github.jrubygradle.api.core
 
-import com.github.jrubygradle.api.gems.GemGroups
+import com.github.jrubygradle.api.gems.GemResolverStrategy
 import com.github.jrubygradle.internal.gems.GemVersionResolver
 import groovy.transform.CompileStatic
 import org.gradle.api.Plugin
@@ -42,7 +42,7 @@ import org.gradle.api.plugins.ExtensionAware
 class JRubyCorePlugin implements Plugin<Project> {
     @Override
     void apply(Project project) {
-        GemGroups gemGroups = project.extensions.create(GemGroups.NAME, GemGroups)
+        GemResolverStrategy gemGroups = project.extensions.create(GemResolverStrategy.NAME, GemResolverStrategy)
 
         ((ExtensionAware) project.repositories).extensions.create(
             RepositoryHandlerExtension.NAME,

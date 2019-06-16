@@ -23,8 +23,8 @@
  */
 package com.github.jrubygradle.internal.gems
 
+import com.github.jrubygradle.api.gems.GemResolverStrategy
 import com.github.jrubygradle.api.gems.GemVersion
-import com.github.jrubygradle.api.gems.GemGroups
 import groovy.transform.CompileDynamic
 import groovy.transform.PackageScope
 import org.gradle.api.Action
@@ -46,17 +46,17 @@ import static com.github.jrubygradle.api.gems.GemVersion.gemVersionFromGradleIvy
  * @since 2.0
  */
 class GemVersionResolver {
-    static void addGemResolver(Configuration cfg, GemGroups gemGroups, GemVersionResolver versionResolver) {
+    static void addGemResolver(Configuration cfg, GemResolverStrategy gemGroups, GemVersionResolver versionResolver) {
         Action<DependencyResolveDetails> gemResolveRule = {
-            GemGroups gemgrp, GemVersionResolver resolver, DependencyResolveDetails drd ->
-                if (gemgrp.isGemGroup(drd.requested.group)) {
+            String configName, GemResolverStrategy gemgrp, GemVersionResolver resolver, DependencyResolveDetails drd ->
+                if (gemgrp.useGemVersionResolver(configName) && gemgrp.useGemVersionResolver(drd.requested)) {
                     resolver.resolve(drd)
                 }
-        }.curry(gemGroups, versionResolver)
+        }.curry(cfg.name, gemGroups, versionResolver)
         cfg.resolutionStrategy.eachDependency(gemResolveRule)
     }
 
-    GemVersionResolver(GemGroups gemGroups, Logger logger, Configuration configuration) {
+    GemVersionResolver(GemResolverStrategy gemGroups, Logger logger, Configuration configuration) {
         this.gemGroups = gemGroups
         this.logger = logger
         this.configuration = configuration
@@ -83,8 +83,7 @@ class GemVersionResolver {
             logger.debug("${configuration}      resolved  ${next}")
 
             details.useVersion(next.toString())
-            withReason(details,"Selected by GEM Version Resolver")
-
+            withReason(details, 'Selected by GEM Version Resolver')
         } else {
             GemVersion next = gemVersionFromGradleIvyRequirement(details.requested.version)
             versions[details.requested.name] = next
@@ -119,7 +118,7 @@ class GemVersionResolver {
 
     @CompileDynamic
     void withReason(DependencyResolveDetails drd, String reason) {
-        if(HAS_BECAUSE_PROPERTY) {
+        if (HAS_BECAUSE_PROPERTY) {
             drd.because(reason)
         }
     }
@@ -132,5 +131,5 @@ class GemVersionResolver {
     private final Map versions = [:]
     private final Configuration configuration
     private final Logger logger
-    private final GemGroups gemGroups
+    private final GemResolverStrategy gemGroups
 }

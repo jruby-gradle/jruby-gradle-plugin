@@ -167,6 +167,27 @@ class IvyXmlProxyServerIntegrationSpec extends Specification {
         findFiles ~/^jruby-openssl-0.10.2-java.gem$/
     }
 
+    @Issue('https://github.com/jruby-gradle/jruby-gradle-plugin/issues/325')
+    void 'Resolve a prerelease GEM by excluding from GEM strategy'() {
+        setup:
+        withBuildFile '''
+        gemResolverStrategy {
+            excludeModule ~/^asciidoctor-pdf$/, ~/.+(alpha|beta).*/ 
+        }
+        
+        dependencies {
+            something 'rubygems:asciidoctor-pdf-cjk-kai_gen_gothic:0.1.1'
+            something 'rubygems:asciidoctor-pdf:1.5.0.alpha.8'
+        }
+        '''
+
+        when:
+        build()
+
+        then:
+        findFiles (~/^asciidoctor-pdf.*\.gem$/).size() == 3
+    }
+
     private List<File> findFiles(Pattern pat) {
         new File(projectDir, 'build/something').listFiles(new FilenameFilter() {
             @Override

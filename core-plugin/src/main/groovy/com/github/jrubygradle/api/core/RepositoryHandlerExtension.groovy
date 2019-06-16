@@ -23,7 +23,7 @@
  */
 package com.github.jrubygradle.api.core
 
-import com.github.jrubygradle.api.gems.GemGroups
+import com.github.jrubygradle.api.gems.GemResolverStrategy
 import com.github.jrubygradle.internal.core.IvyXmlGlobalProxyRegistry
 import groovy.transform.CompileDynamic
 import groovy.transform.CompileStatic
@@ -111,7 +111,7 @@ class RepositoryHandlerExtension {
         String group
     ) {
         IvyXmlProxyServer proxy = ivyProxies.registerProxy(serverUri, group)
-        project.extensions.getByType(GemGroups).addGemGroup(group)
+        project.extensions.getByType(GemResolverStrategy).addGemGroup(group)
         restrictToGems(createIvyRepo(serverUri, proxy.bindAddress), group)
     }
 
