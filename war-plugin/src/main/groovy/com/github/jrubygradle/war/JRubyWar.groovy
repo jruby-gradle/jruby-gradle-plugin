@@ -1,5 +1,6 @@
 package com.github.jrubygradle.war
 
+import com.github.jrubygradle.internal.core.Transform
 import org.gradle.api.Project
 import org.gradle.api.tasks.Input
 import org.gradle.api.tasks.bundling.War
@@ -34,7 +35,7 @@ class JRubyWar extends War {
         // is only resolved at execution time. This will take the embeds
         // from within the `jrubyEmbeds` configuration and dump them into the war
         from {
-            project.configurations.jrubyEmbeds.collect {
+            Transform.toList(project.configurations.jrubyEmbeds) {
                 project.zipTree(it)
             }
         }

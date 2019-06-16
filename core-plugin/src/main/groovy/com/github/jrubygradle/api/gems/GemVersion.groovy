@@ -1,5 +1,6 @@
 package com.github.jrubygradle.api.gems
 
+import com.github.jrubygradle.internal.core.Transform
 import groovy.transform.CompileDynamic
 import groovy.transform.CompileStatic
 import groovy.util.logging.Slf4j
@@ -132,14 +133,14 @@ class GemVersion implements Comparable<GemVersion> {
      * @return List of GEM versions. Can be empty if all requirements evaluate to {@link #NO_VERSION}.
      */
     static List<GemVersion> gemVersionsFromMultipleGemRequirements(String multipleRequirements) {
-        multipleRequirements.split(/,\s*/).collect { String it ->
+        Transform.toList(multipleRequirements.split(/,\s*/)) { String it ->
             gemVersionFromGemRequirement(it.trim())
         }.findAll {
             it != NO_VERSION
         }
     }
 
-    /** Takes a GEM requirement list and creates a single GEM versin, by taking a union of
+    /** Takes a GEM requirement list and creates a single GEM version, by taking a union of
      * all requirements.
      *
      * @param multipleRequirements Comma-separated list of GEM requirements.

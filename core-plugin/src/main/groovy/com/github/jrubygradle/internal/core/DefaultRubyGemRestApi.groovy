@@ -149,7 +149,7 @@ class DefaultRubyGemRestApi implements com.github.jrubygradle.api.core.RubyGemQu
         )
 
         if (jsonParser.dependencies?.runtime) {
-            metadata.dependencies.addAll(jsonParser.dependencies.runtime.collect {
+            metadata.dependencies.addAll( Transform.toList(jsonParser.dependencies.runtime) {
                 new DefaultGemDependency(name: it.name, requirements: it.requirements)
             })
         }

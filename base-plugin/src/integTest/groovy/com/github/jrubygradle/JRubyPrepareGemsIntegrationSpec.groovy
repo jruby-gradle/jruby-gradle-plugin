@@ -36,6 +36,7 @@ class JRubyPrepareGemsIntegrationSpec extends IntegrationSpecification {
         withPreamble """repositories.ruby.gems()
             jrubyPrepare.outputDir = '${pathAsUriStr(projectDir)}'.toURI()
         """
+
         withDependencies """
             gems "rubygems:sinatra:1.4.5"
             gems "rubygems:rack:[0,)"
@@ -49,6 +50,48 @@ class JRubyPrepareGemsIntegrationSpec extends IntegrationSpecification {
         // since we need a version range in the setup the
         // resolved version here can vary over time
         new File(projectDir, "gems/rack-1.6.11").exists()
+    }
+
+    @IgnoreIf({ IntegrationSpecification.OFFLINE })
+    void "Check that GEM dependencies are locked"() {
+        setup:
+        File lockFile = new File(projectDir, 'gradle/dependency-locks/gems.lockfile')
+        withPreamble """repositories.ruby.gems()
+            jrubyPrepare.outputDir = '${pathAsUriStr(projectDir)}'.toURI()
+
+            dependencyLocking {
+                lockAllConfigurations()
+            }
+
+
+        """
+        withDependencies """
+            gems "rubygems:sinatra:1.4.5"
+            gems "rubygems:rack:[0,)"
+            gems "rubygems:lookout-rack-utils:5.0.0.49"
+        """
+
+        lockFile.parentFile.mkdirs()
+        lockFile.text = '''
+rubygems:concurrent-ruby:1.1.5
+rubygems:configatron:4.5.1
+rubygems:i18n:1.6.0
+rubygems:log4r:1.1.10
+rubygems:lookout-rack-utils:5.0.0.49
+rubygems:lookout-statsd:3.2.0
+rubygems:rack-graphite:1.6.0
+rubygems:rack-protection:1.5.5
+rubygems:rack:1.6.10
+rubygems:sinatra:1.4.5
+rubygems:tilt:2.0.9
+'''
+        when:
+        build()
+
+        then:
+        // since we need a version range in the setup the
+        // resolved version here can vary over time
+        new File(projectDir, "gems/rack-1.6.10").exists()
     }
 
     @IgnoreIf({ IntegrationSpecification.OFFLINE })
@@ -131,6 +174,7 @@ class JRubyPrepareGemsIntegrationSpec extends IntegrationSpecification {
         tasks.addAll(moreTasks)
         tasks.add('-i')
         tasks.add('-s')
+        tasks.add('--refresh-dependencies')
         writeBuildFile()
         gradleRunner(tasks).build()
     }

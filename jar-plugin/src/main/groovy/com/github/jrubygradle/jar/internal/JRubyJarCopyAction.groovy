@@ -1,12 +1,13 @@
 package com.github.jrubygradle.jar.internal
 
+import com.github.jengelman.gradle.plugins.shadow.impl.RelocatorRemapper
+
 /*
  * This source code is derived from Apache 2.0 licensed software copyright John
  * Engelman (https://github.com/johnrengelman) and was originally ported from this
  * repository: https://github.com/johnrengelman/shadow
 */
 
-import com.github.jengelman.gradle.plugins.shadow.impl.RelocatorRemapper
 import com.github.jengelman.gradle.plugins.shadow.internal.UnusedTracker
 import com.github.jengelman.gradle.plugins.shadow.internal.ZipCompressor
 import com.github.jengelman.gradle.plugins.shadow.relocation.Relocator
@@ -14,11 +15,6 @@ import com.github.jengelman.gradle.plugins.shadow.transformers.Transformer
 import groovy.util.logging.Slf4j
 import org.apache.commons.io.FilenameUtils
 import org.apache.commons.io.IOUtils
-import shadow.org.apache.tools.zip.UnixStat
-import shadow.org.apache.tools.zip.Zip64RequiredException
-import shadow.org.apache.tools.zip.ZipEntry
-import shadow.org.apache.tools.zip.ZipFile
-import shadow.org.apache.tools.zip.ZipOutputStream
 import org.gradle.api.Action
 import org.gradle.api.GradleException
 import org.gradle.api.UncheckedIOException
@@ -40,6 +36,11 @@ import org.objectweb.asm.ClassReader
 import org.objectweb.asm.ClassVisitor
 import org.objectweb.asm.ClassWriter
 import org.objectweb.asm.commons.ClassRemapper
+import shadow.org.apache.tools.zip.UnixStat
+import shadow.org.apache.tools.zip.Zip64RequiredException
+import shadow.org.apache.tools.zip.ZipEntry
+import shadow.org.apache.tools.zip.ZipFile
+import shadow.org.apache.tools.zip.ZipOutputStream
 
 import java.util.zip.ZipException
 
@@ -58,7 +59,7 @@ import java.util.zip.ZipException
  */
 @Slf4j
 @SuppressWarnings(['ParameterCount', 'CatchException', 'DuplicateStringLiteral',
-'CatchThrowable', 'VariableName', 'UnnecessaryGString', 'InvertedIfElse'])
+    'CatchThrowable', 'VariableName', 'UnnecessaryGString', 'InvertedIfElse'])
 class JRubyJarCopyAction implements CopyAction {
     static final long CONSTANT_TIME_FOR_ZIP_ENTRIES = (new GregorianCalendar(1980, 1, 1, 0, 0, 0)).timeInMillis
 
@@ -74,9 +75,9 @@ class JRubyJarCopyAction implements CopyAction {
     private final UnusedTracker unusedTracker
 
     JRubyJarCopyAction(File zipFile, ZipCompressor compressor, DocumentationRegistry documentationRegistry,
-                            String encoding, List<Transformer> transformers, List<Relocator> relocators,
-                            PatternSet patternSet,
-                            boolean preserveFileTimestamps, boolean minimizeJar, UnusedTracker unusedTracker) {
+                       String encoding, List<Transformer> transformers, List<Relocator> relocators,
+                       PatternSet patternSet,
+                       boolean preserveFileTimestamps, boolean minimizeJar, UnusedTracker unusedTracker) {
 
         this.zipFile = zipFile
         this.compressor = compressor
@@ -109,20 +110,13 @@ class JRubyJarCopyAction implements CopyAction {
             unusedClasses = Collections.emptySet()
         }
 
-        final ZipOutputStream zipOutStr
-
         try {
-            zipOutStr = compressor.createArchiveOutputStream(zipFile)
-        } catch (Exception e) {
-            throw new GradleException("Could not create ZIP '${zipFile.toString()}'", e)
-        }
-
-        try {
+            final ZipOutputStream zipOutStr = compressor.createArchiveOutputStream(zipFile)
             withResource(zipOutStr, new Action<ZipOutputStream>() {
                 void execute(ZipOutputStream outputStream) {
                     try {
                         stream.process(new StreamAction(outputStream, encoding, transformers, relocators, patternSet,
-                                unusedClasses))
+                            unusedClasses))
                         processTransformers(outputStream)
                     } catch (Exception e) {
                         log.error('ex', e)
@@ -134,10 +128,12 @@ class JRubyJarCopyAction implements CopyAction {
         } catch (UncheckedIOException e) {
             if (e.cause instanceof Zip64RequiredException) {
                 throw new Zip64RequiredException(
-                        String.format("%s\n\nTo build this archive, please enable the zip64 extension.\nSee: %s",
-                                e.cause.message, documentationRegistry.getDslRefForProperty(Zip, "zip64"))
+                    String.format("%s\n\nTo build this archive, please enable the zip64 extension.\nSee: %s",
+                        e.cause.message, documentationRegistry.getDslRefForProperty(Zip, "zip64"))
                 )
             }
+        } catch (Exception e) {
+            throw new GradleException("Could not create ZIP '${zipFile.toString()}'", e)
         }
         return WorkResults.didWork(true)
     }
@@ -217,7 +213,7 @@ class JRubyJarCopyAction implements CopyAction {
         private final Set<String> visitedFiles = [] as Set
 
         StreamAction(ZipOutputStream zipOutStr, String encoding, List<Transformer> transformers,
-                            List<Relocator> relocators, PatternSet patternSet, Set<String> unused) {
+                     List<Relocator> relocators, PatternSet patternSet, Set<String> unused) {
             this.zipOutStr = zipOutStr
             this.transformers = transformers
             this.relocators = relocators
@@ -260,7 +256,7 @@ class JRubyJarCopyAction implements CopyAction {
 
         private boolean isUnused(String classPath) {
             final String className = FilenameUtils.removeExtension(classPath)
-                    .replace('/' as char, '.' as char)
+                .replace('/' as char, '.' as char)
             final boolean result = unused.contains(className)
             if (result) {
                 log.debug("Dropping unused class: $className")
@@ -354,11 +350,11 @@ class JRubyJarCopyAction implements CopyAction {
             try {
                 String mappedPath = remapper.map(element.relativePath.pathString)
                 transformers.find { it.canTransformResource(element) }.transform(
-                        TransformerContext.builder()
-                                .path(mappedPath)
-                                .is(is)
-                                .relocators(relocators)
-                                .build()
+                    TransformerContext.builder()
+                        .path(mappedPath)
+                        .is(is)
+                        .relocators(relocators)
+                        .build()
                 )
             } finally {
                 is.close()
