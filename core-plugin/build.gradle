@@ -13,3 +13,31 @@ dependencies {
         exclude group: 'org.codehaus.groovy'
     }
 }
+
+artifacts {
+    archives sourcesJar
+}
+
+bintray {
+    user = project.bintrayUser
+    key = project.bintrayKey
+    publish = true
+    dryRun = false
+    configurations = ['archives']
+
+    pkg {
+        userOrg = 'jruby-gradle'
+        repo = 'plugins'
+        name = 'jruby-gradle-core-plugin'
+        labels = ['jruby']
+
+        version {
+            name = project.version
+            vcsTag = "v${project.version}"
+            attributes = ['gradle-plugin': 'com.github.jruby-gradle.core:com.github.jruby-gradle:jruby-gradle-core-plugin']
+            desc = 'This plugin provides some core dependency resolution for JRuby/Gradle'
+
+        }
+    }
+}
+bintrayUpload.dependsOn assemble
