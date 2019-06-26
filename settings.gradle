@@ -7,4 +7,3 @@
 
 include 'docs'
 
-enableFeaturePreview('STABLE_PUBLISHING')
