@@ -188,6 +188,26 @@ class IvyXmlProxyServerIntegrationSpec extends Specification {
         findFiles (~/^asciidoctor-pdf.*\.gem$/).size() == 3
     }
 
+    @Issue('https://github.com/jruby-gradle/jruby-gradle-plugin/issues/380')
+    void 'Resolve transitive which contains a single digit twiddle-wakka'() {
+        setup:
+        withBuildFile '''
+        dependencies {
+            something 'rubygems:asciidoctor-bibtex:0.3.1'
+            something 'rubygems:bibtex-ruby:4.4.7', {
+                force = true
+            }    
+        }
+        '''
+
+        when:
+        build()
+
+        then:
+        findFiles ~/^asciidoctor-bibtex-0.3.1.gem$/
+        findFiles ~/^bibtex-ruby-4.4.7.gem$/
+    }
+
     private List<File> findFiles(Pattern pat) {
         new File(projectDir, 'build/something').listFiles(new FilenameFilter() {
             @Override
