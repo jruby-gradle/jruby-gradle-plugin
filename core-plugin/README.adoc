@@ -8,3 +8,8 @@ This plugin offers the following functionality:
 * Conversion between GEM-style and Ivy-style dependencies notations.
 * An abstract task class (`AbstractJRubyPrepare`) for preparing local GEM + JAR installations.
 
+== Getting Started
+
+=== Compatibility
+
+This plugin requires link:http://gradle.org[Gradle] 4.3 or better

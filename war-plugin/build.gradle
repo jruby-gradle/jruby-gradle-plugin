@@ -1,6 +1,4 @@
 description = 'This plugin encapsulates web archive building functionality for JRuby Gradle projects'
-group = rootProject.group
-version = "${rootProject.version}-alpha"
 
 
 dependencies {

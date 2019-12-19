@@ -100,7 +100,7 @@ class RepositoryHandlerExtension {
                 mvn.url = 'http://rubygems-proxy.torquebox.org/releases'.toURI()
             }
         }
-        (MavenArtifactRepository)restrictToGems(
+        (MavenArtifactRepository) restrictToGems(
             this.project.repositories.maven(mvnConfigurator),
             DEFAULT_GROUP_NAME
         )
@@ -120,6 +120,10 @@ class RepositoryHandlerExtension {
         this.project.repositories.ivy {
             artifactPattern "${server}/downloads/[artifact]-[revision](-[classifier]).gem"
             ivyPattern "${bindAddress}/[organisation]/[module]/[revision]/ivy.xml"
+
+            if (HAS_SECURE_PROTOCOL_FEATURE) {
+                allowInsecureProtocol = true
+            }
         }
     }
 
@@ -136,4 +140,5 @@ class RepositoryHandlerExtension {
     private final Project project
     private final IvyXmlGlobalProxyRegistry ivyProxies
     private static final boolean HAS_CONTENT_FEATURE = GradleVersion.current() >= GradleVersion.version('5.1')
+    private static final boolean HAS_SECURE_PROTOCOL_FEATURE = GradleVersion.current() >= GradleVersion.version('6.0')
 }

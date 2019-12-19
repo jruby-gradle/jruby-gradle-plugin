@@ -151,6 +151,10 @@ class JRubyExecIntegrationSpec extends IntegrationSpecification {
             script 'rspec'
         """
 
+        File specDir = new File(projectDir,'spec')
+        specDir.mkdirs()
+        new File(specDir,'sample.rb').text = ''
+
         when:
         BuildResult result = build()
 
@@ -224,7 +228,7 @@ class JRubyExecIntegrationSpec extends IntegrationSpecification {
         buildFile.text = """
         import com.github.jrubygradle.JRubyExec
 
-        ${projectWithMavenRepo}
+        ${projectWithRubyGemsRepo}
 
         ${preamble ?: ''}
 

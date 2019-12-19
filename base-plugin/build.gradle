@@ -22,7 +22,6 @@ project.afterEvaluate {
 // --- up to here
 
 ext {
-    olderJRubyVersion = '9.2.1.0'
     slimVersion = '2.0.2'
     leafyVersion = '0.4.0'
 }
@@ -48,31 +47,27 @@ dependencies {
         exclude group: 'org.codehaus.groovy'
     }
 
-    // NOTE: This is used by JRubyPrepareGemsIntegrationSpec
-    integrationTestGems "rubygems:slim:${slimVersion}"
-
-    // NOTE: This is used by JRubyPrepareJarsIntegrationSpec
-    integrationTestGems "rubygems:leafy-complete:${leafyVersion}"
-
-    // NOTE: If you change this, you will also need to update JRubyExecIntegrationSpec & JRubyExecExtensionIntegrationSpec
-    integrationTestGems 'rubygems:credit_card_validator:1.1.0'
-
-    // NOTE: If you change this, you will also need to update JRubyExecIntegrationSpec
-    integrationTestGems 'rubygems:rspec:3.1.0'
-
-    // NOTE: This should always be an older older version. 
+    // NOTE: This should always be an older older version.
     // It is used by JRubyExecIntegrationSpec
     integrationTestGems "org.jruby:jruby-complete:${olderJRubyVersion}"
-
-    // NOTE: older jruby versions needs this for exec to work properly
-    integrationTestGems "rubygems:jar-dependencies:0.1.15"
 
     // This is used by JRubyExecExtensionIntegrationSpec
     integrationTestGems "org.bouncycastle:bcprov-jdk15on:${bcprovVersion}"
 
+    // This is used by JRubyPrepareJarsIntegrationSpec
+    integrationTestGems "io.dropwizard.metrics:metrics-core:${dropwizardMetricsCoreVersion}"
+
     gradleTest "org.jruby:jruby-complete:${jrubyVersion}"
-    gradleTest 'rubygems:credit_card_validator:1.1.0'
     gradleTest 'org.bouncycastle:bcprov-jdk15on:1.50'
+
+    // These are real GEMs which cannot currently be cached
+//    gradleTest 'rubygems:credit_card_validator:1.1.0'
+//    integrationTestGems "rubygems:slim:${slimVersion}"
+//    integrationTestGems "rubygems:leafy-complete:${leafyVersion}"
+//    integrationTestGems 'rubygems:credit_card_validator:1.1.0'
+//    integrationTestGems 'rubygems:rspec:3.1.0'
+//    integrationTestGems "rubygems:jar-dependencies:0.1.15"
+
 }
 
 generateTestConfig {
@@ -81,7 +76,10 @@ generateTestConfig {
             bcprovVersion: bcprovVersion,
             olderJRubyVersion: olderJRubyVersion,
             slimVersion: slimVersion,
-            leafyVersion: leafyVersion
+            leafyVersion: leafyVersion,
+            creditCardValidatorVersion : '1.1.0',
+            dropwizardMetricsCoreVersion : dropwizardMetricsCoreVersion,
+            rspecVersion : '3.1.0'
 }
 
 task copyIntegrationTestJRuby(type: Copy) {

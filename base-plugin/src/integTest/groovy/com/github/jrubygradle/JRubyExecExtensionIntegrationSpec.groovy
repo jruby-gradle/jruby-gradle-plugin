@@ -25,14 +25,16 @@ package com.github.jrubygradle
 
 import com.github.jrubygradle.testhelper.IntegrationSpecification
 import org.gradle.testkit.runner.BuildResult
+import spock.lang.IgnoreIf
 
 /**
  * @author Schalk W. Cronjé
  */
+@IgnoreIf({System.getProperty('TESTS_ARE_OFFLINE')})
 class JRubyExecExtensionIntegrationSpec extends IntegrationSpecification {
 
-    static final String DEFAULT_TASK_NAME = 'inlineJRubyExec'
-    static final String BCPROV_NAME = 'bcprov-jdk15on'
+    public static final String DEFAULT_TASK_NAME = 'inlineJRubyExec'
+    public static final String BCPROV_NAME = 'bcprov-jdk15on'
 
     void "Run a script with minimum parameters"() {
         setup:
@@ -147,7 +149,7 @@ class JRubyExecExtensionIntegrationSpec extends IntegrationSpecification {
     @SuppressWarnings('BuilderMethodWithSideEffects')
     private void createJRubyExecProject(String preamble, String jrubyexecConfig) {
         buildFile.text = """
-        ${projectWithLocalRepo}
+        ${projectWithRubyGemsRepo}
 
         ${preamble}
 
