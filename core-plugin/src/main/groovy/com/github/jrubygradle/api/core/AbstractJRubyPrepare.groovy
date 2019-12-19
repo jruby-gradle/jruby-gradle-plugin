@@ -32,6 +32,7 @@ import org.gradle.api.file.FileCollection
 import org.gradle.api.tasks.InputFiles
 import org.gradle.api.tasks.Internal
 import org.gradle.api.tasks.Optional
+import org.gradle.api.tasks.OutputFile
 import org.gradle.api.tasks.TaskAction
 
 import static com.github.jrubygradle.api.gems.GemOverwriteAction.SKIP
@@ -55,6 +56,7 @@ abstract class AbstractJRubyPrepare extends DefaultTask implements JRubyAwareTas
 
     /** Target directory for GEMs. Extracted GEMs will end up in {@code outputDir + "/gems"}
      */
+    @Internal
     File getOutputDir() {
         project.file(this.outputDir)
     }
@@ -100,6 +102,7 @@ abstract class AbstractJRubyPrepare extends DefaultTask implements JRubyAwareTas
      *
      * @return Path on local filesystem
      */
+    @OutputFile
     abstract protected File getJrubyJarLocation()
 
     @TaskAction

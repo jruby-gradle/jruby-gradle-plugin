@@ -17,7 +17,7 @@ dependencies {
     /* We want to cache jruby-complete at this alternative version which we use
      * in many places
      */
-    integrationTestGems 'org.jruby:jruby-complete:1.7.11'
+    integrationTestGems "org.jruby:jruby-complete:${olderJRubyVersion}"
 }
 
 sourceSets {

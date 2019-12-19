@@ -263,11 +263,12 @@ class JRubyExec extends JavaExec implements JRubyAwareTask, JRubyExecSpec {
      *
      * There are three modes of behaviour
      * <ul>
-     *   <li> script set. no jrubyArgs, or jrubyArgs does not contain {@code -S} - Normal way to execute script. A check
+     *   <li> script set. no jrubyArgs, or jrubyArgs does not contain {@code -S}: normal way to execute script. A check
      *   whether the script exists will be performed.
-     *   <li> script set. jrubyArgs contains {@code -S} - If script is not absolute, no check will be performed to see
+     *   <li> script set. jrubyArgs contains {@code -S}: if script is not absolute, no check will be performed to see
      *   if the script exists and will be assumed that the script can be found using the default ruby path mechanism.
-     *   <li> script not set, but jrubyArgs set - Set up to execute jruby with no script. This should be a rarely used otion.
+     *   <li> script not set, but jrubyArgs set: set up to execute jruby with no script. This should be a rarely used
+     *   option.
      * </ul>
      *
      * @throw {@code org.gradle.api.InvalidUserDataException} if mode of behaviour cannot be determined.

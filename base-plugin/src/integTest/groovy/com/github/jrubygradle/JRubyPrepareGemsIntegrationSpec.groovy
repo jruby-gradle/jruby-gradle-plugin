@@ -31,11 +31,12 @@ import spock.lang.Issue
 /**
  * @author Schalk W. Cronjé.
  */
+@IgnoreIf({System.getProperty('TESTS_ARE_OFFLINE')})
 class JRubyPrepareGemsIntegrationSpec extends IntegrationSpecification {
 
     static final String DEFAULT_TASK_NAME = 'jrubyPrepare'
 
-    String repoSetup = projectWithLocalRepo
+    String repoSetup = projectWithRubyGemsRepo
     String preamble
     String dependenciesConfig
 
@@ -72,7 +73,7 @@ class JRubyPrepareGemsIntegrationSpec extends IntegrationSpecification {
         then:
         // since we need a version range in the setup the
         // resolved version here can vary over time
-        new File(projectDir, "gems/rack-1.6.11").exists()
+        new File(projectDir, "gems/rack-1.6.12").exists()
     }
 
     @IgnoreIf({ IntegrationSpecification.OFFLINE })

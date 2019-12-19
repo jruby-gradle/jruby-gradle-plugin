@@ -25,6 +25,7 @@ allprojects {
     targetCompatibility = '1.8'
 
     ext {
+        olderJRubyVersion = '9.2.1.0'
         spockVersion = "org.spockframework:spock-core:1.2-groovy-2.4"
         pluginExtraText = (version.contains('-alpha') || version.contains('-beta')) ?
             '(If you need a production-ready version of the JRuby/Gradle plugin use a 1.7.x release instead)': ''
@@ -37,7 +38,6 @@ subprojects {
 
     repositories {
         jcenter()
-        maven { url torqueboxProxy }
     }
 
     if (project.name != 'docs') {
@@ -79,10 +79,17 @@ subprojects {
         gradleTest {
             // https://github.com/jruby-gradle/jruby-gradle-plugin/issues/346
             if (JavaVersion.current().java11) {
-                versions '5.0', '5.4.1'
+                versions '5.0', '5.4.1', '6.0.1'
             } else {
-                versions '4.2', '4.10.2', '5.3.1'
+                versions '4.10.2', '5.3.1', '6.0.1'
+
+                if(project.name == 'jruby-gradle-core-plugin' ) {
+                    versions '4.3'
+                } else {
+                    versions '4.9'
+                }
             }
+
             dependsOn jar
         }
 

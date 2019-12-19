@@ -71,6 +71,7 @@ class JRubyJar extends Jar {
     /**
      * @return Directory that the dependencies for this project will be staged into
      */
+    @Internal
     File getGemDir() {
         return prepareTask.outputDir
     }
@@ -83,6 +84,7 @@ class JRubyJar extends Jar {
      * modifies the jrubyVersion on the project after we have instantiated, that we still
      * respect this setting
      * */
+    @Input
     String getJrubyVersion() {
         if (embeddedJRubyVersion == null) {
             return project.jruby.defaultVersion

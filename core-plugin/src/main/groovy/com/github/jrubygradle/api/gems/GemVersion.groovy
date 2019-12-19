@@ -480,13 +480,6 @@ class GemVersion implements Comparable<GemVersion> {
         matcher[0][1]
     }
 
-//    private GemVersion(Boolean lowInclusive, String low, String high, Boolean highInclusive) {
-//        this.lowBoundary = lowInclusive ? INCLUSIVE : EXCLUSIVE
-//        this.low = low
-//        this.high = high
-//        this.highBoundary = highInclusive ? INCLUSIVE : EXCLUSIVE
-//    }
-
     private GemVersion(Boundary pre, String low, String high, Boundary post) {
         this.lowBoundary = pre
         this.low = low

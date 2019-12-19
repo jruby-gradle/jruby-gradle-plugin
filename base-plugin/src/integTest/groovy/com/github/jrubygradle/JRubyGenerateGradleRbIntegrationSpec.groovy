@@ -30,6 +30,7 @@ import spock.lang.IgnoreIf
 /**
  * @author Schalk W. Cronjé
  */
+@IgnoreIf({System.getProperty('TESTS_ARE_OFFLINE')})
 class JRubyGenerateGradleRbIntegrationSpec extends IntegrationSpecification {
 
     static final String DEFAULT_TASK_NAME = 'RubyWax'
@@ -40,7 +41,7 @@ class JRubyGenerateGradleRbIntegrationSpec extends IntegrationSpecification {
         buildFile.text = """
             import com.github.jrubygradle.GenerateGradleRb
     
-            ${projectWithLocalRepo}
+            ${projectWithRubyGemsRepo}
     
             task ${DEFAULT_TASK_NAME} (type: GenerateGradleRb)  {
                 gemInstallDir 'build/gems'
