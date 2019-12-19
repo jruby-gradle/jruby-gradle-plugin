@@ -121,6 +121,6 @@ subprojects {
 
 task release(type: Exec) {
     description 'Create and upload a release'
-    dependsOn subprojects.collect { ":${it.name}:bintrayUpload" }
+    dependsOn subprojects.findAll { it.name != 'docs' }.collect { ":${it.name}:bintrayUpload" }
     commandLine 'git', 'tag', "v${project.version}"
 }
