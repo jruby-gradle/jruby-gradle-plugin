@@ -432,11 +432,21 @@ class GemVersion implements Comparable<GemVersion> {
     private static GemVersion parseTwiddleWakka(String singleRequirement) {
         String base = getVersionFromRequirement(singleRequirement, TWIDDLE_WAKKA)
         List<String> parts = base.tokenize(VERSION_SPLIT)
-        if (1 == parts) {
+        if (1 == parts.size()) {
+            if (base =~ ONLY_DIGITS) {
+                return new GemVersion(
+                    INCLUSIVE,
+                    base,
+                    null,
+                    OPEN_ENDED
+                )
+            }
+
             throw new GemVersionException(
-                "'${singleRequirement}' does not look like a correctly formattedGEM twiddle-wakka requirement"
+                "'${singleRequirement}' does not look like a correctly formatted GEM twiddle-wakka"
             )
         }
+
         String lastNumberPart = parts[0..-2].reverse().find {
             it =~ ONLY_DIGITS
         }
