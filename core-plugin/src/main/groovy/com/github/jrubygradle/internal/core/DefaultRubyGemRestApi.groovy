@@ -34,6 +34,7 @@ import groovyx.net.http.HttpBuilder
 import groovyx.net.http.HttpException
 import okhttp3.OkHttpClient
 
+import static com.github.jrubygradle.internal.gems.GemToIvy.JAVA_PLATFORM
 import static groovyx.net.http.ContentTypes.JSON
 import static groovyx.net.http.NativeHandlers.Parsers.json
 import static groovyx.net.http.OkHttpBuilder.configure
@@ -171,8 +172,16 @@ class DefaultRubyGemRestApi implements com.github.jrubygradle.api.core.RubyGemQu
             // licenses arrayList
         )
 
+        if (metadata.platform != JAVA_PLATFORM) {
+            if (getData(V1, "versions/${metadata.name}").find {
+                it.number == metadata.version && it.platform == JAVA_PLATFORM
+            }) {
+                metadata.platform = JAVA_PLATFORM
+            }
+        }
+
         if (jsonParser.dependencies?.runtime) {
-            metadata.dependencies.addAll( Transform.toList(jsonParser.dependencies.runtime) {
+            metadata.dependencies.addAll(Transform.toList(jsonParser.dependencies.runtime) {
                 new DefaultGemDependency(name: it.name, requirements: it.requirements)
             })
         }

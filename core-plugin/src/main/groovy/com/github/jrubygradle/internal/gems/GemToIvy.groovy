@@ -41,6 +41,8 @@ import static com.github.jrubygradle.api.gems.GemVersion.singleGemVersionFromMul
 @CompileStatic
 class GemToIvy {
 
+    public static final String JAVA_PLATFORM = 'java'
+
     /** Create a converter from GEM metadata to Ivy metadata.
      *
      * This constructor version assumes that the group is called {@code rubygems}.
@@ -156,7 +158,6 @@ class GemToIvy {
         shaFile
     }
 
-    private static final String JAVA_PLATFORM = 'java'
     private final String serverUri
     private final String org = 'rubygems'
 }

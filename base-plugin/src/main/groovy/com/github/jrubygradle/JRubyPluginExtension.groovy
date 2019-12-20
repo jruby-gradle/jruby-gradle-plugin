@@ -60,6 +60,7 @@ class JRubyPluginExtension extends AbstractCombinedProjectTaskExtension {
      */
     JRubyPluginExtension(Project p) {
         super(p)
+        this.jrubyVersion = DEFAULT_JRUBY_VERSION
     }
 
     /** Task extension constructor
@@ -322,7 +323,7 @@ class JRubyPluginExtension extends AbstractCombinedProjectTaskExtension {
     }
 
     private static final String JRUBY_COMPLETE_DEPENDENCY = 'org.jruby:jruby-complete'
-    private Object jrubyVersion = DEFAULT_JRUBY_VERSION
+    private Object jrubyVersion
 
     private Provider<Configuration> gemConfiguration
     private String gemPrepareTaskName

@@ -189,7 +189,7 @@ class JRubyExec extends JavaExec implements JRubyAwareTask, JRubyExecSpec {
      */
     @Deprecated
     String getJrubyVersion() {
-        deprecated('Use jruby.getJrubyVersion rather getJrubyVersion()')
+        deprecated('Use jruby.getJrubyVersion() rather getJrubyVersion()')
         jruby.jrubyVersion
     }
 
