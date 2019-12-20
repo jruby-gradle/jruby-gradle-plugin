@@ -36,7 +36,6 @@ bintray {
             vcsTag = "v${project.version}"
             attributes = ['gradle-plugin': 'com.github.jruby-gradle.core:com.github.jruby-gradle:jruby-gradle-core-plugin']
             desc = 'This plugin provides some core dependency resolution for JRuby/Gradle'
-
         }
     }
 }

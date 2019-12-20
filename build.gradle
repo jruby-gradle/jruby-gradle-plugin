@@ -107,9 +107,7 @@ subprojects {
             ideReport.enabled = true
             ideReport.destination = file( "${project.codenarc.reportsDir}/${reportName}.ide.txt")
         }
-
     }
-
 
     idea {
         module {

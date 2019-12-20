@@ -208,6 +208,21 @@ class IvyXmlProxyServerIntegrationSpec extends Specification {
         findFiles ~/^bibtex-ruby-4.4.7.gem$/
     }
 
+    void 'Resolve a transitive dependency which is jruby-specific'() {
+        setup:
+        withBuildFile '''
+        dependencies {
+            something 'rubygems:rubocop:0.77.0'
+        }
+        '''
+
+        when:
+        build()
+
+        then:
+        findFiles ~/^jaro_winkler-1.5.\d+-java.gem$/
+    }
+
     private List<File> findFiles(Pattern pat) {
         new File(projectDir, 'build/something').listFiles(new FilenameFilter() {
             @Override
