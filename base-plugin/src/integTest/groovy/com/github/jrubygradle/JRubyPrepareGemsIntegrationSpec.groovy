@@ -77,6 +77,27 @@ class JRubyPrepareGemsIntegrationSpec extends IntegrationSpecification {
     }
 
     @IgnoreIf({ IntegrationSpecification.OFFLINE })
+    void "Check if selenium-webdriver version gets resolved"() {
+        setup:
+        withPreamble """repositories.ruby.gems()
+            jrubyPrepare.outputDir = '${pathAsUriStr(projectDir)}'.toURI()
+        """
+
+        withDependencies """
+            gems 'rubygems:selenium-webdriver:3.142.6'
+            gems 'rubygems:webdrivers:4.1.3'
+        """
+
+        when:
+        build()
+
+        then:
+        // since we need a version range in the setup the
+        // resolved version here can vary over time
+        new File(projectDir, "gems/selenium-webdriver-3.142.6").exists()
+    }
+
+    @IgnoreIf({ IntegrationSpecification.OFFLINE })
     void "Check that GEM dependencies are locked"() {
         setup:
         File lockFile = new File(projectDir, 'gradle/dependency-locks/gems.lockfile')
