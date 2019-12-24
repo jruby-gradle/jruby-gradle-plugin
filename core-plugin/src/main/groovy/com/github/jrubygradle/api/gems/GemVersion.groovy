@@ -62,6 +62,7 @@ import static com.github.jrubygradle.api.gems.GemVersion.Boundary.OPEN_ENDED
  *
  * @author Christian Meier
  * @author Schalk W. Cronjé
+ * @author Guillaume Grossetie
  *
  * @since 2.0 (Moved here from base plugin where it existed since 0.4.0)
  */
