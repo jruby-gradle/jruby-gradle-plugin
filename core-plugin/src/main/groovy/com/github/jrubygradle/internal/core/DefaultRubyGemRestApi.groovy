@@ -23,6 +23,7 @@
  */
 package com.github.jrubygradle.internal.core
 
+import com.github.jrubygradle.api.core.ApiException
 import com.github.jrubygradle.api.gems.GemInfo
 import com.github.jrubygradle.api.gems.JarDependency
 import com.github.jrubygradle.internal.gems.DefaultGemDependency
@@ -33,6 +34,7 @@ import groovy.transform.CompileStatic
 import groovyx.net.http.HttpBuilder
 import groovyx.net.http.HttpException
 import okhttp3.OkHttpClient
+import org.gradle.util.GradleVersion
 
 import static com.github.jrubygradle.internal.gems.GemToIvy.JAVA_PLATFORM
 import static groovyx.net.http.ContentTypes.JSON
@@ -51,7 +53,7 @@ class DefaultRubyGemRestApi implements com.github.jrubygradle.api.core.RubyGemQu
 
     /** Creates a client from a URI
      *
-     * @param serverUri URI as a String. ONly the scheme plus host
+     * @param serverUri URI as a String. Only the scheme plus host
      * parts should be provided.
      */
     DefaultRubyGemRestApi(final String serverUri) {
@@ -74,12 +76,25 @@ class DefaultRubyGemRestApi implements com.github.jrubygradle.api.core.RubyGemQu
      * @throw {@link com.github.jrubygradle.api.core.ApiException} if a networking error occurred.
      */
     @Override
-    @SuppressWarnings('CatchThrowable')
     List<String> allVersions(String gemName) {
+        allVersions(gemName, false)
+    }
+
+    /**
+     * Return all published versions for a specific GEM
+     *
+     * @param gemName Name of GEM.
+     * @param includePrelease Whether pre-release versions should be included.
+     * @return List of versions. Can be empty if the GEM does not have any versions. Never {@code null}.
+     * @throws {@link ApiException} if a networking or parser error occurs.
+     */
+    @Override
+    @SuppressWarnings('CatchThrowable')
+    List<String> allVersions(String gemName, boolean includePrelease) {
         try {
-            extractVersions(getData(V1, "versions/${gemName}"))
+            extractVersions(getData(V1, "versions/${gemName}"), includePrelease)
         } catch (Throwable e) {
-            throw new com.github.jrubygradle.api.core.ApiException("Count not retrieve list of versions for ${gemName}", e)
+            throw new ApiException("Count not retrieve list of versions for ${gemName}", e)
         }
     }
 
@@ -90,16 +105,33 @@ class DefaultRubyGemRestApi implements com.github.jrubygradle.api.core.RubyGemQu
      * @throw {@link com.github.jrubygradle.api.core.ApiException} if a networking error occurred or the GEM does not exist.
      */
     @Override
-    @SuppressWarnings('CatchThrowable')
     String latestVersion(String gemName) {
+        latestVersion(gemName, false)
+    }
+
+    /**
+     * Return latest published version of GEM.
+     *
+     * @param gemName Name of GEM.
+     * @param allowPrerelease Whether a prereleased version can be considered a latest version.
+     * @return Version of GEM
+     * @throws {@link ApiException} if GEM does not exist.
+     */
+    @Override
+    @SuppressWarnings('CatchThrowable')
+    String latestVersion(String gemName, boolean allowPrerelease) {
         String version
         try {
-            version = extractVersion(getData(V1, "versions/${gemName}/latest"))
+            if (allowPrerelease) {
+                version = allVersions(gemName, allowPrerelease).collect { GradleVersion.version(it) }.max().toString()
+            } else {
+                version = extractVersion(getData(V1, "versions/${gemName}/latest"))
+            }
         } catch (Throwable e) {
-            throw new com.github.jrubygradle.api.core.ApiException("Failed to retrieve latest version of ${gemName}", e)
+            throw new ApiException("Failed to retrieve latest version of ${gemName}", e)
         }
         if (version == 'unknown') {
-            throw new com.github.jrubygradle.api.core.ApiException("Cound not retrieve latest version of ${gemName}. Maybe it does not exist")
+            throw new ApiException("Cound not retrieve latest version of ${gemName}. Maybe it does not exist")
         }
         version
     }
@@ -117,9 +149,9 @@ class DefaultRubyGemRestApi implements com.github.jrubygradle.api.core.RubyGemQu
         try {
             extractMetadata(getData(V2, "rubygems/${gemName}/versions/${gemVersion}"))
         } catch (HttpException e) {
-            throw new com.github.jrubygradle.api.core.ApiException(":${gemName}:${gemVersion} not found", e)
+            throw new ApiException(":${gemName}:${gemVersion} not found", e)
         } catch (Throwable e) {
-            throw new com.github.jrubygradle.api.core.ApiException("Could not obtain information for :${gemName}:${gemVersion}.", e)
+            throw new ApiException("Could not obtain information for :${gemName}:${gemVersion}.", e)
         }
     }
 
@@ -148,8 +180,12 @@ class DefaultRubyGemRestApi implements com.github.jrubygradle.api.core.RubyGemQu
     }
 
     @CompileDynamic
-    private List<String> extractVersions(Object jsonParser) {
-        jsonParser*.number
+    private List<String> extractVersions(Object jsonParser, boolean includePrerelease) {
+        if (includePrerelease) {
+            jsonParser*.number
+        } else {
+            jsonParser.findAll { !it.prerelease }*.number
+        }
     }
 
     @CompileDynamic

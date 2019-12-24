@@ -31,8 +31,8 @@ import org.gradle.api.Action
 import org.gradle.api.Project
 import org.gradle.api.artifacts.repositories.ArtifactRepository
 import org.gradle.api.artifacts.repositories.IvyArtifactRepository
-import org.gradle.api.artifacts.repositories.MavenArtifactRepository
 import org.gradle.util.GradleVersion
+import org.ysb33r.grolifant.api.ClosureUtils
 
 /** Extension which can be added to {@code project.repositories}.
  *
@@ -60,7 +60,31 @@ class RepositoryHandlerExtension {
      * @return Artifact repository.
      */
     ArtifactRepository gems() {
-        bindRepositoryToProxyServer('https://rubygems.org'.toURI(), DEFAULT_GROUP_NAME)
+        bindRepositoryToProxyServer(
+            RUBYGEMS_URI,
+            DEFAULT_GROUP_NAME,
+            new GemRepositoryConfiguration()
+        )
+    }
+
+    /** Create an artifact repository which will use {@link https://rubygems.org} and
+     * associate group {@code rubygems} with it.
+     *
+     * @param cfg GEM repository configuration
+     * @return Artifact repository.
+     */
+    ArtifactRepository gems(@DelegatesTo(GemRepositoryConfiguration) Closure cfg) {
+        bindRepositoryToProxyServer(RUBYGEMS_URI, DEFAULT_GROUP_NAME, cfg)
+    }
+
+    /** Create an artifact repository which will use {@link https://rubygems.org} and
+     * associate group {@code rubygems} with it.
+     *
+     * @param cfg GEM repository configuration
+     * @return Artifact repository.
+     */
+    ArtifactRepository gems(Action<GemRepositoryConfiguration> cfg) {
+        bindRepositoryToProxyServer(RUBYGEMS_URI, DEFAULT_GROUP_NAME, cfg)
     }
 
     /** Create an artifact repository which will use specified URI and
@@ -72,7 +96,33 @@ class RepositoryHandlerExtension {
      * @return Artifact repository.
      */
     ArtifactRepository gems(Object uri) {
-        bindRepositoryToProxyServer(project.uri(uri), DEFAULT_GROUP_NAME)
+        bindRepositoryToProxyServer(project.uri(uri), DEFAULT_GROUP_NAME, new GemRepositoryConfiguration())
+    }
+
+    /** Create an artifact repository which will use specified URI and
+     * associate group {@code rubygems} with it.
+     *
+     * @param uri URI of remote repository that serves up Rubygems. Any object convertible
+     * with {@code project.uri} can be provided.
+     * @param cfg GEM repository configuration
+     *
+     * @return Artifact repository.
+     */
+    ArtifactRepository gems(Object uri, @DelegatesTo(GemRepositoryConfiguration) Closure cfg) {
+        bindRepositoryToProxyServer(project.uri(uri), DEFAULT_GROUP_NAME, cfg)
+    }
+
+    /** Create an artifact repository which will use specified URI and
+     * associate group {@code rubygems} with it.
+     *
+     * @param uri URI of remote repository that serves up Rubygems. Any object convertible
+     * with {@code project.uri} can be provided.
+     * @param cfg GEM repository configuration
+     *
+     * @return Artifact repository.
+     */
+    ArtifactRepository gems(Object uri, Action<GemRepositoryConfiguration> cfg) {
+        bindRepositoryToProxyServer(project.uri(uri), DEFAULT_GROUP_NAME, cfg)
     }
 
     /** Create an artifact repository which will use specified URI and
@@ -84,16 +134,63 @@ class RepositoryHandlerExtension {
      * @return Artifact repository.
      */
     ArtifactRepository gems(String group, Object uri) {
-        bindRepositoryToProxyServer(project.uri(uri), group)
+        bindRepositoryToProxyServer(project.uri(uri), group, new GemRepositoryConfiguration())
+    }
+
+    /** Create an artifact repository which will use specified URI and
+     * associate a specified group with it.
+     *
+     * @param group Group to associate this server with.
+     * @param uri URI of remote repository that serves up Rubygems. Any object convertible
+     * with {@code project.uri} can be provided.
+     * @param cfg GEM repository configuration
+     * @return Artifact repository.
+     */
+    ArtifactRepository gems(String group, Object uri, @DelegatesTo(GemRepositoryConfiguration) Closure cfg) {
+        bindRepositoryToProxyServer(project.uri(uri), group, cfg)
+    }
+
+    /** Create an artifact repository which will use specified URI and
+     * associate a specified group with it.
+     *
+     * @param group Group to associate this server with.
+     * @param uri URI of remote repository that serves up Rubygems. Any object convertible
+     * with {@code project.uri} can be provided.
+     * @param cfg GEM repository configuration
+     * @return Artifact repository.
+     */
+    ArtifactRepository gems(String group, Object uri, Action<GemRepositoryConfiguration> cfg) {
+        bindRepositoryToProxyServer(project.uri(uri), group, cfg)
     }
 
     private ArtifactRepository bindRepositoryToProxyServer(
         URI serverUri,
-        String group
+        String group,
+        GemRepositoryConfiguration cfg
     ) {
-        IvyXmlProxyServer proxy = ivyProxies.registerProxy(serverUri, group)
+        IvyXmlProxyServer proxy = ivyProxies.registerProxy(serverUri, group, cfg)
         project.extensions.getByType(GemResolverStrategy).addGemGroup(group)
         restrictToGems(createIvyRepo(serverUri, proxy.bindAddress), group)
+    }
+
+    private ArtifactRepository bindRepositoryToProxyServer(
+        URI serverUri,
+        String group,
+        @DelegatesTo(GemRepositoryConfiguration) Closure cfg
+    ) {
+        GemRepositoryConfiguration grc = new GemRepositoryConfiguration()
+        ClosureUtils.configureItem(grc, cfg)
+        bindRepositoryToProxyServer(serverUri, group, grc)
+    }
+
+    private ArtifactRepository bindRepositoryToProxyServer(
+        URI serverUri,
+        String group,
+        Action<GemRepositoryConfiguration> cfg
+    ) {
+        GemRepositoryConfiguration grc = new GemRepositoryConfiguration()
+        cfg.execute(grc)
+        bindRepositoryToProxyServer(serverUri, group, grc)
     }
 
     @CompileDynamic
@@ -122,4 +219,5 @@ class RepositoryHandlerExtension {
     private final IvyXmlGlobalProxyRegistry ivyProxies
     private static final boolean HAS_CONTENT_FEATURE = GradleVersion.current() >= GradleVersion.version('5.1')
     private static final boolean HAS_SECURE_PROTOCOL_FEATURE = GradleVersion.current() >= GradleVersion.version('6.0')
+    private static final URI RUBYGEMS_URI = 'https://rubygems.org'.toURI()
 }

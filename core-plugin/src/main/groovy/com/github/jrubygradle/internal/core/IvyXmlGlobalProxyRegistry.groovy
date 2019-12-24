@@ -23,6 +23,7 @@
  */
 package com.github.jrubygradle.internal.core
 
+import com.github.jrubygradle.api.core.GemRepositoryConfiguration
 import groovy.transform.CompileStatic
 import org.gradle.api.Project
 
@@ -54,8 +55,17 @@ class IvyXmlGlobalProxyRegistry {
      * @param group Group name for GEMs that will be fected from the remote.
      * @return Access to a proxy sever. If the server does not exist it will be created.
      */
-    com.github.jrubygradle.api.core.IvyXmlProxyServer registerProxy(URI remoteURI, String group) {
-        com.github.jrubygradle.api.core.IvyXmlProxyServer proxy = getOrCreateServer(remoteURI, group, new File(rootCacheDir, uriHash(remoteURI)))
+    com.github.jrubygradle.api.core.IvyXmlProxyServer registerProxy(
+        URI remoteURI,
+        String group,
+        GemRepositoryConfiguration grc
+    ) {
+        com.github.jrubygradle.api.core.IvyXmlProxyServer proxy = getOrCreateServer(
+            remoteURI,
+            group,
+            new File(rootCacheDir, uriHash(remoteURI)),
+            grc
+        )
         proxy.refreshDependencies = refresh
         proxy
     }
@@ -68,10 +78,11 @@ class IvyXmlGlobalProxyRegistry {
     static private com.github.jrubygradle.api.core.IvyXmlProxyServer getOrCreateServer(
         URI uri,
         String group,
-        File cacheDir
+        File cacheDir,
+        GemRepositoryConfiguration grc
     ) {
         SERVER_MAP.computeIfAbsent(uri, {
-            com.github.jrubygradle.api.core.IvyXmlProxyServer server = createProxyServer(uri, group, cacheDir)
+            com.github.jrubygradle.api.core.IvyXmlProxyServer server = createProxyServer(uri, group, cacheDir, grc)
             server.run()
             server
         })
@@ -80,9 +91,10 @@ class IvyXmlGlobalProxyRegistry {
     static private com.github.jrubygradle.api.core.IvyXmlProxyServer createProxyServer(
         URI uri,
         String group,
-        File cacheDir
+        File cacheDir,
+        GemRepositoryConfiguration grc
     ) {
-        new IvyXmlRatpackProxyServer(cacheDir, uri, group)
+        new IvyXmlRatpackProxyServer(cacheDir, uri, group, grc)
     }
 
     static private final ConcurrentMap<URI, com.github.jrubygradle.api.core.IvyXmlProxyServer> SERVER_MAP = new ConcurrentHashMap<>()

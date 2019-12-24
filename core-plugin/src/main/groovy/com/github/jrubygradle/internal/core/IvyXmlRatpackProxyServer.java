@@ -23,6 +23,7 @@
  */
 package com.github.jrubygradle.internal.core;
 
+import com.github.jrubygradle.api.core.GemRepositoryConfiguration;
 import ratpack.server.RatpackServer;
 
 import java.io.File;
@@ -46,9 +47,15 @@ public class IvyXmlRatpackProxyServer extends AbstractIvyXmlProxyServer {
      * @param cache     Root directory for local Ivy XML cache.
      * @param serverUri URI of remote Rubygems proxy.
      * @param group     Group that will be associated with the Rubygems proxy.
+     * @param grc       Additional configuration regarding remote GEM server
      */
-    public IvyXmlRatpackProxyServer(File cache, URI serverUri, String group) {
-        super(cache, serverUri, group);
+    public IvyXmlRatpackProxyServer(
+            File cache,
+            URI serverUri,
+            String group,
+            GemRepositoryConfiguration grc
+    ) {
+        super(cache, serverUri, group, grc);
     }
 
     /**

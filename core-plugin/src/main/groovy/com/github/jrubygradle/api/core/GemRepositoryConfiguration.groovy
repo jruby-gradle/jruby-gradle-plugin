@@ -23,44 +23,19 @@
  */
 package com.github.jrubygradle.api.core
 
-import com.github.jrubygradle.internal.core.IvyXmlRatpackProxyServer
-import groovyx.net.http.HttpBuilder
-import groovyx.net.http.OkHttpBuilder
-import org.junit.Rule
-import org.junit.rules.TemporaryFolder
-import spock.lang.Specification
+import groovy.transform.CompileStatic
 
-class IvyXmlProxyServerSpec extends Specification {
+/** Additional options for configuring a remote GEM repository
+ *
+ * @author Schalk W. Cronjé
+ *
+ * @since 2.0
+ */
+@CompileStatic
+class GemRepositoryConfiguration {
 
-    public static final String CREDIT_CARD = RubyGemQueryRestApiSpec.CREDIT_CARD
-    public static final String TEST_IVY_PATH = "${CREDIT_CARD}/1.3.2/ivy.xml"
-
-    IvyXmlProxyServer server
-    HttpBuilder httpBuilder
-
-    @Rule
-    TemporaryFolder projectRoot
-
-    void setup() {
-        server = new IvyXmlRatpackProxyServer(
-            projectRoot.root,
-            'https://rubygems.org'.toURI(),
-            'rubygems',
-            new GemRepositoryConfiguration()
-        )
-        server.run()
-        httpBuilder = OkHttpBuilder.configure {
-            request.uri = server.bindAddress
-        }
-    }
-
-    void 'Build an Ivy Xml file from a query to Rubygems'() {
-        when: 'I query the local proxy server'
-        httpBuilder.get {
-            request.uri.path = "/rubygems/${TEST_IVY_PATH}"
-        }
-
-        then: 'The Ivy file should be generated and cached locally'
-        new File(projectRoot.root,TEST_IVY_PATH)
-    }
+    /** Set whether pre-release GEMs should be considered.
+     *
+     */
+    boolean prerelease = false
 }
