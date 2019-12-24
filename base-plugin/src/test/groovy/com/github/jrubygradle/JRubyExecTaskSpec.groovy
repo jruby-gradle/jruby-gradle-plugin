@@ -72,12 +72,12 @@ class JRubyExecTaskSpec extends Specification {
         when:
         project.configure(execTask) {
             jruby.gemConfiguration configurationName
-            jruby.getProposedJRubyVersion newVersion
+            jruby.jrubyVersion newVersion
         }
         project.evaluate()
 
         then:
-        execTask.jruby.jrubyVersion != project.jruby.getProposedJRubyVersion
+        execTask.jruby.jrubyVersion != project.jruby.jrubyVersion
 
         and: "jrubyConfigurationName must point to this new configuration"
         execTask.jruby.getGemConfiguration().name == configurationName

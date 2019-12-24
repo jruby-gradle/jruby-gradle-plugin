@@ -184,12 +184,12 @@ class JRubyExec extends JavaExec implements JRubyAwareTask, JRubyExecSpec {
     /** If it is required that a JRubyExec task needs to be executed with a different version of JRuby that the
      * globally configured one, it can be done by setting it here.
      *
-     * @deprecated Use{@code jruby.getProposedJRubyVersion( )} instead.
+     * @deprecated Use {@code jruby.getJrubyVersion( )} instead.
      *
      */
     @Deprecated
     String getJrubyVersion() {
-        deprecated('Use jruby.getProposedJRubyVersion() rather getProposedJRubyVersion()')
+        deprecated('Use jruby.getJrubyVersion() rather getJrubyVersion()')
         jruby.jrubyVersion
     }
 
