@@ -21,51 +21,36 @@
  * OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
  * WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
-package com.github.jrubygradle
+package com.github.jrubygradle.internal.core
 
-import com.github.jrubygradle.api.core.AbstractJRubyPrepare
-import com.github.jrubygradle.internal.JRubyExecUtils
 import groovy.transform.CompileStatic
-import org.gradle.api.provider.Provider
 
-import java.util.concurrent.Callable
-
-/** Task for preparing a project-local installation of GEMs & JARs.
+/** Provides some metadata about this plugin
  *
  * @author Schalk W. Cronjé
- * @author R Tyler Croy
- * @author Christian Meier
+ *
+ * @since 2.0.0
+ *
  */
 @CompileStatic
-class JRubyPrepare extends AbstractJRubyPrepare {
+class PluginMetadata {
 
-    JRubyPrepare() {
-        super()
-        this.jruby = extensions.create(JRubyPluginExtension.NAME, JRubyPluginExtension, this)
-    }
-
-    /** Location of {@code jruby-complete} JAR.
+    /** Plugin version
      *
-     * @return Path on local filesystem
+     * @return Version of this plugin.
      */
-    @Override
-    protected Provider<File> getJrubyJarLocation() {
-        project.provider({ JRubyPluginExtension jrubyExt ->
-            JRubyExecUtils.jrubyJar(jrubyExt.jrubyConfiguration)
-        }.curry(this.jruby) as Callable<File>)
+    static String version() {
+        METADATA['version']
     }
 
-    /** Version of JRuby to be used.
-     *
-     * This method should not resolve any files to obtain the version.
-     *
-     * @return Intended version of JRuby.
-     */
-    @Override
-    protected String getJrubyVersion() {
-        jruby.jrubyVersion
+    private static Map<String,String> loadProperties() {
+        final String location = 'META-INF/jruby-gradle/com.jrubygradle.core-plugin.version.properties'
+        final Properties props = new Properties()
+        PluginMetadata.classLoader.getResourceAsStream(location).withCloseable { strm ->
+            props.load(strm)
+        }
+        props as Map<String,String>
     }
 
-    private final JRubyPluginExtension jruby
+    private static final Map<String,String> METADATA = loadProperties()
 }
-
