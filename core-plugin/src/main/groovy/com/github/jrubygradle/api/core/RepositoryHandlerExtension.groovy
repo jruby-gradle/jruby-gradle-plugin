@@ -87,25 +87,6 @@ class RepositoryHandlerExtension {
         bindRepositoryToProxyServer(project.uri(uri), group)
     }
 
-    /** Adds the legacy Torquebox Maven proxy to {@code rubygems.org}.
-     *
-     * Please note that this proxy is effectively unmaintained an no longer supported
-     * by the original creators.
-     *
-     * @return Maven artifact repository
-     */
-    MavenArtifactRepository torquebox() {
-        Action mvnConfigurator = new Action<MavenArtifactRepository>() {
-            void execute(MavenArtifactRepository mvn) {
-                mvn.url = 'http://rubygems-proxy.torquebox.org/releases'.toURI()
-            }
-        }
-        (MavenArtifactRepository) restrictToGems(
-            this.project.repositories.maven(mvnConfigurator),
-            DEFAULT_GROUP_NAME
-        )
-    }
-
     private ArtifactRepository bindRepositoryToProxyServer(
         URI serverUri,
         String group
