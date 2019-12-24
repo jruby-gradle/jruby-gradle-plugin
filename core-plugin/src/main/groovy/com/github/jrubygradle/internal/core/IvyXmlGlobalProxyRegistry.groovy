@@ -44,7 +44,7 @@ class IvyXmlGlobalProxyRegistry {
      * @param project Associated project.
      */
     IvyXmlGlobalProxyRegistry(Project project) {
-        rootCacheDir = new File(project.gradle.gradleUserHomeDir, 'rubygems-ivyxml-cache')
+        rootCacheDir = new File(project.gradle.gradleUserHomeDir, "rubygems-ivyxml-cache/${PluginMetadata.version()}")
         refresh = project.gradle.startParameter.refreshDependencies
     }
 

@@ -147,7 +147,7 @@ class GemToIvy {
         writer.toString()
     }
 
-    /** Writes the SHA1 checksum of the {@code ivy.xmnl} file.
+    /** Writes the SHA1 checksum of the {@code ivy.xml} file.
      *
      * @param ivyXml Fle containing the {@code ivy.xml} content/
      * @return Checksum file.

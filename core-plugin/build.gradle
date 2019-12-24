@@ -39,4 +39,12 @@ bintray {
         }
     }
 }
+
+
+processResources {
+    filesMatching '**/com.jrubygradle.core-plugin.version.properties', {
+        expand VERSION : project.version
+    }
+}
+
 bintrayUpload.dependsOn assemble

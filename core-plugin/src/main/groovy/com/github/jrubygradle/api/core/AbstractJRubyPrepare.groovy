@@ -29,10 +29,11 @@ import groovy.transform.CompileStatic
 import org.gradle.api.DefaultTask
 import org.gradle.api.artifacts.Configuration
 import org.gradle.api.file.FileCollection
+import org.gradle.api.provider.Provider
+import org.gradle.api.tasks.Input
 import org.gradle.api.tasks.InputFiles
 import org.gradle.api.tasks.Internal
 import org.gradle.api.tasks.Optional
-import org.gradle.api.tasks.OutputFile
 import org.gradle.api.tasks.TaskAction
 
 import static com.github.jrubygradle.api.gems.GemOverwriteAction.SKIP
@@ -102,13 +103,22 @@ abstract class AbstractJRubyPrepare extends DefaultTask implements JRubyAwareTas
      *
      * @return Path on local filesystem
      */
-    @OutputFile
-    abstract protected File getJrubyJarLocation()
+    @Internal
+    abstract protected Provider<File> getJrubyJarLocation()
+
+    /** Version of JRuby to be used.
+     *
+     * This method should not resolve any files to obtain the version.
+     *
+     * @return Intended version of JRuby.
+     */
+    @Input
+    abstract protected String getJrubyVersion()
 
     @TaskAction
     void exec() {
         File out = getOutputDir()
-        File jrubyJar = jrubyJarLocation
+        File jrubyJar = jrubyJarLocation.get()
         extractGems(project, jrubyJar, gemsAsFileCollection(), out, SKIP)
 
         dependencies.findAll {
