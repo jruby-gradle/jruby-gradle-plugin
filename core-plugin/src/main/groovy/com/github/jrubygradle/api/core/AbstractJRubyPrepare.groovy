@@ -110,10 +110,12 @@ abstract class AbstractJRubyPrepare extends DefaultTask implements JRubyAwareTas
      *
      * This method should not resolve any files to obtain the version.
      *
-     * @return Intended version of JRuby.
+     * @return Intended version of JRuby. Can be {@code null} if the version
+     * is indirectly inferred via configuration.
      */
     @Input
-    abstract protected String getJrubyVersion()
+    @Optional
+    abstract protected String getProposedJRubyVersion()
 
     @TaskAction
     void exec() {

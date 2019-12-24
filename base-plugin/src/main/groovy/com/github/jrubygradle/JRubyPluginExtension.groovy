@@ -111,7 +111,7 @@ class JRubyPluginExtension extends AbstractCombinedProjectTaskExtension {
      */
     @Deprecated
     String getDefaultVersion() {
-        deprecated('Use getJrubyVersion() rather than getDefaultVersion()')
+        deprecated('Use getProposedJRubyVersion() rather than getDefaultVersion()')
         getJrubyVersion()
     }
 

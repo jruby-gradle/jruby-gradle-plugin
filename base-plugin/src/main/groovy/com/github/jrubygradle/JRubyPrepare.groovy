@@ -62,7 +62,7 @@ class JRubyPrepare extends AbstractJRubyPrepare {
      * @return Intended version of JRuby.
      */
     @Override
-    protected String getJrubyVersion() {
+    protected String getProposedJRubyVersion() {
         jruby.jrubyVersion
     }
 
