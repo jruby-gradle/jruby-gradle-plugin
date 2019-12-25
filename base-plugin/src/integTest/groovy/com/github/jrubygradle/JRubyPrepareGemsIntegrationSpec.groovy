@@ -30,8 +30,9 @@ import spock.lang.Issue
 
 /**
  * @author Schalk W. Cronjé.
+ * @author Guillaume Grossetie
  */
-@IgnoreIf({System.getProperty('TESTS_ARE_OFFLINE')})
+@IgnoreIf({ IntegrationSpecification.OFFLINE })
 class JRubyPrepareGemsIntegrationSpec extends IntegrationSpecification {
 
     static final String DEFAULT_TASK_NAME = 'jrubyPrepare'
@@ -54,7 +55,6 @@ class JRubyPrepareGemsIntegrationSpec extends IntegrationSpecification {
         new File(projectDir, "gems/slim-${slimVersion}").exists()
     }
 
-    @IgnoreIf({ IntegrationSpecification.OFFLINE })
     void "Check if rack version gets resolved"() {
         setup:
         withPreamble """repositories.ruby.gems()
@@ -76,7 +76,6 @@ class JRubyPrepareGemsIntegrationSpec extends IntegrationSpecification {
         new File(projectDir, "gems/rack-1.6.12").exists()
     }
 
-    @IgnoreIf({ IntegrationSpecification.OFFLINE })
     void "Check if selenium-webdriver version gets resolved"() {
         setup:
         withPreamble """repositories.ruby.gems()
@@ -97,7 +96,6 @@ class JRubyPrepareGemsIntegrationSpec extends IntegrationSpecification {
         new File(projectDir, "gems/selenium-webdriver-3.142.6").exists()
     }
 
-    @IgnoreIf({ IntegrationSpecification.OFFLINE })
     void "Check that GEM dependencies are locked"() {
         setup:
         File lockFile = new File(projectDir, 'gradle/dependency-locks/gems.lockfile')
@@ -139,7 +137,6 @@ rubygems:tilt:2.0.9
         new File(projectDir, "gems/rack-1.6.10").exists()
     }
 
-    @IgnoreIf({ IntegrationSpecification.OFFLINE })
     void "Check if prerelease gem gets resolved"() {
         setup:
         withDefaultRepositories()
@@ -156,7 +153,6 @@ rubygems:tilt:2.0.9
     }
 
     @Issue('https://github.com/jruby-gradle/jruby-gradle-plugin/issues/341')
-    @IgnoreIf({ IntegrationSpecification.OFFLINE })
     void "Make an install-time gem dependency available"() {
         setup:
         withRubyGemsRepository()

@@ -30,6 +30,7 @@ import org.junit.rules.TemporaryFolder
 import spock.lang.IgnoreIf
 import spock.lang.Issue
 import spock.lang.Specification
+import spock.lang.Unroll
 
 import java.util.regex.Pattern
 
@@ -185,7 +186,7 @@ class IvyXmlProxyServerIntegrationSpec extends Specification {
         build()
 
         then:
-        findFiles (~/^asciidoctor-pdf.*\.gem$/).size() == 3
+        findFiles(~/^asciidoctor-pdf.*\.gem$/).size() == 3
     }
 
     @Issue('https://github.com/jruby-gradle/jruby-gradle-plugin/issues/380')
@@ -243,14 +244,16 @@ class IvyXmlProxyServerIntegrationSpec extends Specification {
             .build()
     }
 
-    private void withBuildFile(String content) {
+    private void withBuildFile(String content, boolean prerelease = false) {
         buildFile.text = """
         plugins {
             id 'com.github.jruby-gradle.core'
         }
 
         repositories {
-            ruby.gems()
+            ruby.gems {
+                prerelease = ${prerelease}
+            }
         }
 
         configurations {

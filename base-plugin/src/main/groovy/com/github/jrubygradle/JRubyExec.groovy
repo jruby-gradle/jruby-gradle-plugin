@@ -26,6 +26,7 @@ package com.github.jrubygradle
 import com.github.jrubygradle.api.core.JRubyAwareTask
 import com.github.jrubygradle.api.core.JRubyExecSpec
 import com.github.jrubygradle.internal.JRubyExecUtils
+import groovy.transform.CompileStatic
 import org.gradle.api.Task
 import org.gradle.api.artifacts.Configuration
 import org.gradle.api.provider.Provider
@@ -48,6 +49,7 @@ import static org.ysb33r.grolifant.api.StringUtils.stringize
  * @author Christian Meier
  *
  */
+@CompileStatic
 class JRubyExec extends JavaExec implements JRubyAwareTask, JRubyExecSpec {
 
     public static final String MAIN_CLASS = 'org.jruby.Main'
@@ -65,13 +67,13 @@ class JRubyExec extends JavaExec implements JRubyAwareTask, JRubyExecSpec {
         super.setMain MAIN_CLASS
         this.jruby = extensions.create(JRubyPluginExtension.NAME, JRubyPluginExtension, this)
 
-        inputs.property 'jrubyver', {
+        inputs.property 'jrubyver', { JRubyPluginExtension jruby ->
             jruby.jrubyVersion
-        }
+        }.curry(this.jruby)
 
-        inputs.property 'gemConfiguration', {
+        inputs.property 'gemConfiguration', { JRubyPluginExtension jruby ->
             jruby.gemConfiguration
-        }
+        }.curry(this.jruby)
 
         if (GradleVersion.current() >= GradleVersion.version('4.10')) {
             dependsOn(project.provider({ JRubyPluginExtension jpe ->
@@ -85,7 +87,7 @@ class JRubyExec extends JavaExec implements JRubyAwareTask, JRubyExecSpec {
     }
 
     /** Script to execute.
-     * @return The path to the script (or nul if not set)
+     * @return The path to the script (or {@code null} if not set)
      */
     @Optional
     @Input
@@ -184,12 +186,12 @@ class JRubyExec extends JavaExec implements JRubyAwareTask, JRubyExecSpec {
     /** If it is required that a JRubyExec task needs to be executed with a different version of JRuby that the
      * globally configured one, it can be done by setting it here.
      *
-     * @deprecated Use{@code jruby.getProposedJRubyVersion( )} instead.
+     * @deprecated Use {@code jruby.getJrubyVersion( )} instead.
      *
      */
     @Deprecated
     String getJrubyVersion() {
-        deprecated('Use jruby.getProposedJRubyVersion() rather getProposedJRubyVersion()')
+        deprecated('Use jruby.getJrubyVersion() rather getJrubyVersion()')
         jruby.jrubyVersion
     }
 
