@@ -21,21 +21,32 @@
  * OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
  * WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
-package com.github.jrubygradle.internal.gems
+package com.github.jrubygradle.api.core
 
-import com.github.jrubygradle.api.gems.JarDependency
-import groovy.transform.CompileStatic
+import org.gradle.api.Project
+import org.gradle.testfixtures.ProjectBuilder
+import spock.lang.Specification
 
-/** Defining a JAR dependency.
- *
- * @author Schalk W. Cronjé
- *
- * @since 2.0
- */
-@CompileStatic
-class DefaultJarDependency extends DefaultGemDependency implements JarDependency {
-    /** Name of group / organisation.
-     *
-     */
-    String group
+
+class RepositoryHandlerExtensionSpec extends Specification {
+
+    Project project = ProjectBuilder.builder().build()
+
+    void 'Add Maven repository'() {
+        when:
+        project.allprojects {
+            apply plugin : JRubyCorePlugin
+
+            repositories {
+                ruby {
+                    mavengems()
+                    mavengems('https://goo1')
+                    mavengems('goo2','https://goo2')
+                }
+            }
+        }
+
+        then:
+        project.repositories.size() == 3
+    }
 }

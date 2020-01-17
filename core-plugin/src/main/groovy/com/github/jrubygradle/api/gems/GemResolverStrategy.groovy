@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014-2019, R. Tyler Croy <rtyler@brokenco.de>,
+ * Copyright (c) 2014-2020, R. Tyler Croy <rtyler@brokenco.de>,
  *     Schalk Cronje <ysb33r@gmail.com>, Christian Meier, Lookout, Inc.
  *
  * Permission is hereby granted, free of charge, to any person obtaining
@@ -102,7 +102,7 @@ class GemResolverStrategy {
 
     /** Whether the GEM version resolving strategy should be applied for a specific module.
      *
-     * In most cases this will alsways be {@code true} unless a specific rule excludes it.
+     * In most cases this will always be {@code true} unless a specific rule excludes it.
      *
      * @param mvs Module version selector
      * @return Whether the Bundler-like version selector atregty may be applied
