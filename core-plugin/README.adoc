@@ -32,9 +32,41 @@ plugins {
 repositories {
     ruby.mavengems() // <1>
     ruby.mavengems('https://foo.bar') // <2>
-    ruby.mavengems('https://foo.bar', 'acme-rubygems') // <3>
+    ruby.mavengems('acme-rubygems', 'https://foo.bar') // <3>
+
+    ruby.gems() // <4>
+    ruby.gems { // <5>
+        prerelease = true
+    }
+    ruby.gems('https://foo.bar') // <6>
+    ruby.gems('acme-rubygems', 'https://foo.bar') // <7>
 }
 ----
 <1> Adds a Maven repository that uses the one official supported by the JRuby group. In order to use this, GEM dependencies should all be placed in the `rubygems` group.
 <2> Adds a custom Maven repository that will proxy a GEMs repository. In order to use this, GEM dependencies should all be placed in the `rubygems` group.
 <3> Adds a custom Maven repository that will proxy a GEMs repository, but allocate a custom dedicated Maven group. This is useful where you would want to use both the public repository and your own, but you want to save network query traffic, by only query repositories where you know the dependencies should exist.
+<4> Proxy rubygems.org directly and use `rubygems` as the Maven coordinate group.
+<5> Proxy rubygems.org directly and allow prerelease GEMs to be considered. Use `rubygems` as the Maven coordinate group.
+<6> Proxy a custom rubygems repository.
+<7> Proxy a custom rubygems repository and assign a custom Maven coordinate group.
+
+== Advanced
+
+=== Customising GEM resolving
+
+By default the `rubygems` configuration and others added via `ruby.mavengems()` and `ruby.gems()` will have additional resolving strategies applied that mimicks GEM behaviour rather then Gradle behaviour. It is possible to customise this behaviour.
+
+.build.gradle
+[source,groovy]
+----
+gemResolverStrategy {
+  excludeConfigurations 'foo', 'bar'  // <1>
+  excludeModule 'foo.*' // <2>
+  excludeModule 'foo.*', /1\.2.*/ // <3>
+  useGemVersionResolver 'gems2'
+}
+----
+<1> Exclude configurations `foo` and `bar` from being considered for GEM resolver strategies.
+<2> Exclude module that matches regular expression from GEM resolver strategies.
+<3> Exclude module and version that matches regular expression from GEM resolver strategies.
+<4> Apply GEM resolver strategies to a specific configuration.
