@@ -13,3 +13,28 @@ This plugin offers the following functionality:
 === Compatibility
 
 This plugin requires link:http://gradle.org[Gradle] 4.3 or better
+
+=== Installing
+
+.build.gradle
+[source, groovy]
+----
+plugins {
+  id 'com.github.jruby-gradle.core' version 'VERSION-OF-PLUGIN'
+}
+----
+
+=== Adding repositories
+
+.build.gradle
+[source,groovy]
+----
+repositories {
+    ruby.mavengems() // <1>
+    ruby.mavengems('https://foo.bar') // <2>
+    ruby.mavengems('https://foo.bar', 'acme-rubygems') // <3>
+}
+----
+<1> Adds a Maven repository that uses the one official supported by the JRuby group. In order to use this, GEM dependencies should all be placed in the `rubygems` group.
+<2> Adds a custom Maven repository that will proxy a GEMs repository. In order to use this, GEM dependencies should all be placed in the `rubygems` group.
+<3> Adds a custom Maven repository that will proxy a GEMs repository, but allocate a custom dedicated Maven group. This is useful where you would want to use both the public repository and your own, but you want to save network query traffic, by only query repositories where you know the dependencies should exist.

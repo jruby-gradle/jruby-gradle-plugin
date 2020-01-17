@@ -31,6 +31,7 @@ import org.gradle.api.Action
 import org.gradle.api.Project
 import org.gradle.api.artifacts.repositories.ArtifactRepository
 import org.gradle.api.artifacts.repositories.IvyArtifactRepository
+import org.gradle.api.artifacts.repositories.MavenArtifactRepository
 import org.gradle.util.GradleVersion
 import org.ysb33r.grolifant.api.ClosureUtils
 
@@ -163,6 +164,56 @@ class RepositoryHandlerExtension {
         bindRepositoryToProxyServer(project.uri(uri), group, cfg)
     }
 
+    /** Adds the Maven-GEMs proxy that is supported by the JRuby group.
+     *
+     * For supporting Gradle versions, this repository will only be consulted for artifacts that are in the
+     * {@code rubygems} group.
+     *
+     * @return Maven repository
+     */
+    MavenArtifactRepository mavengems() {
+        bindToMavenRepository(MAVENGEMS_URI, DEFAULT_GROUP_NAME)
+    }
+
+    /** Adds a remote Maven-GEMs proxy.
+     *
+     * For supporting Gradle versions, this repository will only be consulted for artifacts that are in the
+     * {@code rubygems} group.
+     *
+     * @param uri Remote Maven-GEMs proxy
+     * @return Maven repository
+     */
+    MavenArtifactRepository mavengems(Object uri) {
+        bindToMavenRepository(project.uri(uri), DEFAULT_GROUP_NAME)
+    }
+
+    /**  Adds a remote Maven-GEMs proxy anbd allocate a dedicated group for it.
+     *
+     * For supporting Gradle versions, this repository will only be consulted for artifacts that are in the
+     * specified group.
+     *
+     * @param group Maven group name
+     * @param uri Remote Maven-GEMs proxy
+     * @return Maven repository
+     */
+    MavenArtifactRepository mavengems(String group, Object uri) {
+        bindToMavenRepository(project.uri(uri), group)
+    }
+
+    private MavenArtifactRepository bindToMavenRepository(
+        URI serverUri,
+        String group
+    ) {
+        MavenArtifactRepository repo = project.repositories.maven(new Action<MavenArtifactRepository>() {
+            @Override
+            void execute(MavenArtifactRepository mvn) {
+                mvn.url = serverUri
+            }
+        })
+        restrictToGems(repo, group)
+        repo
+    }
+
     private ArtifactRepository bindRepositoryToProxyServer(
         URI serverUri,
         String group,
@@ -220,4 +271,5 @@ class RepositoryHandlerExtension {
     private static final boolean HAS_CONTENT_FEATURE = GradleVersion.current() >= GradleVersion.version('5.1')
     private static final boolean HAS_SECURE_PROTOCOL_FEATURE = GradleVersion.current() >= GradleVersion.version('6.0')
     private static final URI RUBYGEMS_URI = 'https://rubygems.org'.toURI()
+    private static final URI MAVENGEMS_URI = 'https://mavengems.jruby.org'.toURI()
 }
