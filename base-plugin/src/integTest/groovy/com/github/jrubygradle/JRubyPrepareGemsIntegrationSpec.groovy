@@ -73,7 +73,7 @@ class JRubyPrepareGemsIntegrationSpec extends IntegrationSpecification {
         then:
         // since we need a version range in the setup the
         // resolved version here can vary over time
-        new File(projectDir, "gems/rack-1.6.12").exists()
+        new File(projectDir, "gems/rack-1.6.13").exists()
     }
 
     void "Check if selenium-webdriver version gets resolved"() {

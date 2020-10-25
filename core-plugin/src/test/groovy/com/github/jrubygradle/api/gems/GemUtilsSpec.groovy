@@ -28,6 +28,7 @@ import com.github.jrubygradle.api.gems.GemUtils
 import org.gradle.api.Project
 import org.gradle.api.file.DuplicateFileCopyingException
 import org.gradle.testfixtures.ProjectBuilder
+import org.ysb33r.grolifant.api.core.ProjectOperations
 import spock.lang.Specification
 
 import static com.github.jrubygradle.api.gems.GemOverwriteAction.FAIL
@@ -46,6 +47,7 @@ class GemUtilsSpec extends Specification {
 
     void setup() {
         project = ProjectBuilder.builder().build()
+        ProjectOperations.maybeCreateExtension(project)
         src = project.file('src')
         dest = project.file('dest')
         fakeGem = new File(src, 'gems/mygem-1.0')

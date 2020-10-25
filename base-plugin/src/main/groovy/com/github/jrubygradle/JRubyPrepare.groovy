@@ -42,6 +42,9 @@ class JRubyPrepare extends AbstractJRubyPrepare {
     JRubyPrepare() {
         super()
         this.jruby = extensions.create(JRubyPluginExtension.NAME, JRubyPluginExtension, this)
+        this.jrubyJarLocation = project.provider({ JRubyPluginExtension jrubyExt ->
+            JRubyExecUtils.jrubyJar(jrubyExt.jrubyConfiguration)
+        }.curry(this.jruby) as Callable<File>)
     }
 
     /** Location of {@code jruby-complete} JAR.
@@ -50,9 +53,7 @@ class JRubyPrepare extends AbstractJRubyPrepare {
      */
     @Override
     protected Provider<File> getJrubyJarLocation() {
-        project.provider({ JRubyPluginExtension jrubyExt ->
-            JRubyExecUtils.jrubyJar(jrubyExt.jrubyConfiguration)
-        }.curry(this.jruby) as Callable<File>)
+        this.jrubyJarLocation
     }
 
     /** Version of JRuby to be used.
@@ -67,5 +68,6 @@ class JRubyPrepare extends AbstractJRubyPrepare {
     }
 
     private final JRubyPluginExtension jruby
+    private final Provider<File> jrubyJarLocation
 }
 

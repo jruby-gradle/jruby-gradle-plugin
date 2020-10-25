@@ -29,11 +29,15 @@ import groovy.transform.CompileDynamic
 import groovy.transform.CompileStatic
 import org.gradle.api.Action
 import org.gradle.api.Project
+import org.gradle.api.artifacts.dsl.RepositoryHandler
 import org.gradle.api.artifacts.repositories.ArtifactRepository
 import org.gradle.api.artifacts.repositories.IvyArtifactRepository
 import org.gradle.api.artifacts.repositories.MavenArtifactRepository
+import org.gradle.api.plugins.ExtensionContainer
 import org.gradle.util.GradleVersion
-import org.ysb33r.grolifant.api.ClosureUtils
+import org.ysb33r.grolifant.api.v4.ClosureUtils
+
+import static org.ysb33r.grolifant.api.v4.UriUtils.urize
 
 /** Extension which can be added to {@code project.repositories}.
  *
@@ -51,11 +55,12 @@ class RepositoryHandlerExtension {
      * @param project Gradle project.
      */
     RepositoryHandlerExtension(final Project project) {
-        this.project = project
+        this.extensions = project.extensions
+        this.repositories = project.repositories
         this.ivyProxies = new IvyXmlGlobalProxyRegistry(project)
     }
 
-    /** Create an artifact repository which will use {@link https://rubygems.org} and
+    /** Create an artifact repository which will use https://rubygems.org and
      * associate group {@code rubygems} with it.
      *
      * @return Artifact repository.
@@ -68,7 +73,7 @@ class RepositoryHandlerExtension {
         )
     }
 
-    /** Create an artifact repository which will use {@link https://rubygems.org} and
+    /** Create an artifact repository which will use https://rubygems.org and
      * associate group {@code rubygems} with it.
      *
      * @param cfg GEM repository configuration
@@ -78,7 +83,7 @@ class RepositoryHandlerExtension {
         bindRepositoryToProxyServer(RUBYGEMS_URI, DEFAULT_GROUP_NAME, cfg)
     }
 
-    /** Create an artifact repository which will use {@link https://rubygems.org} and
+    /** Create an artifact repository which will use https://rubygems.org and
      * associate group {@code rubygems} with it.
      *
      * @param cfg GEM repository configuration
@@ -97,7 +102,7 @@ class RepositoryHandlerExtension {
      * @return Artifact repository.
      */
     ArtifactRepository gems(Object uri) {
-        bindRepositoryToProxyServer(project.uri(uri), DEFAULT_GROUP_NAME, new GemRepositoryConfiguration())
+        bindRepositoryToProxyServer(urize(uri), DEFAULT_GROUP_NAME, new GemRepositoryConfiguration())
     }
 
     /** Create an artifact repository which will use specified URI and
@@ -110,7 +115,7 @@ class RepositoryHandlerExtension {
      * @return Artifact repository.
      */
     ArtifactRepository gems(Object uri, @DelegatesTo(GemRepositoryConfiguration) Closure cfg) {
-        bindRepositoryToProxyServer(project.uri(uri), DEFAULT_GROUP_NAME, cfg)
+        bindRepositoryToProxyServer(urize(uri), DEFAULT_GROUP_NAME, cfg)
     }
 
     /** Create an artifact repository which will use specified URI and
@@ -123,7 +128,7 @@ class RepositoryHandlerExtension {
      * @return Artifact repository.
      */
     ArtifactRepository gems(Object uri, Action<GemRepositoryConfiguration> cfg) {
-        bindRepositoryToProxyServer(project.uri(uri), DEFAULT_GROUP_NAME, cfg)
+        bindRepositoryToProxyServer(urize(uri), DEFAULT_GROUP_NAME, cfg)
     }
 
     /** Create an artifact repository which will use specified URI and
@@ -135,7 +140,7 @@ class RepositoryHandlerExtension {
      * @return Artifact repository.
      */
     ArtifactRepository gems(String group, Object uri) {
-        bindRepositoryToProxyServer(project.uri(uri), group, new GemRepositoryConfiguration())
+        bindRepositoryToProxyServer(urize(uri), group, new GemRepositoryConfiguration())
     }
 
     /** Create an artifact repository which will use specified URI and
@@ -148,7 +153,7 @@ class RepositoryHandlerExtension {
      * @return Artifact repository.
      */
     ArtifactRepository gems(String group, Object uri, @DelegatesTo(GemRepositoryConfiguration) Closure cfg) {
-        bindRepositoryToProxyServer(project.uri(uri), group, cfg)
+        bindRepositoryToProxyServer(urize(uri), group, cfg)
     }
 
     /** Create an artifact repository which will use specified URI and
@@ -161,7 +166,7 @@ class RepositoryHandlerExtension {
      * @return Artifact repository.
      */
     ArtifactRepository gems(String group, Object uri, Action<GemRepositoryConfiguration> cfg) {
-        bindRepositoryToProxyServer(project.uri(uri), group, cfg)
+        bindRepositoryToProxyServer(urize(uri), group, cfg)
     }
 
     /** Adds the Maven-GEMs proxy that is supported by the JRuby group.
@@ -184,7 +189,7 @@ class RepositoryHandlerExtension {
      * @return Maven repository
      */
     MavenArtifactRepository mavengems(Object uri) {
-        bindToMavenRepository(project.uri(uri), DEFAULT_GROUP_NAME)
+        bindToMavenRepository(urize(uri), DEFAULT_GROUP_NAME)
     }
 
     /**  Adds a remote Maven-GEMs proxy anbd allocate a dedicated group for it.
@@ -197,14 +202,14 @@ class RepositoryHandlerExtension {
      * @return Maven repository
      */
     MavenArtifactRepository mavengems(String group, Object uri) {
-        bindToMavenRepository(project.uri(uri), group)
+        bindToMavenRepository(urize(uri), group)
     }
 
     private MavenArtifactRepository bindToMavenRepository(
         URI serverUri,
         String group
     ) {
-        MavenArtifactRepository repo = project.repositories.maven(new Action<MavenArtifactRepository>() {
+        MavenArtifactRepository repo = repositories.maven(new Action<MavenArtifactRepository>() {
             @Override
             void execute(MavenArtifactRepository mvn) {
                 mvn.url = serverUri
@@ -220,7 +225,7 @@ class RepositoryHandlerExtension {
         GemRepositoryConfiguration cfg
     ) {
         IvyXmlProxyServer proxy = ivyProxies.registerProxy(serverUri, group, cfg)
-        project.extensions.getByType(GemResolverStrategy).addGemGroup(group)
+        extensions.getByType(GemResolverStrategy).addGemGroup(group)
         restrictToGems(createIvyRepo(serverUri, proxy.bindAddress), group)
     }
 
@@ -246,7 +251,7 @@ class RepositoryHandlerExtension {
 
     @CompileDynamic
     private IvyArtifactRepository createIvyRepo(URI server, URI bindAddress) {
-        this.project.repositories.ivy {
+        repositories.ivy {
             artifactPattern "${server}/downloads/[artifact]-[revision](-[classifier]).gem"
             ivyPattern "${bindAddress}/[organisation]/[module]/[revision]/ivy.xml"
 
@@ -266,8 +271,9 @@ class RepositoryHandlerExtension {
         repo
     }
 
-    private final Project project
     private final IvyXmlGlobalProxyRegistry ivyProxies
+    private final ExtensionContainer extensions
+    private final RepositoryHandler repositories
     private static final boolean HAS_CONTENT_FEATURE = GradleVersion.current() >= GradleVersion.version('5.1')
     private static final boolean HAS_SECURE_PROTOCOL_FEATURE = GradleVersion.current() >= GradleVersion.version('6.0')
     private static final URI RUBYGEMS_URI = 'https://rubygems.org'.toURI()

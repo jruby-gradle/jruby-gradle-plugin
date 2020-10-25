@@ -227,7 +227,7 @@ class JRubyJarTestKitSpec extends IntegrationSpecification {
 
     private BuildResult build(String taskName, String... additionalTasks) {
         writeBuildFile()
-        List<String> tasks = ['-i', taskName]
+        List<String> tasks = ['-i', '-s', taskName]
         tasks.addAll(additionalTasks)
         gradleRunner(tasks).build()
     }
