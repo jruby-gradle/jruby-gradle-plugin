@@ -21,21 +21,36 @@
  * OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
  * WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
-package com.github.jrubygradle.internal.gems
+package com.github.jrubygradle.internal.core
 
-import com.github.jrubygradle.api.gems.JarDependency
 import groovy.transform.CompileStatic
 
-/** Defining a JAR dependency.
+/** Provides some metadata about this plugin
  *
  * @author Schalk W. Cronjé
  *
- * @since 2.0
+ * @since 2.0.0
+ *
  */
 @CompileStatic
-class DefaultJarDependency extends DefaultGemDependency implements JarDependency {
-    /** Name of group / organisation.
+class PluginMetadata {
+
+    /** Plugin version
      *
+     * @return Version of this plugin.
      */
-    String group
+    static String version() {
+        METADATA['version']
+    }
+
+    private static Map<String,String> loadProperties() {
+        final String location = 'META-INF/jruby-gradle/com.jrubygradle.core-plugin.version.properties'
+        final Properties props = new Properties()
+        PluginMetadata.classLoader.getResourceAsStream(location).withCloseable { strm ->
+            props.load(strm)
+        }
+        props as Map<String,String>
+    }
+
+    private static final Map<String,String> METADATA = loadProperties()
 }

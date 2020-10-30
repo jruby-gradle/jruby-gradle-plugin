@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014-2019, R. Tyler Croy <rtyler@brokenco.de>,
+ * Copyright (c) 2014-2020, R. Tyler Croy <rtyler@brokenco.de>,
  *     Schalk Cronje <ysb33r@gmail.com>, Christian Meier, Lookout, Inc.
  *
  * Permission is hereby granted, free of charge, to any person obtaining
@@ -24,20 +24,23 @@
 package com.github.jrubygradle
 
 import com.github.jrubygradle.testhelper.IntegrationSpecification
+import spock.lang.IgnoreIf
 
 /**
  * @author Schalk W. Cronjé.
  * @author Christian Meier
  */
+@IgnoreIf({ IntegrationSpecification.OFFLINE })
 class JRubyPrepareJarsIntegrationSpec extends IntegrationSpecification {
 
     def "Check that default 'jrubyPrepare' uses the correct directory for the jars"() {
         given:
+        String testVer = testProperties.dropwizardMetricsCoreVersion
         buildFile.text = """
-            ${projectWithLocalRepo}
+            ${projectWithRubyGemsRepo}
 
             dependencies {
-                gems 'io.dropwizard.metrics:metrics-core:3.1.0'
+                gems "io.dropwizard.metrics:metrics-core:${testVer}"
             }                
         """
 
@@ -45,7 +48,11 @@ class JRubyPrepareJarsIntegrationSpec extends IntegrationSpecification {
         gradleRunner('jrubyPrepare', '-i').build()
 
         then:
-        new File(projectDir, 'build/.gems/Jars.lock').text.trim() == 'io.dropwizard.metrics:metrics-core:3.1.0:runtime:'
-        new File(projectDir, 'build/.gems/jars/io/dropwizard/metrics/metrics-core/3.1.0/metrics-core-3.1.0.jar').exists()
+        new File(projectDir, 'build/.gems/Jars.lock').text.trim() ==
+            "io.dropwizard.metrics:metrics-core:${testProperties.dropwizardMetricsCoreVersion}:runtime:"
+        new File(
+            projectDir,
+            "build/.gems/jars/io/dropwizard/metrics/metrics-core/${testVer}/metrics-core-${testVer}.jar"
+        ).exists()
     }
 }

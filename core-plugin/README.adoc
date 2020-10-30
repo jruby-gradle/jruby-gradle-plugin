@@ -8,3 +8,65 @@ This plugin offers the following functionality:
 * Conversion between GEM-style and Ivy-style dependencies notations.
 * An abstract task class (`AbstractJRubyPrepare`) for preparing local GEM + JAR installations.
 
+== Getting Started
+
+=== Compatibility
+
+This plugin requires link:http://gradle.org[Gradle] 4.3 or better
+
+=== Installing
+
+.build.gradle
+[source, groovy]
+----
+plugins {
+  id 'com.github.jruby-gradle.core' version 'VERSION-OF-PLUGIN'
+}
+----
+
+=== Adding repositories
+
+.build.gradle
+[source,groovy]
+----
+repositories {
+    ruby.gems() // <1>
+    ruby.gems { // <2>
+        prerelease = true
+    }
+    ruby.gems('https://foo.bar') // <3>
+    ruby.gems('acme-rubygems', 'https://foo.bar') // <4>
+
+    ruby.mavengems() // <5>
+    ruby.mavengems('https://foo.bar') // <6>
+    ruby.mavengems('acme-rubygems', 'https://foo.bar') // <7>
+}
+----
+<1> Proxy rubygems.org directly and use `rubygems` as the Maven coordinate group.
+<2> Proxy rubygems.org directly and allow prerelease GEMs to be considered. Use `rubygems` as the Maven coordinate group.
+<3> Proxy a custom rubygems repository.
+<4> Proxy a custom rubygems repository and assign a custom Maven coordinate group.
+<5> Adds a Maven repository that uses the one official supported by the JRuby group. In order to use this, GEM dependencies should all be placed in the `rubygems` group.
+<6> Adds a custom Maven repository that will proxy a GEMs repository. In order to use this, GEM dependencies should all be placed in the `rubygems` group.
+<7> Adds a custom Maven repository that will proxy a GEMs repository, but allocate a custom dedicated Maven group. This is useful where you would want to use both the public repository and your own, but you want to save network query traffic, by only query repositories where you know the dependencies should exist.
+
+== Advanced
+
+=== Customising GEM resolving
+
+By default the `rubygems` configuration and others added via `ruby.mavengems()` and `ruby.gems()` will have additional resolving strategies applied that mimicks GEM behaviour rather then Gradle behaviour. It is possible to customise this behaviour.
+
+.build.gradle
+[source,groovy]
+----
+gemResolverStrategy {
+  excludeConfigurations 'foo', 'bar'  // <1>
+  excludeModule 'foo.*' // <2>
+  excludeModule 'foo.*', /1\.2.*/ // <3>
+  useGemVersionResolver 'gems2'
+}
+----
+<1> Exclude configurations `foo` and `bar` from being considered for GEM resolver strategies.
+<2> Exclude module that matches regular expression from GEM resolver strategies.
+<3> Exclude module and version that matches regular expression from GEM resolver strategies.
+<4> Apply GEM resolver strategies to a specific configuration.

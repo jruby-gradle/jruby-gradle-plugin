@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014-2019, R. Tyler Croy <rtyler@brokenco.de>,
+ * Copyright (c) 2014-2020, R. Tyler Croy <rtyler@brokenco.de>,
  *     Schalk Cronje <ysb33r@gmail.com>, Christian Meier, Lookout, Inc.
  *
  * Permission is hereby granted, free of charge, to any person obtaining
@@ -29,10 +29,13 @@ import groovy.transform.CompileStatic
 import org.gradle.api.DefaultTask
 import org.gradle.api.artifacts.Configuration
 import org.gradle.api.file.FileCollection
+import org.gradle.api.provider.Provider
+import org.gradle.api.tasks.Input
 import org.gradle.api.tasks.InputFiles
 import org.gradle.api.tasks.Internal
 import org.gradle.api.tasks.Optional
 import org.gradle.api.tasks.TaskAction
+import org.ysb33r.grolifant.api.core.ProjectOperations
 
 import static com.github.jrubygradle.api.gems.GemOverwriteAction.SKIP
 import static com.github.jrubygradle.api.gems.GemUtils.extractGems
@@ -50,13 +53,18 @@ import static com.github.jrubygradle.api.gems.GemUtils.setupJars
 abstract class AbstractJRubyPrepare extends DefaultTask implements JRubyAwareTask {
 
     protected AbstractJRubyPrepare() {
+        this.projectOperations = ProjectOperations.find(project)
+        this.outputDir = {
+            ProjectOperations projectOperations -> projectOperations.buildDirDescendant('.gems')
+        }.curry(this.projectOperations)
         outputs.dir({ AbstractJRubyPrepare t -> new File(t.getOutputDir(), 'gems') }.curry(this))
     }
 
     /** Target directory for GEMs. Extracted GEMs will end up in {@code outputDir + "/gems"}
      */
+    @Internal
     File getOutputDir() {
-        project.file(this.outputDir)
+        projectOperations.file(this.outputDir)
     }
 
     /** Sets the output directory
@@ -81,7 +89,7 @@ abstract class AbstractJRubyPrepare extends DefaultTask implements JRubyAwareTas
      */
     @InputFiles
     FileCollection gemsAsFileCollection() {
-        return GemUtils.getGems(project.files(this.dependencies))
+        return GemUtils.getGems(projectOperations.files(this.dependencies))
     }
 
     @Internal
@@ -96,16 +104,38 @@ abstract class AbstractJRubyPrepare extends DefaultTask implements JRubyAwareTas
         this.dependencies.addAll(f.toList())
     }
 
+    /**
+     *
+     * @return Configuration Cache safe project operations service.
+     *
+     * @since 2.1.0
+     */
+    protected ProjectOperations getProjectOperations() {
+        this.projectOperations
+    }
+
     /** Location of {@code jruby-complete} JAR.
      *
      * @return Path on local filesystem
      */
-    abstract protected File getJrubyJarLocation()
+    @Internal
+    abstract protected Provider<File> getJrubyJarLocation()
+
+    /** Version of JRuby to be used.
+     *
+     * This method should not resolve any files to obtain the version.
+     *
+     * @return Intended version of JRuby. Can be {@code null} if the version
+     * is indirectly inferred via configuration.
+     */
+    @Input
+    @Optional
+    abstract protected String getProposedJRubyVersion()
 
     @TaskAction
     void exec() {
         File out = getOutputDir()
-        File jrubyJar = jrubyJarLocation
+        File jrubyJar = jrubyJarLocation.get()
         extractGems(project, jrubyJar, gemsAsFileCollection(), out, SKIP)
 
         dependencies.findAll {
@@ -115,6 +145,7 @@ abstract class AbstractJRubyPrepare extends DefaultTask implements JRubyAwareTas
         }
     }
 
-    private Object outputDir = { -> "${project.buildDir}/.gems" }
+    private Object outputDir
+    private final ProjectOperations projectOperations
 }
 

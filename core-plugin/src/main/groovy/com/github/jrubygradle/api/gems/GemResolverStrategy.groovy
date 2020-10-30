@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014-2019, R. Tyler Croy <rtyler@brokenco.de>,
+ * Copyright (c) 2014-2020, R. Tyler Croy <rtyler@brokenco.de>,
  *     Schalk Cronje <ysb33r@gmail.com>, Christian Meier, Lookout, Inc.
  *
  * Permission is hereby granted, free of charge, to any person obtaining
@@ -65,7 +65,7 @@ class GemResolverStrategy {
      * @param configs Configurations to be excluded
      */
     void excludeConfigurations(Configuration... configs) {
-        this.excludedConfigurations.addAll(configs*.name)
+        this.excludedConfigurations.addAll(configs*.name as Iterable<String>)
     }
 
     /** Exclude a configuration from being resolved using the GEM
@@ -102,7 +102,7 @@ class GemResolverStrategy {
 
     /** Whether the GEM version resolving strategy should be applied for a specific module.
      *
-     * In most cases this will alsways be {@code true} unless a specific rule excludes it.
+     * In most cases this will always be {@code true} unless a specific rule excludes it.
      *
      * @param mvs Module version selector
      * @return Whether the Bundler-like version selector atregty may be applied
@@ -132,7 +132,7 @@ class GemResolverStrategy {
         }
     }
 
-    private final Set<Matcher> excludedModules = [].toSet()
-    private final Set<String> excludedConfigurations = [].toSet()
+    private final Set<Matcher> excludedModules = [].toSet() as Set<Matcher>
+    private final Set<String> excludedConfigurations = [].toSet() as Set<String>
     private final Set<String> groups = [RepositoryHandlerExtension.DEFAULT_GROUP_NAME].toSet()
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014-2019, R. Tyler Croy <rtyler@brokenco.de>,
+ * Copyright (c) 2014-2020, R. Tyler Croy <rtyler@brokenco.de>,
  *     Schalk Cronje <ysb33r@gmail.com>, Christian Meier, Lookout, Inc.
  *
  * Permission is hereby granted, free of charge, to any person obtaining
@@ -71,6 +71,7 @@ class JRubyJar extends Jar {
     /**
      * @return Directory that the dependencies for this project will be staged into
      */
+    @Internal
     File getGemDir() {
         return prepareTask.outputDir
     }
@@ -83,6 +84,7 @@ class JRubyJar extends Jar {
      * modifies the jrubyVersion on the project after we have instantiated, that we still
      * respect this setting
      * */
+    @Input
     String getJrubyVersion() {
         if (embeddedJRubyVersion == null) {
             return project.jruby.defaultVersion

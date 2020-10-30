@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014-2019, R. Tyler Croy <rtyler@brokenco.de>,
+ * Copyright (c) 2014-2020, R. Tyler Croy <rtyler@brokenco.de>,
  *     Schalk Cronje <ysb33r@gmail.com>, Christian Meier, Lookout, Inc.
  *
  * Permission is hereby granted, free of charge, to any person obtaining
@@ -32,7 +32,7 @@ import org.gradle.api.Project
 import org.gradle.api.Task
 import org.gradle.api.artifacts.Configuration
 
-import static org.ysb33r.grolifant.api.TaskProvider.registerTask
+import static org.ysb33r.grolifant.api.v4.TaskProvider.registerTask
 
 /** Base plugin for JRuby.
  *
@@ -62,7 +62,7 @@ class JRubyPlugin implements Plugin<Project> {
         JRubyExecDelegate.addToProject(project, PROJECT_JRUBYEXEC)
 
         registerTask(
-            project,
+            project.tasks,
             'generateGradleRb',
             GenerateGradleRb
         ).configure(generateGradleRbConfiguration(project))

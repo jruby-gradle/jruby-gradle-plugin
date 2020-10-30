@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014-2019, R. Tyler Croy <rtyler@brokenco.de>,
+ * Copyright (c) 2014-2020, R. Tyler Croy <rtyler@brokenco.de>,
  *     Schalk Cronje <ysb33r@gmail.com>, Christian Meier, Lookout, Inc.
  *
  * Permission is hereby granted, free of charge, to any person obtaining
@@ -23,7 +23,6 @@
  */
 package com.github.jrubygradle.api.gems
 
-import com.github.jrubygradle.api.gems.GemVersion
 import spock.lang.Specification
 import spock.lang.Unroll
 
@@ -77,7 +76,7 @@ class GemVersionSpec extends Specification {
     }
 
     @Unroll
-    void "Intersect: #ivyLeft ∩ #ivyRight ⇒ Gem #gemVer"() {
+    void "intersect: #ivyLeft ∩ #ivyRight ⇒ Gem #gemVer"() {
         when:
         GemVersion lhs = gemVersionFromGradleIvyRequirement(ivyLeft)
         GemVersion rhs = gemVersionFromGradleIvyRequirement(ivyRight)
@@ -87,10 +86,10 @@ class GemVersionSpec extends Specification {
 
         where:
         ivyLeft             | ivyRight            | gemVer
-        '[1.2.1,1.2.4]'     | ']1.2.1,1.2.4['     | ']1.2.1,1.2.4['
+        '[1.2.1,1.2.4]'     | ']1.2.1,1.2.4['     | '[1.2.1,1.2.4]'
         '[1.2.0,1.2.4]'     | ']1.2.1,1.2.3['     | ']1.2.1,1.2.3['
         '[1.2.0,1.2.4]'     | '[1.2.1,1.2.3]'     | '[1.2.1,1.2.3]'
-        ']1.2.0,1.2.4['     | '[1.2.0,1.2.4]'     | ']1.2.0,1.2.4['
+        ']1.2.0,1.2.4['     | '[1.2.0,1.2.4]'     | '[1.2.0,1.2.4]'
         ']1.2.1,1.2.3['     | '[1.2.0,1.2.4]'     | ']1.2.1,1.2.3['
         '[1.2.1,1.2.3]'     | '[1.2.0,1.2.4]'     | '[1.2.1,1.2.3]'
         '[1.2.10,1.2.14]'   | '[1.2.2,1.10.14]'   | '[1.2.10,1.2.14]'
@@ -100,9 +99,20 @@ class GemVersionSpec extends Specification {
         ']2.5.1.1,99999]'   | ']2.5.1.1,)'        | ']2.5.1.1,99999]'
     }
 
-    void 'Ivy union of < 3, >= 1.2'() {
-        expect:
-        singleGemVersionFromMultipleGemRequirements('< 3,>= 1.2').toString() == '[1.2,3['
+    @Unroll
+    void '#gemRequirements (requirements) ⇒ #gemRequirement (requirement)'() {
+        when:
+        GemVersion subject = singleGemVersionFromMultipleGemRequirements(gemRequirements)
+
+        then:
+        subject.toString() == gemRequirement
+
+        where:
+        gemRequirements    | gemRequirement
+        '< 3,>= 1.2'       | '[1.2,3['
+        '>= 3.0, < 4.0'    | '[3.0,4.0['
+        '< 4.0, >= 3.0'    | '[3.0,4.0['
+        '~> 2.2, >= 2.2.1' | '[2.2.1,3.0['
     }
 
     void "intersects with conflict"() {
@@ -110,7 +120,7 @@ class GemVersionSpec extends Specification {
         GemVersion subject = gemVersionFromGradleIvyRequirement('[1.2.1,1.2.3]')
 
         expect:
-        subject.intersect('[1.2.4, 1.2.4]').conflict() == true
+        subject.intersect('[1.2.4, 1.2.4]').conflict()
     }
 
     void "finds no conflicts in non-integer version ranges"() {

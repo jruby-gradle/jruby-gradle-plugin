@@ -21,21 +21,21 @@
  * OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
  * WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
-package com.github.jrubygradle.internal.gems
+package com.github.jrubygradle.api.core
 
-import com.github.jrubygradle.api.gems.JarDependency
 import groovy.transform.CompileStatic
 
-/** Defining a JAR dependency.
+/** Additional options for configuring a remote GEM repository
  *
  * @author Schalk W. Cronjé
  *
  * @since 2.0
  */
 @CompileStatic
-class DefaultJarDependency extends DefaultGemDependency implements JarDependency {
-    /** Name of group / organisation.
+class GemRepositoryConfiguration {
+
+    /** Set whether pre-release GEMs should be considered.
      *
      */
-    String group
+    boolean prerelease = false
 }

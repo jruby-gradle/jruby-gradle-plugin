@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014-2019, R. Tyler Croy <rtyler@brokenco.de>,
+ * Copyright (c) 2014-2020, R. Tyler Croy <rtyler@brokenco.de>,
  *     Schalk Cronje <ysb33r@gmail.com>, Christian Meier, Lookout, Inc.
  *
  * Permission is hereby granted, free of charge, to any person obtaining
@@ -62,6 +62,7 @@ import static com.github.jrubygradle.api.gems.GemVersion.Boundary.OPEN_ENDED
  *
  * @author Christian Meier
  * @author Schalk W. Cronjé
+ * @author Guillaume Grossetie
  *
  * @since 2.0 (Moved here from base plugin where it existed since 0.4.0)
  */
@@ -177,7 +178,7 @@ class GemVersion implements Comparable<GemVersion> {
             gemVersions.first()
         } else {
             gemVersions[1..-1].inject(gemVersions.first()) { range, value ->
-                range.union(value)
+                range.intersect(value)
             }
         }
     }
@@ -300,66 +301,53 @@ class GemVersion implements Comparable<GemVersion> {
      * @since 2.0
      */
     GemVersion intersect(GemVersion other) {
-        Boundary newLowBoundary
-        String newLow
-        switch (compare(low, other.low)) {
-            case -1:
-                newLow = other.low
-                newLowBoundary = other.lowBoundary
-                break
-            case 0:
-                newLowBoundary = (lowBoundary == EXCLUSIVE || other.lowBoundary == EXCLUSIVE) ? EXCLUSIVE : INCLUSIVE
-                newLow = low
-                break
-            case 1:
-                newLow = low
-                newLowBoundary = lowBoundary
-        }
-
-        Boundary newHighBoundary
-        String newHigh
-
-        if (!high && other.high) {
-            newHigh = other.high
-            newHighBoundary = other.highBoundary
-        } else if (high && !other.high) {
-            newHigh = high
-            newHighBoundary = highBoundary
-        } else if (!high && !other.high) {
-            newHigh = null
-            newHighBoundary = highBoundary
-        } else {
-            switch (compare(high, other.high)) {
-                case 1:
-                    newHigh = other.high
-                    newHighBoundary = other.highBoundary
-                    break
-                case 0:
-                    newHighBoundary = (highBoundary == EXCLUSIVE || other.highBoundary == EXCLUSIVE) ? EXCLUSIVE : INCLUSIVE
-                    newHigh = high
-                    break
-                case -1:
-                    newHigh = high
-                    newHighBoundary = highBoundary
+        Tuple2<String, Boundary> newLowVersionSpec = intersect(low, lowBoundary, other.low, other.lowBoundary, true)
+        Tuple2<String, Boundary> newHighVersionSpec = intersect(high, highBoundary, other.high, other.highBoundary, false)
+        GemVersion intersection = new GemVersion(newLowVersionSpec.second, newLowVersionSpec.first, newHighVersionSpec.first, newHighVersionSpec.second)
+        if (intersection == this) {
+            // is other a subset of this?
+            if (compare(this.low, other.low) >= 0 && compare(other.low, this.high) < 0 && compare(this.high, other.high) <= 0) {
+                return intersection
             }
+            return NO_VERSION
         }
-        return new GemVersion(newLowBoundary, newLow, newHigh, newHighBoundary)
+        if (intersection == other) {
+            // is this a subset of other?
+            if (compare(other.low, this.low) >= 0 && compare(this.low, other.high) < 0 && compare(other.high, this.high) <= 0) {
+                return intersection
+            }
+            return NO_VERSION
+        }
+        return intersection
     }
 
-    /** Creates a new GEM version requirement which that the lowest of two requirements and the highest
-     * of those same requirement
-     *
-     * @param other Other GEM to combine with
-     * @return New GEM version requirement.
-     *
-     * @since 2.0
-     */
-    GemVersion union(GemVersion other) {
-        List<GemVersion> pair = [this, other]
-        GemVersion min = pair.min()
-        GemVersion max = pair.max()
+    Tuple2<String,Boundary> intersect(String version, Boundary boundary, String otherVersion, Boundary otherBoundary, boolean low) {
+        Boundary newBoundary
+        String newVersion
+        if (!version && otherVersion) {
+            newVersion = otherVersion
+            newBoundary = otherBoundary
+        } else if (version && !otherVersion) {
+            newVersion = version
+            newBoundary = boundary
+        } else if (!version && !otherVersion) {
+            newVersion = null
+            newBoundary = boundary
+        } else {
+            int compareLow = low ? compare(version, otherVersion) : compare(otherVersion, version)
+            if (compareLow < 0) {
+                newVersion = otherVersion
+                newBoundary = otherBoundary
+            } else if (compareLow > 0) {
+                newVersion = version
+                newBoundary = boundary
+            } else {
+                newBoundary = (boundary == INCLUSIVE || otherBoundary == INCLUSIVE) ? INCLUSIVE : EXCLUSIVE
+                newVersion = version
+            }
+        }
 
-        new GemVersion(min.lowBoundary, min.low, max.high, max.highBoundary)
+        return new Tuple2(newVersion, newBoundary)
     }
 
     /** Allows for versions to be compared and sorted.
@@ -479,13 +467,6 @@ class GemVersion implements Comparable<GemVersion> {
         def matcher = gemRevision =~ matchPattern
         matcher[0][1]
     }
-
-//    private GemVersion(Boolean lowInclusive, String low, String high, Boolean highInclusive) {
-//        this.lowBoundary = lowInclusive ? INCLUSIVE : EXCLUSIVE
-//        this.low = low
-//        this.high = high
-//        this.highBoundary = highInclusive ? INCLUSIVE : EXCLUSIVE
-//    }
 
     private GemVersion(Boundary pre, String low, String high, Boundary post) {
         this.lowBoundary = pre

@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2014-2019, R. Tyler Croy <rtyler@brokenco.de>,
+ * Copyright (c) 2014-2020, R. Tyler Croy <rtyler@brokenco.de>,
  *     Schalk Cronje <ysb33r@gmail.com>, Christian Meier, Lookout, Inc.
  *
  * Permission is hereby granted, free of charge, to any person obtaining
@@ -33,9 +33,10 @@ import java.util.List;
  *
  * @since 2.0.
  *
- * @see https://guides.rubygems.org/rubygems-org-api
+ * @see {@link https://guides.rubygems.org/rubygems-org-api}
  */
 public interface RubyGemQueryRestApi {
+
     /**
      * Return all published versions for a specific GEM
      *
@@ -46,6 +47,16 @@ public interface RubyGemQueryRestApi {
     List<String> allVersions(String gemName) throws ApiException;
 
     /**
+     * Return all published versions for a specific GEM
+     *
+     * @param gemName Name of GEM.
+     * @param includePrelease Whether pre-release versions should be included.
+     * @return List of versions. Can be empty if the GEM does not have any versions. Never {@code null}.
+     * @throws {@link ApiException} if a networking or parser error occurs.
+     */
+    List<String> allVersions(String gemName, boolean includePrelease) throws ApiException;
+
+    /**
      * Return latest published version of GEM.
      *
      * @param gemName Name of GEM.
@@ -53,6 +64,16 @@ public interface RubyGemQueryRestApi {
      * @throws {@link ApiException} if GEM does not exist.
      */
     String latestVersion(String gemName) throws ApiException;
+
+    /**
+     * Return latest published version of GEM.
+     *
+     * @param gemName Name of GEM.
+     * @param allowPrerelease Whether a prereleased version can be considered a latest version.
+     * @return Version of GEM
+     * @throws {@link ApiException} if GEM does not exist.
+     */
+    String latestVersion(String gemName, boolean allowPrerelease) throws ApiException;
 
     /** Returns the basic metadata for a GEM.
      *

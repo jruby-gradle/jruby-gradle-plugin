@@ -7,7 +7,7 @@ image::https://api.bintray.com/packages/jruby-gradle/plugins/jruby-gradle-jar-pl
 
 === Compatibility
 
-This plugin requires link::http://gradle.org[Gradle] 2.0 or better
+This plugin requires link::http://gradle.org[Gradle] 4.9 or better
 
 === Installing
 

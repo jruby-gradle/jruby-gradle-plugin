@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014-2019, R. Tyler Croy <rtyler@brokenco.de>,
+ * Copyright (c) 2014-2020, R. Tyler Croy <rtyler@brokenco.de>,
  *     Schalk Cronje <ysb33r@gmail.com>, Christian Meier, Lookout, Inc.
  *
  * Permission is hereby granted, free of charge, to any person obtaining
@@ -24,19 +24,24 @@
 package com.github.jrubygradle.internal
 
 import com.github.jrubygradle.JRubyPluginExtension
+import com.github.jrubygradle.JRubyPrepare
 import com.github.jrubygradle.api.core.JRubyExecSpec
+import groovy.transform.CompileStatic
 import org.gradle.api.Action
 import org.gradle.api.Project
 import org.gradle.api.file.FileCollection
+import org.gradle.api.plugins.ExtensionContainer
+import org.gradle.api.tasks.TaskContainer
 import org.gradle.process.ExecResult
 import org.gradle.process.JavaExecSpec
-import org.ysb33r.grolifant.api.ClosureUtils
+import org.ysb33r.grolifant.api.core.ProjectOperations
+import org.ysb33r.grolifant.api.v4.ClosureUtils
 
 import static com.github.jrubygradle.JRubyExec.MAIN_CLASS
 import static com.github.jrubygradle.internal.JRubyExecUtils.buildArgs
 import static com.github.jrubygradle.internal.JRubyExecUtils.prepareJRubyEnvironment
 import static com.github.jrubygradle.internal.JRubyExecUtils.resolveScript
-import static org.ysb33r.grolifant.api.StringUtils.stringize
+import static org.ysb33r.grolifant.api.v4.StringUtils.stringize
 
 /** Delegate for running JRuby using {@code project.jrubyexec}.
  *
@@ -44,6 +49,7 @@ import static org.ysb33r.grolifant.api.StringUtils.stringize
  * @author R Tyler Croy
  *
  */
+@CompileStatic
 class JRubyExecDelegate {
 
     static void addToProject(final Project project, final String name) {
@@ -64,44 +70,54 @@ class JRubyExecDelegate {
     }
 
     ExecResult call(@DelegatesTo(JRubyExecSpec) Closure cfg) {
-        project.javaexec { JavaExecSpec javaExecSpec ->
-            ExecSpec execSpec = new ExecSpec(project, javaExecSpec)
+        projectOperations.javaexec { JavaExecSpec javaExecSpec ->
+            ExecSpec execSpec = new ExecSpec(projectOperations, javaExecSpec)
             ClosureUtils.configureItem(execSpec, cfg)
             finaliseJavaExecConfiguration(execSpec, javaExecSpec)
         }
     }
 
     ExecResult call(Action<JRubyExecSpec> cfg) {
-        project.javaexec { JavaExecSpec javaExecSpec ->
-            ExecSpec execSpec = new ExecSpec(project, javaExecSpec)
-            cfg.execute(spec)
+        projectOperations.javaexec { JavaExecSpec javaExecSpec ->
+            ExecSpec execSpec = new ExecSpec(projectOperations, javaExecSpec)
+            cfg.execute(execSpec)
             finaliseJavaExecConfiguration(execSpec, javaExecSpec)
         }
     }
 
     void finaliseJavaExecConfiguration(ExecSpec execSpec, JavaExecSpec javaExecSpec) {
-        JRubyPluginExtension jruby = project.extensions.getByType(JRubyPluginExtension)
+        JRubyPluginExtension jruby = extensions.getByType(JRubyPluginExtension)
         javaExecSpec.with {
             main = MAIN_CLASS
             classpath = jruby.jrubyConfiguration
-            args = buildArgs([], execSpec.jrubyArgs, execSpec.script, execSpec.scriptArgs)
+            args = buildArgs(
+                [],
+                execSpec.jrubyArgs as List<Object>,
+                execSpec.script,
+                execSpec.scriptArgs as List<Object>
+            )
+
             environment = prepareJRubyEnvironment(
                 environment,
                 execSpec.inheritRubyEnv,
-                project.tasks.getByName(jruby.gemPrepareTaskName).outputDir
+                ((JRubyPrepare)tasks.getByName(jruby.gemPrepareTaskName)).outputDir
             )
         }
     }
 
     private JRubyExecDelegate(Project project) {
-        this.project = project
+        this.projectOperations = ProjectOperations.find(project)
+        this.tasks = project.tasks
+        this.extensions = project.extensions
     }
 
-    private final Project project
+    private final ProjectOperations projectOperations
+    private final TaskContainer tasks
+    private final ExtensionContainer extensions
 
     private static class ExecSpec implements JRubyExecSpec {
-        ExecSpec(Project project, JavaExecSpec spec) {
-            this.project = project
+        ExecSpec(ProjectOperations projectOperations, JavaExecSpec spec) {
+            this.projectOperations = projectOperations
             this.javaExecSpec = spec
         }
 
@@ -139,12 +155,12 @@ class JRubyExecDelegate {
 
         @Override
         void script(Object scr) {
-            this.script = resolveScript(project, scr)
+            this.script = resolveScript(projectOperations, scr)
         }
 
         @Override
         void setScript(Object scr) {
-            this.script = resolveScript(project, scr)
+            this.script = resolveScript(projectOperations, scr)
         }
 
         @Override
@@ -195,6 +211,6 @@ class JRubyExecDelegate {
         private final List<String> jrubyArgs = []
         private final @Delegate
         JavaExecSpec javaExecSpec
-        private final Project project
+        private final ProjectOperations projectOperations
     }
 }

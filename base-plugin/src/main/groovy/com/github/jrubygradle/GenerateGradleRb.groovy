@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014-2019, R. Tyler Croy <rtyler@brokenco.de>,
+ * Copyright (c) 2014-2020, R. Tyler Croy <rtyler@brokenco.de>,
  *     Schalk Cronje <ysb33r@gmail.com>, Christian Meier, Lookout, Inc.
  *
  * Permission is hereby granted, free of charge, to any person obtaining
@@ -29,16 +29,18 @@ import groovy.transform.CompileStatic
 import org.apache.tools.ant.filters.ReplaceTokens
 import org.gradle.api.DefaultTask
 import org.gradle.api.GradleException
+import org.gradle.api.file.CopySpec
 import org.gradle.api.file.FileCopyDetails
 import org.gradle.api.file.RelativePath
 import org.gradle.api.tasks.Input
 import org.gradle.api.tasks.OutputFile
 import org.gradle.api.tasks.TaskAction
-import org.ysb33r.grolifant.api.StringUtils
+import org.ysb33r.grolifant.api.core.ProjectOperations
+import org.ysb33r.grolifant.api.v4.StringUtils
 
 import static com.github.jrubygradle.internal.JRubyExecUtils.classpathFromConfiguration
 
-/** Generate a LOAD_PATH Ruby file whichi is loadable by Ruby scripts when
+/** Generate a LOAD_PATH Ruby file which is loadable by Ruby scripts when
  * performing local manual testing.
  *
  * @author Schalk W. Cronjé
@@ -53,6 +55,7 @@ class GenerateGradleRb extends DefaultTask implements JRubyAwareTask {
 
     GenerateGradleRb() {
         this.jruby = extensions.create(JRubyPluginExtension.NAME, JRubyPluginExtension, this)
+        this.projectOperations = ProjectOperations.create(project)
     }
 
     void destinationDir(Object dest) {
@@ -72,7 +75,7 @@ class GenerateGradleRb extends DefaultTask implements JRubyAwareTask {
     }
 
     File getDestinationDir() {
-        project.file(destinationDir)
+        projectOperations.file(destinationDir)
     }
 
     @OutputFile
@@ -86,7 +89,7 @@ class GenerateGradleRb extends DefaultTask implements JRubyAwareTask {
     }
 
     File getGemInstallDir() {
-        project.file(this.gemInstallDir)
+        projectOperations.file(this.gemInstallDir)
     }
 
     @TaskAction
@@ -98,27 +101,27 @@ class GenerateGradleRb extends DefaultTask implements JRubyAwareTask {
         String path = classpathFromConfiguration(jruby.jrubyConfiguration).join(File.pathSeparator)
         String gemDir = getGemInstallDir().absolutePath
         String bootstrapName = getBaseName()
+        String bootstrapTemplate = BOOTSTRAP_TEMPLATE
         logger.info("GenerateGradleRb - source: ${source}, destination: ${destination}, baseName: ${baseName}")
-        project.copy {
-            from(source) {
-                /* In the case of this plugin existing in a zip (i.e. the
-             * plugin jar) our `source` will be a ZipTree, so we only want
-             * to pull in the template itself
-             */
-                include "**/${GenerateGradleRb.BOOTSTRAP_TEMPLATE}"
-            }
-            into destination
-            fileMode = 0755
-            includeEmptyDirs = false
-            rename BOOTSTRAP_TEMPLATE, bootstrapName
-            // Flatten the file into the destination directory so we don't copy
-            // the file into: ${destination}/META-INF/gradle-plugins/gradle.rb
-            eachFile { FileCopyDetails details ->
-                details.relativePath = new RelativePath(true, [details.name] as String[])
-            }
+        projectOperations.copy { CopySpec cs ->
+            cs.with {
+                // In the case of this plugin existing in a zip (i.e. the plugin jar) our `source` will be a ZipTree,
+                // so we only want to pull in the template itself
+                from(source).include "**/${bootstrapTemplate}"
 
-            filter ReplaceTokens, beginToken: '%%', endToken: '%%',
-                tokens: [GEMFOLDER: gemDir, JRUBYEXEC_CLASSPATH: path]
+                into destination
+                fileMode = 0755
+                includeEmptyDirs = false
+                rename bootstrapTemplate, bootstrapName
+                // Flatten the file into the destination directory so we don't copy
+                // the file into: ${destination}/META-INF/gradle-plugins/gradle.rb
+                eachFile { FileCopyDetails details ->
+                    details.relativePath = new RelativePath(true, [details.name] as String[])
+                }
+
+                filter ReplaceTokens, beginToken: '%%', endToken: '%%',
+                    tokens: [GEMFOLDER: gemDir, JRUBYEXEC_CLASSPATH: path]
+            }
         }
     }
 
@@ -152,4 +155,5 @@ class GenerateGradleRb extends DefaultTask implements JRubyAwareTask {
     private Object destinationDir = project.projectDir
     private Object gemInstallDir
     private final JRubyPluginExtension jruby
+    private final ProjectOperations projectOperations
 }

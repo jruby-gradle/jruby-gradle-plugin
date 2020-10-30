@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014-2019, R. Tyler Croy <rtyler@brokenco.de>,
+ * Copyright (c) 2014-2020, R. Tyler Croy <rtyler@brokenco.de>,
  *     Schalk Cronje <ysb33r@gmail.com>, Christian Meier, Lookout, Inc.
  *
  * Permission is hereby granted, free of charge, to any person obtaining
@@ -30,6 +30,7 @@ import org.junit.rules.TemporaryFolder
 import spock.lang.IgnoreIf
 import spock.lang.Issue
 import spock.lang.Specification
+import spock.lang.Unroll
 
 import java.util.regex.Pattern
 
@@ -185,7 +186,7 @@ class IvyXmlProxyServerIntegrationSpec extends Specification {
         build()
 
         then:
-        findFiles (~/^asciidoctor-pdf.*\.gem$/).size() == 3
+        findFiles(~/^asciidoctor-pdf.*\.gem$/).size() == 3
     }
 
     @Issue('https://github.com/jruby-gradle/jruby-gradle-plugin/issues/380')
@@ -208,6 +209,21 @@ class IvyXmlProxyServerIntegrationSpec extends Specification {
         findFiles ~/^bibtex-ruby-4.4.7.gem$/
     }
 
+    void 'Resolve a transitive dependency which is jruby-specific'() {
+        setup:
+        withBuildFile '''
+        dependencies {
+            something 'rubygems:rubocop:0.77.0'
+        }
+        '''
+
+        when:
+        build()
+
+        then:
+        findFiles ~/^jaro_winkler-1.5.\d+-java.gem$/
+    }
+
     private List<File> findFiles(Pattern pat) {
         new File(projectDir, 'build/something').listFiles(new FilenameFilter() {
             @Override
@@ -228,14 +244,16 @@ class IvyXmlProxyServerIntegrationSpec extends Specification {
             .build()
     }
 
-    private void withBuildFile(String content) {
+    private void withBuildFile(String content, boolean prerelease = false) {
         buildFile.text = """
         plugins {
             id 'com.github.jruby-gradle.core'
         }
 
         repositories {
-            ruby.gems()
+            ruby.gems {
+                prerelease = ${prerelease}
+            }
         }
 
         configurations {

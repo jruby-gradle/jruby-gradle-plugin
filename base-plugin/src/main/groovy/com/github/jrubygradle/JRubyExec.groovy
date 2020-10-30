@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014-2019, R. Tyler Croy <rtyler@brokenco.de>,
+ * Copyright (c) 2014-2020, R. Tyler Croy <rtyler@brokenco.de>,
  *     Schalk Cronje <ysb33r@gmail.com>, Christian Meier, Lookout, Inc.
  *
  * Permission is hereby granted, free of charge, to any person obtaining
@@ -26,20 +26,23 @@ package com.github.jrubygradle
 import com.github.jrubygradle.api.core.JRubyAwareTask
 import com.github.jrubygradle.api.core.JRubyExecSpec
 import com.github.jrubygradle.internal.JRubyExecUtils
+import groovy.transform.CompileStatic
 import org.gradle.api.Task
 import org.gradle.api.artifacts.Configuration
 import org.gradle.api.provider.Provider
 import org.gradle.api.tasks.Input
 import org.gradle.api.tasks.JavaExec
 import org.gradle.api.tasks.Optional
+import org.gradle.api.tasks.TaskContainer
 import org.gradle.process.JavaExecSpec
 import org.gradle.util.GradleVersion
+import org.ysb33r.grolifant.api.core.ProjectOperations
 
 import java.util.concurrent.Callable
 
 import static com.github.jrubygradle.internal.JRubyExecUtils.prepareJRubyEnvironment
 import static com.github.jrubygradle.internal.JRubyExecUtils.resolveScript
-import static org.ysb33r.grolifant.api.StringUtils.stringize
+import static org.ysb33r.grolifant.api.v4.StringUtils.stringize
 
 /** Runs a ruby script using JRuby
  *
@@ -48,6 +51,7 @@ import static org.ysb33r.grolifant.api.StringUtils.stringize
  * @author Christian Meier
  *
  */
+@CompileStatic
 class JRubyExec extends JavaExec implements JRubyAwareTask, JRubyExecSpec {
 
     public static final String MAIN_CLASS = 'org.jruby.Main'
@@ -62,35 +66,43 @@ class JRubyExec extends JavaExec implements JRubyAwareTask, JRubyExecSpec {
 
     JRubyExec() {
         super()
-        super.setMain MAIN_CLASS
+        super.setMain(MAIN_CLASS)
         this.jruby = extensions.create(JRubyPluginExtension.NAME, JRubyPluginExtension, this)
+        this.projectOperations = ProjectOperations.create(project)
+        this.tasks = project.tasks
 
-        inputs.property 'jrubyver', {
+        inputs.property 'jrubyver', { JRubyPluginExtension jruby ->
             jruby.jrubyVersion
-        }
+        }.curry(this.jruby)
 
-        inputs.property 'gemConfiguration', {
+        inputs.property 'gemConfiguration', { JRubyPluginExtension jruby ->
             jruby.gemConfiguration
-        }
+        }.curry(this.jruby)
 
         if (GradleVersion.current() >= GradleVersion.version('4.10')) {
-            dependsOn(project.provider({ JRubyPluginExtension jpe ->
-                project.tasks.getByName(jpe.gemPrepareTaskName)
-            }.curry(this.jruby)))
+            dependsOn(project.provider({ JRubyPluginExtension jpe, TaskContainer t ->
+                t.getByName(jpe.gemPrepareTaskName)
+            }.curry(this.jruby, this.tasks)))
         } else {
             project.afterEvaluate({ Task t, JRubyPluginExtension jpe ->
                 t.dependsOn(jpe.gemPrepareTaskName)
             }.curry(this, this.jruby))
         }
+
+        Callable<File> resolveGemWorkDir = { JRubyPluginExtension jpe, TaskContainer t ->
+            ((JRubyPrepare) t.getByName(jpe.gemPrepareTaskName)).outputDir
+        }.curry(jruby, tasks) as Callable<File>
+
+        this.gemWorkDir = project.provider(resolveGemWorkDir)
     }
 
     /** Script to execute.
-     * @return The path to the script (or nul if not set)
+     * @return The path to the script (or {@code null} if not set)
      */
     @Optional
     @Input
     File getScript() {
-        resolveScript(project, this.script)
+        resolveScript(projectOperations, this.script)
     }
 
     /** Returns a list of script arguments
@@ -174,11 +186,7 @@ class JRubyExec extends JavaExec implements JRubyAwareTask, JRubyExecSpec {
      * @return Provider of GEM working directory.
      */
     Provider<File> getGemWorkDir() {
-        Callable<File> resolveGemWorkDir = { JRubyPluginExtension jpe ->
-            ((JRubyPrepare) project.tasks.getByName(jpe.gemPrepareTaskName)).outputDir
-        }.curry(jruby) as Callable<File>
-
-        project.provider(resolveGemWorkDir)
+        this.gemWorkDir
     }
 
     /** If it is required that a JRubyExec task needs to be executed with a different version of JRuby that the
@@ -189,7 +197,7 @@ class JRubyExec extends JavaExec implements JRubyAwareTask, JRubyExecSpec {
      */
     @Deprecated
     String getJrubyVersion() {
-        deprecated('Use jruby.getJrubyVersion rather getJrubyVersion()')
+        deprecated('Use jruby.getJrubyVersion() rather getJrubyVersion()')
         jruby.jrubyVersion
     }
 
@@ -254,7 +262,7 @@ class JRubyExec extends JavaExec implements JRubyAwareTask, JRubyExecSpec {
     void exec() {
         File gemDir = getGemWorkDir().get()
         setEnvironment prepareJRubyEnvironment(this.environment, this.inheritRubyEnv, gemDir)
-        super.classpath jruby.jrubyConfiguration
+        super.classpath(jruby.jrubyConfiguration)
         super.setArgs(getArgs())
         super.exec()
     }
@@ -263,11 +271,12 @@ class JRubyExec extends JavaExec implements JRubyAwareTask, JRubyExecSpec {
      *
      * There are three modes of behaviour
      * <ul>
-     *   <li> script set. no jrubyArgs, or jrubyArgs does not contain {@code -S} - Normal way to execute script. A check
+     *   <li> script set. no jrubyArgs, or jrubyArgs does not contain {@code -S}: normal way to execute script. A check
      *   whether the script exists will be performed.
-     *   <li> script set. jrubyArgs contains {@code -S} - If script is not absolute, no check will be performed to see
+     *   <li> script set. jrubyArgs contains {@code -S}: if script is not absolute, no check will be performed to see
      *   if the script exists and will be assumed that the script can be found using the default ruby path mechanism.
-     *   <li> script not set, but jrubyArgs set - Set up to execute jruby with no script. This should be a rarely used otion.
+     *   <li> script not set, but jrubyArgs set: set up to execute jruby with no script. This should be a rarely used
+     *   option.
      * </ul>
      *
      * @throw {@code org.gradle.api.InvalidUserDataException} if mode of behaviour cannot be determined.
@@ -315,5 +324,8 @@ class JRubyExec extends JavaExec implements JRubyAwareTask, JRubyExecSpec {
     private Object script
     private final List<Object> scriptArgs = []
     private final List<Object> jrubyArgs = []
+    private final ProjectOperations projectOperations
+    private final TaskContainer tasks
+    private final Provider<File> gemWorkDir
 
 }

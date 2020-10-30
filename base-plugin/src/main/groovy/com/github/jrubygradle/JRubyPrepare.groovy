@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014-2019, R. Tyler Croy <rtyler@brokenco.de>,
+ * Copyright (c) 2014-2020, R. Tyler Croy <rtyler@brokenco.de>,
  *     Schalk Cronje <ysb33r@gmail.com>, Christian Meier, Lookout, Inc.
  *
  * Permission is hereby granted, free of charge, to any person obtaining
@@ -26,6 +26,9 @@ package com.github.jrubygradle
 import com.github.jrubygradle.api.core.AbstractJRubyPrepare
 import com.github.jrubygradle.internal.JRubyExecUtils
 import groovy.transform.CompileStatic
+import org.gradle.api.provider.Provider
+
+import java.util.concurrent.Callable
 
 /** Task for preparing a project-local installation of GEMs & JARs.
  *
@@ -39,6 +42,9 @@ class JRubyPrepare extends AbstractJRubyPrepare {
     JRubyPrepare() {
         super()
         this.jruby = extensions.create(JRubyPluginExtension.NAME, JRubyPluginExtension, this)
+        this.jrubyJarLocation = project.provider({ JRubyPluginExtension jrubyExt ->
+            JRubyExecUtils.jrubyJar(jrubyExt.jrubyConfiguration)
+        }.curry(this.jruby) as Callable<File>)
     }
 
     /** Location of {@code jruby-complete} JAR.
@@ -46,10 +52,22 @@ class JRubyPrepare extends AbstractJRubyPrepare {
      * @return Path on local filesystem
      */
     @Override
-    protected File getJrubyJarLocation() {
-        JRubyExecUtils.jrubyJar(this.jruby.jrubyConfiguration)
+    protected Provider<File> getJrubyJarLocation() {
+        this.jrubyJarLocation
+    }
+
+    /** Version of JRuby to be used.
+     *
+     * This method should not resolve any files to obtain the version.
+     *
+     * @return Intended version of JRuby.
+     */
+    @Override
+    protected String getProposedJRubyVersion() {
+        jruby.jrubyVersion
     }
 
     private final JRubyPluginExtension jruby
+    private final Provider<File> jrubyJarLocation
 }
 

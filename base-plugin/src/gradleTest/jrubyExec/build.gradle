@@ -6,8 +6,12 @@ configurations {
     jrubyExec
 }
 
+repositories {
+    ruby.gems()
+}
+
 dependencies {
-    jrubyExec ':credit_card_validator:1.1.0@gem'
+    jrubyExec 'rubygems:credit_card_validator:1.1.0'
 }
 
 

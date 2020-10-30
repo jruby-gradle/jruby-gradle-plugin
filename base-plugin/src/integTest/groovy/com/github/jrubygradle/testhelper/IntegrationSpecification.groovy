@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014-2019, R. Tyler Croy <rtyler@brokenco.de>,
+ * Copyright (c) 2014-2020, R. Tyler Croy <rtyler@brokenco.de>,
  *     Schalk Cronje <ysb33r@gmail.com>, Christian Meier, Lookout, Inc.
  *
  * Permission is hereby granted, free of charge, to any person obtaining
@@ -23,28 +23,36 @@
  */
 package com.github.jrubygradle.testhelper
 
+
 import org.gradle.testkit.runner.GradleRunner
 import org.junit.Rule
 import org.junit.rules.TemporaryFolder
 import spock.lang.Shared
 import spock.lang.Specification
 
+import static com.github.jrubygradle.JRubyExecExtensionIntegrationSpec.BCPROV_NAME
+
 class IntegrationSpecification extends Specification {
 
-    static final boolean OFFLINE = System.getProperty('TESTS_ARE_OFFLINE')
+    public static final boolean OFFLINE = System.getProperty('TESTS_ARE_OFFLINE')
 
-    static final String HELLO_WORLD = 'helloWorld.rb'
-    static final String HELLO_NAME = 'helloName.rb'
-    static final String REQUIRES_GEM = 'requiresGem.rb'
-    static final String REQUIRE_THE_A_GEM = 'require-a-gem.rb'
-    static final String ENV_VARS = 'envVars.rb'
+    public static final String HELLO_WORLD = 'helloWorld.rb'
+    public static final String HELLO_NAME = 'helloName.rb'
+    public static final String REQUIRES_GEM = 'requiresGem.rb'
+    public static final String REQUIRE_THE_A_GEM = 'require-a-gem.rb'
+    public static final String ENV_VARS = 'envVars.rb'
 
     @Shared
     Map testProperties
+
     @Shared
     File flatRepoLocation
+
     @Shared
     File mavenRepoLocation
+
+    @Shared
+    Map artifactVersions
 
     @Rule
     TemporaryFolder testFolder
@@ -57,6 +65,15 @@ class IntegrationSpecification extends Specification {
         testProperties = loadTestProperties()
         flatRepoLocation = new File(testProperties.flatrepo)
         mavenRepoLocation = new File(testProperties.mavenrepo)
+
+        artifactVersions = [
+            'credit_card_validator': testProperties.creditCardValidatorVersion,
+            'rspec'                : testProperties.rspecVersion,
+            'rspec-core'           : testProperties.rspecVersion,
+            'rspec-support'        : testProperties.rspecVersion,
+            'metrics-core'         : testProperties.dropwizardMetricsCoreVersion,
+            (BCPROV_NAME)          : testProperties.bcprovVersion
+        ]
     }
 
     void setup() {
@@ -73,26 +90,17 @@ class IntegrationSpecification extends Specification {
         destination.text = this.class.getResource("/scripts/${name}").text
     }
 
+
     String findDependency(final String organisation, final String artifact, final String extension) {
-        "'${VersionFinder.findDependency(flatRepoLocation, organisation, artifact, extension)}'"
+        String ver = artifactVersions[artifact]
+        if (!ver) {
+            throw new RuntimeException("No version specified for ${artifact}")
+        }
+        "'${organisation ?: 'rubygems'}:${artifact}:${ver}@${extension}'"
     }
 
     String pathAsUriStr(final File path) {
         path.absoluteFile.toURI().toString()
-    }
-
-    String getProjectWithLocalRepo() {
-        """
-        plugins {
-            id 'com.github.jruby-gradle.base'
-        }
-
-        repositories {
-            flatDir {
-                dirs '${pathAsUriStr(flatRepoLocation)}'.toURI()
-            }
-        }
-        """
     }
 
     String getProjectWithMavenRepo() {
@@ -138,13 +146,14 @@ class IntegrationSpecification extends Specification {
         }
         """
     }
+
     GradleRunner gradleRunner(List<String> args) {
         GradleRunner.create()
-                .withProjectDir(projectDir)
-                .withDebug(true)
-                .withArguments(args)
-                .withPluginClasspath()
-                .forwardOutput()
+            .withProjectDir(projectDir)
+            .withDebug(true)
+            .withArguments(args)
+            .withPluginClasspath()
+            .forwardOutput()
     }
 
     GradleRunner gradleRunner(String... args) {

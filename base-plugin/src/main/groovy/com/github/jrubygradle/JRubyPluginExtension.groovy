@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014-2019, R. Tyler Croy <rtyler@brokenco.de>,
+ * Copyright (c) 2014-2020, R. Tyler Croy <rtyler@brokenco.de>,
  *     Schalk Cronje <ysb33r@gmail.com>, Christian Meier, Lookout, Inc.
  *
  * Permission is hereby granted, free of charge, to any person obtaining
@@ -29,16 +29,27 @@ import com.github.jrubygradle.internal.JRubyPrepareUtils
 import groovy.transform.CompileStatic
 import org.gradle.api.Action
 import org.gradle.api.Project
+import org.gradle.api.Task
+import org.gradle.api.UnknownTaskException
 import org.gradle.api.artifacts.Configuration
+import org.gradle.api.artifacts.ConfigurationContainer
 import org.gradle.api.artifacts.Dependency
 import org.gradle.api.artifacts.ResolutionStrategy
+import org.gradle.api.artifacts.dsl.DependencyHandler
+import org.gradle.api.artifacts.dsl.RepositoryHandler
+import org.gradle.api.logging.Logger
 import org.gradle.api.plugins.ExtensionAware
 import org.gradle.api.provider.Provider
-import org.ysb33r.grolifant.api.AbstractCombinedProjectTaskExtension
+import org.gradle.api.provider.ProviderFactory
+import org.gradle.api.tasks.TaskContainer
+import org.ysb33r.grolifant.api.core.ProjectOperations
+import org.ysb33r.grolifant.api.v4.AbstractCombinedProjectTaskExtension
+import org.ysb33r.grolifant.api.v4.TaskProvider
 
 import java.util.concurrent.Callable
 
-import static org.ysb33r.grolifant.api.StringUtils.stringize
+import static com.github.jrubygradle.JRubyPlugin.TASK_GROUP_NAME
+import static org.ysb33r.grolifant.api.v4.StringUtils.stringize
 
 /**
  * Class providing the jruby DSL extension to the Gradle build script.
@@ -50,7 +61,7 @@ import static org.ysb33r.grolifant.api.StringUtils.stringize
  */
 @CompileStatic
 class JRubyPluginExtension extends AbstractCombinedProjectTaskExtension {
-    public static final String DEFAULT_JRUBY_VERSION = '9.2.7.0'
+    public static final String DEFAULT_JRUBY_VERSION = '9.2.9.0'
 
     public static final String NAME = 'jruby'
 
@@ -60,6 +71,14 @@ class JRubyPluginExtension extends AbstractCombinedProjectTaskExtension {
      */
     JRubyPluginExtension(Project p) {
         super(p)
+        this.jrubyVersion = DEFAULT_JRUBY_VERSION
+        this.repositories = p.repositories
+        this.dependencies = p.dependencies
+        this.configurations = p.configurations
+        this.providers = p.providers
+        this.logger = p.logger
+        this.tasks = p.tasks
+        this.projectOperations = ProjectOperations.create(p)
     }
 
     /** Task extension constructor
@@ -70,6 +89,13 @@ class JRubyPluginExtension extends AbstractCombinedProjectTaskExtension {
      */
     JRubyPluginExtension(JRubyAwareTask t) {
         super(t, NAME)
+        this.repositories = t.project.repositories
+        this.dependencies = t.project.dependencies
+        this.configurations = t.project.configurations
+        this.providers = t.project.providers
+        this.logger = t.project.logger
+        this.tasks = t.project.tasks
+        this.projectOperations = ProjectOperations.create(t.project)
     }
 
     /** The default version of jruby that will be used.
@@ -86,7 +112,8 @@ class JRubyPluginExtension extends AbstractCombinedProjectTaskExtension {
 
     /** Set a new JRuby version to use.
      *
-     * @param v New version to be used. Can be of anything that be be resolved by {@link StringUtils.stringize ( Object o )}
+     * @param v New version to be used. Can be of anything that be be resolved by
+     * {@link org.ysb33r.grolifant.api.v4.StringUtils#stringize ( Object o )}
      *
      * @since 2.0
      */
@@ -96,7 +123,8 @@ class JRubyPluginExtension extends AbstractCombinedProjectTaskExtension {
 
     /** Set a new JRuby version to use.
      *
-     * @param v New version to be used. Can be of anything that be be resolved by {@link StringUtils.stringize ( Object o )}
+     * @param v New version to be used. Can be of anything that be be resolved by
+     * {@link org.ysb33r.grolifant.api.v4.StringUtils#stringize ( Object o )}
      *
      * @since 2.0
      */
@@ -152,8 +180,8 @@ class JRubyPluginExtension extends AbstractCombinedProjectTaskExtension {
                         'It is recommended that you explicitly declare your repositories rather than rely on ' +
                         'this functionality.'
                 )
-                project.repositories.jcenter()
-                ((ExtensionAware) (project.repositories)).extensions.getByType(RepositoryHandlerExtension).gems()
+                repositories.jcenter()
+                ((ExtensionAware) (repositories)).extensions.getByType(RepositoryHandlerExtension).gems()
             } else {
                 deprecated(
                     'jruby.defaultRepositories are no longer switched on by default - you can safely remove ' +
@@ -206,7 +234,7 @@ class JRubyPluginExtension extends AbstractCombinedProjectTaskExtension {
 
         List<Dependency> deps = [createDependency(jrubyCompleteDep)]
 
-        Configuration configuration = project.configurations.detachedConfiguration(
+        Configuration configuration = configurations.detachedConfiguration(
             deps.toArray() as Dependency[]
         )
 
@@ -220,16 +248,16 @@ class JRubyPluginExtension extends AbstractCombinedProjectTaskExtension {
     /** Sets the GEM configuration.
      *
      * @param c Configuration instance, Character sequence as configuration name, or a {@code Provider<Configuration}.
-             */
+              */
     void setGemConfiguration(final Object c) {
         switch (c) {
             case Configuration:
-                this.gemConfiguration = project.provider({ -> c } as Callable<Configuration>)
+                this.gemConfiguration = providers.provider({ -> c } as Callable<Configuration>)
                 registerPrepareTask(((Configuration) c).name)
                 break
             case CharSequence:
                 this.gemConfiguration = project.provider(
-                    { -> project.configurations.getByName(c.toString()) } as Callable<Configuration>
+                    { -> configurations.getByName(c.toString()) } as Callable<Configuration>
                 )
                 registerPrepareTask(c.toString())
                 break
@@ -247,7 +275,7 @@ class JRubyPluginExtension extends AbstractCombinedProjectTaskExtension {
     /** Declarative way of setting the GEM configuration.
      *
      * @param c Configuration instance, Character sequence as configuration name, or a {@code Provider<Configuration}.
-             */
+              */
     void gemConfiguration(final Object c) {
         setGemConfiguration(c)
     }
@@ -305,29 +333,58 @@ class JRubyPluginExtension extends AbstractCombinedProjectTaskExtension {
     }
 
     private void deprecated(String msg) {
-        project.logger.info("Deprecated feature in ${NAME} extension. ${msg}")
+        logger.info("Deprecated feature in ${NAME} extension. ${msg}")
     }
 
     private Dependency createDependency(final String notation, final Closure configurator = null) {
         if (configurator) {
-            project.dependencies.create(notation, configurator)
+            dependencies.create(notation, configurator)
         } else {
-            project.dependencies.create(notation)
+            dependencies.create(notation)
         }
     }
 
     private void registerPrepareTask(final String configurationName) {
-        JRubyPrepareUtils.registerPrepareTask(project, configurationName)
-        this.gemPrepareTaskName = JRubyPrepareUtils.taskName(configurationName)
+        final String taskName = JRubyPrepareUtils.taskName(configurationName)
+        final String gemDir = JRubyPrepareUtils.gemRelativePath(configurationName)
+
+        try {
+            TaskProvider.taskByName(tasks, taskName)
+        } catch (UnknownTaskException e) {
+            TaskProvider<JRubyPrepare> prepare = TaskProvider.registerTask(tasks, taskName, JRubyPrepare)
+            ProjectOperations po = this.projectOperations
+            Action<JRubyPrepare> configurator = new Action<JRubyPrepare>() {
+                void execute(JRubyPrepare jp) {
+                    jp.with {
+                        group = TASK_GROUP_NAME
+                        description = "Prepare the gems/jars from the `${configurationName}` dependencies"
+                        dependencies(project.configurations.getByName(configurationName))
+                        outputDir =  { ->
+                            po.buildDirDescendant(gemDir)
+                        }
+                    }
+                }
+            }
+            prepare.configure(configurator as Action<? extends Task>)
+            prepare
+        }
+
+        this.gemPrepareTaskName = taskName//JRubyPrepareUtils.taskName(configurationName)
     }
 
     private static final String JRUBY_COMPLETE_DEPENDENCY = 'org.jruby:jruby-complete'
-    private Object jrubyVersion = DEFAULT_JRUBY_VERSION
+    private Object jrubyVersion
 
     private Provider<Configuration> gemConfiguration
     private String gemPrepareTaskName
     private boolean taskResolutionStrategiesOnly = false
     private final List<Action<ResolutionStrategy>> resolutionsStrategies = []
-
+    private final ProjectOperations projectOperations
+    private final RepositoryHandler repositories
+    private final ConfigurationContainer configurations
+    private final DependencyHandler dependencies
+    private final ProviderFactory providers
+    private final TaskContainer tasks
+    private final Logger logger
     private boolean defaultRepositoriesCalled = false
 }

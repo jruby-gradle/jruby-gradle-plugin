@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014-2019, R. Tyler Croy <rtyler@brokenco.de>,
+ * Copyright (c) 2014-2020, R. Tyler Croy <rtyler@brokenco.de>,
  *     Schalk Cronje <ysb33r@gmail.com>, Christian Meier, Lookout, Inc.
  *
  * Permission is hereby granted, free of charge, to any person obtaining
@@ -40,6 +40,8 @@ import static com.github.jrubygradle.api.gems.GemVersion.singleGemVersionFromMul
  */
 @CompileStatic
 class GemToIvy {
+
+    public static final String JAVA_PLATFORM = 'java'
 
     /** Create a converter from GEM metadata to Ivy metadata.
      *
@@ -145,7 +147,7 @@ class GemToIvy {
         writer.toString()
     }
 
-    /** Writes the SHA1 checksum of the {@code ivy.xmnl} file.
+    /** Writes the SHA1 checksum of the {@code ivy.xml} file.
      *
      * @param ivyXml Fle containing the {@code ivy.xml} content/
      * @return Checksum file.
@@ -156,7 +158,6 @@ class GemToIvy {
         shaFile
     }
 
-    private static final String JAVA_PLATFORM = 'java'
     private final String serverUri
     private final String org = 'rubygems'
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014-2019, R. Tyler Croy <rtyler@brokenco.de>,
+ * Copyright (c) 2014-2020, R. Tyler Croy <rtyler@brokenco.de>,
  *     Schalk Cronje <ysb33r@gmail.com>, Christian Meier, Lookout, Inc.
  *
  * Permission is hereby granted, free of charge, to any person obtaining
@@ -30,6 +30,7 @@ import org.gradle.api.Plugin
 import org.gradle.api.Project
 import org.gradle.api.artifacts.Configuration
 import org.gradle.api.plugins.ExtensionAware
+import org.ysb33r.grolifant.api.core.ProjectOperations
 
 /** Provides only a repository handler extensiosn for looking up rubygem
  * metadata.
@@ -42,6 +43,7 @@ import org.gradle.api.plugins.ExtensionAware
 class JRubyCorePlugin implements Plugin<Project> {
     @Override
     void apply(Project project) {
+        ProjectOperations.maybeCreateExtension(project)
         GemResolverStrategy gemGroups = project.extensions.create(GemResolverStrategy.NAME, GemResolverStrategy)
 
         ((ExtensionAware) project.repositories).extensions.create(

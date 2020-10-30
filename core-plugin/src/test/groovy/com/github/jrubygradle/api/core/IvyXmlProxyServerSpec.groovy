@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014-2019, R. Tyler Croy <rtyler@brokenco.de>,
+ * Copyright (c) 2014-2020, R. Tyler Croy <rtyler@brokenco.de>,
  *     Schalk Cronje <ysb33r@gmail.com>, Christian Meier, Lookout, Inc.
  *
  * Permission is hereby granted, free of charge, to any person obtaining
@@ -42,7 +42,12 @@ class IvyXmlProxyServerSpec extends Specification {
     TemporaryFolder projectRoot
 
     void setup() {
-        server = new IvyXmlRatpackProxyServer(projectRoot.root, 'https://rubygems.org'.toURI(), 'rubygems')
+        server = new IvyXmlRatpackProxyServer(
+            projectRoot.root,
+            'https://rubygems.org'.toURI(),
+            'rubygems',
+            new GemRepositoryConfiguration()
+        )
         server.run()
         httpBuilder = OkHttpBuilder.configure {
             request.uri = server.bindAddress

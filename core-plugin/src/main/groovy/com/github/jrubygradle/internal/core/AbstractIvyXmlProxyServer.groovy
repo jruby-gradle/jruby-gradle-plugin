@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014-2019, R. Tyler Croy <rtyler@brokenco.de>,
+ * Copyright (c) 2014-2020, R. Tyler Croy <rtyler@brokenco.de>,
  *     Schalk Cronje <ysb33r@gmail.com>, Christian Meier, Lookout, Inc.
  *
  * Permission is hereby granted, free of charge, to any person obtaining
@@ -24,6 +24,7 @@
 package com.github.jrubygradle.internal.core
 
 import com.github.jrubygradle.api.core.ApiException
+import com.github.jrubygradle.api.core.GemRepositoryConfiguration
 import com.github.jrubygradle.api.core.IvyXmlProxyServer
 import com.github.jrubygradle.api.core.RubyGemQueryRestApi
 import com.github.jrubygradle.api.gems.GemInfo
@@ -94,12 +95,19 @@ abstract class AbstractIvyXmlProxyServer implements IvyXmlProxyServer {
      * @param cache Root directory for local Ivy XML cache.
      * @param serverUri URI of remote Rubygems proxy.
      * @param group Group that will be associated with the Rubygems proxy.
+     * @param grc       Additional configuration regarding remote GEM server
      */
-    protected AbstractIvyXmlProxyServer(File cache, URI serverUri, String group) {
+    protected AbstractIvyXmlProxyServer(
+        File cache,
+        URI serverUri,
+        String group,
+        GemRepositoryConfiguration grc
+    ) {
         localCachePath = cache
         gemToIvy = new GemToIvy(serverUri)
         api = new DefaultRubyGemRestApi(serverUri)
         this.group = group
+        this.configuration = grc
     }
 
     @Synchronized
@@ -170,7 +178,7 @@ abstract class AbstractIvyXmlProxyServer implements IvyXmlProxyServer {
     protected String getDirectoryListing(String grp, String name) throws NotFound {
         if (inGroups(grp)) {
             debug "Request to find all versions for ${grp}:${name}"
-            List<String> versions = api.allVersions(name)
+            List<String> versions = api.allVersions(name, configuration.prerelease)
             debug "Got versions ${versions.join(', ')}"
             revisionsAsHtmlDirectoryListing(versions)
         } else {
@@ -185,7 +193,7 @@ abstract class AbstractIvyXmlProxyServer implements IvyXmlProxyServer {
 
     private String getGemQueryRevisionFromIvy(String gemName, String revisionPattern) {
         GemVersion version = gemVersionFromGradleIvyRequirement(revisionPattern)
-        version.highOpenEnded ? api.latestVersion(gemName) : version.high
+        version.highOpenEnded ? api.latestVersion(gemName, configuration.prerelease) : version.high
     }
 
     private void debug(String text) {
@@ -203,4 +211,5 @@ abstract class AbstractIvyXmlProxyServer implements IvyXmlProxyServer {
     private final GemToIvy gemToIvy
     private final RubyGemQueryRestApi api
     private final String group
+    private final GemRepositoryConfiguration configuration
 }
