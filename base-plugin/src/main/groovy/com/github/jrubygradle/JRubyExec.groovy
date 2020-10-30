@@ -33,14 +33,16 @@ import org.gradle.api.provider.Provider
 import org.gradle.api.tasks.Input
 import org.gradle.api.tasks.JavaExec
 import org.gradle.api.tasks.Optional
+import org.gradle.api.tasks.TaskContainer
 import org.gradle.process.JavaExecSpec
 import org.gradle.util.GradleVersion
+import org.ysb33r.grolifant.api.core.ProjectOperations
 
 import java.util.concurrent.Callable
 
 import static com.github.jrubygradle.internal.JRubyExecUtils.prepareJRubyEnvironment
 import static com.github.jrubygradle.internal.JRubyExecUtils.resolveScript
-import static org.ysb33r.grolifant.api.StringUtils.stringize
+import static org.ysb33r.grolifant.api.v4.StringUtils.stringize
 
 /** Runs a ruby script using JRuby
  *
@@ -64,8 +66,10 @@ class JRubyExec extends JavaExec implements JRubyAwareTask, JRubyExecSpec {
 
     JRubyExec() {
         super()
-        super.setMain MAIN_CLASS
+        super.setMain(MAIN_CLASS)
         this.jruby = extensions.create(JRubyPluginExtension.NAME, JRubyPluginExtension, this)
+        this.projectOperations = ProjectOperations.create(project)
+        this.tasks = project.tasks
 
         inputs.property 'jrubyver', { JRubyPluginExtension jruby ->
             jruby.jrubyVersion
@@ -76,14 +80,20 @@ class JRubyExec extends JavaExec implements JRubyAwareTask, JRubyExecSpec {
         }.curry(this.jruby)
 
         if (GradleVersion.current() >= GradleVersion.version('4.10')) {
-            dependsOn(project.provider({ JRubyPluginExtension jpe ->
-                project.tasks.getByName(jpe.gemPrepareTaskName)
-            }.curry(this.jruby)))
+            dependsOn(project.provider({ JRubyPluginExtension jpe, TaskContainer t ->
+                t.getByName(jpe.gemPrepareTaskName)
+            }.curry(this.jruby, this.tasks)))
         } else {
             project.afterEvaluate({ Task t, JRubyPluginExtension jpe ->
                 t.dependsOn(jpe.gemPrepareTaskName)
             }.curry(this, this.jruby))
         }
+
+        Callable<File> resolveGemWorkDir = { JRubyPluginExtension jpe, TaskContainer t ->
+            ((JRubyPrepare) t.getByName(jpe.gemPrepareTaskName)).outputDir
+        }.curry(jruby, tasks) as Callable<File>
+
+        this.gemWorkDir = project.provider(resolveGemWorkDir)
     }
 
     /** Script to execute.
@@ -92,7 +102,7 @@ class JRubyExec extends JavaExec implements JRubyAwareTask, JRubyExecSpec {
     @Optional
     @Input
     File getScript() {
-        resolveScript(project, this.script)
+        resolveScript(projectOperations, this.script)
     }
 
     /** Returns a list of script arguments
@@ -176,17 +186,13 @@ class JRubyExec extends JavaExec implements JRubyAwareTask, JRubyExecSpec {
      * @return Provider of GEM working directory.
      */
     Provider<File> getGemWorkDir() {
-        Callable<File> resolveGemWorkDir = { JRubyPluginExtension jpe ->
-            ((JRubyPrepare) project.tasks.getByName(jpe.gemPrepareTaskName)).outputDir
-        }.curry(jruby) as Callable<File>
-
-        project.provider(resolveGemWorkDir)
+        this.gemWorkDir
     }
 
     /** If it is required that a JRubyExec task needs to be executed with a different version of JRuby that the
      * globally configured one, it can be done by setting it here.
      *
-     * @deprecated Use {@code jruby.getJrubyVersion( )} instead.
+     * @deprecated Use{@code jruby.getJrubyVersion( )} instead.
      *
      */
     @Deprecated
@@ -256,7 +262,7 @@ class JRubyExec extends JavaExec implements JRubyAwareTask, JRubyExecSpec {
     void exec() {
         File gemDir = getGemWorkDir().get()
         setEnvironment prepareJRubyEnvironment(this.environment, this.inheritRubyEnv, gemDir)
-        super.classpath jruby.jrubyConfiguration
+        super.classpath(jruby.jrubyConfiguration)
         super.setArgs(getArgs())
         super.exec()
     }
@@ -318,5 +324,8 @@ class JRubyExec extends JavaExec implements JRubyAwareTask, JRubyExecSpec {
     private Object script
     private final List<Object> scriptArgs = []
     private final List<Object> jrubyArgs = []
+    private final ProjectOperations projectOperations
+    private final TaskContainer tasks
+    private final Provider<File> gemWorkDir
 
 }

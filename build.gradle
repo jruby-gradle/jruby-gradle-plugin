@@ -33,7 +33,6 @@ allprojects {
 }
 
 subprojects {
-
     apply plugin: 'maven'
 
     repositories {
@@ -55,8 +54,8 @@ subprojects {
         dependencies {
             compile localGroovy()
             compile gradleApi()
-            compile 'org.ysb33r.gradle:grolifant:0.12'
-            gradleTestRuntime 'org.ysb33r.gradle:grolifant:0.12'
+            compile "org.ysb33r.gradle:grolifant50:${grolifantVersion}"
+            gradleTestRuntime "org.ysb33r.gradle:grolifant50:${grolifantVersion}"
         }
 
         codenarc {
@@ -79,9 +78,9 @@ subprojects {
         gradleTest {
             // https://github.com/jruby-gradle/jruby-gradle-plugin/issues/346
             if (JavaVersion.current().java11) {
-                versions '5.0', '5.4.1', '6.0.1'
+                versions '5.0', '5.4.1', '6.0.1', '6.7'
             } else {
-                versions '4.10.2', '5.3.1', '6.0.1'
+                versions '4.10.2', '5.3.1', '6.0.1', '6.7'
 
                 if(project.name == 'jruby-gradle-core-plugin' ) {
                     versions '4.3'

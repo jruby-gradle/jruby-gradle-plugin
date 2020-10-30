@@ -35,6 +35,7 @@ import org.gradle.api.tasks.InputFiles
 import org.gradle.api.tasks.Internal
 import org.gradle.api.tasks.Optional
 import org.gradle.api.tasks.TaskAction
+import org.ysb33r.grolifant.api.core.ProjectOperations
 
 import static com.github.jrubygradle.api.gems.GemOverwriteAction.SKIP
 import static com.github.jrubygradle.api.gems.GemUtils.extractGems
@@ -52,6 +53,10 @@ import static com.github.jrubygradle.api.gems.GemUtils.setupJars
 abstract class AbstractJRubyPrepare extends DefaultTask implements JRubyAwareTask {
 
     protected AbstractJRubyPrepare() {
+        this.projectOperations = ProjectOperations.find(project)
+        this.outputDir = {
+            ProjectOperations projectOperations -> projectOperations.buildDirDescendant('.gems')
+        }.curry(this.projectOperations)
         outputs.dir({ AbstractJRubyPrepare t -> new File(t.getOutputDir(), 'gems') }.curry(this))
     }
 
@@ -59,7 +64,7 @@ abstract class AbstractJRubyPrepare extends DefaultTask implements JRubyAwareTas
      */
     @Internal
     File getOutputDir() {
-        project.file(this.outputDir)
+        projectOperations.file(this.outputDir)
     }
 
     /** Sets the output directory
@@ -84,7 +89,7 @@ abstract class AbstractJRubyPrepare extends DefaultTask implements JRubyAwareTas
      */
     @InputFiles
     FileCollection gemsAsFileCollection() {
-        return GemUtils.getGems(project.files(this.dependencies))
+        return GemUtils.getGems(projectOperations.files(this.dependencies))
     }
 
     @Internal
@@ -97,6 +102,16 @@ abstract class AbstractJRubyPrepare extends DefaultTask implements JRubyAwareTas
     @Optional
     void dependencies(Object... f) {
         this.dependencies.addAll(f.toList())
+    }
+
+    /**
+     *
+     * @return Configuration Cache safe project operations service.
+     *
+     * @since 2.1.0
+     */
+    protected ProjectOperations getProjectOperations() {
+        this.projectOperations
     }
 
     /** Location of {@code jruby-complete} JAR.
@@ -130,6 +145,7 @@ abstract class AbstractJRubyPrepare extends DefaultTask implements JRubyAwareTas
         }
     }
 
-    private Object outputDir = { -> "${project.buildDir}/.gems" }
+    private Object outputDir
+    private final ProjectOperations projectOperations
 }
 

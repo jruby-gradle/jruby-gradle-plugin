@@ -65,7 +65,7 @@ class GemResolverStrategy {
      * @param configs Configurations to be excluded
      */
     void excludeConfigurations(Configuration... configs) {
-        this.excludedConfigurations.addAll(configs*.name)
+        this.excludedConfigurations.addAll(configs*.name as Iterable<String>)
     }
 
     /** Exclude a configuration from being resolved using the GEM
@@ -132,7 +132,7 @@ class GemResolverStrategy {
         }
     }
 
-    private final Set<Matcher> excludedModules = [].toSet()
-    private final Set<String> excludedConfigurations = [].toSet()
+    private final Set<Matcher> excludedModules = [].toSet() as Set<Matcher>
+    private final Set<String> excludedConfigurations = [].toSet() as Set<String>
     private final Set<String> groups = [RepositoryHandlerExtension.DEFAULT_GROUP_NAME].toSet()
 }

@@ -24,20 +24,17 @@
 package com.github.jrubygradle.internal
 
 import com.github.jrubygradle.JRubyPlugin
-import com.github.jrubygradle.JRubyPluginExtension
-import com.github.jrubygradle.api.gems.GemOverwriteAction
-import com.github.jrubygradle.api.gems.GemUtils
 import groovy.transform.CompileDynamic
 import groovy.transform.CompileStatic
 import org.gradle.api.InvalidUserDataException
-import org.gradle.api.Project
 import org.gradle.api.artifacts.Configuration
 import org.ysb33r.grolifant.api.OperatingSystem
-import org.ysb33r.grolifant.api.StringUtils
+import org.ysb33r.grolifant.api.core.ProjectOperations
+import org.ysb33r.grolifant.api.v4.StringUtils
 
 import java.util.regex.Matcher
 
-import static org.ysb33r.grolifant.api.StringUtils.stringize
+import static org.ysb33r.grolifant.api.v4.StringUtils.stringize
 
 /** Utilities for preparation or executing JRuby.
  *
@@ -120,17 +117,17 @@ class JRubyExecUtils {
 
     /** Resolves a script location object.
      *
-     * @paream project Project context for script.
+     * @paream project Project operations for script.
      * @param script Script to resolve.
      * @return Resolved script location. Will be {@code null} if {@code script == null},
      */
-    static File resolveScript(Project project, Object script) {
+    static File resolveScript(ProjectOperations projectOperations, Object script) {
         if (script) {
             File intermediate = script instanceof File ? (File) script : new File(stringize(script))
             if (intermediate.absolute) {
                 intermediate
             } else {
-                intermediate.parentFile ? project.file(script) : intermediate
+                intermediate.parentFile ? projectOperations.file(script) : intermediate
             }
         } else {
             null
@@ -217,58 +214,45 @@ class JRubyExecUtils {
         return path.absolutePath + File.pathSeparatorChar + originalPath
     }
 
-    /**
-     * Update the given configuration on the project with the appropriate versions
-     * of JRuby and supplemental dependencies to execute JRuby successfully
-     */
-    static void updateJRubyDependenciesForConfiguration(Project project, String configuration, String version) {
-        Configuration c = project.configurations.findByName(configuration)
-
-        /* Only define this dependency if we don't already have it */
-        if (!(c.dependencies.find { it.name == JRUBY_COMPLETE })) {
-            project.dependencies.add(configuration, "org.jruby:jruby-complete:${version}")
-        }
-    }
-
-    /**
-     * Prepare the Ruby and Java dependencies for the configured configuration
-     *
-     * This method will determine the appropriate dependency overwrite behavior
-     * from the Gradle invocation. In effect, if the --refresh-dependencies flag
-     * is used, already installed gems will be overwritten.
-     *
-     * @param project The associated Gradle project.
-     * @param gemWorkDir THe GEM unpack/working directory.
-     * @param jruby The associated JRuby project or task extension.
-     * @param gemConfiguration Configuration which contains GEMs for unpacking.
-     * @param overwrite Overwrite mode.
-     *
-     * @since 2.0
-     */
-    static void prepareDependencies(
-        Project project,
-        File gemWorkDir,
-        JRubyPluginExtension jruby,
-        Configuration gemConfiguration,
-        GemOverwriteAction overwrite
-    ) {
-        File gemDir = gemWorkDir.absoluteFile
-
-        gemDir.mkdirs()
-
-        GemUtils.extractGems(
-            project,
-            jruby.jrubyConfiguration,
-            gemConfiguration,
-            gemDir,
-            overwrite
-        )
-        GemUtils.setupJars(
-            gemConfiguration,
-            gemDir,
-            overwrite
-        )
-    }
+//    /**
+//     * Prepare the Ruby and Java dependencies for the configured configuration
+//     *
+//     * This method will determine the appropriate dependency overwrite behavior
+//     * from the Gradle invocation. In effect, if the --refresh-dependencies flag
+//     * is used, already installed gems will be overwritten.
+//     *
+//     * @param project The associated Gradle project.
+//     * @param gemWorkDir THe GEM unpack/working directory.
+//     * @param jruby The associated JRuby project or task extension.
+//     * @param gemConfiguration Configuration which contains GEMs for unpacking.
+//     * @param overwrite Overwrite mode.
+//     *
+//     * @since 2.0
+//     */
+//    static void prepareDependencies(
+//        Project project,
+//        File gemWorkDir,
+//        JRubyPluginExtension jruby,
+//        Configuration gemConfiguration,
+//        GemOverwriteAction overwrite
+//    ) {
+//        File gemDir = gemWorkDir.absoluteFile
+//
+//        gemDir.mkdirs()
+//
+//        GemUtils.extractGems(
+//            project,
+//            jruby.jrubyConfiguration,
+//            gemConfiguration,
+//            gemDir,
+//            overwrite
+//        )
+//        GemUtils.setupJars(
+//            gemConfiguration,
+//            gemDir,
+//            overwrite
+//        )
+//    }
 
     /** Prepare en environment which can be used to execute JRuby.
      *

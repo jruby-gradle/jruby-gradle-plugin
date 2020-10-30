@@ -23,8 +23,8 @@
  */
 package com.github.jrubygradle.api.gems
 
-import groovy.transform.CompileDynamic
 import groovy.transform.CompileStatic
+import groovy.util.logging.Slf4j
 import org.gradle.api.Action
 import org.gradle.api.Project
 import org.gradle.api.artifacts.Configuration
@@ -33,9 +33,9 @@ import org.gradle.api.file.CopySpec
 import org.gradle.api.file.DuplicateFileCopyingException
 import org.gradle.api.file.FileCollection
 import org.gradle.process.JavaExecSpec
-import org.ysb33r.grolifant.api.OperatingSystem
+import org.ysb33r.grolifant.api.core.OperatingSystem
+import org.ysb33r.grolifant.api.core.ProjectOperations
 
-import static com.github.jrubygradle.api.gems.GemOverwriteAction.SKIP
 import static com.github.jrubygradle.api.gems.GemOverwriteAction.FAIL
 import static com.github.jrubygradle.api.gems.GemOverwriteAction.OVERWRITE
 
@@ -47,6 +47,7 @@ import static com.github.jrubygradle.api.gems.GemOverwriteAction.OVERWRITE
  * @since 2.0
  */
 @CompileStatic
+@Slf4j
 class GemUtils {
     public static final String JRUBY_MAINCLASS = 'org.jruby.Main'
     public static final String JRUBY_ARCHIVE_NAME = 'jruby-complete'
@@ -69,7 +70,10 @@ class GemUtils {
      * @param gem Gem file to extract.
      * @param destDir Directory to extract to.
      * @param overwrite Allow overwrite of an existing gem folder.
+     * @deprecated Use the version that takes a {@link ProjectOperations} instead as it will be safe when
+     * configuration cache is active.
      */
+    @Deprecated
     static void extractGem(
         Project project,
         File jRubyClasspath,
@@ -77,7 +81,27 @@ class GemUtils {
         File destDir,
         GemOverwriteAction overwrite
     ) {
+        ProjectOperations po = ProjectOperations.find(project)
+        extractGems(po, jRubyClasspath, po.files(gem), destDir, overwrite)
+    }
 
+    /** Extracts a gem to a folder
+     *
+     * @param project {@link ProjectOperations} instance.
+     * @param jRubyClasspath The path to the {@code jruby-complete} jar.
+     * @param gem Gem file to extract.
+     * @param destDir Directory to extract to.
+     * @param overwrite Allow overwrite of an existing gem folder.
+     *
+     * @since 2.1.0
+     */
+    static void extractGem(
+        ProjectOperations project,
+        File jRubyClasspath,
+        File gem,
+        File destDir,
+        GemOverwriteAction overwrite
+    ) {
         extractGems(project, jRubyClasspath, project.files(gem), destDir, overwrite)
     }
 
@@ -88,9 +112,32 @@ class GemUtils {
      * @param gems GEMs to install.
      * @param destDir Directory to extract to.
      * @param overwrite Allow overwrite of an existing gem folder.
+     *
+     * @deprecated Use the version that takes a {@Link ProjectOperations} instead.
      */
+    @Deprecated
     static void extractGems(
         Project project,
+        File jRubyClasspath,
+        FileCollection gems,
+        File destDir,
+        GemOverwriteAction overwrite
+    ) {
+        extractGems(ProjectOperations.find(project), jRubyClasspath, gems, destDir, overwrite)
+    }
+
+    /** Extracts and install a collection of GEMs.
+     *
+     * @param project {@link ProjectOperations} instance.
+     * @param jRubyClasspath The path to the {@code jruby-complete} jar.
+     * @param gems GEMs to install.
+     * @param destDir Directory to extract to.
+     * @param overwrite Allow overwrite of an existing gem folder.
+     *
+     * @since 2.1.0
+     */
+    static void extractGems(
+        ProjectOperations project,
         File jRubyClasspath,
         FileCollection gems,
         File destDir,
@@ -107,7 +154,7 @@ class GemUtils {
             File extractDirForJava = new File(destDir, "gems/${gemName}-java")
 
             switch (overwrite) {
-                case SKIP:
+                case GemOverwriteAction.SKIP:
                     if (extractDir.exists() || extractDirForJava.exists()) {
                         return
                     }
@@ -125,10 +172,10 @@ class GemUtils {
         }
 
         if (gemsToProcess.size()) {
-            deletes.each { project.delete it }
+            deletes.each { project.delete(it) }
             destDir.mkdirs()
 
-            project.logger.info("Installing ${gemsToProcess*.name.join(',')}")
+            log.info("Installing ${gemsToProcess*.name.join(',')}")
 
             project.javaexec { JavaExecSpec spec ->
                 spec.with {
@@ -189,9 +236,36 @@ class GemUtils {
      * @param gemConfig Configuration containing GEMs
      * @param destDir Directory to extract to
      * @param action Allow overwrite of an existing gem folder
+     * @deprecated Use the version that takes a {@Link ProjectOperations} instead
      */
+    @Deprecated
     static void extractGems(
         Project project,
+        Configuration jRubyConfig,
+        Configuration gemConfig,
+        File destDir,
+        GemOverwriteAction action) {
+        extractGems(
+            ProjectOperations.find(project),
+            jRubyConfig,
+            gemConfig,
+            destDir,
+            action
+        )
+    }
+
+    /** Extract Gems from a given configuration.
+     *
+     * @param projectOperations Project instance
+     * @param jRubyClasspath Where to find the jruby-complete jar
+     * @param gemConfig Configuration containing GEMs
+     * @param destDir Directory to extract to
+     * @param action Allow overwrite of an existing gem folder
+     *
+     * @since 1.0
+     */
+    static void extractGems(
+        ProjectOperations projectOperations,
         Configuration jRubyConfig,
         Configuration gemConfig,
         File destDir,
@@ -204,7 +278,7 @@ class GemUtils {
                 "Cannot find ${JRUBY_ARCHIVE_NAME}. Classpath contains ${cp.join(':')}"
             )
         }
-        extractGems(project, jRubyClasspath, project.files(gemConfig.files), destDir, action)
+        extractGems(projectOperations, jRubyClasspath, projectOperations.files(gemConfig.files), destDir, action)
     }
 
     /** Write a JARs lock file if the content has changed.
@@ -325,27 +399,47 @@ class GemUtils {
      * @param Additional properties to control behaviour
      * @param dir The source of the GEM files
      * @return Returns a CopySpec which can be attached as a child to another object that implements a CopySpec
-     * @since 0.1.2
+     * @since 0.1.2*
+     * @deprecated Use the version that takes a {@link ProjectOperations}.
      */
-    @CompileDynamic
+    @Deprecated
     static CopySpec gemCopySpec(Map properties = [:], Project project, Object dir) {
+        gemCopySpec(properties, ProjectOperations.find(project), dir)
+    }
+
+    /** Adds a GEM CopySpec to an archive
+     *
+     * The following are supported as properties:
+     * <ul>
+     * <li>fullGem (boolean) - Copy all of the GEM content, not just a minimal subset</li>
+     * <li>subfolder (Object) - Adds an additional subfolder into the GEM
+     * </ul>
+     *
+     * @param Additional properties to control behaviour
+     * @param dir The source of the GEM files
+     * @return Returns a CopySpec which can be attached as a child to another object that implements a CopySpec
+     * @since 1.0
+     */
+    static CopySpec gemCopySpec(Map properties = [:], ProjectOperations projectOperations, Object dir) {
         boolean fullGem = properties['fullGem']
         String subFolder = properties['subfolder']
 
-        project.copySpec(new Action<CopySpec>() {
+        projectOperations.copySpec(new Action<CopySpec>() {
             void execute(CopySpec spec) {
                 spec.with {
-                    from(dir) {
-                        include EVERYTHING
-                        // TODO have some standard which is bin/*, gems/**
-                        // specifications/*
-                        if (!fullGem) {
-                            exclude 'cache/**'
-                            exclude 'gems/*/test/**'
-                            exclude 'gems/*/tests/**'
-                            exclude 'gems/*/spec/**'
-                            exclude 'gems/*/specs/**'
-                            exclude 'build_info'
+                    from(dir) { CopySpec cs ->
+                        cs.with {
+                            include EVERYTHING
+                            // TODO have some standard which is bin/*, gems/**
+                            // specifications/*
+                            if (!fullGem) {
+                                exclude 'cache/**'
+                                exclude 'gems/*/test/**'
+                                exclude 'gems/*/tests/**'
+                                exclude 'gems/*/spec/**'
+                                exclude 'gems/*/specs/**'
+                                exclude 'build_info'
+                            }
                         }
                     }
                     if (subFolder) {
@@ -356,8 +450,17 @@ class GemUtils {
         })
     }
 
+    @Deprecated
     static CopySpec jarCopySpec(Project project, Object dir) {
         project.copySpec { CopySpec spec ->
+            spec.with {
+                from(dir) { include EVERYTHING }
+            }
+        }
+    }
+
+    static CopySpec jarCopySpec(ProjectOperations projectOperations, Object dir) {
+        projectOperations.copySpec { CopySpec spec ->
             spec.with {
                 from(dir) { include EVERYTHING }
             }
