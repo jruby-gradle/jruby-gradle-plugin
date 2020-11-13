@@ -34,7 +34,7 @@ import groovy.transform.CompileStatic
 import groovy.transform.InheritConstructors
 import groovy.transform.Synchronized
 import groovy.util.logging.Slf4j
-import org.ysb33r.grolifant.api.ExclusiveFileAccess
+import org.ysb33r.grolifant.api.core.ExclusiveFileAccess
 
 import java.nio.file.Files
 import java.nio.file.Path
