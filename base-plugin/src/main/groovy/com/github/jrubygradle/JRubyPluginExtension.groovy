@@ -256,7 +256,7 @@ class JRubyPluginExtension extends AbstractCombinedProjectTaskExtension {
                 registerPrepareTask(((Configuration) c).name)
                 break
             case CharSequence:
-                this.gemConfiguration = project.provider(
+                this.gemConfiguration = projectOperations.provider(
                     { -> configurations.getByName(c.toString()) } as Callable<Configuration>
                 )
                 registerPrepareTask(c.toString())
