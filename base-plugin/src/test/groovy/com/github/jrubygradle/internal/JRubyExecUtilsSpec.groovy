@@ -24,7 +24,7 @@
 package com.github.jrubygradle.internal
 
 import org.gradle.api.InvalidUserDataException
-import org.ysb33r.grolifant.api.OperatingSystem
+import org.ysb33r.grolifant.api.core.OperatingSystem
 import spock.lang.Issue
 import spock.lang.Specification
 

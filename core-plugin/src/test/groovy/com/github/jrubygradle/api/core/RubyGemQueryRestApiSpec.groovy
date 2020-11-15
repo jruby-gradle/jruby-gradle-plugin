@@ -24,7 +24,7 @@
 package com.github.jrubygradle.api.core
 
 import com.github.jrubygradle.internal.core.DefaultRubyGemRestApi
-import org.ysb33r.grolifant.api.Version
+import org.ysb33r.grolifant.api.core.Version
 import spock.lang.Specification
 
 class RubyGemQueryRestApiSpec extends Specification {

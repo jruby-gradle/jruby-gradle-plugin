@@ -136,7 +136,7 @@ abstract class AbstractJRubyPrepare extends DefaultTask implements JRubyAwareTas
     void exec() {
         File out = getOutputDir()
         File jrubyJar = jrubyJarLocation.get()
-        extractGems(project, jrubyJar, gemsAsFileCollection(), out, SKIP)
+        extractGems(projectOperations, jrubyJar, gemsAsFileCollection(), out, SKIP)
 
         dependencies.findAll {
             it instanceof Configuration

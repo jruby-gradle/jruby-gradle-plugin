@@ -23,28 +23,34 @@
  */
 package com.github.jrubygradle.jar
 
+import com.github.jengelman.gradle.plugins.shadow.internal.DefaultZipCompressor
+import com.github.jengelman.gradle.plugins.shadow.internal.ZipCompressor
+import com.github.jrubygradle.JRubyPrepare
+
 /*
  * These two internal imports from the Shadow plugin are unavoidable because of
  * the expected internals of ShadowCopyAction
  */
-import com.github.jengelman.gradle.plugins.shadow.internal.DefaultZipCompressor
-import com.github.jengelman.gradle.plugins.shadow.internal.ZipCompressor
 
-import com.github.jrubygradle.JRubyPrepare
 import com.github.jrubygradle.jar.internal.JRubyDirInfoTransformer
 import com.github.jrubygradle.jar.internal.JRubyJarCopyAction
+import groovy.transform.CompileDynamic
 import groovy.transform.PackageScope
 import org.apache.tools.zip.ZipOutputStream
 import org.gradle.api.InvalidUserDataException
 import org.gradle.api.artifacts.Configuration
 import org.gradle.api.file.DuplicatesStrategy
+import org.gradle.api.file.RegularFile
 import org.gradle.api.internal.file.copy.CopyAction
+import org.gradle.api.provider.Provider
 import org.gradle.api.tasks.Input
 import org.gradle.api.tasks.Internal
 import org.gradle.api.tasks.Optional
 import org.gradle.api.tasks.StopExecutionException
 import org.gradle.api.tasks.bundling.Jar
 import org.gradle.api.tasks.bundling.ZipEntryCompression
+import org.ysb33r.grolifant.api.core.LegacyLevel
+import org.ysb33r.grolifant.api.core.ProjectOperations
 
 import static com.github.jrubygradle.JRubyPlugin.TASK_GROUP_NAME
 
@@ -63,10 +69,31 @@ class JRubyJar extends Jar {
         RUNNABLE, LIBRARY
     }
 
-    static final String DEFAULT_JRUBYJAR_CONFIG = 'jrubyJar'
-    static final String DEFAULT_MAIN_CLASS = 'org.jruby.mains.JarMain'
-    static final String EXTRACTING_MAIN_CLASS = 'org.jruby.mains.ExtractingMain'
-    static final String DEFAULT_JRUBY_MAINS = '0.6.1'
+    public static final String DEFAULT_JRUBYJAR_CONFIG = 'jrubyJar'
+    public static final String DEFAULT_MAIN_CLASS = 'org.jruby.mains.JarMain'
+    public static final String EXTRACTING_MAIN_CLASS = 'org.jruby.mains.ExtractingMain'
+    public static final String DEFAULT_JRUBY_MAINS = '0.6.1'
+
+    JRubyJar() {
+        projectOperations = ProjectOperations.create(project)
+        addJrubyAppendix()
+        /* Make sure our default configuration is present regardless of whether we use it or not */
+        prepareTask = project.task("prepare${prepareNameForSuffix(name)}", type: JRubyPrepare)
+        prepareTask.group TASK_GROUP_NAME
+        dependsOn prepareTask
+        group TASK_GROUP_NAME
+
+        // TODO get rid of this and try to adjust the CopySpec for the gems
+        // to exclude '.jrubydir'
+        // there are other duplicates as well :(
+        setDuplicatesStrategy(DuplicatesStrategy.EXCLUDE)
+        customConfigName = "jrubyJarEmbeds-${hashCode()}"
+
+        project.afterEvaluate {
+            addJRubyDependency()
+            applyConfig()
+        }
+    }
 
     /**
      * @return Directory that the dependencies for this project will be staged into
@@ -187,7 +214,7 @@ class JRubyJar extends Jar {
      * Unrecognised values are silently discarded
      *
      * @param defs A list of defaults. Currently {@code gems} and {@code mainClass} are the only recognised values.
-     * @deprecated This method is no longer very useful, just use {@link defaultMainClass} instead
+     * @deprecated This method is no longer very useful, just use {@code defaultMainClass} instead
      */
     @Deprecated
     void defaults(final String... defs) {
@@ -231,7 +258,7 @@ class JRubyJar extends Jar {
         if (mainClass != null && scriptName != Type.LIBRARY) {
             Configuration embeds = project.configurations.findByName(customConfigName)
 
-            with project.copySpec {
+            with projectOperations.copySpec {
                 embeds.each { File embed ->
                     logger.info("unzipping ${embed} in the jar")
                     /* We nede to extract the class files from jruby-mains in order to properly run */
@@ -248,11 +275,11 @@ class JRubyJar extends Jar {
         }
 
         if (scriptName != Type.RUNNABLE && scriptName != Type.LIBRARY) {
-            File script = project.file(scriptName)
+            File script = projectOperations.file(scriptName)
             if (!script.exists()) {
                 throw new InvalidUserDataException("initScript ${script} does not exists")
             }
-            with project.copySpec {
+            with projectOperations.copySpec {
                 from script.parent
                 include script.name
                 rename(script.name, 'jar-bootstrap.rb')
@@ -270,26 +297,6 @@ class JRubyJar extends Jar {
         Type.RUNNABLE
     }
 
-    JRubyJar() {
-        appendix = 'jruby'
-        /* Make sure our default configuration is present regardless of whether we use it or not */
-        prepareTask = project.task("prepare${prepareNameForSuffix(name)}", type: JRubyPrepare)
-        prepareTask.group TASK_GROUP_NAME
-        dependsOn prepareTask
-        group TASK_GROUP_NAME
-
-        // TODO get rid of this and try to adjust the CopySpec for the gems
-        // to exclude '.jrubydir'
-        // there are other duplicates as well :(
-        setDuplicatesStrategy(DuplicatesStrategy.EXCLUDE)
-        customConfigName = "jrubyJarEmbeds-${hashCode()}"
-
-        project.afterEvaluate {
-            addJRubyDependency()
-            applyConfig()
-        }
-    }
-
     /**
      * Adds our jruby-complete to a custom configuration only so it can be
      * safely unzipped later when we build the jar
@@ -304,16 +311,40 @@ class JRubyJar extends Jar {
 
     /** Update the staging directory and tasks responsible for setting it up */
     void updateStageDirectory() {
-        File dir = project.file("${project.buildDir}/dirinfo/${configuration}")
+        File dir = projectOperations.file("${project.buildDir}/dirinfo/${configuration}")
 
         prepareTask.dependencies project.configurations.maybeCreate(configuration)
-        prepareTask.outputDir dir
+        prepareTask.outputDir(dir)
 
         logger.info("${this} including files in ${dir}")
         from(dir) {
             include 'specifications/**', 'gems/**', 'jars/**', 'bin/**', 'Jars.lock'
         }
     }
+
+    @Internal
+    protected Object scriptName
+
+    @Internal
+    protected JRubyPrepare prepareTask
+
+    @Internal
+    protected String customConfigName
+
+    @Internal
+    protected String embeddedJRubyVersion
+
+    @Internal
+    protected String embeddedJRubyMainsVersion = DEFAULT_JRUBY_MAINS
+
+    @Internal
+    protected String jarConfiguration = DEFAULT_JRUBYJAR_CONFIG
+
+    @Internal
+    protected String jarMainClass
+
+    @Internal
+    protected final ProjectOperations projectOperations
 
     /**
      * Provide a custom {@link CopyAction} to insert .jrubydir files into the archive.
@@ -325,17 +356,18 @@ class JRubyJar extends Jar {
      */
     @Override
     protected CopyAction createCopyAction() {
-        return new JRubyJarCopyAction(getArchivePath(),
-                getInternalCompressor(),
-                null, /* DocumentationRegistry */
-                'utf-8', /* encoding */
-                [new JRubyDirInfoTransformer()], /* transformers */
-                [], /* relocators */
-                mainSpec.buildRootResolver().getPatternSet(), /* patternSet */
-                false, /* preserveFileTimestamps */
-                false, /* minimizeJar */
-                null /* unusedTracker */
-                )
+        new JRubyJarCopyAction(
+            getArchiveProviderSafely(),
+            getInternalCompressor(),
+            null, /* DocumentationRegistry */
+            'utf-8', /* encoding */
+            [new JRubyDirInfoTransformer()], /* transformers */
+            [], /* relocators */
+            mainSpec.buildRootResolver().getPatternSet(), /* patternSet */
+            false, /* preserveFileTimestamps */
+            false, /* minimizeJar */
+            null /* unusedTracker */
+        )
 
     }
 
@@ -363,11 +395,22 @@ class JRubyJar extends Jar {
         return baseName.replaceAll('(?i)jruby', 'JRuby').capitalize()
     }
 
-    protected Object scriptName
-    protected JRubyPrepare prepareTask
-    protected String customConfigName
-    protected String embeddedJRubyVersion
-    protected String embeddedJRubyMainsVersion = DEFAULT_JRUBY_MAINS
-    protected String jarConfiguration = DEFAULT_JRUBYJAR_CONFIG
-    protected String jarMainClass
+    @CompileDynamic
+    private Provider<File> getArchiveProviderSafely() {
+        if (LegacyLevel.PRE_5_1) {
+            projectOperations.provider { -> archivePath }
+        } else {
+            archiveFile.map { RegularFile it -> it.asFile }
+        }
+    }
+
+    @CompileDynamic
+    @SuppressWarnings('DuplicateStringLiteral')
+    private void addJrubyAppendix() {
+        if (LegacyLevel.PRE_5_1) {
+            appendix = 'jruby'
+        } else {
+            archiveAppendix.set('jruby')
+        }
+    }
 }
