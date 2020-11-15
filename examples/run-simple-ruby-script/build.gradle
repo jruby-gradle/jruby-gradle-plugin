@@ -25,9 +25,8 @@ task printSomePrettyOutputPlease(type: JRubyExec) {
     script "${projectDir}/print-script.rb"
 }
 
-
 /*
- * This task is only here for the execution fo the gradleTest
+ * This task is only here for the execution of the gradleTest
  */
 task runGradleTest {
     dependsOn printSomePrettyOutputPlease

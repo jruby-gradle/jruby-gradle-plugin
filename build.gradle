@@ -54,8 +54,8 @@ subprojects {
         dependencies {
             compile localGroovy()
             compile gradleApi()
-            compile "org.ysb33r.gradle:grolifant50:${grolifantVersion}"
-            gradleTestRuntime "org.ysb33r.gradle:grolifant50:${grolifantVersion}"
+            compile "org.ysb33r.gradle:grolifant60:${grolifantVersion}"
+            gradleTestRuntime "org.ysb33r.gradle:grolifant60:${grolifantVersion}"
         }
 
         codenarc {

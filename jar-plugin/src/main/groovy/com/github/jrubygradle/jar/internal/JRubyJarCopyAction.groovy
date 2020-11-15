@@ -24,6 +24,7 @@
 package com.github.jrubygradle.jar.internal
 
 import com.github.jengelman.gradle.plugins.shadow.impl.RelocatorRemapper
+import com.github.jengelman.gradle.plugins.shadow.internal.UnusedTracker
 
 /*
  * This source code is derived from Apache 2.0 licensed software copyright John
@@ -31,7 +32,6 @@ import com.github.jengelman.gradle.plugins.shadow.impl.RelocatorRemapper
  * repository: https://github.com/johnrengelman/shadow
 */
 
-import com.github.jengelman.gradle.plugins.shadow.internal.UnusedTracker
 import com.github.jengelman.gradle.plugins.shadow.internal.ZipCompressor
 import com.github.jengelman.gradle.plugins.shadow.relocation.Relocator
 import com.github.jengelman.gradle.plugins.shadow.transformers.Transformer
@@ -50,6 +50,7 @@ import org.gradle.api.internal.file.DefaultFileTreeElement
 import org.gradle.api.internal.file.copy.CopyAction
 import org.gradle.api.internal.file.copy.CopyActionProcessingStream
 import org.gradle.api.internal.file.copy.FileCopyDetailsInternal
+import org.gradle.api.provider.Provider
 import org.gradle.api.tasks.WorkResult
 import org.gradle.api.tasks.WorkResults
 import org.gradle.api.tasks.bundling.Zip
@@ -86,7 +87,7 @@ import java.util.zip.ZipException
 class JRubyJarCopyAction implements CopyAction {
     static final long CONSTANT_TIME_FOR_ZIP_ENTRIES = (new GregorianCalendar(1980, 1, 1, 0, 0, 0)).timeInMillis
 
-    private final File zipFile
+    private final Provider<File> zipFile
     private final ZipCompressor compressor
     private final DocumentationRegistry documentationRegistry
     private final List<Transformer> transformers
@@ -97,7 +98,7 @@ class JRubyJarCopyAction implements CopyAction {
     private final boolean minimizeJar
     private final UnusedTracker unusedTracker
 
-    JRubyJarCopyAction(File zipFile, ZipCompressor compressor, DocumentationRegistry documentationRegistry,
+    JRubyJarCopyAction(Provider<File> zipFile, ZipCompressor compressor, DocumentationRegistry documentationRegistry,
                        String encoding, List<Transformer> transformers, List<Relocator> relocators,
                        PatternSet patternSet,
                        boolean preserveFileTimestamps, boolean minimizeJar, UnusedTracker unusedTracker) {
@@ -133,8 +134,9 @@ class JRubyJarCopyAction implements CopyAction {
             unusedClasses = Collections.emptySet()
         }
 
+        File zipFileResolved = zipFile.get()
         try {
-            final ZipOutputStream zipOutStr = compressor.createArchiveOutputStream(zipFile)
+            final ZipOutputStream zipOutStr = compressor.createArchiveOutputStream(zipFileResolved)
             withResource(zipOutStr, new Action<ZipOutputStream>() {
                 void execute(ZipOutputStream outputStream) {
                     try {
@@ -156,7 +158,7 @@ class JRubyJarCopyAction implements CopyAction {
                 )
             }
         } catch (Exception e) {
-            throw new GradleException("Could not create ZIP '${zipFile.toString()}'", e)
+            throw new GradleException("Could not create ZIP '${zipFileResolved}'", e)
         }
         return WorkResults.didWork(true)
     }
@@ -273,7 +275,7 @@ class JRubyJarCopyAction implements CopyAction {
                 }
                 recordVisit(fileDetails.relativePath)
             } catch (Exception e) {
-                throw new GradleException(String.format("Could not add %s to ZIP '%s'.", fileDetails, zipFile), e)
+                throw new GradleException(String.format("Could not add %s to ZIP '%s'.", fileDetails, zipFile.get()), e)
             }
         }
 
@@ -357,7 +359,7 @@ class JRubyJarCopyAction implements CopyAction {
                 zipOutStr.closeEntry()
                 recordVisit(dirDetails.relativePath)
             } catch (Exception e) {
-                throw new GradleException(String.format("Could not add %s to ZIP '%s'.", dirDetails, zipFile), e)
+                throw new GradleException(String.format("Could not add %s to ZIP '%s'.", dirDetails, zipFile.get()), e)
             }
         }
 

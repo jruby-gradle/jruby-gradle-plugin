@@ -24,7 +24,7 @@
 package com.github.jrubygradle
 
 import com.github.jrubygradle.testhelper.IntegrationSpecification
-import org.ysb33r.grolifant.api.OperatingSystem
+import org.ysb33r.grolifant.api.core.OperatingSystem
 import spock.lang.IgnoreIf
 
 /**
