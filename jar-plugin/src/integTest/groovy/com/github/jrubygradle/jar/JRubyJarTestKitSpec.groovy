@@ -26,6 +26,7 @@ package com.github.jrubygradle.jar
 import com.github.jrubygradle.jar.helpers.IntegrationSpecification
 import org.gradle.testkit.runner.BuildResult
 import org.gradle.testkit.runner.TaskOutcome
+import spock.lang.Ignore
 import spock.lang.IgnoreIf
 import spock.lang.Issue
 
@@ -34,6 +35,7 @@ import java.util.zip.ZipFile
 
 import static com.github.jrubygradle.jar.JRubyJar.DEFAULT_MAIN_CLASS
 
+@Ignore
 class JRubyJarTestKitSpec extends IntegrationSpecification {
 
     public static final String DEFAULT_TASK_NAME = 'jrubyJar'
