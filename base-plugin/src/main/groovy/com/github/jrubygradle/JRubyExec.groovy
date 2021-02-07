@@ -29,10 +29,15 @@ import com.github.jrubygradle.internal.JRubyExecUtils
 import groovy.transform.CompileStatic
 import org.gradle.api.Task
 import org.gradle.api.artifacts.Configuration
+import org.gradle.api.model.ReplacedBy
 import org.gradle.api.provider.Provider
 import org.gradle.api.tasks.Input
+import org.gradle.api.tasks.InputFile
 import org.gradle.api.tasks.JavaExec
+import org.gradle.api.tasks.LocalState
 import org.gradle.api.tasks.Optional
+import org.gradle.api.tasks.PathSensitive
+import org.gradle.api.tasks.PathSensitivity
 import org.gradle.api.tasks.TaskContainer
 import org.gradle.process.JavaExecSpec
 import org.gradle.util.GradleVersion
@@ -100,7 +105,8 @@ class JRubyExec extends JavaExec implements JRubyAwareTask, JRubyExecSpec {
      * @return The path to the script (or {@code null} if not set)
      */
     @Optional
-    @Input
+    @InputFile
+    @PathSensitive(PathSensitivity.NONE)
     File getScript() {
         resolveScript(projectOperations, this.script)
     }
@@ -185,6 +191,7 @@ class JRubyExec extends JavaExec implements JRubyAwareTask, JRubyExecSpec {
      *
      * @return Provider of GEM working directory.
      */
+    @LocalState
     Provider<File> getGemWorkDir() {
         this.gemWorkDir
     }
@@ -196,6 +203,7 @@ class JRubyExec extends JavaExec implements JRubyAwareTask, JRubyExecSpec {
      *
      */
     @Deprecated
+    @ReplacedBy('jruby.jrubyVersion')
     String getJrubyVersion() {
         deprecated('Use jruby.getJrubyVersion() rather getJrubyVersion()')
         jruby.jrubyVersion
