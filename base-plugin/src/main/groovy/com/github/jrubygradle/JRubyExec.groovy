@@ -29,9 +29,12 @@ import com.github.jrubygradle.internal.JRubyExecUtils
 import groovy.transform.CompileStatic
 import org.gradle.api.Task
 import org.gradle.api.artifacts.Configuration
+import org.gradle.api.model.ReplacedBy
 import org.gradle.api.provider.Provider
 import org.gradle.api.tasks.Input
+import org.gradle.api.tasks.Internal
 import org.gradle.api.tasks.JavaExec
+import org.gradle.api.tasks.LocalState
 import org.gradle.api.tasks.Optional
 import org.gradle.process.JavaExecSpec
 import org.gradle.util.GradleVersion
@@ -89,8 +92,7 @@ class JRubyExec extends JavaExec implements JRubyAwareTask, JRubyExecSpec {
     /** Script to execute.
      * @return The path to the script (or {@code null} if not set)
      */
-    @Optional
-    @Input
+    @Internal
     File getScript() {
         resolveScript(project, this.script)
     }
@@ -175,6 +177,7 @@ class JRubyExec extends JavaExec implements JRubyAwareTask, JRubyExecSpec {
      *
      * @return Provider of GEM working directory.
      */
+    @LocalState
     Provider<File> getGemWorkDir() {
         Callable<File> resolveGemWorkDir = { JRubyPluginExtension jpe ->
             ((JRubyPrepare) project.tasks.getByName(jpe.gemPrepareTaskName)).outputDir
@@ -190,6 +193,7 @@ class JRubyExec extends JavaExec implements JRubyAwareTask, JRubyExecSpec {
      *
      */
     @Deprecated
+    @ReplacedBy('jruby.jrubyVersion')
     String getJrubyVersion() {
         deprecated('Use jruby.getJrubyVersion() rather getJrubyVersion()')
         jruby.jrubyVersion
@@ -304,6 +308,15 @@ class JRubyExec extends JavaExec implements JRubyAwareTask, JRubyExecSpec {
     @Override
     JavaExecSpec args(Iterable<?> args) {
         throw notAllowed(USE_JVM_ARGS)
+    }
+
+    /** Capture the path of the script as an input.
+     * @return the path of the script to execute.
+     */
+    @Optional
+    @Input
+    protected String getScriptPath() {
+        getScript()?.path
     }
 
     private static UnsupportedOperationException notAllowed(final String msg) {

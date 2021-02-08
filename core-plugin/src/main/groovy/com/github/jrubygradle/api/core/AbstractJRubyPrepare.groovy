@@ -34,11 +34,13 @@ import org.gradle.api.tasks.Input
 import org.gradle.api.tasks.InputFiles
 import org.gradle.api.tasks.Internal
 import org.gradle.api.tasks.Optional
+import org.gradle.api.tasks.PathSensitive
 import org.gradle.api.tasks.TaskAction
 
 import static com.github.jrubygradle.api.gems.GemOverwriteAction.SKIP
 import static com.github.jrubygradle.api.gems.GemUtils.extractGems
 import static com.github.jrubygradle.api.gems.GemUtils.setupJars
+import static org.gradle.api.tasks.PathSensitivity.ABSOLUTE
 
 /** Abstract base class for building custom tasks for preparing GEMs.
  *
@@ -81,9 +83,24 @@ abstract class AbstractJRubyPrepare extends DefaultTask implements JRubyAwareTas
     /** All GEMs that have been supplied as dependencies.
      *
      * @return Collection of GEMs.
+     *
+     * @see #getGemsAsFileCollection()
+     * @deprecated Use {@link #getGemsAsFileCollection()} instead.
+     */
+    @Deprecated
+    FileCollection gemsAsFileCollection() {
+        gemsAsFileCollection
+    }
+
+    /** All GEMs that have been supplied as dependencies.
+     *
+     * @return Collection of GEMs.
+     *
+     * @since 2.1.0
      */
     @InputFiles
-    FileCollection gemsAsFileCollection() {
+    @PathSensitive(ABSOLUTE)
+    FileCollection getGemsAsFileCollection() {
         return GemUtils.getGems(project.files(this.dependencies))
     }
 
@@ -94,7 +111,6 @@ abstract class AbstractJRubyPrepare extends DefaultTask implements JRubyAwareTas
      *
      * @param f One or more of file, directory, configuration or list of gems.
      */
-    @Optional
     void dependencies(Object... f) {
         this.dependencies.addAll(f.toList())
     }
@@ -121,7 +137,7 @@ abstract class AbstractJRubyPrepare extends DefaultTask implements JRubyAwareTas
     void exec() {
         File out = getOutputDir()
         File jrubyJar = jrubyJarLocation.get()
-        extractGems(project, jrubyJar, gemsAsFileCollection(), out, SKIP)
+        extractGems(project, jrubyJar, gemsAsFileCollection, out, SKIP)
 
         dependencies.findAll {
             it instanceof Configuration
