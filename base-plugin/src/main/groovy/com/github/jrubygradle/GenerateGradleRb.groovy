@@ -32,6 +32,7 @@ import org.gradle.api.GradleException
 import org.gradle.api.file.FileCopyDetails
 import org.gradle.api.file.RelativePath
 import org.gradle.api.tasks.Input
+import org.gradle.api.tasks.Internal
 import org.gradle.api.tasks.OutputFile
 import org.gradle.api.tasks.TaskAction
 import org.ysb33r.grolifant.api.StringUtils
@@ -71,6 +72,7 @@ class GenerateGradleRb extends DefaultTask implements JRubyAwareTask {
         this.gemInstallDir = dir
     }
 
+    @Internal
     File getDestinationDir() {
         project.file(destinationDir)
     }
@@ -85,8 +87,14 @@ class GenerateGradleRb extends DefaultTask implements JRubyAwareTask {
         StringUtils.stringize(baseName)
     }
 
+    @Internal
     File getGemInstallDir() {
         project.file(this.gemInstallDir)
+    }
+
+    @Input
+    protected String getGemInstallDirPath() {
+        getGemInstallDir().absolutePath
     }
 
     @TaskAction
@@ -96,7 +104,7 @@ class GenerateGradleRb extends DefaultTask implements JRubyAwareTask {
         Object source = getSourceFromResource()
         File destination = destinationFile().parentFile
         String path = classpathFromConfiguration(jruby.jrubyConfiguration).join(File.pathSeparator)
-        String gemDir = getGemInstallDir().absolutePath
+        String gemDir = getGemInstallDirPath()
         String bootstrapName = getBaseName()
         logger.info("GenerateGradleRb - source: ${source}, destination: ${destination}, baseName: ${baseName}")
         project.copy {

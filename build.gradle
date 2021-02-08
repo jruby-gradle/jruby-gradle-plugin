@@ -107,6 +107,11 @@ subprojects {
             ideReport.enabled = true
             ideReport.destination = file( "${project.codenarc.reportsDir}/${reportName}.ide.txt")
         }
+
+        tasks.withType(ValidateTaskProperties) { validateTaskProperties ->
+            validateTaskProperties.failOnWarning = true
+            validateTaskProperties.enableStricterValidation = true
+        }
     }
 
     idea {
