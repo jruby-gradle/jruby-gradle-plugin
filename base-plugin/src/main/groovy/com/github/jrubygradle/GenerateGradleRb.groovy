@@ -100,6 +100,11 @@ class GenerateGradleRb extends DefaultTask implements JRubyAwareTask {
         getGemInstallDir().absolutePath
     }
 
+    @Input
+    protected String getGemInstallDirPath() {
+        getGemInstallDir().absolutePath
+    }
+
     @TaskAction
     @CompileDynamic
     @SuppressWarnings('DuplicateStringLiteral')
