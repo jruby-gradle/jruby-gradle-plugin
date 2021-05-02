@@ -24,8 +24,6 @@
 package com.github.jrubygradle
 
 import org.gradle.api.Project
-import org.gradle.api.artifacts.repositories.ArtifactRepository
-import org.gradle.api.artifacts.repositories.IvyArtifactRepository
 import org.gradle.testfixtures.ProjectBuilder
 import spock.lang.Specification
 
@@ -44,13 +42,5 @@ class JRubyPluginSpec extends Specification {
 
         then:
         project.jruby.defaultVersion == JRubyPluginExtension.DEFAULT_JRUBY_VERSION
-    }
-
-    private Collection hasRepositoryUrl(Project p, String url) {
-        p.repositories.findAll { ArtifactRepository r ->
-            r instanceof IvyArtifactRepository
-        }.findAll {
-            it.ivyPattern.contains(url)
-        }
     }
 }

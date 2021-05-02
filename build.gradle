@@ -36,7 +36,8 @@ subprojects {
     apply plugin: 'maven'
 
     repositories {
-        jcenter()
+        mavenCentral()
+        gradlePluginPortal()
     }
 
     if (project.name != 'docs') {

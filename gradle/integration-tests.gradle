@@ -40,5 +40,6 @@ task integrationTest(type: Test, dependsOn: jar) {
     classpath = sourceSets.integrationTest.runtimeClasspath
     dependsOn copyIntegrationTestGems
     mustRunAfter test
+    systemProperties TMP_FOLDER : file('build/tmp/integrationTestTempFolder').absolutePath
 }
 check.dependsOn integrationTest

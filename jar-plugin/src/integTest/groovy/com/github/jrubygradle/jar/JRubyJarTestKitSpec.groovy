@@ -27,7 +27,6 @@ import com.github.jrubygradle.jar.helpers.IntegrationSpecification
 import org.gradle.testkit.runner.BuildResult
 import org.gradle.testkit.runner.TaskOutcome
 import spock.lang.Ignore
-import spock.lang.IgnoreIf
 import spock.lang.Issue
 
 import java.util.zip.ZipEntry
@@ -175,23 +174,7 @@ class JRubyJarTestKitSpec extends IntegrationSpecification {
         """
     }
 
-    private void withRepoSetup(String content) {
-        this.repoSetup = """
-        repositories {
-            ${content}
-        }
-        """
-    }
-
-    private void withDependencies(String content) {
-        this.deps = """
-        dependencies {
-            ${content}
-        }
-        """
-    }
-
-    private void withPreamble(String content) {
+     private void withPreamble(String content) {
         this.preamble = content
     }
 

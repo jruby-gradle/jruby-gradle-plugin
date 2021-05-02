@@ -61,6 +61,6 @@ class IvyXmlProxyServerSpec extends Specification {
         }
 
         then: 'The Ivy file should be generated and cached locally'
-        new File(projectRoot.root,TEST_IVY_PATH)
+        new File(projectRoot.root, TEST_IVY_PATH)
     }
 }
