@@ -31,6 +31,7 @@ import spock.lang.Specification
 
 class IntegrationSpecification extends Specification {
     static final boolean OFFLINE = System.getProperty('TESTS_ARE_OFFLINE')
+    static final File PARENT_TEST_FOLDER = new File(System.getProperty('TEST_TEMP_FOLDER','./build/tmp/integrationTests'))
 
     @Shared
     Map testProperties
@@ -40,13 +41,14 @@ class IntegrationSpecification extends Specification {
     File mavenRepoLocation
 
     @Rule
-    TemporaryFolder testFolder
+    TemporaryFolder testFolder = new TemporaryFolder(PARENT_TEST_FOLDER)
 
     File projectDir
     File buildFile
     File settingsFile
 
     void setupSpec() {
+        PARENT_TEST_FOLDER.mkdirs()
         testProperties = loadTestProperties()
         flatRepoLocation = new File(testProperties.flatrepo)
         mavenRepoLocation = new File(testProperties.mavenrepo)
@@ -66,6 +68,7 @@ class IntegrationSpecification extends Specification {
                 .withDebug(true)
                 .withArguments(args)
                 .withPluginClasspath()
+                .withTestKitDir(PARENT_TEST_FOLDER)
                 .forwardOutput()
     }
 
