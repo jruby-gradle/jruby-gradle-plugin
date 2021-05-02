@@ -87,7 +87,12 @@ subprojects {
 
             dependsOn jar
         }
-
+        
+        pluginBundle {
+            website = 'http://jruby-gradle.org/'
+            vcsUrl = 'https://github.com/jruby-gradle/jruby-gradle-plugin.git'
+        }
+    
         tasks.withType(Test) {
             if (gradle.startParameter.isOffline()) {
                 systemProperties 'TESTS_ARE_OFFLINE': '1'
@@ -107,11 +112,7 @@ subprojects {
         }
     }
 
-    pluginBundle {
-        website = 'http://jruby-gradle.org/'
-        vcsUrl = 'https://github.com/jruby-gradle/jruby-gradle-plugin.git'
-    }
-    
+
     idea {
         module {
             downloadJavadoc = true
