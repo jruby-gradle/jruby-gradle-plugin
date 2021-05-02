@@ -107,6 +107,11 @@ subprojects {
         }
     }
 
+    pluginBundle {
+        website = 'http://jruby-gradle.org/'
+        vcsUrl = 'https://github.com/jruby-gradle/jruby-gradle-plugin.git'
+    }
+    
     idea {
         module {
             downloadJavadoc = true
