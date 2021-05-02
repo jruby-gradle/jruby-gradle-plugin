@@ -1,3 +1,7 @@
 # Enable auto-env through the sdkman_auto_env config
 # Add key=value pairs of SDKs to use below
+<<<<<<< HEAD
 java=8.0.265.j9-adpt 
+=======
+java=8.0.282.hs-adpt
+>>>>>>> 998cb79 (Add sdkmanrc file and set to use JDK8)

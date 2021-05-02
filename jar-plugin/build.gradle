@@ -87,30 +87,15 @@ artifacts {
     archives sourcesJar
 }
 
-bintray {
-    user = project.bintrayUser
-    key = project.bintrayKey
-    publish = true
-    dryRun = false
-    configurations = ['archives']
-
-    pkg {
-        userOrg = 'jruby-gradle'
-        repo = 'plugins'
-        name = 'jruby-gradle-jar-plugin'
-        labels = ['jruby']
-
-        version {
-            name = project.version
-            vcsTag = "v${project.version}"
-            attributes = ['gradle-plugin' : 'com.github.jruby-gradle.jar:com.github.jruby-gradle:jruby-gradle-jar-plugin']
-            desc = 'This plugin encapsulates java archive building functionality for JRuby Gradle projects'
+pluginBundle {
+    plugins {
+        gradlePlugin {
+            id = 'com.github.jruby-gradle.jar'
+            displayName = 'JRuby/Gradle base plugin'
+            description = 'This plugin encapsulates java archive building functionality for JRuby Gradle projects'
+            tags = (['jruby','fatjar'])
         }
     }
-}
-
-bintrayUpload {
-    dependsOn assemble
 }
 
 gradleTest {

@@ -114,8 +114,8 @@ jobs:
     - name: Build
       uses: eskatos/gradle-command-action@v1
       with:
-        arguments: -i -S --console=plain --no-build-cache assemble
-    # Unit tests
+        arguments: -i -S --console=plain --no-build-cache assemble validateTaskProperties
+      # Unit tests
     - name: Unit tests
       uses: eskatos/gradle-command-action@v1
       with:
@@ -137,3 +137,42 @@ jobs:
         name: Test reports
         path: "**/build/reports/**"
         retention-days: 5
+  publish:
+    runs-on: ubuntu-latest
+#    on:
+#      push:
+#        branches:
+#          - release
+    needs: build
+    if: ${{ github.repository == 'jruby-gradle/jruby-gradle-plugin' && github.ref == 'refs/heads/release' }}
+    steps:
+    - uses: actions/checkout@v1
+    - uses: actions/setup-java@v1
+      with:
+        java-version: 8
+    - name: Cache .gradle/caches
+      uses: actions/cache@v1
+      with:
+        path: ~/.gradle/caches
+        key: ${{ runner.os }}-gradle-cache-${{ hashFiles('**/*.gradle') }}
+        restore-keys: ${{ runner.os }}-gradle-cache-
+    - name: Cache .gradle/wrapper
+      uses: actions/cache@v1
+      with:
+        path: ~/.gradle/wrapper
+        key: ${{ runner.os }}-gradle-wrapper-${{ hashFiles('**/*.gradle') }}
+        restore-keys: ${{ runner.os }}-gradle-wrapper-
+    - name: Publish to Gradle Portal
+      uses: eskatos/gradle-command-action@v1
+      env:
+        PUBLISH_KEY: ${{ secrets.PUBLISH_KEY }}
+        PUBLISH_SECRET: ${{ secrets.PUBLISH_SECRET }}
+      with:
+        arguments: -i --console=plain --no-build-cache assemble publishPlugins -Dgradle.publish.key=$PUBLISH_KEY -Dgradle.publish.secret=$PUBLISH_SECRET
+    - name: Publish documentation
+      uses: eskatos/gradle-command-action@v1
+      env:
+        GH_PAGES_PUSH_USER: ${{ secrets.GH_PAGES_PUSH_USER }}
+        GH_PAGES_PUSH_TOKEN: ${{ secrets.GH_PAGES_PUSH_TOKEN }}
+      with:
+        arguments: -i --console=plain --no-build-cache docs:publishGhPages -Dorg.ajoberstar.grgit.auth.username=$GH_PAGES_PUSH_USER -Dorg.ajoberstar.grgit.auth.password=$GH_PAGES_PUSH_TOKEN -Dorg.ajoberstar.grgit.auth.force=hardcoded
