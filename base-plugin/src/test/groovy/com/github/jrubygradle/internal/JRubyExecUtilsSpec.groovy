@@ -115,7 +115,7 @@ class JRubyExecUtilsSpec extends Specification {
 
     void "Prepare a basic JRuby environment"() {
         when:
-        Map preparedEnv = prepareJRubyEnvironment([:],false, new File('tmp/foo'))
+        Map preparedEnv = prepareJRubyEnvironment([:], false, new File('tmp/foo'))
 
         then:
         preparedEnv.size() > 0
@@ -128,7 +128,7 @@ class JRubyExecUtilsSpec extends Specification {
             'GEM_HOME'       : '/tmp/spock',
             'RUBY_VERSION'   : 'notaversion',
             'rvm_ruby_string': 'jruby-head',
-        ],false, gemWorkDir)
+        ], false, gemWorkDir)
 
         then:
         preparedEnv['GEM_HOME'] == gemWorkDir.absolutePath

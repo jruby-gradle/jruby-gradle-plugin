@@ -23,7 +23,6 @@
  */
 package com.github.jrubygradle.internal.gems
 
-
 import spock.lang.Specification
 
 class GemToIvySpec extends Specification {

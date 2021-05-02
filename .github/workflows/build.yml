@@ -58,7 +58,7 @@ jobs:
       - name: Build
         uses: eskatos/gradle-command-action@v1
         with:
-          arguments: --console=plain --warning-mode=all -clean assemble
+          arguments: --console=plain --warning-mode=all clean assemble
       # Test
       - name: UnitTest
         uses: eskatos/gradle-command-action@v1
@@ -79,6 +79,13 @@ jobs:
         uses: eskatos/gradle-command-action@v1
         with:
           arguments: --stop
+      - name: Store reports
+        uses: actions/upload-artifact@v2
+        if: always()
+        with:
+          name: Test reports Windows
+          path: "**/build/reports/**"
+          retention-days: 5
   build:
     strategy:
       matrix:
@@ -109,17 +116,24 @@ jobs:
       with:
         arguments: -i -S --console=plain --no-build-cache assemble
     # Unit tests
-    - name: UNit tests
+    - name: Unit tests
       uses: eskatos/gradle-command-action@v1
       with:
         arguments: -i -s --console=plain --no-build-cache test
     # Integration tests
-    - name: Integration tests (without slides)
+    - name: Integration tests
       uses: eskatos/gradle-command-action@v1
       with:
         arguments: -i -s --console=plain --no-build-cache intTest
     # Gradle tests
-    - name: Gradle tests
+    - name: Compatibility tests
       uses: eskatos/gradle-command-action@v1
       with:
         arguments: -i -s --console=plain --no-build-cache gradleTest
+    - name: Store reports
+      uses: actions/upload-artifact@v2
+      if: always()
+      with:
+        name: Test reports
+        path: "**/build/reports/**"
+        retention-days: 5

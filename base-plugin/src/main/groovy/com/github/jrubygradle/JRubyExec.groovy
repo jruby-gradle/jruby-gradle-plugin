@@ -32,12 +32,9 @@ import org.gradle.api.artifacts.Configuration
 import org.gradle.api.model.ReplacedBy
 import org.gradle.api.provider.Provider
 import org.gradle.api.tasks.Input
-import org.gradle.api.tasks.InputFile
+import org.gradle.api.tasks.Internal
 import org.gradle.api.tasks.JavaExec
 import org.gradle.api.tasks.LocalState
-import org.gradle.api.tasks.Optional
-import org.gradle.api.tasks.PathSensitive
-import org.gradle.api.tasks.PathSensitivity
 import org.gradle.api.tasks.TaskContainer
 import org.gradle.process.JavaExecSpec
 import org.gradle.util.GradleVersion
@@ -75,6 +72,16 @@ class JRubyExec extends JavaExec implements JRubyAwareTask, JRubyExecSpec {
         this.jruby = extensions.create(JRubyPluginExtension.NAME, JRubyPluginExtension, this)
         this.projectOperations = ProjectOperations.create(project)
         this.tasks = project.tasks
+        this.inputs.property 'script-path', { scr ->
+            File f = resolveScript(projectOperations, scr)
+            if (!f) {
+                ''
+            } else if (f.exists()) {
+                f.text
+            } else {
+                stringize(scr)
+            }
+        }.curry(this.script)
 
         inputs.property 'jrubyver', { JRubyPluginExtension jruby ->
             jruby.jrubyVersion
@@ -104,9 +111,10 @@ class JRubyExec extends JavaExec implements JRubyAwareTask, JRubyExecSpec {
     /** Script to execute.
      * @return The path to the script (or {@code null} if not set)
      */
-    @Optional
-    @InputFile
-    @PathSensitive(PathSensitivity.NONE)
+//    @Optional
+//    @InputFile
+//    @PathSensitive(PathSensitivity.NONE)
+    @Internal
     File getScript() {
         resolveScript(projectOperations, this.script)
     }

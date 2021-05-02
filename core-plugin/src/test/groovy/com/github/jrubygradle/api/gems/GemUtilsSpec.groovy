@@ -23,8 +23,6 @@
  */
 package com.github.jrubygradle.api.gems
 
-import com.github.jrubygradle.api.gems.GemOverwriteAction
-import com.github.jrubygradle.api.gems.GemUtils
 import org.gradle.api.Project
 import org.gradle.api.file.DuplicateFileCopyingException
 import org.gradle.testfixtures.ProjectBuilder

@@ -31,7 +31,7 @@ import spock.lang.Specification
 
 class IntegrationSpecification extends Specification {
     static final boolean OFFLINE = System.getProperty('TESTS_ARE_OFFLINE')
-    static final File PARENT_TEST_FOLDER = new File(System.getProperty('TEST_TEMP_FOLDER','./build/tmp/integrationTests'))
+    static final File PARENT_TEST_FOLDER = new File(System.getProperty('TEST_TEMP_FOLDER', './build/tmp/integrationTests'))
 
     @Shared
     Map testProperties
@@ -64,12 +64,12 @@ class IntegrationSpecification extends Specification {
 
     GradleRunner gradleRunner(List<String> args) {
         GradleRunner.create()
-                .withProjectDir(projectDir)
-                .withDebug(true)
-                .withArguments(args)
-                .withPluginClasspath()
-                .withTestKitDir(PARENT_TEST_FOLDER)
-                .forwardOutput()
+            .withProjectDir(projectDir)
+            .withDebug(true)
+            .withArguments(args)
+            .withPluginClasspath()
+            .withTestKitDir(PARENT_TEST_FOLDER)
+            .forwardOutput()
     }
 
     String pathAsUriStr(final File path) {

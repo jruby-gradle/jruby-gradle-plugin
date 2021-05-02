@@ -30,7 +30,6 @@ import org.junit.rules.TemporaryFolder
 import spock.lang.IgnoreIf
 import spock.lang.Issue
 import spock.lang.Specification
-import spock.lang.Unroll
 
 import java.util.regex.Pattern
 
@@ -103,7 +102,6 @@ class IvyXmlProxyServerIntegrationSpec extends Specification {
         new File(projectDir, 'build/something/credit_card_validator-1.3.2.gem').exists()
         new File(projectDir, 'build/something/base_app-1.0.6.gem').exists()
     }
-
 
     void 'Download Asciidoctor Reveal.JS GEM and friends'() {
         setup:
