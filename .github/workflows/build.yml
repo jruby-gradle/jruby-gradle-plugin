@@ -108,12 +108,12 @@ jobs:
       uses: eskatos/gradle-command-action@v1
       with:
         arguments: -i -S --console=plain --no-build-cache assemble
-      # Unit tests
-     - name: UNit tests
-       uses: eskatos/gradle-command-action@v1
-       with:
-         arguments: -i -s --console=plain --no-build-cache test
-      # Integration tests
+    # Unit tests
+    - name: UNit tests
+      uses: eskatos/gradle-command-action@v1
+      with:
+        arguments: -i -s --console=plain --no-build-cache test
+    # Integration tests
     - name: Integration tests (without slides)
       uses: eskatos/gradle-command-action@v1
       with:
