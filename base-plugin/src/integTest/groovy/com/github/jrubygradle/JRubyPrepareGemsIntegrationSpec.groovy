@@ -106,7 +106,6 @@ class JRubyPrepareGemsIntegrationSpec extends IntegrationSpecification {
                 lockAllConfigurations()
             }
 
-
         """
         withDependencies """
             gems "rubygems:sinatra:1.4.5"

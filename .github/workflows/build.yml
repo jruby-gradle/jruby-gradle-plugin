@@ -1,0 +1,178 @@
+name: Build
+on: [push, pull_request]
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v1
+      - uses: actions/setup-java@v1
+        with:
+          java-version: 11
+      # Cache
+      - name: Cache .gradle/caches
+        uses: actions/cache@v1
+        with:
+          path: ~/.gradle/caches
+          key: ${{ runner.os }}-gradle-cache-${{ hashFiles('**/*.gradle') }}
+          restore-keys: ${{ runner.os }}-gradle-cache-
+      - name: Cache .gradle/wrapper
+        uses: actions/cache@v1
+        with:
+          path: ~/.gradle/wrapper
+          key: ${{ runner.os }}-gradle-wrapper-${{ hashFiles('**/*.gradle') }}
+          restore-keys: ${{ runner.os }}-gradle-wrapper-
+      # Licensing
+      - name: Licensing
+        uses: eskatos/gradle-command-action@v1
+        with:
+          arguments: --console=plain -S license
+      # Coding style
+      - name: Coding style
+        uses: eskatos/gradle-command-action@v1
+        with:
+          arguments: --console=plain -i codenarcMain codenarcTest codenarcIntTest
+  build-windows:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v1
+        # use a short path to avoid exceeding the path limit on Windows... sigh
+        with:
+          path: 'w'
+      - uses: actions/setup-java@v1
+        with:
+          java-version: 11
+      # Cache
+      - name: Cache .gradle/caches
+        uses: actions/cache@v1
+        with:
+          path: ~/.gradle/caches
+          key: ${{ runner.os }}-gradle-cache-${{ hashFiles('**/*.gradle') }}
+          restore-keys: ${{ runner.os }}-gradle-cache-
+      - name: Cache .gradle/wrapper
+        uses: actions/cache@v1
+        with:
+          path: ~/.gradle/wrapper
+          key: ${{ runner.os }}-gradle-wrapper-${{ hashFiles('**/*.gradle') }}
+          restore-keys: ${{ runner.os }}-gradle-wrapper-
+      # Build
+      - name: Build
+        uses: eskatos/gradle-command-action@v1
+        with:
+          arguments: --console=plain --warning-mode=all clean assemble
+      # Test
+      - name: UnitTest
+        uses: eskatos/gradle-command-action@v1
+        with:
+          arguments: --console=plain --warning-mode=all --no-parallel test
+      # Test
+      - name: IntegrationTest
+        uses: eskatos/gradle-command-action@v1
+        with:
+          arguments: --console=plain --warning-mode=all --no-parallel intTest
+      # Test
+      - name: CompatibilityTest
+        uses: eskatos/gradle-command-action@v1
+        with:
+          arguments: --console=plain --warning-mode=all --no-parallel gradleTest
+      # Stop gradlew to avoid locking issues
+      - name: Cleanup
+        uses: eskatos/gradle-command-action@v1
+        with:
+          arguments: --stop
+      - name: Store reports
+        uses: actions/upload-artifact@v2
+        if: always()
+        with:
+          name: Test reports Windows
+          path: "**/build/reports/**"
+          retention-days: 5
+  build:
+    strategy:
+      matrix:
+        os: [ubuntu-latest, macos-latest]
+        java: [ 8, 11 ]
+    runs-on: ${{ matrix.os }}
+    steps:
+    - uses: actions/checkout@v1
+    - uses: actions/setup-java@v1
+      with:
+        java-version: ${{ matrix.java }}
+    # Cache
+    - name: Cache .gradle/caches
+      uses: actions/cache@v1
+      with:
+        path: ~/.gradle/caches
+        key: ${{ runner.os }}-gradle-cache-${{ hashFiles('**/*.gradle') }}
+        restore-keys: ${{ runner.os }}-gradle-cache-
+    - name: Cache .gradle/wrapper
+      uses: actions/cache@v1
+      with:
+        path: ~/.gradle/wrapper
+        key: ${{ runner.os }}-gradle-wrapper-${{ hashFiles('**/*.gradle') }}
+        restore-keys: ${{ runner.os }}-gradle-wrapper-
+    # Build
+    - name: Build
+      uses: eskatos/gradle-command-action@v1
+      with:
+        arguments: -i -S --console=plain --no-build-cache assemble validateTaskProperties
+      # Unit tests
+    - name: Unit tests
+      uses: eskatos/gradle-command-action@v1
+      with:
+        arguments: -i -s --console=plain --no-build-cache test
+    # Integration tests
+    - name: Integration tests
+      uses: eskatos/gradle-command-action@v1
+      with:
+        arguments: -i -s --console=plain --no-build-cache intTest
+    # Gradle tests
+    - name: Compatibility tests
+      uses: eskatos/gradle-command-action@v1
+      with:
+        arguments: -i -s --console=plain --no-build-cache gradleTest
+    - name: Store reports
+      uses: actions/upload-artifact@v2
+      if: always()
+      with:
+        name: Test reports
+        path: "**/build/reports/**"
+        retention-days: 5
+  publish:
+    runs-on: ubuntu-latest
+#    on:
+#      push:
+#        branches:
+#          - release
+    needs: build
+    if: ${{ github.repository == 'jruby-gradle/jruby-gradle-plugin' && github.ref == 'refs/heads/release' }}
+    steps:
+    - uses: actions/checkout@v1
+    - uses: actions/setup-java@v1
+      with:
+        java-version: 8
+    - name: Cache .gradle/caches
+      uses: actions/cache@v1
+      with:
+        path: ~/.gradle/caches
+        key: ${{ runner.os }}-gradle-cache-${{ hashFiles('**/*.gradle') }}
+        restore-keys: ${{ runner.os }}-gradle-cache-
+    - name: Cache .gradle/wrapper
+      uses: actions/cache@v1
+      with:
+        path: ~/.gradle/wrapper
+        key: ${{ runner.os }}-gradle-wrapper-${{ hashFiles('**/*.gradle') }}
+        restore-keys: ${{ runner.os }}-gradle-wrapper-
+    - name: Publish to Gradle Portal
+      uses: eskatos/gradle-command-action@v1
+      env:
+        PUBLISH_KEY: ${{ secrets.PUBLISH_KEY }}
+        PUBLISH_SECRET: ${{ secrets.PUBLISH_SECRET }}
+      with:
+        arguments: -i --console=plain --no-build-cache assemble publishPlugins -Dgradle.publish.key=$PUBLISH_KEY -Dgradle.publish.secret=$PUBLISH_SECRET
+    - name: Publish documentation
+      uses: eskatos/gradle-command-action@v1
+      env:
+        GH_PAGES_PUSH_USER: ${{ secrets.GH_PAGES_PUSH_USER }}
+        GH_PAGES_PUSH_TOKEN: ${{ secrets.GH_PAGES_PUSH_TOKEN }}
+      with:
+        arguments: -i --console=plain --no-build-cache docs:publishGhPages -Dorg.ajoberstar.grgit.auth.username=$GH_PAGES_PUSH_USER -Dorg.ajoberstar.grgit.auth.password=$GH_PAGES_PUSH_TOKEN -Dorg.ajoberstar.grgit.auth.force=hardcoded

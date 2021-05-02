@@ -102,46 +102,16 @@ task installGroovyDoc(type: Copy) {
     onlyIf { project.hasProperty('jrubyGradleWebsiteInstallDir') }
 }
 
-
-publishing {
-    publications {
-        maven(MavenPublication) {
-//            groupId project.group
-//            artifactId project.archivesBaseName
-//            version project.version
-
-            artifact sourcesJar {
-                classifier "sources"
-            }
-
-            from components.java
+pluginBundle {
+    plugins {
+        gradlePlugin {
+            id = 'com.github.jruby-gradle.base'
+            displayName = 'JRuby/Gradle base plugin'
+            description = 'The purpose of plugin is to encapsulate useful Gradle functionality for JRuby projects'
+            tags = (['jruby'])
         }
     }
 }
-
-bintray {
-    user = project.bintrayUser
-    key = project.bintrayKey
-    publish = true
-    dryRun = false
-    publications = ['maven']
-
-    pkg {
-        userOrg = 'jruby-gradle'
-        repo = 'plugins'
-        name = 'jruby-gradle-plugin'
-        labels = ['jruby']
-
-        version {
-            name = project.version
-            vcsTag = "v${project.version}"
-            attributes = ['gradle-plugin': 'com.github.jruby-gradle.base:com.github.jruby-gradle:jruby-gradle-plugin']
-            desc = 'The purpose of plugin is to encapsulate useful Gradle functionality for JRuby projects.'
-
-        }
-    }
-}
-bintrayUpload.dependsOn assemble
 
 gradleTest.mustRunAfter integrationTest
 // vim: ft=groovy

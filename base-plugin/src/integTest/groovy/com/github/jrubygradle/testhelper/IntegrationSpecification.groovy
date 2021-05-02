@@ -23,7 +23,6 @@
  */
 package com.github.jrubygradle.testhelper
 
-
 import org.gradle.testkit.runner.GradleRunner
 import org.junit.Rule
 import org.junit.rules.TemporaryFolder
@@ -55,7 +54,7 @@ class IntegrationSpecification extends Specification {
     Map artifactVersions
 
     @Rule
-    TemporaryFolder testFolder
+    TemporaryFolder testFolder = new TemporaryFolder(new File(System.getProperty('TMP_FOLDER')))
 
     File projectDir
     File buildFile
@@ -65,6 +64,7 @@ class IntegrationSpecification extends Specification {
         testProperties = loadTestProperties()
         flatRepoLocation = new File(testProperties.flatrepo)
         mavenRepoLocation = new File(testProperties.mavenrepo)
+        new File(System.getProperty('TMP_FOLDER')).mkdirs()
 
         artifactVersions = [
             'credit_card_validator': testProperties.creditCardValidatorVersion,
@@ -77,7 +77,7 @@ class IntegrationSpecification extends Specification {
     }
 
     void setup() {
-        projectDir = testFolder.root
+        projectDir = testFolder.root.absoluteFile
         buildFile = new File(projectDir, 'build.gradle')
         settingsFile = new File(projectDir, 'settings.gradle')
 
@@ -90,7 +90,7 @@ class IntegrationSpecification extends Specification {
         destination.text = this.class.getResource("/scripts/${name}").text
     }
 
-
+    @SuppressWarnings('ThrowRuntimeException')
     String findDependency(final String organisation, final String artifact, final String extension) {
         String ver = artifactVersions[artifact]
         if (!ver) {

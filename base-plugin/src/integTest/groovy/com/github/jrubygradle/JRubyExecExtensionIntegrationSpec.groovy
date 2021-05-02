@@ -30,7 +30,7 @@ import spock.lang.IgnoreIf
 /**
  * @author Schalk W. Cronjé
  */
-@IgnoreIf({System.getProperty('TESTS_ARE_OFFLINE')})
+@IgnoreIf({ System.getProperty('TESTS_ARE_OFFLINE') })
 class JRubyExecExtensionIntegrationSpec extends IntegrationSpecification {
 
     public static final String DEFAULT_TASK_NAME = 'inlineJRubyExec'

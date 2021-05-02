@@ -35,7 +35,7 @@ class GemVersionSpec extends Specification {
     @Unroll
     void "#gemRequirement (gem requirement) ⇒ #ivyNotation (ivy)"() {
         when:
-        String ivy = gemVersionFromGemRequirement(gemRequirement).toString()
+        String ivy = gemVersionFromGemRequirement(gemRequirement)
 
         then:
         ivy == ivyNotation

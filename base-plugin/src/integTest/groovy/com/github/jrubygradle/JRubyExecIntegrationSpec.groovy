@@ -25,11 +25,7 @@ package com.github.jrubygradle
 
 import com.github.jrubygradle.testhelper.IntegrationSpecification
 import org.gradle.testkit.runner.BuildResult
-import spock.lang.IgnoreIf
 import spock.lang.Issue
-import spock.lang.PendingFeature
-
-import static com.github.jrubygradle.internal.JRubyExecUtils.DEFAULT_JRUBYEXEC_CONFIG
 
 class JRubyExecIntegrationSpec extends IntegrationSpecification {
     static final String DEFAULT_TASK_NAME = 'RubyWax'
@@ -151,9 +147,9 @@ class JRubyExecIntegrationSpec extends IntegrationSpecification {
             script 'rspec'
         """
 
-        File specDir = new File(projectDir,'spec')
+        File specDir = new File(projectDir, 'spec')
         specDir.mkdirs()
-        new File(specDir,'sample.rb').text = ''
+        new File(specDir, 'sample.rb').text = ''
 
         when:
         BuildResult result = build()

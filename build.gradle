@@ -1,11 +1,10 @@
 plugins {
     id 'com.gradle.build-scan' version '2.0.2'
     id 'org.ysb33r.gradletest' version '2.0-rc.4' apply false
-    id 'com.jfrog.bintray' version '1.8.4' apply false
     id 'org.ajoberstar.github-pages' version '1.2.0' apply false
-    id 'org.ysb33r.cloudci.appveyor.testreporter' version '2.5' apply false
     id 'com.github.hierynomus.license' version '0.14.0' apply false
     id 'io.ratpack.ratpack-java' version "1.6.1" apply false
+    id 'com.gradle.plugin-publish' version '0.14.0' apply false
 }
 
 buildScan {
@@ -33,10 +32,9 @@ allprojects {
 }
 
 subprojects {
-    apply plugin: 'maven'
-
     repositories {
-        jcenter()
+        mavenCentral()
+        gradlePluginPortal()
     }
 
     if (project.name != 'docs') {
@@ -44,10 +42,8 @@ subprojects {
         apply plugin: 'java-gradle-plugin'
         apply plugin: 'groovy'
         apply plugin: 'codenarc'
-        apply plugin: 'com.jfrog.bintray'
         apply plugin: 'org.ysb33r.gradletest'
-        apply plugin: 'maven-publish'
-        apply plugin: 'org.ysb33r.cloudci.appveyor.testreporter'
+        apply plugin: 'com.gradle.plugin-publish'
         apply from: "${rootProject.projectDir}/gradle/integration-tests.gradle"
         apply from: "${rootProject.projectDir}/gradle/license.gradle"
 
@@ -92,8 +88,6 @@ subprojects {
             dependsOn jar
         }
 
-        install.dependsOn check
-
         tasks.withType(Test) {
             if (gradle.startParameter.isOffline()) {
                 systemProperties 'TESTS_ARE_OFFLINE': '1'
@@ -105,6 +99,11 @@ subprojects {
             def ideReport = reports.add(org.gradle.api.reporting.internal.TaskGeneratedSingleFileReport, 'ide', reports.task)
             ideReport.enabled = true
             ideReport.destination = file( "${project.codenarc.reportsDir}/${reportName}.ide.txt")
+        }
+
+        tasks.withType(ValidateTaskProperties) { validateTaskProperties ->
+            validateTaskProperties.failOnWarning = true
+            validateTaskProperties.enableStricterValidation = true
         }
     }
 

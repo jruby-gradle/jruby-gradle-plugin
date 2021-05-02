@@ -23,7 +23,6 @@
  */
 package com.github.jrubygradle
 
-
 import org.gradle.api.InvalidUserDataException
 import org.gradle.api.Project
 import org.gradle.api.artifacts.Configuration
@@ -80,7 +79,7 @@ class JRubyExecTaskSpec extends Specification {
         execTask.jruby.jrubyVersion != project.jruby.jrubyVersion
 
         and: "jrubyConfigurationName must point to this new configuration"
-        execTask.jruby.getGemConfiguration().name == configurationName
+        execTask.jruby.gemConfiguration.name == configurationName
 
         and: "configuration must exist"
         project.configurations.findByName(configurationName)
@@ -178,6 +177,6 @@ class JRubyExecTaskSpec extends Specification {
         }
 
         then:
-        execTask.jruby.getGemConfiguration().name == customConfig.name
+        execTask.jruby.gemConfiguration.name == customConfig.name
     }
 }

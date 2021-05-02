@@ -1,9 +1,7 @@
 buildscript {
     repositories {
         jcenter()
-        maven {
-            url "https://plugins.gradle.org/m2/"
-        }
+        gradlePluginPortal()
     }
     dependencies {
         /* wow. so recursion */
@@ -30,7 +28,7 @@ dependencies {
 }
 
 task prepareGroovyDocs(type: Copy) {
-    description "Copy Groovydocs into our site directory for deploybment/publication"
+    description "Copy Groovydocs into our site directory for deployment/publication"
     into "${buildDir}/_site/groovydoc"
 
     rootProject.subprojects.each {
