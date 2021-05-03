@@ -94,8 +94,8 @@ subprojects {
         }
 
         publishPlugins.doFirst {
-            println "U: ${'*' * System.getProperty('gradle.publish.key').toInteger()}"
-            println "P: ${'*' * System.getProperty('gradle.publish.secret').toInteger()}"
+            println "U: ${'*' * System.getProperty('gradle.publish.key').size()}"
+//            println "P: ${'*' * System.getProperty('gradle.publish.secret').toInteger()}"
         }
 
         tasks.withType(Test) {
