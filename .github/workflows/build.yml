@@ -168,7 +168,7 @@ jobs:
         PUBLISH_KEY: ${{ secrets.PUBLISH_KEY }}
         PUBLISH_SECRET: ${{ secrets.PUBLISH_SECRET }}
       with:
-        arguments: -i --console=plain --no-build-cache assemble publishPlugins -Dgradle.publish.key=$PUBLISH_KEY -Dgradle.publish.secret=$PUBLISH_SECRET
+        arguments: -i --console=plain --no-build-cache assemble publishPlugins -Dgradle.publish.key=${{ secrets.PUBLISH_KEY }} -Dgradle.publish.secret=$PUBLISH_SECRET
     - name: Publish documentation
       uses: eskatos/gradle-command-action@v1
       env:
