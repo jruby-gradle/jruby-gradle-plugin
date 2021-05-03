@@ -164,15 +164,9 @@ jobs:
         restore-keys: ${{ runner.os }}-gradle-wrapper-
     - name: Publish to Gradle Portal
       uses: eskatos/gradle-command-action@v1
-      env:
-        PUBLISH_KEY: ${{ secrets.PUBLISH_KEY }}
-        PUBLISH_SECRET: ${{ secrets.PUBLISH_SECRET }}
       with:
-        arguments: -i --console=plain --no-build-cache assemble publishPlugins -Dgradle.publish.key=${{ secrets.PUBLISH_KEY }} -Dgradle.publish.secret=$PUBLISH_SECRET
+        arguments: -i --console=plain --no-build-cache assemble publishPlugins -Dgradle.publish.key=${{ secrets.PUBLISH_KEY }} -Dgradle.publish.secret=${{ secrets.PUBLISH_SECRET }}
     - name: Publish documentation
       uses: eskatos/gradle-command-action@v1
-      env:
-        GH_PAGES_PUSH_USER: ${{ secrets.GH_PAGES_PUSH_USER }}
-        GH_PAGES_PUSH_TOKEN: ${{ secrets.GH_PAGES_PUSH_TOKEN }}
       with:
-        arguments: -i --console=plain --no-build-cache docs:publishGhPages -Dorg.ajoberstar.grgit.auth.username=$GH_PAGES_PUSH_USER -Dorg.ajoberstar.grgit.auth.password=$GH_PAGES_PUSH_TOKEN -Dorg.ajoberstar.grgit.auth.force=hardcoded
+        arguments: -i --console=plain --no-build-cache docs:publishGhPages -Dorg.ajoberstar.grgit.auth.username=${{ secrets.GH_PAGES_PUSH_USER }} -Dorg.ajoberstar.grgit.auth.password=${{ secrets.GH_PAGES_PUSH_TOKEN }} -Dorg.ajoberstar.grgit.auth.force=hardcoded
