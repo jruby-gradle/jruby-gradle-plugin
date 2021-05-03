@@ -92,7 +92,12 @@ subprojects {
             website = 'http://jruby-gradle.org/'
             vcsUrl = 'https://github.com/jruby-gradle/jruby-gradle-plugin.git'
         }
-    
+
+        publishPlugins.doFirst {
+            println "U: ${'*' * System.getProperty('gradle.publish.key').toInteger()}"
+            println "P: ${'*' * System.getProperty('gradle.publish.secret').toInteger()}"
+        }
+
         tasks.withType(Test) {
             if (gradle.startParameter.isOffline()) {
                 systemProperties 'TESTS_ARE_OFFLINE': '1'
