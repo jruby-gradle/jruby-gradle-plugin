@@ -187,7 +187,7 @@ class GemUtils {
                         JARS_SKIP: true,
                         GEM_HOME: destDir.absolutePath,
                         GEM_PATH: destDir.absolutePath
-                    main = JRUBY_MAINCLASS
+                    mainClass = JRUBY_MAINCLASS
                     classpath jRubyClasspath
                     args '-S', GEM, 'install'
 
