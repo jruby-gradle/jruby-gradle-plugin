@@ -193,19 +193,23 @@ class GemUtils {
                     classpath jRubyClasspath
                     args '-S', GEM, 'install'
 
-                /*
-                 * NOTE: gemsToProcess is assumed to typically be sourced from
-                 * a FileCollection generated elsewhere in the code. The
-                 * FileCollection a flattened version of the dependency tree.
-                 *
-                 * In order to handle Rubygems which depend on their
-                 * dependencies at _installation time_, we need to reverse the
-                 * order to make sure that the .gem files for the
-                 * transitive/nested dependencies are installed first
-                 *
-                 * See:
-                 * https://gikhub.com/jruby-gradle/jruby-gradle-plugin/issues/341
-                 */
+                    if (OperatingSystem.current().windows) {
+                        systemProperty('jdk.io.File.enableADS', 'true')
+                    }
+
+                    /*
+                     * NOTE: gemsToProcess is assumed to typically be sourced from
+                     * a FileCollection generated elsewhere in the code. The
+                     * FileCollection a flattened version of the dependency tree.
+                     *
+                     * In order to handle Rubygems which depend on their
+                     * dependencies at _installation time_, we need to reverse the
+                     * order to make sure that the .gem files for the
+                     * transitive/nested dependencies are installed first
+                     *
+                     * See:
+                     * https://github.com/jruby-gradle/jruby-gradle-plugin/issues/341
+                     */
                     gemsToProcess.toList().reverse().each { File gem ->
                         args gem
                     }
