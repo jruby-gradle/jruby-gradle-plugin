@@ -38,6 +38,7 @@ import org.gradle.api.tasks.LocalState
 import org.gradle.api.tasks.TaskContainer
 import org.gradle.process.JavaExecSpec
 import org.gradle.util.GradleVersion
+import org.ysb33r.grolifant.api.core.OperatingSystem
 import org.ysb33r.grolifant.api.core.ProjectOperations
 
 import java.util.concurrent.Callable
@@ -106,6 +107,9 @@ class JRubyExec extends JavaExec implements JRubyAwareTask, JRubyExecSpec {
         }.curry(jruby, tasks) as Callable<File>
 
         this.gemWorkDir = project.provider(resolveGemWorkDir)
+        if (OperatingSystem.current().windows) {
+            systemProperty('jdk.io.File.enableADS', 'true')
+        }
     }
 
     /** Script to execute.
