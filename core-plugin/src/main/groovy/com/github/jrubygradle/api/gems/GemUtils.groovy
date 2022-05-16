@@ -138,6 +138,7 @@ class GemUtils {
      *
      * @since 2.1.0
      */
+    @SuppressWarnings('DuplicateStringLiteral')
     static void extractGems(
         ProjectOperations project,
         File jRubyClasspath,
@@ -180,7 +181,7 @@ class GemUtils {
             log.info("Installing ${gemsToProcess*.name.join(',')}")
 
             project.javaexec { JavaExecSpec spec ->
-                setMainClass(spec, JRUBY_MAINCLASS)
+                applyMainClassName(spec, JRUBY_MAINCLASS)
                 spec.with {
                     // Setting these environment variables will ensure that
                     // jbundler and/or jar-dependencies will not attempt to invoke
@@ -474,7 +475,7 @@ class GemUtils {
     }
 
     @CompileDynamic
-    private void setMainClass(JavaExecSpec spec, String mainClassName) {
+    private static void applyMainClassName(JavaExecSpec spec, String mainClassName) {
         if (LegacyLevel.PRE_7_0) {
             spec.main = mainClassName
         } else {

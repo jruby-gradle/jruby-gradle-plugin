@@ -219,7 +219,7 @@ class IvyXmlProxyServerIntegrationSpec extends Specification {
         build()
 
         then:
-        findFiles ~/^jaro_winkler-1.5.\d+-java.gem$/
+        findFiles ~/^jaro_winkler-1\.5\.\d+-java\.gem$/
     }
 
     private List<File> findFiles(Pattern pat) {
