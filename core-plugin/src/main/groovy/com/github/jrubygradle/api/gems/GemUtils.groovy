@@ -193,7 +193,7 @@ class GemUtils {
                     classpath jRubyClasspath
                     args '-S', GEM, 'install'
 
-                    /*
+                /*
                  * NOTE: gemsToProcess is assumed to typically be sourced from
                  * a FileCollection generated elsewhere in the code. The
                  * FileCollection a flattened version of the dependency tree.
@@ -471,7 +471,7 @@ class GemUtils {
 
     @CompileDynamic
     private void setMainClass(JavaExecSpec spec, String mainClassName) {
-        if(LegacyLevel.PRE_7_0) {
+        if (LegacyLevel.PRE_7_0) {
             spec.main = mainClassName
         } else {
             spec.mainClass = mainClassName
