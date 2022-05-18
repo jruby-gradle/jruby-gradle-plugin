@@ -63,12 +63,12 @@ jobs:
       - name: UnitTest
         uses: eskatos/gradle-command-action@v1
         with:
-          arguments: --console=plain --warning-mode=all --no-parallel test
+          arguments: --console=plain --warning-mode=all --no-parallel test -i
       # Test
       - name: IntegrationTest
         uses: eskatos/gradle-command-action@v1
         with:
-          arguments: --console=plain --warning-mode=all --no-parallel intTest
+          arguments: --console=plain --warning-mode=all --no-parallel intTest -i
       # Test
       - name: CompatibilityTest
         uses: eskatos/gradle-command-action@v1

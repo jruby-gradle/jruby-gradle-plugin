@@ -23,6 +23,7 @@
  */
 package com.github.jrubygradle.api.gems
 
+import groovy.transform.CompileDynamic
 import groovy.transform.CompileStatic
 import groovy.util.logging.Slf4j
 import org.gradle.api.Action
@@ -33,6 +34,7 @@ import org.gradle.api.file.CopySpec
 import org.gradle.api.file.DuplicateFileCopyingException
 import org.gradle.api.file.FileCollection
 import org.gradle.process.JavaExecSpec
+import org.ysb33r.grolifant.api.core.LegacyLevel
 import org.ysb33r.grolifant.api.core.OperatingSystem
 import org.ysb33r.grolifant.api.core.ProjectOperations
 
@@ -136,6 +138,7 @@ class GemUtils {
      *
      * @since 2.1.0
      */
+    @SuppressWarnings('DuplicateStringLiteral')
     static void extractGems(
         ProjectOperations project,
         File jRubyClasspath,
@@ -178,6 +181,7 @@ class GemUtils {
             log.info("Installing ${gemsToProcess*.name.join(',')}")
 
             project.javaexec { JavaExecSpec spec ->
+                applyMainClassName(spec, JRUBY_MAINCLASS)
                 spec.with {
                     // Setting these environment variables will ensure that
                     // jbundler and/or jar-dependencies will not attempt to invoke
@@ -187,23 +191,26 @@ class GemUtils {
                         JARS_SKIP: true,
                         GEM_HOME: destDir.absolutePath,
                         GEM_PATH: destDir.absolutePath
-                    main = JRUBY_MAINCLASS
                     classpath jRubyClasspath
                     args '-S', GEM, 'install'
 
+                    if (OperatingSystem.current().windows) {
+                        systemProperty('jdk.io.File.enableADS', 'true')
+                    }
+
                     /*
-                 * NOTE: gemsToProcess is assumed to typically be sourced from
-                 * a FileCollection generated elsewhere in the code. The
-                 * FileCollection a flattened version of the dependency tree.
-                 *
-                 * In order to handle Rubygems which depend on their
-                 * dependencies at _installation time_, we need to reverse the
-                 * order to make sure that the .gem files for the
-                 * transitive/nested dependencies are installed first
-                 *
-                 * See:
-                 * https://gikhub.com/jruby-gradle/jruby-gradle-plugin/issues/341
-                 */
+                     * NOTE: gemsToProcess is assumed to typically be sourced from
+                     * a FileCollection generated elsewhere in the code. The
+                     * FileCollection a flattened version of the dependency tree.
+                     *
+                     * In order to handle Rubygems which depend on their
+                     * dependencies at _installation time_, we need to reverse the
+                     * order to make sure that the .gem files for the
+                     * transitive/nested dependencies are installed first
+                     *
+                     * See:
+                     * https://github.com/jruby-gradle/jruby-gradle-plugin/issues/341
+                     */
                     gemsToProcess.toList().reverse().each { File gem ->
                         args gem
                     }
@@ -464,6 +471,15 @@ class GemUtils {
             spec.with {
                 from(dir) { include EVERYTHING }
             }
+        }
+    }
+
+    @CompileDynamic
+    private static void applyMainClassName(JavaExecSpec spec, String mainClassName) {
+        if (LegacyLevel.PRE_7_0) {
+            spec.main = mainClassName
+        } else {
+            spec.mainClass = mainClassName
         }
     }
 

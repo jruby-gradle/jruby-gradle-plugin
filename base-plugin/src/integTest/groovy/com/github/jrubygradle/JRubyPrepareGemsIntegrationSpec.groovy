@@ -25,6 +25,7 @@ package com.github.jrubygradle
 
 import com.github.jrubygradle.testhelper.IntegrationSpecification
 import org.gradle.testkit.runner.BuildResult
+import spock.lang.Ignore
 import spock.lang.IgnoreIf
 import spock.lang.Issue
 
@@ -152,6 +153,7 @@ rubygems:tilt:2.0.9
     }
 
     @Issue('https://github.com/jruby-gradle/jruby-gradle-plugin/issues/341')
+    @Ignore
     void "Make an install-time gem dependency available"() {
         setup:
         withRubyGemsRepository()
