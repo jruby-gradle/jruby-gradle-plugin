@@ -18,7 +18,8 @@ Use of this plugin replaces the need for Rake, link:http://bundler.io[Bundler]
 and link:https://github.com/jruby/warbler[Warbler].
 
 
-NOTE: JRuby/Gradle 2.0 relies on JRuby 9.x and later.
+NOTE: JRuby/Gradle 2.1 relies on JRuby 9.4 and later.
+      JRuby/Gradle 2.0 relies on JRuby 9.x and later.
 
 
 This repository contains the:

@@ -101,7 +101,7 @@ class JRubyExecExtensionIntegrationSpec extends IntegrationSpecification {
         useScript(REQUIRES_GEM)
         createJRubyExecProject withCreditCardValidator(), """
             script '${REQUIRES_GEM}'
-            jrubyArgs '-T1'
+            jrubyArgs '-v'
         """
 
         when:
