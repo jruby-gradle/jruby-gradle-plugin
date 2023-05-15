@@ -24,7 +24,7 @@ allprojects {
     targetCompatibility = '1.8'
 
     ext {
-        olderJRubyVersion = '9.2.1.0'
+        olderJRubyVersion = '9.4.1.0'
         spockVersion = "org.spockframework:spock-core:1.2-groovy-2.4"
         pluginExtraText = (version.contains('-alpha') || version.contains('-beta')) ?
             '(If you need a production-ready version of the JRuby/Gradle plugin use a 1.7.x release instead)': ''

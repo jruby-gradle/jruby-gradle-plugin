@@ -61,7 +61,7 @@ import static org.ysb33r.grolifant.api.v4.StringUtils.stringize
  */
 @CompileStatic
 class JRubyPluginExtension extends AbstractCombinedProjectTaskExtension {
-    public static final String DEFAULT_JRUBY_VERSION = '9.3.4.0'
+    public static final String DEFAULT_JRUBY_VERSION = '9.4.2.0'
 
     public static final String NAME = 'jruby'
 
