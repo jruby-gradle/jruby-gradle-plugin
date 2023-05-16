@@ -160,13 +160,13 @@ rubygems:tilt:2.0.9
         withPreamble """
             jrubyPrepare.outputDir = '${pathAsUriStr(projectDir)}'.toURI()
         """
-        withDependencies 'gems "rubygems:childprocess:1.0.1"'
+        withDependencies 'gems "rubygems:childprocess:4.1.0"'
 
         when:
         build()
 
         then:
-        new File(projectDir, "gems/childprocess-1.0.1").exists()
+        new File(projectDir, "gems/childprocess-4.1.0").exists()
     }
 
     private void withDefaultRepositories() {

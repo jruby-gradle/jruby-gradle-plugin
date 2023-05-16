@@ -1,11 +1,7 @@
 = JRuby/Gradle plugins
 
-image::https://travis-ci.org/jruby-gradle/jruby-gradle-plugin.svg?branch=master["Build Status", link="https://travis-ci.org/jruby-gradle/jruby-gradle-plugin"]
-
-image::https://api.bintray.com/packages/jruby-gradle/plugins/jruby-gradle-plugin/images/download.svg[link="https://bintray.com/jruby-gradle/plugins/jruby-gradle-plugin/_latestVersion"]
-
+image::https://github.com/jruby-gradle/jruby-gradle-plugin/actions/workflows/build.yml/badge.svg["Build Status", link="https://github.com/jruby-gradle/jruby-gradle-plugin/actions/workflows/build.yml"]
 image::https://badges.gitter.im/Join%20Chat.svg[link="https://gitter.im/jruby-gradle/jruby-gradle-plugin", title="Gitter"]
-
 
 You can also join us on the link:https://groups.google.com/forum/#!forum/jruby-gradle[JRuby/Gradle mailing list]
 
@@ -18,7 +14,8 @@ Use of this plugin replaces the need for Rake, link:http://bundler.io[Bundler]
 and link:https://github.com/jruby/warbler[Warbler].
 
 
-NOTE: JRuby/Gradle 2.0 relies on JRuby 9.x and later.
+NOTE: JRuby/Gradle 2.1 relies on JRuby 9.4 and later.
+      JRuby/Gradle 2.0 relies on JRuby 9.x and later.
 
 
 This repository contains the:
