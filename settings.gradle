@@ -1,5 +1,5 @@
 ['base','war','jar', 'core'].each { mod ->
-    def fName = "jruby-gradle${(mod == 'base') ? '' : ('-' + mod)}-plugin"
+    def fName = "jruby-gradle-${mod}-plugin"
 
     include fName
     project(":${fName}").projectDir = file("${mod}-plugin")

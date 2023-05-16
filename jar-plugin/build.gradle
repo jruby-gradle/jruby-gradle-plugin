@@ -11,12 +11,12 @@ configurations {
 }
 
 generateTestConfig {
-    testProperties mavenrepo: new File(project(':jruby-gradle-plugin').projectDir,'src/integTest/mavenrepo').absolutePath,
+    testProperties mavenrepo: new File(project(':jruby-gradle-base-plugin').projectDir,'src/integTest/mavenrepo').absolutePath,
             flatrepo: testRepoDir.absolutePath
 }
 
 dependencies {
-    compile project(':jruby-gradle-plugin')
+    compile project(':jruby-gradle-base-plugin')
     /*
      * NOTE: version 5.0.0 of the shadow plugin supports only Gradle 5.x and later
      */

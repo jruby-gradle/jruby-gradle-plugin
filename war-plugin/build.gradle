@@ -2,7 +2,7 @@ description = 'This plugin encapsulates web archive building functionality for J
 
 
 dependencies {
-    compile project(':jruby-gradle-plugin')
+    compile project(':jruby-gradle-base-plugin')
     compile group: 'com.github.jruby-gradle', name: 'warbler-bootstrap', version: '0.2.0+'
 
     testCompile(spockVersion) {
@@ -17,7 +17,7 @@ artifacts {
 pluginBundle {
     plugins {
         gradlePlugin {
-            id = 'com.github.jruby-gradle.jar'
+            id = 'com.github.jruby-gradle.war'
             displayName = 'JRuby/Gradle base plugin'
             description = 'This plugin encapsulates building deployable WARs using JRuby'
             tags = (['jruby', 'war'])
