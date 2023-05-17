@@ -127,6 +127,13 @@ class GemResolverStrategy {
         Pattern module
         Pattern version
 
+        def Matcher(values) {
+            module = values['module'] as Pattern
+            version = values['version'] as Pattern
+            println "module: " + module
+            println "version: " + version
+        }
+
         boolean match(String name, String ver) {
             name =~ module && (this.version == null || ver ==~ this.version)
         }

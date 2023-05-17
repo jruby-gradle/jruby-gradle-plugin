@@ -27,11 +27,11 @@ import java.nio.file.Files
 import java.nio.file.Path
 import java.nio.file.Paths
 
-import shadow.org.apache.tools.zip.ZipEntry
+import org.apache.tools.zip.ZipEntry
 import org.codehaus.plexus.util.IOUtil
 import org.gradle.api.file.FileTreeElement
 
-import shadow.org.apache.tools.zip.ZipOutputStream
+import org.apache.tools.zip.ZipOutputStream
 import com.github.jengelman.gradle.plugins.shadow.transformers.Transformer
 import com.github.jengelman.gradle.plugins.shadow.transformers.TransformerContext
 

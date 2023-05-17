@@ -1,5 +1,3 @@
-
-
 ext {
     testRepoDir = new File(buildDir,'tmp/test/repo' )
 }
@@ -15,18 +13,24 @@ generateTestConfig {
             flatrepo: testRepoDir.absolutePath
 }
 
+repositories {
+    mavenCentral()
+    gradlePluginPortal()
+}
+
 dependencies {
-    compile project(':jruby-gradle-base-plugin')
+    implementation project(':jruby-gradle-base-plugin')
+    implementation project(':jruby-gradle-core-plugin')
     /*
      * NOTE: version 5.0.0 of the shadow plugin supports only Gradle 5.x and later
      */
-    compile 'com.github.jengelman.gradle.plugins:shadow:5.2.0'
-    compile 'org.codehaus.plexus:plexus-utils:[3.2.0,3.3)'
-    compile 'org.apache.commons:commons-io:1.3.2'
-    compile 'org.ow2.asm:asm-commons:[6.1,6.99)'
-    compile 'org.apache.ant:ant:[1.10.6,2.0)'
+    implementation 'com.github.johnrengelman:shadow:8.1.1'
+    implementation 'org.codehaus.plexus:plexus-utils:[3.2.0,3.3)'
+    implementation 'org.apache.commons:commons-io:1.3.2'
+    implementation 'org.ow2.asm:asm-commons:[6.1,6.99)'
+    implementation 'org.apache.ant:ant:[1.10.6,2.0)'
 
-    testCompile (spockVersion) {
+    testImplementation (spockVersion) {
         exclude module : 'groovy-all'
     }
 
@@ -87,13 +91,14 @@ artifacts {
     archives sourcesJar
 }
 
-pluginBundle {
+gradlePlugin {
     plugins {
-        gradlePlugin {
+        jarPlugin {
             id = 'com.github.jruby-gradle.jar'
+            implementationClass = 'com.github.jrubygradle.api.jar.JRubyCorePlugin'
             displayName = 'JRuby/Gradle base plugin'
             description = 'This plugin encapsulates java archive building functionality for JRuby Gradle projects'
-            tags = (['jruby','fatjar'])
+//            tags.set(['jruby','fatjar'])
         }
     }
 }

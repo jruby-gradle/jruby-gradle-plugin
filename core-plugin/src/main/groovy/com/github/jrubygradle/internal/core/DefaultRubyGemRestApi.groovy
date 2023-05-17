@@ -168,8 +168,8 @@ class DefaultRubyGemRestApi implements com.github.jrubygradle.api.core.RubyGemQu
         configure {
             request.uri = uri
             client.clientCustomizer { OkHttpClient.Builder builder ->
-                builder.followRedirects(true)
-                builder.followSslRedirects(true)
+//                builder.followRedirects(true)
+//                builder.followSslRedirects(true)
             }
         }
     }

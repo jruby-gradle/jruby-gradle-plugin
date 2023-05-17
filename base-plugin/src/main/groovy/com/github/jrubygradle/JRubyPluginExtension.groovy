@@ -296,7 +296,7 @@ class JRubyPluginExtension extends AbstractCombinedProjectTaskExtension {
         } else if (this.gemConfiguration) {
             this.gemConfiguration.get()
         } else {
-            extFromProject.gemConfiguration
+            extFromProject.gemConfiguration.get()
         }
     }
 

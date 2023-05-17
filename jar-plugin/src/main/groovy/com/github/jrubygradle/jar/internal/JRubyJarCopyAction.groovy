@@ -60,11 +60,11 @@ import org.objectweb.asm.ClassReader
 import org.objectweb.asm.ClassVisitor
 import org.objectweb.asm.ClassWriter
 import org.objectweb.asm.commons.ClassRemapper
-import shadow.org.apache.tools.zip.UnixStat
-import shadow.org.apache.tools.zip.Zip64RequiredException
-import shadow.org.apache.tools.zip.ZipEntry
-import shadow.org.apache.tools.zip.ZipFile
-import shadow.org.apache.tools.zip.ZipOutputStream
+import org.apache.tools.zip.UnixStat
+import org.apache.tools.zip.Zip64RequiredException
+import org.apache.tools.zip.ZipEntry
+import org.apache.tools.zip.ZipFile
+import org.apache.tools.zip.ZipOutputStream
 
 import java.util.zip.ZipException
 

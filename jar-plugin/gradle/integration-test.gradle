@@ -2,8 +2,8 @@ import groovy.json.JsonOutput
 
 configurations {
     testJRubyPrepare
-    integrationTestCompile.extendsFrom testCompile
-    integrationTestRuntime.extendsFrom testRuntime, integrationTestCompile
+    integrationTestCompile.extendsFrom testImplementation
+    integrationTestRuntime.extendsFrom testRuntimeOnly, integrationTestCompile
 }
 
 sourceSets {
@@ -67,7 +67,7 @@ dependencies {
     integrationTestRuntime files(prepareGradleTestKitClasspath)
 
     gradleTest project(':jruby-gradle-plugin')
-    gradleTest 'com.github.jengelman.gradle.plugins:shadow:[1.2.2,2.0)'
+    gradleTest 'com.github.jengelman.gradle.plugins:shadow:[7.0,8.0)'
 
     testJRubyPrepare "org.jruby:jruby-complete:1.7.19"
 }

@@ -2,10 +2,11 @@ description = 'This plugin encapsulates web archive building functionality for J
 
 
 dependencies {
-    compile project(':jruby-gradle-base-plugin')
-    compile group: 'com.github.jruby-gradle', name: 'warbler-bootstrap', version: '0.2.0+'
+    implementation project(':jruby-gradle-base-plugin')
+    implementation project(':jruby-gradle-core-plugin')
+    implementation group: 'com.github.jruby-gradle', name: 'warbler-bootstrap', version: '0.2.0+'
 
-    testCompile(spockVersion) {
+    testImplementation(spockVersion) {
         exclude module: 'groovy-all'
     }
 }
@@ -14,13 +15,14 @@ artifacts {
     archives sourcesJar
 }
 
-pluginBundle {
+gradlePlugin {
     plugins {
-        gradlePlugin {
+        warPlugin {
             id = 'com.github.jruby-gradle.war'
+            implementationClass = 'com.github.jrubygradle.api.war.JRubyCorePlugin'
             displayName = 'JRuby/Gradle base plugin'
             description = 'This plugin encapsulates building deployable WARs using JRuby'
-            tags = (['jruby', 'war'])
+//            tags.set(['jruby', 'war'])
         }
     }
 }

@@ -1,4 +1,15 @@
-['base','war','jar', 'core'].each { mod ->
+plugins {
+    id "com.gradle.enterprise" version "3.13.2"
+}
+
+gradleEnterprise {
+    buildScan {
+        termsOfServiceUrl = 'https://gradle.com/terms-of-service'
+        termsOfServiceAgree = 'yes'
+    }
+}
+
+['base', 'war', 'jar', 'core'].each { mod ->
     def fName = "jruby-gradle-${mod}-plugin"
 
     include fName
@@ -6,4 +17,3 @@
 }
 
 include 'docs'
-

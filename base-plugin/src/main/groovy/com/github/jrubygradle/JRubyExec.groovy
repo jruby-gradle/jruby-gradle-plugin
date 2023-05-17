@@ -69,7 +69,7 @@ class JRubyExec extends JavaExec implements JRubyAwareTask, JRubyExecSpec {
 
     JRubyExec() {
         super()
-        super.setMain(MAIN_CLASS)
+        super.mainClass.set(MAIN_CLASS)
         this.jruby = extensions.create(JRubyPluginExtension.NAME, JRubyPluginExtension, this)
         this.projectOperations = ProjectOperations.create(project)
         this.tasks = project.tasks

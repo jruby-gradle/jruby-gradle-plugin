@@ -5,7 +5,7 @@ buildscript {
     }
     dependencies {
         /* wow. so recursion */
-        classpath "com.github.jruby-gradle:jruby-gradle-plugin:1.0.3"
+        classpath "com.github.jruby-gradle:jruby-gradle-plugin:1.1.1"
     }
 }
 apply plugin: 'org.ajoberstar.github-pages'

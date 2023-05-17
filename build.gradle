@@ -1,15 +1,10 @@
 plugins {
-    id 'com.gradle.build-scan' version '2.0.2'
-    id 'org.ysb33r.gradletest' version '2.0-rc.4' apply false
+    id 'org.ysb33r.gradletest' version '3.0.0-alpha.1' apply false
     id 'org.ajoberstar.github-pages' version '1.2.0' apply false
     id 'com.github.hierynomus.license' version '0.14.0' apply false
     id 'io.ratpack.ratpack-java' version "1.6.1" apply false
-    id 'com.gradle.plugin-publish' version '0.14.0' apply false
-}
-
-buildScan {
-    termsOfServiceUrl = 'https://gradle.com/terms-of-service'
-    termsOfServiceAgree = 'yes'
+    id 'com.gradle.plugin-publish' version '1.2.0' apply false
+//    id 'java-gradle-plugin'
 }
 
 allprojects {
@@ -25,7 +20,7 @@ allprojects {
 
     ext {
         olderJRubyVersion = '9.4.1.0'
-        spockVersion = "org.spockframework:spock-core:1.2-groovy-2.4"
+        spockVersion = "org.spockframework:spock-core:2.3-groovy-3.0"
         pluginExtraText = (version.contains('-alpha') || version.contains('-beta')) ?
             '(If you need a production-ready version of the JRuby/Gradle plugin use a 1.7.x release instead)': ''
     }
@@ -48,10 +43,10 @@ subprojects {
         apply from: "${rootProject.projectDir}/gradle/license.gradle"
 
         dependencies {
-            compile localGroovy()
-            compile gradleApi()
-            compile "org.ysb33r.gradle:grolifant60:${grolifantVersion}"
-            gradleTestRuntime "org.ysb33r.gradle:grolifant60:${grolifantVersion}"
+            implementation localGroovy()
+            implementation gradleApi()
+            implementation "org.ysb33r.gradle:grolifant70:${grolifantVersion}"
+            gradleTestRuntimeOnly "org.ysb33r.gradle:grolifant70:${grolifantVersion}"
         }
 
         codenarc {
@@ -74,7 +69,7 @@ subprojects {
         gradleTest {
             // https://github.com/jruby-gradle/jruby-gradle-plugin/issues/346
             if (JavaVersion.current().java11) {
-                versions '5.0', '5.4.1', '6.0.1', '6.7'
+                versions '7.6.1', '8.1.1'
             } else {
                 versions '4.10.2', '5.3.1', '6.0.1', '6.7'
 
@@ -106,10 +101,10 @@ subprojects {
             ideReport.destination = file( "${project.codenarc.reportsDir}/${reportName}.ide.txt")
         }
 
-        tasks.withType(ValidateTaskProperties) { validateTaskProperties ->
-            validateTaskProperties.failOnWarning = true
-            validateTaskProperties.enableStricterValidation = true
-        }
+//        tasks.withType(ValidatePlugins).configureEach { ValidatePlugins ->
+//            ValidatePlugins.failOnWarning = true
+//            ValidatePlugins.enableStricterValidation = true
+//        }
     }
 
 

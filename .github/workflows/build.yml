@@ -114,7 +114,7 @@ jobs:
     - name: Build
       uses: eskatos/gradle-command-action@v1
       with:
-        arguments: -i -S --console=plain --no-build-cache assemble validateTaskProperties
+        arguments: -i -S --console=plain --no-build-cache assemble ValidatePlugins
       # Unit tests
     - name: Unit tests
       uses: eskatos/gradle-command-action@v1

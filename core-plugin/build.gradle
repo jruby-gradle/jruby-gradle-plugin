@@ -3,7 +3,8 @@ dependencies {
     implementation "io.ratpack:ratpack-core:${ratpackVersion}"
     integrationTestCompile gradleTestKit()
 
-    testCompile(spockVersion) {
+    testImplementation group: 'junit', name: 'junit', version: '4.13.2'
+    testImplementation(spockVersion) {
         exclude module: 'groovy-all'
         exclude group: 'org.codehaus.groovy'
     }
@@ -18,13 +19,14 @@ artifacts {
     archives sourcesJar
 }
 
-pluginBundle {
+gradlePlugin {
     plugins {
-        gradlePlugin {
+        corePlugin {
             id = 'com.github.jruby-gradle.core'
+            implementationClass = 'com.github.jrubygradle.api.core.JRubyCorePlugin'
             displayName = 'JRuby/Gradle core plugin'
             description = 'This plugin provides some core dependency resolution for JRuby/Gradle'
-            tags = (['jruby'])
+//            tags.set(['jruby'])
         }
     }
 }

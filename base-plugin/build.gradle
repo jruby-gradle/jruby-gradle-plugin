@@ -28,8 +28,8 @@ ext {
 
 dependencies {
 
-    compile project(':jruby-gradle-core-plugin')
-    runtime('de.saumya.mojo:rubygems:0.2.3@war') {
+    implementation project(':jruby-gradle-core-plugin')
+    runtimeOnly('de.saumya.mojo:rubygems:0.2.3@war') {
         // we just want the war file on the classloader for the application
         // to find it and use the war-file from filesystem
         exclude group: 'org.sonatype.nexus.plugins', module: 'nexus-ruby-tools'
@@ -37,7 +37,7 @@ dependencies {
 
     testJRubyPrepare "org.jruby:jruby-complete:${jrubyVersion}"
 
-    testCompile(spockVersion) {
+    testImplementation(spockVersion) {
         exclude module: 'groovy-all'
         exclude group: 'org.codehaus.groovy'
     }
@@ -92,6 +92,9 @@ integrationTest {
         systemProperties 'TESTS_ARE_OFFLINE': '1'
     }
     dependsOn copyIntegrationTestJRuby
+    dependencies {
+        testImplementation group: 'junit', name: 'junit', version: '4.13.2'
+    }
 }
 
 task installGroovyDoc(type: Copy) {
@@ -102,13 +105,14 @@ task installGroovyDoc(type: Copy) {
     onlyIf { project.hasProperty('jrubyGradleWebsiteInstallDir') }
 }
 
-pluginBundle {
+gradlePlugin {
     plugins {
-        gradlePlugin {
+        basePlugin {
             id = 'com.github.jruby-gradle.base'
+            implementationClass = 'com.github.jrubygradle.JRubyPlugin'
             displayName = 'JRuby/Gradle base plugin'
             description = 'The purpose of plugin is to encapsulate useful Gradle functionality for JRuby projects'
-            tags = (['jruby'])
+//            tags.set(['jruby'])
         }
     }
 }

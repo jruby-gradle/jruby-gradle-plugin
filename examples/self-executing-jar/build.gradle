@@ -10,7 +10,7 @@ buildscript {
         /* here to make sure that our dependencies get loaded in properly under
          * GradleTest, this is NOT needed by end-users
          */
-        classpath 'com.github.jengelman.gradle.plugins:shadow:[1.2.2,2.0)'
+        classpath 'com.github.jengelman.gradle.plugins:shadow:[7.0,8.0)'
     }
 }
 

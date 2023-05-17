@@ -3,10 +3,10 @@
 
 configurations {
     integrationTestCompile {
-        extendsFrom testCompile
+        extendsFrom testImplementation
     }
     integrationTestRuntime {
-        extendsFrom integrationTestCompile, testRuntime
+        extendsFrom integrationTestCompile, testRuntimeOnly
     }
     integrationTestGems
 }

@@ -175,7 +175,7 @@ class JRubyExecUtils {
         cmdArgs.addAll(jrubyArgs)
 
         if (useBinPath && script != null) {
-            if (script.isAbsolute() && (!script.exists())) {
+            if (script.absolute && (!script.exists())) {
                 throw new InvalidUserDataException("${script} does not exist")
             }
             cmdArgs.add(script.toString())
@@ -184,7 +184,7 @@ class JRubyExecUtils {
                 throw new InvalidUserDataException('No `script` property defined and no inline script provided')
             }
 
-            if (jrubyArgs.isEmpty()) {
+            if (jrubyArgs.empty) {
                 throw new InvalidUserDataException('Cannot build JRuby execution arguments with either `script` or `jrubyArgs` set')
             }
         }
