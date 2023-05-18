@@ -9,19 +9,7 @@ jobs:
         with:
           distribution: 'temurin'
           java-version: '11'
-      # Cache
-      - name: Cache .gradle/caches
-        uses: actions/cache@v1
-        with:
-          path: ~/.gradle/caches
-          key: ${{ runner.os }}-gradle-cache-${{ hashFiles('**/*.gradle') }}
-          restore-keys: ${{ runner.os }}-gradle-cache-
-      - name: Cache .gradle/wrapper
-        uses: actions/cache@v1
-        with:
-          path: ~/.gradle/wrapper
-          key: ${{ runner.os }}-gradle-wrapper-${{ hashFiles('**/*.gradle') }}
-          restore-keys: ${{ runner.os }}-gradle-wrapper-
+          cache: 'gradle'
       # Licensing
       - name: Licensing
         uses: eskatos/gradle-command-action@v1
@@ -43,19 +31,7 @@ jobs:
         with:
           distribution: 'temurin'
           java-version: '11'
-      # Cache
-      - name: Cache .gradle/caches
-        uses: actions/cache@v1
-        with:
-          path: ~/.gradle/caches
-          key: ${{ runner.os }}-gradle-cache-${{ hashFiles('**/*.gradle') }}
-          restore-keys: ${{ runner.os }}-gradle-cache-
-      - name: Cache .gradle/wrapper
-        uses: actions/cache@v1
-        with:
-          path: ~/.gradle/wrapper
-          key: ${{ runner.os }}-gradle-wrapper-${{ hashFiles('**/*.gradle') }}
-          restore-keys: ${{ runner.os }}-gradle-wrapper-
+          cache: 'gradle'
       # Build
       - name: Build
         uses: eskatos/gradle-command-action@v1
@@ -100,19 +76,7 @@ jobs:
         with:
           distribution: 'temurin'
           java-version: ${{ matrix.java }}
-      # Cache
-      - name: Cache .gradle/caches
-        uses: actions/cache@v1
-        with:
-          path: ~/.gradle/caches
-          key: ${{ runner.os }}-gradle-cache-${{ hashFiles('**/*.gradle') }}
-          restore-keys: ${{ runner.os }}-gradle-cache-
-      - name: Cache .gradle/wrapper
-        uses: actions/cache@v1
-        with:
-          path: ~/.gradle/wrapper
-          key: ${{ runner.os }}-gradle-wrapper-${{ hashFiles('**/*.gradle') }}
-          restore-keys: ${{ runner.os }}-gradle-wrapper-
+          cache: 'gradle'
       # Build
       - name: Build
         uses: eskatos/gradle-command-action@v1
@@ -154,18 +118,7 @@ jobs:
         with:
           distribution: 'temurin'
           java-version: '8'
-      - name: Cache .gradle/caches
-        uses: actions/cache@v1
-        with:
-          path: ~/.gradle/caches
-          key: ${{ runner.os }}-gradle-cache-${{ hashFiles('**/*.gradle') }}
-          restore-keys: ${{ runner.os }}-gradle-cache-
-      - name: Cache .gradle/wrapper
-        uses: actions/cache@v1
-        with:
-          path: ~/.gradle/wrapper
-          key: ${{ runner.os }}-gradle-wrapper-${{ hashFiles('**/*.gradle') }}
-          restore-keys: ${{ runner.os }}-gradle-wrapper-
+          cache: 'gradle'
       - name: Publish to Gradle Portal
         uses: eskatos/gradle-command-action@v1
         with:
