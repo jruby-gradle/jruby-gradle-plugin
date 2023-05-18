@@ -5,7 +5,8 @@ buildscript {
     }
     dependencies {
         /* wow. so recursion */
-        classpath "com.github.jruby-gradle:jruby-gradle-plugin:2.1.0-alpha.2"
+        classpath "com.github.jruby-gradle:jruby-gradle-plugin:2.0.2"
+        classpath 'org.ysb33r.gradle:grolifant:0.17.0'
     }
 }
 apply plugin: 'groovy'
