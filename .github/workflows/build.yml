@@ -123,4 +123,4 @@ jobs:
         uses: eskatos/gradle-command-action@v1
         with:
 #          arguments: -i --console=plain --no-build-cache docs:publishGhPages -Dorg.ajoberstar.grgit.auth.username=${{ secrets.GH_PAGES_PUSH_USER }} -Dorg.ajoberstar.grgit.auth.password=${{ secrets.GH_PAGES_PUSH_TOKEN }} -Dorg.ajoberstar.grgit.auth.force=hardcoded
-          arguments: -i --console=plain --no-build-cache docs:publishGhPages -Dorg.ajoberstar.grgit.auth.username=${{ secrets.GH_PAGES_PUSH_TOKEN }} -Dorg.ajoberstar.grgit.auth.password=${{ secrets.GH_PAGES_PUSH_TOKEN }} -Dorg.ajoberstar.grgit.auth.force=hardcoded
+          arguments: -i --console=plain --no-build-cache docs:assembleDocs
