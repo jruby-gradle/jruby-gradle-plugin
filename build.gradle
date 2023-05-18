@@ -4,7 +4,7 @@ plugins {
     id 'org.ajoberstar.github-pages' version '1.2.0' apply false
     id 'com.github.hierynomus.license' version '0.14.0' apply false
     id 'io.ratpack.ratpack-java' version "1.6.1" apply false
-    id 'com.gradle.plugin-publish' version '0.14.0' apply false
+    id 'com.gradle.plugin-publish' version '1.1.0'
 }
 
 buildScan {
@@ -27,7 +27,7 @@ allprojects {
         olderJRubyVersion = '9.4.1.0'
         spockVersion = "org.spockframework:spock-core:1.2-groovy-2.4"
         pluginExtraText = (version.contains('-alpha') || version.contains('-beta')) ?
-            '(If you need a production-ready version of the JRuby/Gradle plugin use a 1.7.x release instead)': ''
+                '(If you need a production-ready version of the JRuby/Gradle plugin use a 1.7.x release instead)' : ''
     }
 }
 
@@ -78,7 +78,7 @@ subprojects {
             } else {
                 versions '4.10.2', '5.3.1', '6.0.1', '6.7', '7.6.1'
 
-                if(project.name == 'jruby-gradle-core-plugin' ) {
+                if (project.name == 'jruby-gradle-core-plugin') {
                     versions '4.3'
                 } else {
                     versions '4.9'
@@ -87,8 +87,8 @@ subprojects {
 
             dependsOn jar
         }
-        
-        pluginBundle {
+
+        gradlePlugin {
             website = 'https://github.com/jruby-gradle/jruby-gradle-plugin' // 'http://jruby-gradle.org/'
             vcsUrl = 'https://github.com/jruby-gradle/jruby-gradle-plugin.git'
         }
@@ -103,7 +103,7 @@ subprojects {
             def reportName = (codenarcSourceSetTask.name - 'codenarc').uncapitalize()
             def ideReport = reports.add(org.gradle.api.reporting.internal.TaskGeneratedSingleFileReport, 'ide', reports.task)
             ideReport.enabled = true
-            ideReport.destination = file( "${project.codenarc.reportsDir}/${reportName}.ide.txt")
+            ideReport.destination = file("${project.codenarc.reportsDir}/${reportName}.ide.txt")
         }
 
         tasks.withType(ValidateTaskProperties) { validateTaskProperties ->
@@ -111,7 +111,6 @@ subprojects {
             validateTaskProperties.enableStricterValidation = true
         }
     }
-
 
     idea {
         module {
