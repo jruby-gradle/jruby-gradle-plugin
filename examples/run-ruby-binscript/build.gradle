@@ -17,7 +17,7 @@ dependencies {
     /* Using the built-in `gems` configuration to describe the
      * dependencies our JRubyExec-based tasks will need.
      */
-    gems "rubygems:asciidoctor:1.5.2+"
+    gems "rubygems:asciidoctor:2.0.20+"
 }
 
 task verifyAsciidoctorWorks(type: JRubyExec) {

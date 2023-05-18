@@ -5,7 +5,7 @@ buildscript {
     }
     dependencies {
         /* wow. so recursion */
-        classpath "com.github.jruby-gradle:jruby-gradle-plugin:1.1.1"
+        classpath "com.github.jruby-gradle:jruby-gradle-plugin:2.1.0-alpha.2"
     }
 }
 apply plugin: 'groovy'
@@ -18,14 +18,18 @@ configurations {
     asciidoctor
 }
 
-dependencies {
-    asciidoctor('rubygems:awestruct:0.5.5')
-    asciidoctor('rubygems:coderay:1.1.0')
+repositories {
+    ruby.gems()
+}
 
-    /* later versions of 1.6.x have a dependency incompatibility with
-     * mime-types 2.x
-     */
-    asciidoctor('rubygems:rest-client:1.6.7') { force = true }
+dependencies {
+    asciidoctor('rubygems:awestruct:0.6.6')
+    asciidoctor('rubygems:coderay:1.1.3')
+    asciidoctor('rubygems:http_parser.rb:0.6.0')
+    asciidoctor('rubygems:public_suffix:4.0.7')
+    asciidoctor('rubygems:spoon:0.0.6')
+    asciidoctor('rubygems:htmlcompressor:0.4.0')
+    asciidoctor('rubygems:uglifier:4.2.0')
 }
 
 task prepareGroovyDocs(type: Copy) {

@@ -16,7 +16,7 @@ documentation intends only to cover the JRuby Gradle plugin's functionality.
 [source,gradle]
 .build.gradle
 ----
-include::../examples/basic-topology.gradle[]
+include::examples/basic-topology.gradle[]
 ----
 
 

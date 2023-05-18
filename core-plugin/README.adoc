@@ -63,7 +63,7 @@ gemResolverStrategy {
   excludeConfigurations 'foo', 'bar'  // <1>
   excludeModule 'foo.*' // <2>
   excludeModule 'foo.*', /1\.2.*/ // <3>
-  useGemVersionResolver 'gems2'
+  useGemVersionResolver 'gems2' // <4>
 }
 ----
 <1> Exclude configurations `foo` and `bar` from being considered for GEM resolver strategies.
