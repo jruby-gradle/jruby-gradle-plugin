@@ -89,7 +89,7 @@ class JRubyExec extends JavaExec implements JRubyAwareTask, JRubyExecSpec {
         }.curry(this.jruby)
 
         inputs.property 'gemConfiguration', { JRubyPluginExtension jruby ->
-            jruby.gemConfiguration
+            jruby.gemConfiguration.name
         }.curry(this.jruby)
 
         if (GradleVersion.current() >= GradleVersion.version('4.10')) {
